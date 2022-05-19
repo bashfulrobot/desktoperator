@@ -24,15 +24,15 @@
 
 - name: task-dependencies.yaml - create ansible module folder
   file:
-    path: "/home/{{ lookup('env','USER') }}/.ansible/modules/"
+    path: "{{SYSTEM_HOME}}/.ansible/modules/"
     state: directory
     mode: "0700"
-    owner: "{{ lookup('env','USER') }}"
-    group: "{{ lookup('env','USER') }}"
+    owner: "{{ SYSTEM_USER }}"
+    group: "{{ SYSTEM_USER }}"
 
 - name: task-dependencies.yaml - installing scrape.py andible module
   copy:
     src: ../files/home/.ansible/modules/scrape.py
-    dest: "/home/{{ lookup('env','USER') }}/.ansible/modules/scrape.py"
-    owner: "{{ lookup('env','USER') }}"
-    group: "{{ lookup('env','USER') }}"
+    dest: "{{SYSTEM_HOME}}/.ansible/modules/scrape.py"
+    owner: "{{ SYSTEM_USER }}"
+    group: "{{ SYSTEM_USER }}"
