@@ -1,0 +1,8 @@
+- name: symlink.yaml - batcat bat
+  become: yes
+  ansible.builtin.file:
+    src: /usr/bin/batcat
+    dest: /usr/bin/bat
+    owner: root
+    group: root
+    state: link

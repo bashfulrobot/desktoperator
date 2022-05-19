@@ -1,0 +1,38 @@
+---
+# this file ensures baseline dependencies are met for the core of other tasks.
+# i.e. tasks that install flatpaks would not work if flatpak was not installed
+- name: task-dependencies.yaml - installing dependencies via apt
+  become: yes
+  ansible.builtin.apt:
+    pkg:
+      - python3-pip # install pip packages
+      - flatpak # install flatpaks
+    state: present
+- name: task-dependencies.yaml - installing dependencies via pip
+  become: yes
+  ansible.builtin.pip:
+    name:
+      - github3.py # for github latest releases
+      - beautifulsoup4 # for web scraping
+
+- name: task-dependencies.yaml - add the flathub repository
+  community.general.flatpak_remote:
+    name: flathub
+    state: present
+    flatpakrepo_url: https://dl.flathub.org/repo/flathub.flatpakrepo
+    method: user
+
+- name: task-dependencies.yaml - create ansible module folder
+  file:
+    path: "/home/{{ lookup('env','USER') }}/.ansible/modules/"
+    state: directory
+    mode: "0700"
+    owner: "{{ lookup('env','USER') }}"
+    group: "{{ lookup('env','USER') }}"
+
+- name: task-dependencies.yaml - installing scrape.py andible module
+  copy:
+    src: ../files/home/.ansible/modules/scrape.py
+    dest: "/home/{{ lookup('env','USER') }}/.ansible/modules/scrape.py"
+    owner: "{{ lookup('env','USER') }}"
+    group: "{{ lookup('env','USER') }}"

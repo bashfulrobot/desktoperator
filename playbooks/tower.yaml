@@ -1,0 +1,33 @@
+---
+- name: configuring desktop system
+  hosts: localhost
+  become: no
+  vars_files:
+    - ../config/secrets.yaml
+  pre_tasks:
+    - name: update repositories
+      become: yes
+      apt: update_cache=yes
+      changed_when: false
+    - import_tasks: ../tasks/task-dependencies.yaml
+  tasks:
+    - import_tasks: ../tasks/system/symlink.yaml
+  roles:
+    # - zsh
+    # - ncspot
+    # - code-insiders
+    # - chrome-browser
+    # - nala
+    # - slack
+    # - regolith
+  post_tasks:
+    - name: updating the system
+      become: yes
+      apt:
+        update_cache: yes
+        upgrade: dist
+    - name: autoremove and purge apt packages
+      become: yes
+      apt:
+        autoremove: yes
+        purge: yes
