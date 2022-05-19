@@ -1,0 +1,44 @@
+---
+# tasks file for git-config
+- name: git-config.yaml - install git
+  become: yes
+  ansible.builtin.apt:
+    pkg:
+      - git
+    state: present
+
+- name: git-config.yaml - configure user email
+  git_config:
+    name: user.email
+    scope: global
+    value: "{{ MY_EMAIL }}"
+- name: git-config.yaml - configure name
+  git_config:
+    name: user.name
+    scope: global
+    value: "{{ MY_FULLNAME }}"
+- name: git-config.yaml - configure username
+  git_config:
+    name: user.username
+    scope: global
+    value: "{{ MY_GITHUB_USERNAME }}"
+- name: git-config.yaml - configure user signing key
+  git_config:
+    name: user.signingKey
+    scope: global
+    value: "{{ MY_GIT_SIGNKEY }}"
+- name: git-config.yaml - configure gpg signing
+  git_config:
+    name: commit.gpgsign
+    scope: global
+    value: "true"
+- name: git-config.yaml - set git config - editor
+  git_config:
+    name: core.editor
+    scope: global
+    value: "code-insiders --wait"
+- name: git-config.yaml - set git default branch
+  git_config:
+    name: init.defaultBranch
+    scope: global
+    value: "main"

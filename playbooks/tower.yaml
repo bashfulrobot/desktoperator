@@ -21,6 +21,7 @@
   tasks:
     - import_tasks: ../tasks/system/ufw.yaml
     - import_tasks: ../tasks/system/symlink.yaml
+    - import_tasks: ../tasks/dev/git-config.yaml
   roles:
     # - zsh
     # - ncspot
