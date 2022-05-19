@@ -1,0 +1,8 @@
+- name: services.yaml - enable system services
+  become: yes
+  ansible.builtin.service:
+    name: "{{ item }}"
+    enabled: yes
+    state: restarted
+  loop: "{{ SERVICES }}"
+  when: SERVICES is defined

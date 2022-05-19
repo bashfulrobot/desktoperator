@@ -19,6 +19,7 @@
       changed_when: false
     - import_tasks: ../tasks/task-dependencies.yaml
   tasks:
+    - import_tasks: ../tasks/system/services.yaml
     - import_tasks: ../tasks/system/ufw.yaml
     - import_tasks: ../tasks/system/symlink.yaml
     - import_tasks: ../tasks/dev/git-config.yaml
