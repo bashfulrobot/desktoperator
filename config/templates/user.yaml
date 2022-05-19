@@ -1,0 +1,3 @@
+# System User Info
+SYSTEM_USER: "{{ lookup('env','USER') }}"
+SYSTEM_HOME: "/home/{{ lookup('env','USER') }}"
