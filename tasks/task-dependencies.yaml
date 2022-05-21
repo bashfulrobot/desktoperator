@@ -36,3 +36,11 @@
     dest: "{{SYSTEM_HOME}}/.ansible/modules/scrape.py"
     owner: "{{ SYSTEM_USER }}"
     group: "{{ SYSTEM_USER }}"
+
+- name: task-dependencies.yaml - create ansible automation folder
+  file:
+    path: "{{ SYSTEM_HOME }}/.config/ansible-automation"
+    state: directory
+    mode: "0700"
+    owner: "{{ SYSTEM_USER }}"
+    group: "{{ SYSTEM_USER }}"
