@@ -1,0 +1,232 @@
+---
+# tasks file for zsh
+- name: system/zsh - installing shell
+  become: yes
+  ansible.builtin.apt:
+    pkg:
+      - git
+      - zsh
+      - fonts-powerline
+      - powerline
+      - direnv
+      - zoxide
+      - bat
+      - exa
+      - fd-find
+    state: present
+  register: install_zsh
+
+- name: system/zsh - setup folders
+  file:
+    path: "{{ item }}"
+    state: directory
+    mode: "0700"
+    owner: "{{ SYSTEM_USER }}"
+    group: "{{ SYSTEM_USER }}"
+  with_items:
+    - "{{SYSTEM_HOME }}/.config/zsh"
+
+- name: system/zsh - change current user shell
+  become: yes
+  user:
+    name: "{{ SYSTEM_USER }}"
+    shell: /usr/bin/zsh
+
+- name: system/zsh - placing .zshrc
+  copy:
+    src: ../files/home/.zshrc
+    dest: "{{SYSTEM_HOME }}/.zshrc"
+    owner: "{{ SYSTEM_USER }}"
+    group: "{{ SYSTEM_USER }}"
+
+- name: system/zsh - placing .zshenv
+  copy:
+    src: ../files/home/.zshenv
+    dest: "{{SYSTEM_HOME }}/.zshenv"
+    owner: "{{ SYSTEM_USER }}"
+    group: "{{ SYSTEM_USER }}"
+
+- name: system/zsh - placing .p10k.zsh cfg
+  copy:
+    src: ../files/home/.p10k.zsh
+    dest: "{{SYSTEM_HOME }}/.p10k.zsh"
+    owner: "{{ SYSTEM_USER }}"
+    group: "{{ SYSTEM_USER }}"
+
+- name: system/zsh - placing echoHeader function file
+  copy:
+    src: ../files/home/.config/zsh/echoHeader
+    dest: "{{SYSTEM_HOME }}/.config/zsh/echoHeader"
+    owner: "{{ SYSTEM_USER }}"
+    group: "{{ SYSTEM_USER }}"
+
+- name: system/zsh - placing echoSection function file
+  copy:
+    src: ../files/home/.config/zsh/echoSection
+    dest: "{{SYSTEM_HOME }}/.config/zsh/echoSection"
+    owner: "{{ SYSTEM_USER }}"
+    group: "{{ SYSTEM_USER }}"
+
+- name: system/zsh - placing checkInstalledApt function file
+  copy:
+    src: ../files/home/.config/zsh/checkInstalledApt
+    dest: "{{SYSTEM_HOME }}/.config/zsh/checkInstalledApt"
+    owner: "{{ SYSTEM_USER }}"
+    group: "{{ SYSTEM_USER }}"
+
+- name: system/zsh - placing runAptUpdateIfNeeded function file
+  copy:
+    src: ../files/home/.config/zsh/runAptUpdateIfNeeded
+    dest: "{{SYSTEM_HOME }}/.config/zsh/runAptUpdateIfNeeded"
+    owner: "{{ SYSTEM_USER }}"
+    group: "{{ SYSTEM_USER }}"
+
+- name: system/zsh - placing ask function file
+  copy:
+    src: ../files/home/.config/zsh/ask
+    dest: "{{SYSTEM_HOME }}/.config/zsh/ask"
+    owner: "{{ SYSTEM_USER }}"
+    group: "{{ SYSTEM_USER }}"
+
+- name: system/zsh - placing myint function file
+  copy:
+    src: ../files/home/.config/zsh/myint
+    dest: "{{SYSTEM_HOME }}/.config/zsh/myint"
+    owner: "{{ SYSTEM_USER }}"
+    group: "{{ SYSTEM_USER }}"
+
+- name: system/zsh - placing hw-probe function file
+  copy:
+    src: ../files/home/.config/zsh/hw-probe
+    dest: "{{SYSTEM_HOME }}/.config/zsh/hw-probe"
+    owner: "{{ SYSTEM_USER }}"
+    group: "{{ SYSTEM_USER }}"
+
+- name: system/zsh - placing catclip function file
+  copy:
+    src: ../files/home/.config/zsh/catclip
+    dest: "{{SYSTEM_HOME }}/.config/zsh/catclip"
+    owner: "{{ SYSTEM_USER }}"
+    group: "{{ SYSTEM_USER }}"
+
+- name: system/zsh - placing myip function file
+  copy:
+    src: ../files/home/.config/zsh/myip
+    dest: "{{SYSTEM_HOME }}/.config/zsh/myip"
+    owner: "{{ SYSTEM_USER }}"
+    group: "{{ SYSTEM_USER }}"
+
+- name: system/zsh - placing do-update function file
+  copy:
+    src: ../files/home/.config/zsh/do-update
+    dest: "{{SYSTEM_HOME }}/.config/zsh/do-update"
+    owner: "{{ SYSTEM_USER }}"
+    group: "{{ SYSTEM_USER }}"
+
+- name: system/zsh - placing gh-rate-limit-reset-time function file
+  copy:
+    src: ../files/home/.config/zsh/gh-rate-limit-reset-time
+    dest: "{{SYSTEM_HOME }}/.config/zsh/gh-rate-limit-reset-time"
+    owner: "{{ SYSTEM_USER }}"
+    group: "{{ SYSTEM_USER }}"
+
+- name: system/zsh - placing gh-rate-limit function file
+  copy:
+    src: ../files/home/.config/zsh/gh-rate-limit
+    dest: "{{SYSTEM_HOME }}/.config/zsh/gh-rate-limit"
+    owner: "{{ SYSTEM_USER }}"
+    group: "{{ SYSTEM_USER }}"
+
+- name: system/zsh - placing ansible-role-init function file
+  copy:
+    src: ../files/home/.config/zsh/ansible-role-init
+    dest: "{{SYSTEM_HOME }}/.config/zsh/ansible-role-init"
+    owner: "{{ SYSTEM_USER }}"
+    group: "{{ SYSTEM_USER }}"
+
+- name: system/zsh - placing gh-init function file
+  copy:
+    src: ../files/home/.config/zsh/gh-init
+    dest: "{{SYSTEM_HOME }}/.config/zsh/gh-init"
+    owner: "{{ SYSTEM_USER }}"
+    group: "{{ SYSTEM_USER }}"
+
+- name: system/zsh - placing prepend-sudo function file
+  copy:
+    src: ../files/home/.config/zsh/prepend-sudo
+    dest: "{{SYSTEM_HOME }}/.config/zsh/prepend-sudo"
+    owner: "{{ SYSTEM_USER }}"
+    group: "{{ SYSTEM_USER }}"
+
+- name: system/zsh - placing snap-font-fix function file
+  copy:
+    src: ../files/home/.config/zsh/snap-font-fix
+    dest: "{{SYSTEM_HOME }}/.config/zsh/snap-font-fix"
+    owner: "{{ SYSTEM_USER }}"
+    group: "{{ SYSTEM_USER }}"
+
+- name: system/zsh - placing z4h-remote-init function file
+  copy:
+    src: ../files/home/.config/zsh/z4h-remote-init
+    dest: "{{SYSTEM_HOME }}/.config/zsh/z4h-remote-init"
+    owner: "{{ SYSTEM_USER }}"
+    group: "{{ SYSTEM_USER }}"
+
+- name: system/zsh - setup folders for shell bookmarks
+  file:
+    path: "{{SYSTEM_HOME }}/.bookmarks"
+    state: directory
+    mode: "0700"
+    owner: "{{ SYSTEM_USER }}"
+    group: "{{ SYSTEM_USER }}"
+
+- name: system/zsh - create shell bookmark for devel
+  ansible.builtin.file:
+    src: "{{SYSTEM_HOME }}/Documents/devel"
+    dest: "{{SYSTEM_HOME }}/.bookmarks/@devel"
+    owner: "{{ SYSTEM_USER }}"
+    group: "{{ SYSTEM_USER }}"
+    state: link
+    mode: "0700"
+
+- name: system/zsh- setup code folder
+  become: yes
+  file:
+    path: "{{SYSTEM_HOME }}/code"
+    state: directory
+
+- name: system/zsh - create shell bookmark for code
+  ansible.builtin.file:
+    src: "{{SYSTEM_HOME }}/code"
+    dest: "{{SYSTEM_HOME }}/.bookmarks/@code"
+    owner: "{{ SYSTEM_USER }}"
+    group: "{{ SYSTEM_USER }}"
+    state: link
+    mode: "0700"
+
+- name: system/zsh - create shell bookmark for tmp
+  ansible.builtin.file:
+    src: "{{SYSTEM_HOME }}/tmp"
+    dest: "{{SYSTEM_HOME }}/.bookmarks/@tmp"
+    owner: "{{ SYSTEM_USER }}"
+    group: "{{ SYSTEM_USER }}"
+    state: link
+    mode: "0700"
+
+- name: system/zsh - create shell bookmark for Downloads
+  ansible.builtin.file:
+    src: "{{SYSTEM_HOME }}/Downloads"
+    dest: "{{SYSTEM_HOME }}/.bookmarks/@Downloads"
+    owner: "{{ SYSTEM_USER }}"
+    group: "{{ SYSTEM_USER }}"
+    state: link
+    mode: "0700"
+
+- name: system/zsh - create shell bookmark for config
+  ansible.builtin.file:
+    src: "{{SYSTEM_HOME }}/.config"
+    dest: "{{SYSTEM_HOME }}/.bookmarks/@config"
+    owner: "{{ SYSTEM_USER }}"
+    group: "{{ SYSTEM_USER }}"
+    state: link
+    mode: "0700"

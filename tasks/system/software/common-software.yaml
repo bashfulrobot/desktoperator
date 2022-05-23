@@ -15,3 +15,4 @@
 - import_tasks: ../tasks/system/software/cod.yaml
 - import_tasks: ../tasks/system/software/espanso.yaml
 - import_tasks: ../tasks/system/software/slack.yaml
+- import_tasks: ../tasks/system/software/1password.yaml

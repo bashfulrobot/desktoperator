@@ -1,0 +1,5 @@
+function gh-rate-limit() {
+    # Are the apps installed?
+    checkInstalledApt curl
+    curl -X GET https://api.github.com/rate_limit
+}

@@ -1,0 +1,7 @@
+function echoHeader() {
+    echo
+    echo
+    printf "%40s \n" "[$RED $1 $NC]"
+    # echo "> > >  $1 =========="
+    echo
+}

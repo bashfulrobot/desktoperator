@@ -1,0 +1,58 @@
+ansible-role-init() {
+    checkInstalledApt git
+    checkInstalledApt ansible
+    checkInstalledApt code-insiders
+    # Make sure I pass the role name
+    if [ -z "$1" ]; then
+
+        # wamp wamp, I forgot the role name
+        echo "Hold up cowboy --> missing role name!"
+
+    # Make sure I pass the role description
+    elif [ -z "$2" ]; then
+
+        # wamp wamp, I forgot the role description
+        echo "Hold up cowpoke --> missing role dexcription!"
+
+    # If I added the role name & repo desc, do the work
+    else
+
+        # I like to work here
+        cd $HOME/code
+
+        # Check if I have a copy of my ansible skeleton
+        if [ -d "$HOME/code/ansible-role-skeleton" ]; then
+
+            # If so, freshen up to the latest commit in the repo
+            cd $HOME/code/ansible-role-skeleton
+            git pull
+            cd $HOME/code
+
+        else
+            # If I do not have the skeleton, get it from GitHub
+            git clone git@github.com:bashfulrobot/ansible-role-skeleton
+
+        fi
+
+        # Create a repo on GitHub for the role
+        gh repo create $1 --public --description "$2"
+        # Get a ccode of the role repo local
+        git clone git@github.com:bashfulrobot/$1
+
+        # Switch into the new local repo folder
+        cd $HOME/code/$1
+
+        # Create a new role structure using my skeleton
+        ansible-galaxy init --role-skeleton=$HOME/code/ansible-role-skeleton $1
+
+        # Make sure the init files are in the root of my Git repo
+        mv ./$1/* .
+        rm -rf ./$1
+
+        # Do an initial commit of my template files to GitHub
+        git add -A && git commit -m "chore: :tada: Initial commit" -m "- commit the role template" && git push
+
+        # Open the role workspace in my editor of choice
+        /usr/bin/code-insiders .
+    fi
+}

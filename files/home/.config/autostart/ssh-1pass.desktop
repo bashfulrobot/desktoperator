@@ -1,0 +1,10 @@
+[Desktop Entry]
+Type=Application
+Exec=/usr/bin/dex /usr/share/applications/1password.desktop
+Hidden=false
+NoDisplay=false
+X-GNOME-Autostart-enabled=true
+Name[en_CA]=1password
+Name=1password
+Comment[en_CA]=start 1 password at boot for ssh auth
+Comment=start 1 password at boot for ssh auth

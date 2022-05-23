@@ -1,0 +1,7 @@
+function echoSection() {
+    echo
+    echo
+    printf "$GREEN > > > $NC %1s \n" "$YELLOW $1 $NC"
+    # echo "> > >  $1 =========="
+    echo
+}

@@ -1,0 +1,5 @@
+function catclip() {
+    checkInstalledApt batcat
+    checkInstalledApt xclip
+    batcat -p $1 | xclip -i -selection clipboard
+}

@@ -1,0 +1,31 @@
+function do-update() {
+
+    if [ -f "/usr/bin/nala" ]; then
+        sudo nala update --install-suggests -y
+        sudo nala upgrade -y
+        sleep 1
+    else
+        runAptUpdateIfNeeded
+        sleep 1
+        echoSection "Updating Distro"
+        sudo apt dist-upgrade -y
+        sleep 1
+        echoSection "Performing Autoremove"
+        sudo apt clean -y
+        sudo apt autoremove -y
+        sleep 1
+        echoSection "Adding Missing Deps"
+        sudo apt install -f -y
+        sleep 1
+    fi
+
+    if [ -d "$HOME/docker" ]; then
+        echoSection "Updating docker containers"
+        cd $HOME/docker
+        docker-compose pull && docker-compose down && docker-compose up -d
+        cd $HOME
+    fi
+    sleep 1
+    echoHeader "Completed System Update"
+
+}

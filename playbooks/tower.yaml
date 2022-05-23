@@ -32,6 +32,7 @@
     - import_tasks: ../tasks/system/home.yaml
     - import_tasks: ../tasks/system/software/common-software.yaml
     - import_tasks: ../tasks/cloud/cloud-install.yaml
+    - import_tasks: ../tasks/system/zsh.yaml
   # roles:
     # - zsh
     # - ncspot
