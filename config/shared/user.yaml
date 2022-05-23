@@ -1,4 +1,0 @@
-# System User Info
-SYSTEM_USER: "{{ lookup('env','USER') }}"
-SYSTEM_HOME: "/home/{{ lookup('env','USER') }}"
-ANSIBLE_AUTOMATION_STATE: "{{ SYSTEM_HOME }}/.config/ansible-automation"

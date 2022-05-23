@@ -1,0 +1,27 @@
+- name: cloud/terraform - get latest release version of terraform from github
+  github_release:
+    user: hashicorp
+    repo: terraform
+    action: latest_release
+    token: "{{ GITHUB_TOKEN }}"
+  register: terraform_release
+
+- name: cloud/terraform - clean up terraform version number
+  set_fact:
+    terraform_version: "{{ terraform_release.tag | regex_replace('^v', '') }}"
+
+- name: cloud/terraform - download & extract terraform zip
+  become: yes
+  unarchive:
+    src: "https://releases.hashicorp.com/terraform/{{ terraform_version }}/terraform_{{ terraform_version }}_linux_amd64.zip"
+    dest: /usr/local/bin
+    remote_src: yes
+
+  # when: terraform_release.changed
+- name: cloud/terraform - get latest release version of gh cli from github
+  github_release:
+    user: cli
+    repo: cli
+    action: latest_release
+    token: "{{ GITHUB_TOKEN }}"
+  register: gh_cli_release

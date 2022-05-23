@@ -1,0 +1,16 @@
+- name: system/sudo - add ansible-pull sudoer file
+  become: yes
+  file:
+      path: /etc/sudoers.d/ansible_pull
+      state: touch
+      owner: root
+      group: root
+      mode: 0440
+
+- name: system/sudo - allow ansible-pull with no password
+  become: yes
+  lineinfile:
+      path: /etc/sudoers.d/ansible_pull
+      line: "dustin ALL=(ALL) NOPASSWD: /usr/bin/ansible-pull"
+      # state: present
+      validate: "/usr/sbin/visudo -cf %s"

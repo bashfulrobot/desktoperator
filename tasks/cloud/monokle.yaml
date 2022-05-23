@@ -1,0 +1,16 @@
+- name: cloud/monokle - get latest release version of monokle from github
+  github_release:
+    user: kubeshop
+    repo: monokle
+    action: latest_release
+    token: "{{ GITHUB_TOKEN }}"
+  register: monokle_release
+
+- name: cloud/monokle - get monokle version number w/o v
+  set_fact:
+    monokle_version: "{{ monokle_release.tag | regex_replace('^v', '') }}"
+
+- name: cloud/monokle - install monokle .deb package from github
+  become: yes
+  apt:
+    deb: https://github.com/kubeshop/monokle/releases/download/{{ monokle_release.tag }}/Monokle-linux-{{ monokle_version }}-amd64.deb

@@ -1,0 +1,34 @@
+---
+# tasks file for cloud-tools
+- name: cloud/kubectl-gcp - install kubectl dependencies
+  become: yes
+  ansible.builtin.apt:
+    pkg:
+      - apt-transport-https
+      - ca-certificates
+      - curl
+      - gnupg
+    state: present
+
+- name: cloud/kubectl-gcp - add google apt signing key
+  become: yes
+  ansible.builtin.apt_key:
+    url: "https://packages.cloud.google.com/apt/doc/apt-key.gpg"
+    state: present
+
+- name: cloud/kubectl-gcp - add google-cloud-sdk main repository
+  become: yes
+  ansible.builtin.apt_repository:
+    repo: "deb https://packages.cloud.google.com/apt cloud-sdk main"
+    state: present
+    filename: google-cloud-sdk
+    update_cache: true
+
+- name: cloud/kubectl-gcp - install kubectl, google-cloud-sdk tools
+  become: yes
+  ansible.builtin.apt:
+    pkg:
+      - google-cloud-sdk
+      - google-cloud-sdk-app-engine-go
+      - kubectl
+    state: present

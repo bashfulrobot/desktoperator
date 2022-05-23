@@ -1,8 +1,8 @@
-- name: ufw.yaml - enable ufw
+- name: system/ufw - enable ufw
   become: yes
   community.general.ufw:
     state: enabled
-- name: ufw.yaml - opening tcp ports
+- name: system/ufw - opening tcp ports
   become: yes
   community.general.ufw:
     rule: allow
@@ -10,7 +10,7 @@
     proto: tcp
   loop: "{{ TCP_PORTS }}"
   when: TCP_PORTS is defined
-- name: ufw.yaml - opening udp ports
+- name: system/ufw - opening udp ports
   become: yes
   community.general.ufw:
     rule: allow

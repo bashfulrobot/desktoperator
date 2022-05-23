@@ -1,0 +1,16 @@
+- name: system/software/espanso - get latest release version from github
+  github_release:
+    user: federico-terzi
+    repo: espanso
+    action: latest_release
+    token: "{{ GITHUB_TOKEN }}"
+  register: cod_release
+
+# Had to see the format returned.
+# JSON
+# - debug: msg="{{ cod_release.tag }}"
+
+- name: system/software/espanso - install deb
+  become: yes
+  apt:
+    deb: "https://github.com/federico-terzi/espanso/releases/download/{{ cod_release.tag }}/espanso-debian-x11-amd64.deb"

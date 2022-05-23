@@ -1,0 +1,17 @@
+- name: system/software/common-software - installing flatpaks
+  community.general.flatpak:
+    name:
+      - md.obsidian.Obsidian
+      - com.todoist.Todoist
+      - org.telegram.desktop
+      - org.gimp.GIMP
+      - com.obsproject.Studio
+    state: present
+    method: user
+    remote: flathub
+
+- import_tasks: ../tasks/system/software/flameshot.yaml
+- import_tasks: ../tasks/system/software/kitty.yaml
+- import_tasks: ../tasks/system/software/cod.yaml
+- import_tasks: ../tasks/system/software/espanso.yaml
+- import_tasks: ../tasks/system/software/slack.yaml

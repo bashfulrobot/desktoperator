@@ -23,7 +23,15 @@
     - import_tasks: ../tasks/system/ufw.yaml
     - import_tasks: ../tasks/system/symlink.yaml
     - import_tasks: ../tasks/dev/git-config.yaml
+    - import_tasks: ../tasks/dev/editor.yaml
     - import_tasks: ../tasks/desktops/regolith.yaml
+    - import_tasks: ../tasks/system/ssh.yaml
+    - import_tasks: ../tasks/system/sudo.yaml
+    - import_tasks: ../tasks/system/sysctl.yaml
+    - import_tasks: ../tasks/system/timezone.yaml
+    - import_tasks: ../tasks/system/home.yaml
+    - import_tasks: ../tasks/system/software/common-software.yaml
+    - import_tasks: ../tasks/cloud/cloud-install.yaml
   # roles:
     # - zsh
     # - ncspot

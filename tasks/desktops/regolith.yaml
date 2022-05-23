@@ -1,11 +1,11 @@
 ---
-- name: remove apt packages
+- name: desktops/regolith - remove apt packages
   become: yes
   ansible.builtin.apt:
     pkg:
       - i3xrocks-net-traffic
     state: absent
-- name: install apt packages
+- name: desktops/regolith - install apt packages
   become: yes
   ansible.builtin.apt:
     pkg:
@@ -13,7 +13,7 @@
       - alttab
     state: present
 
-- name: set look
+- name: desktops/regolith - set look
   shell: |
     /usr/bin/regolith-look set {{ REGOLITH_LOOK }}
     touch "{{ ANSIBLE_AUTOMATION_STATE }}/set-regolith-look"
@@ -21,28 +21,28 @@
   args:
     creates: "{{ ANSIBLE_AUTOMATION_STATE }}/set-regolith-look"
 
-- name: placing alttab autostart
+- name: desktops/regolith - placing alttab autostart
   copy:
-    src: files/home/.config/autostart/alttab.desktop
+    src: ../files/home/.config/autostart/alttab.desktop
     dest: "{{ SYSTEM_HOME }}/.config/autostart/alttab.desktop"
     owner: "{{ SYSTEM_USER }}"
     group: "{{ SYSTEM_USER }}"
     mode: 0644
 
-- name: placing .Xresources-regolith
+- name: desktops/regolith - placing .Xresources-regolith
   ansible.builtin.template:
-    src: templates/home/.Xresources-regolith.j2
+    src: ../templates/home/.Xresources-regolith.j2
     dest: "{{ SYSTEM_HOME }}/.Xresources-regolith"
     owner: "{{ SYSTEM_USER }}"
     group: "{{ SYSTEM_USER }}"
     mode: 0644
 
-# - name: create ~/.config/regolith/i3
+# - name: desktops/regolith - create ~/.config/regolith/i3
 #   ansible.builtin.file:
 #     path: "{{ SYSTEM_HOME }}/.config/regolith/i3"
 #     state: directory
 
-# - name: place custom i3 config
+# - name: desktops/regolith - place custom i3 config
 #   ansible.builtin.copy:
 #     src: files/home/.config/regolith/i3/config
 #     dest: "{{ SYSTEM_HOME }}/.config/regolith/i3/config"

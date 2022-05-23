@@ -1,0 +1,4 @@
+- name: ssytem/timezone - setting TZ
+  become: yes
+  timezone:
+    name: "{{ MY_TIMEZONE }}"

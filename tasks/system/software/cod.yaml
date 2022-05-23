@@ -1,0 +1,18 @@
+- name: system/software/cod - get latest release version of cod from github
+  github_release:
+    user: dim-an
+    repo: cod
+    action: latest_release
+    token: "{{ GITHUB_TOKEN }}"
+  register: cod_release
+
+# Had to see the format returned.
+# JSON
+# - debug: msg="{{ cod_release.tag }}"
+
+- name: system/software/cod - download & extract cod tgz
+  become: yes
+  ansible.builtin.unarchive:
+    src: "https://github.com/dim-an/cod/releases/download/{{ cod_release.tag }}/cod-linux-amd64.tgz"
+    dest: /usr/local/bin
+    remote_src: yes

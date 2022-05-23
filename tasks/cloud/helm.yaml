@@ -1,0 +1,26 @@
+- name: cloud/helm - get latest release version of helm from github
+  github_release:
+    user: helm
+    repo: helm
+    action: latest_release
+    token: "{{ GITHUB_TOKEN }}"
+  register: helm_release
+
+# - name: cloud/helm - clean up helm version number
+#   set_fact:
+#     helm_version: "{{ helm_release.tag | regex_replace('^v', '') }}"
+
+- name: cloud/helm - download & extract helm tar
+  unarchive:
+    src: "https://get.helm.sh/helm-{{ helm_release.tag }}-linux-amd64.tar.gz"
+    dest: /tmp
+    remote_src: yes
+
+- name: cloud/helm - install helm
+  become: yes
+  ansible.builtin.copy:
+    src: /tmp/linux-amd64/helm
+    dest: /usr/local/bin/helm
+    owner: "root"
+    group: "root"
+    mode: "0755"

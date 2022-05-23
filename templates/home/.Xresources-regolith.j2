@@ -21,3 +21,7 @@ gnome.wallpaper: {{ WALLPAPER_PATH }}
 {% if HIDE_BAR is defined %}
 i3-wm.bar.mode: hide
 {% endif %}
+
+{% if BAR_POSITION is defined %}
+i3-wm.bar.position: top
+{% endif %}

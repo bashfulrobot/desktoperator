@@ -1,4 +1,4 @@
-- name: symlink.yaml - batcat bat
+- name: system/symlink - batcat bat
   become: yes
   ansible.builtin.file:
     src: /usr/bin/batcat
