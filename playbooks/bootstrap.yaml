@@ -1,0 +1,19 @@
+---
+- name: configuring desktop system
+  hosts: localhost
+  become: no
+  pre_tasks:
+    - name: set variables - include all .yaml files in config/shared directory
+      include_vars:
+        dir: ../config/shared
+        extensions:
+          - 'yaml'
+    - name: update repositories
+      become: yes
+      apt: update_cache=yes
+      changed_when: false
+    - import_tasks: ../tasks/task-dependencies.yaml
+  tasks:
+    - import_tasks: ../tasks/system/software/1password.yaml
+    - import_tasks: ../tasks/dev/git-config.yaml
+    - import_tasks: ../tasks/cloud/doppler.yaml

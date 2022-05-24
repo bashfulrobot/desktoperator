@@ -1,12 +1,18 @@
 ---
 # this file ensures baseline dependencies are met for the core of other tasks.
 # i.e. tasks that install flatpaks would not work if flatpak was not installed
+- name: task-dependencies - add canonical partners ppa
+  become: yes
+  apt_repository:
+    repo: deb http://archive.canonical.com/ubuntu {{ ansible_distribution_release }} partner
+    state: present
 - name: task-dependencies - installing dependencies via apt
   become: yes
   ansible.builtin.apt:
     pkg:
       - python3-pip # install pip packages
       - flatpak # install flatpaks
+      - gnome-software-plugin-flatpak
     state: present
 - name: task-dependencies - installing dependencies via pip
   become: yes

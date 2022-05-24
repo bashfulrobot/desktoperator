@@ -1,3 +1,19 @@
+- name: dev/elementary-sdk - install elementary sdk
+  become: yes
+  ansible.builtin.apt:
+    pkg:
+      - build-essential
+      - desktop-file-utils
+      - debconf-utils
+      - debhelper
+      - ubuntu-dev-tools
+      - piuparts
+      - schroot
+      - sbuild
+      - software-properties-common
+      - dh-make
+    state: present
+
 - name: dev/ubuntu-packaging - placing .sbuildrc
   copy:
     src: ../files/home/.sbuildrc

@@ -38,6 +38,12 @@
     - import_tasks: ../tasks/system/zsh.yaml
     - import_tasks: ../tasks/system/software/zoom.yaml
     - import_tasks: ../tasks/system/software/ncspot.yaml
+    - import_tasks: ../tasks/system/crontab.yaml
+    - import_tasks: ../tasks/system/software/nord-vpn.yaml
+    - import_tasks: ../tasks/dev/go.yaml
+    - import_tasks: ../tasks/system/software/tailscale.yaml
+    - import_tasks: ../tasks/dev/shfmt.yaml
+    - import_tasks: ../tasks/dev/hugo.yaml
   # roles:
     # - zsh
     # - ncspot

@@ -4,11 +4,57 @@
       - md.obsidian.Obsidian
       - com.todoist.Todoist
       - org.telegram.desktop
-      - org.gimp.GIMP
       - com.obsproject.Studio
     state: present
     method: user
     remote: flathub
+
+- name: system/software/common-software - installing debs
+  become: yes
+  ansible.builtin.apt:
+    pkg:
+      - dconf-cli
+      - xournal
+      - restic
+      - xclip
+      - ncdu
+      - ubuntu-restricted-extras
+      - ubuntu-restricted-addons
+      - gnome-disk-utility
+      - gnome-firmware
+      - dlocate
+      - ttf-mscorefonts-installer
+      - fonts-powerline
+      - fonts-emojione
+      - ppa-purge
+      - gnome-calculator
+      - dialog
+      - stacer
+      - gnupg-agent
+      - font-manager
+      - v4l-utils
+      - nvme-cli
+      - celluloid
+      - zoxide
+      - jq
+      - whois
+      - curl
+      - wget
+      - tmux
+      # cargo dependency
+      - pkg-config
+     # gimp and plugins
+      - gimp
+      - gimp-plugin-registry
+    state: present
+
+- name: system/software/common-software - install pip packages
+  pip:
+    name:
+      - ansible-lint
+      - telegram-send
+      # Needed for some ansible modules
+      - psutil
 
 - import_tasks: ../tasks/system/software/flameshot.yaml
 - import_tasks: ../tasks/system/software/kitty.yaml

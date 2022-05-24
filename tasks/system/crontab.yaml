@@ -1,0 +1,12 @@
+- name: system/crontab - backup at specific times
+  ansible.builtin.cron:
+    name: "timed backups"
+    minute: "30"
+    hour: "9,13,14,20"
+    job: "bash {{ BACKUP_SCRIPT }}"
+
+- name: system/crontab - backup at reboot
+  ansible.builtin.cron:
+    name: "backup at reboot"
+    special_time: reboot
+    job: "bash {{ BACKUP_SCRIPT }}"

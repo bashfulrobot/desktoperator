@@ -1,0 +1,18 @@
+- name: system/software/nord-vpn - add nordvpn apt signing keys
+  become: yes
+  apt_key:
+    url: https://repo.nordvpn.com/gpg/nordvpn_public.asc
+    state: present
+
+- name: system/software/nord-vpn - add nordvpn ppa
+  become: yes
+  apt_repository:
+    repo: deb https://repo.nordvpn.com/deb/nordvpn/debian stable main
+    state: present
+
+- name: system/software/nord-vpn - installing
+  become: yes
+  ansible.builtin.apt:
+    pkg:
+      - nordvpn-release
+    state: present

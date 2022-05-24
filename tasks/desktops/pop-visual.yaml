@@ -1,0 +1,150 @@
+- name: set wallpaper - picture-uri-dark
+  become: yes
+  become_user: "{{ lookup('env','USER') }}"
+  community.general.dconf:
+    key: "/org/gnome/desktop/background/picture-uri-dark"
+    value: "'file:///usr/share/backgrounds/pop/nick-nazzaro-ice-cave.png'"
+    state: present
+
+- name: set wallpaper - picture-uri
+  become: yes
+  become_user: "{{ lookup('env','USER') }}"
+  community.general.dconf:
+    key: "/org/gnome/desktop/screensaver/picture-uri"
+    value: "'file:///usr/share/backgrounds/pop/nick-nazzaro-ice-cave.png'"
+    state: present
+
+- name: set dracula GTK theme
+  become: yes
+  become_user: "{{ lookup('env','USER') }}"
+  community.general.dconf:
+    key: "/org/gnome/desktop/interface/gtk-theme"
+    value: "'dracula'"
+    state: present
+
+- name: set dracula wm preferences
+  become: yes
+  become_user: "{{ lookup('env','USER') }}"
+  community.general.dconf:
+    key: "/org/gnome/desktop/wm/preferences/theme"
+    value: "'dracula'"
+    state: present
+
+- name: set dracula icons
+  become: yes
+  become_user: "{{ lookup('env','USER') }}"
+  community.general.dconf:
+    key: "/org/gnome/desktop/interface/icon-theme"
+    value: "'Dracula'"
+    state: present
+
+- name: set dracula - pop-shell/hint-color
+  become: yes
+  become_user: "{{ lookup('env','USER') }}"
+  community.general.dconf:
+    key: "/org/gnome/shell/extensions/pop-shell/hint-color-rgba"
+    value: "'rgb(141,118,191)'"
+    state: present
+
+- name: enable gnome-shell exts
+  become: yes
+  become_user: "{{ lookup('env','USER') }}"
+  community.general.dconf:
+    key: "/org/gnome/shell/enabled-extensions"
+    value: "['ding@rastersoft.com', 'pop-cosmic@system76.com', 'pop-shell@system76.com', 'system76-power@system76.com', 'ubuntu-appindicators@ubuntu.com', 'cosmic-dock@system76.com', 'cosmic-workspaces@system76.com', 'user-theme@gnome-shell-extensions.gcampax.github.com']"
+    state: present
+
+- name: enable cosmic theme
+  become: yes
+  become_user: "{{ lookup('env','USER') }}"
+  community.general.dconf:
+    key: "/org/gnome/shell/extensions/user-theme/name"
+    value: "'dracula'"
+    state: present
+
+
+# Create new profile
+
+- name: create terminal - profile name
+  become: yes
+  become_user: "{{ lookup('env','USER') }}"
+  community.general.dconf:
+    key: "/org/gnome/terminal/legacy/profiles:/:033548d4-6d93-4553-9fe8-fff1be9685be/visible-name"
+    value: "'Dustin'"
+    state: present
+
+- name: create terminal - profile list
+  become: yes
+  become_user: "{{ lookup('env','USER') }}"
+  community.general.dconf:
+    key: "/org/gnome/terminal/legacy/profiles:/list"
+    value: "['033548d4-6d93-4553-9fe8-fff1be9685be']"
+    state: present
+
+# Set default profile
+
+- name: set terminal - default profile
+  become: yes
+  become_user: "{{ lookup('env','USER') }}"
+  community.general.dconf:
+    key: "/org/gnome/terminal/legacy/profiles:/default"
+    value: "'033548d4-6d93-4553-9fe8-fff1be9685be'"
+    state: present
+
+# Set Profile Colours
+
+- name: set terminal - dracula colours
+  become: yes
+  become_user: "{{ lookup('env','USER') }}"
+  community.general.dconf:
+    key: "/org/gnome/terminal/legacy/profiles:/:033548d4-6d93-4553-9fe8-fff1be9685be/palette"
+    value: "['#262626', '#E356A7', '#42E66C', '#E4F34A', '#9B6BDF', '#E64747', '#75D7EC', '#EFA554', '#7A7A7A', '#FF79C6', '#50FA7B', '#F1FA8C', '#BD93F9', '#FF5555', '#8BE9FD', '#FFB86C']"
+    state: present
+
+- name: set terminal - dracula bold-colour
+  become: yes
+  become_user: "{{ lookup('env','USER') }}"
+  community.general.dconf:
+    key: "/org/gnome/terminal/legacy/profiles:/:033548d4-6d93-4553-9fe8-fff1be9685be/bold-color"
+    value: "'#6E46A4'"
+    state: present
+
+- name: set terminal - dracula background-color
+  become: yes
+  become_user: "{{ lookup('env','USER') }}"
+  community.general.dconf:
+    key: "/org/gnome/terminal/legacy/profiles:/:033548d4-6d93-4553-9fe8-fff1be9685be/background-color"
+    value: "'#282A36'"
+    state: present
+
+- name: set terminal - dracula foreground-colour
+  become: yes
+  become_user: "{{ lookup('env','USER') }}"
+  community.general.dconf:
+    key: "/org/gnome/terminal/legacy/profiles:/:033548d4-6d93-4553-9fe8-fff1be9685be/foreground-color"
+    value: "'#F8F8F2'"
+    state: present
+
+- name: set terminal - dracula use-theme-colors
+  become: yes
+  become_user: "{{ lookup('env','USER') }}"
+  community.general.dconf:
+    key: "/org/gnome/terminal/legacy/profiles:/:033548d4-6d93-4553-9fe8-fff1be9685be/use-theme-colors"
+    value: "false"
+    state: present
+
+- name: set terminal - dracula bold-color-same-as-fg
+  become: yes
+  become_user: "{{ lookup('env','USER') }}"
+  community.general.dconf:
+    key: "/org/gnome/terminal/legacy/profiles:/:033548d4-6d93-4553-9fe8-fff1be9685be/bold-color-same-as-fg"
+    value: "false"
+    state: present
+
+- name: set terminal - font size
+  become: yes
+  become_user: "{{ lookup('env','USER') }}"
+  community.general.dconf:
+    key: "/org/gnome/terminal/legacy/profiles:/:033548d4-6d93-4553-9fe8-fff1be9685be/font"
+    value: "'Fira Mono 20'"
+    state: present
