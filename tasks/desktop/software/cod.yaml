@@ -1,4 +1,4 @@
-- name: system/software/cod - get latest release version of cod from github
+- name: desktop/software/cod - get latest release version of cod from github
   github_release:
     user: dim-an
     repo: cod
@@ -10,7 +10,7 @@
 # JSON
 # - debug: msg="{{ cod_release.tag }}"
 
-- name: system/software/cod - download & extract cod tgz
+- name: desktop/software/cod - download & extract cod tgz
   become: yes
   ansible.builtin.unarchive:
     src: "https://github.com/dim-an/cod/releases/download/{{ cod_release.tag }}/cod-linux-amd64.tgz"

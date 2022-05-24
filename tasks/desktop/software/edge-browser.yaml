@@ -1,12 +1,12 @@
 ---
 # tasks file for ms-edge
-- name: system/software/edge-browser - set edge release apt gpg key
+- name: desktop/software/edge-browser - set edge release apt gpg key
   become: yes
   ansible.builtin.apt_key:
     url: "https://packages.microsoft.com/keys/microsoft.asc"
     state: present
 
-- name: system/software/edge-browser - add microsoft edge repository
+- name: desktop/software/edge-browser - add microsoft edge repository
   become: yes
   ansible.builtin.apt_repository:
     repo: "deb [arch=amd64] https://packages.microsoft.com/repos/edge/ stable main"
@@ -14,7 +14,7 @@
     filename: microsoft-edge
     update_cache: true
 
-- name: system/software/edge-browser - install microsoft edge browser
+- name: desktop/software/edge-browser - install microsoft edge browser
   become: yes
   ansible.builtin.apt:
     name: microsoft-edge-stable

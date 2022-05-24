@@ -17,41 +17,16 @@
       become: yes
       apt: update_cache=yes
       changed_when: false
-    - import_tasks: ../tasks/task-dependencies.yaml
+    - import_tasks: ../tasks/dependencies.yaml
   tasks:
-    - import_tasks: ../tasks/system/nala.yaml
-    - import_tasks: ../tasks/system/software/edge-browser.yaml
-    - import_tasks: ../tasks/dev/code-insiders.yaml
-    - import_tasks: ../tasks/system/services.yaml
-    - import_tasks: ../tasks/system/ufw.yaml
-    - import_tasks: ../tasks/system/symlink.yaml
-    - import_tasks: ../tasks/dev/git-config.yaml
-    - import_tasks: ../tasks/dev/editor.yaml
-    - import_tasks: ../tasks/desktops/regolith.yaml
-    - import_tasks: ../tasks/system/ssh.yaml
-    - import_tasks: ../tasks/system/sudo.yaml
-    - import_tasks: ../tasks/system/sysctl.yaml
-    - import_tasks: ../tasks/system/timezone.yaml
-    - import_tasks: ../tasks/system/home.yaml
-    - import_tasks: ../tasks/system/software/common-software.yaml
-    - import_tasks: ../tasks/cloud/cloud-install.yaml
-    - import_tasks: ../tasks/system/zsh.yaml
-    - import_tasks: ../tasks/system/software/zoom.yaml
-    - import_tasks: ../tasks/system/software/ncspot.yaml
-    - import_tasks: ../tasks/system/crontab.yaml
-    - import_tasks: ../tasks/system/software/nord-vpn.yaml
-    - import_tasks: ../tasks/dev/go.yaml
-    - import_tasks: ../tasks/system/software/tailscale.yaml
-    - import_tasks: ../tasks/dev/shfmt.yaml
-    - import_tasks: ../tasks/dev/hugo.yaml
+    - import_tasks: ../tasks/desktop/regolith.yaml
+    - import_tasks: ../tasks/desktop/software/init.yaml
+    - import_tasks: ../tasks/dev/init.yaml
+    - import_tasks: ../tasks/cloud/init.yaml
+    - import_tasks: ../tasks/system/init.yaml
+
   # roles:
     # - zsh
-    # - ncspot
-    # - code-insiders
-    # - chrome-browser
-    # - nala
-    # - slack
-    # - regolith
   post_tasks:
     - name: updating the system
       become: yes

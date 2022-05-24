@@ -1,11 +1,11 @@
-- name: system/software/screenshot - installing flameshot
+- name: desktop/software/screenshot - installing
   become: yes
   ansible.builtin.apt:
     pkg:
       - flameshot
     state: present
 
-- name: system/software/screenshot - disable gnome flashback screenshot
+- name: desktop/software/screenshot - disable gnome flashback
   become: yes
   become_user: "{{ SYSTEM_USER }}"
   dconf:
@@ -13,7 +13,7 @@
       value: "false"
       state: present
 
-- name: system/software/screenshot - disable old screenshot shortcut
+- name: desktop/software/screenshot - disable old screenshot shortcut
   become: yes
   become_user: "{{ SYSTEM_USER }}"
   dconf:
@@ -23,28 +23,28 @@
       state: present
 
 # Next four are all needed to create the custom shortcut
-- name: system/software/screenshot - set custom print binding
+- name: desktop/software/screenshot - set custom print binding
   become: yes
   become_user: "{{ SYSTEM_USER }}"
   dconf:
       key: "/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0/binding"
       value: "'Print'"
       state: present
-- name: system/software/screenshot - set print binding to flameshot command
+- name: desktop/software/screenshot - set print binding to flameshot command
   become: yes
   become_user: "{{ SYSTEM_USER }}"
   dconf:
       key: "/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0/command"
       value: "'flameshot gui'"
       state: present
-- name: system/software/screenshot - set flameshot shortcut name
+- name: desktop/software/screenshot - set flameshot shortcut name
   become: yes
   become_user: "{{ SYSTEM_USER }}"
   dconf:
       key: "/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0/name"
       value: "'Flameshot'"
       state: present
-- name: system/software/screenshot - set flameshot shortcut custom binding
+- name: desktop/software/screenshot - set flameshot shortcut custom binding
   become: yes
   become_user: "{{ SYSTEM_USER }}"
   dconf:

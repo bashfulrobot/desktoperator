@@ -1,10 +1,10 @@
-- name: system/software/cawbird - set cawbird release apt gpg key
+- name: desktop/software/cawbird - set cawbird release apt gpg key
   become: yes
   ansible.builtin.apt_key:
     url: "https://download.opensuse.org/repositories/home:IBBoard:cawbird/xUbuntu_21.10/Release.key"
     state: present
 
-- name: system/software/cawbird - add cawbird repository
+- name: desktop/software/cawbird - add cawbird repository
   become: yes
   ansible.builtin.apt_repository:
     repo: "deb http://download.opensuse.org/repositories/home:/IBBoard:/cawbird/xUbuntu_21.10/ /"
@@ -12,7 +12,7 @@
     filename: cawbird
     update_cache: true
 
-- name: system/software/cawbird - install cawbird
+- name: desktop/software/cawbird - install cawbird
   become: yes
   ansible.builtin.apt:
     name: cawbird

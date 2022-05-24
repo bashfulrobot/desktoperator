@@ -1,4 +1,4 @@
-- name: system/software/draw.io - get latest release version
+- name: desktop/software/draw.io - get latest release version
   github_release:
     user: jgraph
     repo: drawio-desktop
@@ -6,11 +6,11 @@
     token: "{{ GITHUB_TOKEN }}"
   register: drawio_release
 
-- name: system/software/draw.io - get drawio version number w/o v
+- name: desktop/software/draw.io - get drawio version number w/o v
   set_fact:
     drawio_version: "{{ drawio_release.tag | regex_replace('^v', '') }}"
 
-- name: system/software/draw.io - install
+- name: desktop/software/draw.io - install
   become: yes
   apt:
     deb: https://github.com/jgraph/drawio-desktop/releases/download/{{ drawio_release.tag }}/drawio-amd64-{{ drawio_version }}.deb

@@ -1,25 +1,25 @@
-- name: system/software/ncspot - get latest release version of ncspot from github
+- name: desktop/software/ncspot - get latest release version of ncspot from github
   github_release:
     user: hrkfdn
     repo: ncspot
     action: latest_release
   register: ncspot_release
 
-- name: system/software/ncspot - download & extract ncspot tgz
+- name: desktop/software/ncspot - download & extract ncspot tgz
   become: yes
   unarchive:
     src: "https://github.com/hrkfdn/ncspot/releases/download/{{ ncspot_release.tag }}/ncspot-{{ ncspot_release.tag }}-linux-x86_64.tar.gz"
     dest: /usr/local/bin
     remote_src: yes
-# - name: system/software/ncspot - Print return information from the previous task
+# - name: desktop/software/ncspot - Print return information from the previous task
 #   ansible.builtin.debug:
 #     var: ncspot_release.tag
-- name: system/software/ncspot - create config directory
+- name: desktop/software/ncspot - create config directory
   ansible.builtin.file:
     path: "{{ SYSTEM_HOME }}/.config/ncspot"
     state: directory
   when: NCSPOT_THEME is defined
-- name: system/software/ncspot - placing ncspot dracula config
+- name: desktop/software/ncspot - placing ncspot dracula config
   copy:
     src: ../files/home/.config/ncspot/dracula-config.toml
     dest: "{{ SYSTEM_HOME }}/.config/ncspot/config.toml"

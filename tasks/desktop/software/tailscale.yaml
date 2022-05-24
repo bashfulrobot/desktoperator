@@ -1,17 +1,17 @@
-- name: system/software/tailscale - add tailscale apt signing keys
+- name: desktop/software/tailscale - add tailscale apt signing keys
   become: yes
   ansible.builtin.apt_key:
     url: https://pkgs.tailscale.com/stable/ubuntu/focal.gpg
     state: present
 
-- name: system/software/tailscale - add tailiscale stable repository for previous release
+- name: desktop/software/tailscale - add tailiscale stable repository for previous release
   become: yes
   ansible.builtin.apt_repository:
     repo: "deb https://pkgs.tailscale.com/stable/ubuntu {{ TAILSCALE_UBUNTU_VERSION }} main"
     update_cache: true
   when: TAILSCALE_UBUNTU_VERSION is defined
 
-- name: system/software/tailscale - add tailiscale stable repository for the latest release
+- name: desktop/software/tailscale - add tailiscale stable repository for the latest release
   become: yes
   ansible.builtin.apt_repository:
     repo: "deb https://pkgs.tailscale.com/stable/ubuntu {{ ansible_distribution_release }} main"
@@ -20,7 +20,7 @@
     update_cache: true
   when: TAILSCALE_UBUNTU_VERSION is undefined
 
-- name: system/software/tailscale - install tailiscale vpn
+- name: desktop/software/tailscale - install tailiscale vpn
   become: yes
   ansible.builtin.apt:
     name: tailscale

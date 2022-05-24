@@ -1,5 +1,5 @@
 # https://www.forbes.com/sites/jasonevangelho/2021/09/15/linux-gaming-guide-how-to-easily-install-and-update-proton-ge/?sh=4dbf459b4f44
-- name: system/software/protonup - setup folders if they do not exist
+- name: desktop/software/protonup - setup folders if they do not exist
   file:
     path: "{{ item }}"
     state: directory
@@ -9,23 +9,23 @@
   with_items:
     - "/home/{{ lookup('env','USER') }}/.config/ansible-automation"
     - "/home/{{ lookup('env','USER') }}/.steam/root/compatibilitytools.d/"
-- name: system/software/protonup - install python3-pip apt package for protonup
+- name: desktop/software/protonup - install python3-pip apt package for protonup
   become: yes
   ansible.builtin.apt:
     pkg:
       - python3-pip
     state: present
-- name: system/software/protonup - install protonup pip packages
+- name: desktop/software/protonup - install protonup pip packages
   become: yes
   pip:
     name:
       - protonup
-- name: system/software/protonup - set protonup (proton-ge) installation directory
+- name: desktop/software/protonup - set protonup (proton-ge) installation directory
   shell: |
     protonup -d "/home/{{ lookup('env','USER') }}/.steam/root/compatibilitytools.d/"
     touch "/home/{{ lookup('env','USER') }}/.config/ansible-automation/protonup-install-dir"
   args:
     creates: "/home/{{ lookup('env','USER') }}/.config/ansible-automation/protonup-install-dir"
-- name: system/software/protonup - update proton-ge
+- name: desktop/software/protonup - update proton-ge
   shell: |
     protonup -y

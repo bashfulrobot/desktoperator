@@ -1,19 +1,19 @@
 ---
 # tasks file for brave-browser
-- name: system/software/brave-browser - set release apt gpg key
+- name: desktop/software/brave-browser - set release apt gpg key
   become: yes
   ansible.builtin.apt_key:
     url: "https://brave-browser-apt-release.s3.brave.com/brave-core.asc"
     state: present
 
-- name: system/software/brave-browser - add repository
+- name: desktop/software/brave-browser - add repository
   become: yes
   ansible.builtin.apt_repository:
     filename: brave-browser-release
     repo: "deb [arch=amd64] https://brave-browser-apt-release.s3.brave.com/ stable main"
     update_cache: true
 
-- name: system/software/brave-browser - installing
+- name: desktop/software/brave-browser - installing
   become: yes
   ansible.builtin.apt:
     name: brave-browser

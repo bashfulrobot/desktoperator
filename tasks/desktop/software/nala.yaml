@@ -1,12 +1,12 @@
 ---
 # tasks file for nala
-- name: system/nala - set nala release apt gpg key
+- name: desktop/software/nala - set nala release apt gpg key
   become: yes
   ansible.builtin.apt_key:
     url: "https://deb.volian.org/volian/scar.key"
     state: present
 
-- name: system/nala - add nala repository
+- name: desktop/software/nala - add nala repository
   become: yes
   ansible.builtin.apt_repository:
     repo: "deb [arch=amd64,arm64,armhf] http://deb.volian.org/volian/ scar main"
@@ -14,7 +14,7 @@
     filename: nala-sources
     update_cache: true
 
-- name: system/nala - install nala legacy, change once on 22.04
+- name: desktop/software/nala - install nala legacy, change once on 22.04
   become: yes
   ansible.builtin.apt:
     # name: nala

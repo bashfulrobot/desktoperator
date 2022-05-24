@@ -1,9 +1,9 @@
-- name: system/software/element - add element's public pgp key to the apt keyring
+- name: desktop/software/element - add element's public pgp key to the apt keyring
   become: yes
   ansible.builtin.apt_key:
     url: "https://packages.element.io/debian/element-io-archive-keyring.gpg"
 
-- name: system/software/element - add element's stable apt repository
+- name: desktop/software/element - add element's stable apt repository
   become: yes
   ansible.builtin.apt_repository:
     repo: "deb https://packages.element.io/debian/ default main"
@@ -11,14 +11,14 @@
     filename: element-io
     update_cache: true
 
-- name: system/software/element - install element's  dependencies
+- name: desktop/software/element - install element's  dependencies
   become: yes
   ansible.builtin.apt:
     pkg:
       - apt-transport-https
     state: present
 
-- name: system/software/element - install element
+- name: desktop/software/element - install element
   become: yes
   ansible.builtin.apt:
     pkg:

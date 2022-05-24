@@ -1,11 +1,11 @@
 ---
-- name: system/software/slack - set apt gpg key
+- name: desktop/software/slack - set apt gpg key
   become: yes
   ansible.builtin.apt_key:
     url: "https://packagecloud.io/slacktechnologies/slack/gpgkey"
     state: present
 
-- name: system/software/slack - add repository
+- name: desktop/software/slack - add repository
   become: yes
   ansible.builtin.apt_repository:
     repo: "deb https://packagecloud.io/slacktechnologies/slack/debian/ jessie main"
@@ -13,7 +13,7 @@
     filename: slack
     update_cache: true
 
-- name: system/software/slack - install
+- name: desktop/software/slack - install
   become: yes
   ansible.builtin.apt:
     name: slack-desktop

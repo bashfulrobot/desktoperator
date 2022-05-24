@@ -1,4 +1,4 @@
-- name: system/software/espanso - get latest release version from github
+- name: desktop/software/espanso - get latest release version from github
   github_release:
     user: federico-terzi
     repo: espanso
@@ -10,7 +10,7 @@
 # JSON
 # - debug: msg="{{ cod_release.tag }}"
 
-- name: system/software/espanso - install deb
+- name: desktop/software/espanso - install deb
   become: yes
   apt:
     deb: "https://github.com/federico-terzi/espanso/releases/download/{{ cod_release.tag }}/espanso-debian-x11-amd64.deb"

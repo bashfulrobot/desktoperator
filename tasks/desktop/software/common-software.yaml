@@ -1,4 +1,4 @@
-- name: system/software/common-software - installing flatpaks
+- name: desktop/software/common-software - installing flatpaks
   community.general.flatpak:
     name:
       - md.obsidian.Obsidian
@@ -9,7 +9,7 @@
     method: user
     remote: flathub
 
-- name: system/software/common-software - installing debs
+- name: desktop/software/common-software - installing debs
   become: yes
   ansible.builtin.apt:
     pkg:
@@ -48,17 +48,10 @@
       - gimp-plugin-registry
     state: present
 
-- name: system/software/common-software - install pip packages
+- name: desktop/software/common-software - install pip packages
   pip:
     name:
       - ansible-lint
       - telegram-send
       # Needed for some ansible modules
       - psutil
-
-- import_tasks: ../tasks/system/software/flameshot.yaml
-- import_tasks: ../tasks/system/software/kitty.yaml
-- import_tasks: ../tasks/system/software/cod.yaml
-- import_tasks: ../tasks/system/software/espanso.yaml
-- import_tasks: ../tasks/system/software/slack.yaml
-- import_tasks: ../tasks/system/software/1password.yaml
