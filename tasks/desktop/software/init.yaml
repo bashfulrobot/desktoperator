@@ -4,11 +4,11 @@
 - import_tasks: ../tasks/desktop/software/edge-browser.yaml
 - import_tasks: ../tasks/desktop/software/element.yaml
 - import_tasks: ../tasks/desktop/software/espanso.yaml
-# - import_tasks: ../tasks/desktop/software/flameshot.yaml
+- import_tasks: ../tasks/desktop/software/flameshot.yaml
 - import_tasks: ../tasks/desktop/software/kitty.yaml
 - import_tasks: ../tasks/desktop/software/nala.yaml
 - import_tasks: ../tasks/desktop/software/ncspot.yaml
 - import_tasks: ../tasks/desktop/software/nord-vpn.yaml
 - import_tasks: ../tasks/desktop/software/slack.yaml
 - import_tasks: ../tasks/desktop/software/tailscale.yaml
-- import_tasks: ../tasks/desktop/software/zoom.yaml
+# - import_tasks: ../tasks/desktop/software/zoom.yaml
