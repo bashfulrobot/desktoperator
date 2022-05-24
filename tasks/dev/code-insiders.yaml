@@ -1,0 +1,64 @@
+---
+# tasks file for code-insiders
+- name: dev/code-insiders - copy vscode theme
+  copy:
+    src: "../files/tmp/dracula-pro.vsix"
+    dest: "/tmp/dracula-pro.vsix"
+
+- name: dev/code-insiders - set apt gpg key
+  become: yes
+  ansible.builtin.apt_key:
+    url: "https://packages.microsoft.com/keys/microsoft.asc"
+    state: present
+
+- name: dev/code-insiders - add repository
+  become: yes
+  ansible.builtin.apt_repository:
+    repo: "deb [arch=amd64] http://packages.microsoft.com/repos/code stable main"
+    state: present
+    filename: vscode
+    update_cache: true
+
+- name: dev/code-insiders - install
+  become: yes
+  ansible.builtin.apt:
+    pkg:
+      - apt-transport-https
+      - code-insiders
+    state: present
+
+- name: dev/code-insiders - install vscode dracula theme locally
+  shell: |
+    code-insiders --install-extension /tmp/dracula-pro.vsix
+    touch "{{ SYSTEM_HOME }}/.config/ansible-automation/install-vscode-dracula-theme"
+  args:
+    creates: "{{ SYSTEM_HOME }}/.config/ansible-automation/install-vscode-dracula-theme"
+
+- name: dev/code-insiders - install nautilus integration dependencies
+  become: yes
+  ansible.builtin.apt:
+    pkg:
+      - python3-nautilus
+    state: present
+
+- name: dev/code-insiders - create "~/.local/share/nautilus-python/extensions/" folder
+  file:
+    path: "{{ SYSTEM_HOME }}/.local/share/nautilus-python/extensions/"
+    state: directory
+    mode: "0700"
+    owner: "{{ lookup('env','USER') }}"
+    group: "{{ lookup('env','USER') }}"
+
+- name: dev/code-insiders - install the latest code-nautilus.py
+  get_url:
+    url: https://raw.githubusercontent.com/harry-cpp/code-nautilus/master/code-nautilus.py
+    dest: "{{ SYSTEM_HOME }}/.local/share/nautilus-python/extensions/code-nautilus.py"
+
+- name: dev/code-insiders - create code-insiders to code symbolic link
+  become: yes
+  ansible.builtin.file:
+    src: /usr/bin/code-insiders
+    dest: /usr/bin/code
+    owner: root
+    group: root
+    state: link

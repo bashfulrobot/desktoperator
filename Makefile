@@ -38,6 +38,7 @@ POUND = \#
 
 TOWER-PLAYBOOK = playbooks/tower.yaml
 SD-LAPTOP-PLAYBOOK = playbooks/sd-laptop.yaml
+TESTER = playbooks/test.yaml
 
 install: ## install software dependencies
 	@echo "${BLUE}installing software dependencies ${RESET}"
@@ -51,8 +52,11 @@ requirements: ## install ansible requirements
 	@ansible-galaxy install -r requirements.yaml --ignore-errors --force
 run-desktop: ## run all ansible tasks
 	@echo "${BLUE}running all ansible tasks${RESET}"
-	@ansible-playbook --ask-become-pass --ask-vault-pass --connection=local "${TOWER-PLAYBOOK}"
+	@ansible-playbook --ask-become-pass --ask-vault-pass --connection=local "${TESTER}"
 run-sd-laptop: ## run all ansible tasks
+	@echo "${BLUE}running all ansible tasks${RESET}"
+	@ansible-playbook --ask-become-pass --ask-vault-pass --connection=local "${SD-LAPTOP-PLAYBOOK}"
+run-test: ## run all ansible tasks
 	@echo "${BLUE}running all ansible tasks${RESET}"
 	@ansible-playbook --ask-become-pass --ask-vault-pass --connection=local "${SD-LAPTOP-PLAYBOOK}"
 see_tags: ## run to see which tags are in use in the playbook

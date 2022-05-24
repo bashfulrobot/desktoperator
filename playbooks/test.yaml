@@ -1,0 +1,35 @@
+---
+- name: configuring desktop system
+  hosts: localhost
+  become: no
+  pre_tasks:
+    - name: set variables - include all .yaml files in config/shared directory
+      include_vars:
+        dir: ../config/shared
+        extensions:
+          - 'yaml'
+    - name: set variables - include all .yaml files in config/tower directory
+      include_vars:
+        dir: ../config/tower
+        extensions:
+          - 'yaml'
+    - name: update repositories
+      become: yes
+      apt: update_cache=yes
+      changed_when: false
+    - import_tasks: ../tasks/task-dependencies.yaml
+  tasks:
+    - include_tasks: "{{ item }}"
+      with_fileglob:
+      - playbooks/test-tasks/*.yaml
+  post_tasks:
+    - name: updating the system
+      become: yes
+      apt:
+        update_cache: yes
+        upgrade: dist
+    - name: autoremove and purge apt packages
+      become: yes
+      apt:
+        autoremove: yes
+        purge: yes

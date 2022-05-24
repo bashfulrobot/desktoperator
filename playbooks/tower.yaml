@@ -19,6 +19,9 @@
       changed_when: false
     - import_tasks: ../tasks/task-dependencies.yaml
   tasks:
+    - import_tasks: ../tasks/system/nala.yaml
+    - import_tasks: ../tasks/system/software/edge-browser.yaml
+    - import_tasks: ../tasks/dev/code-insiders.yaml
     - import_tasks: ../tasks/system/services.yaml
     - import_tasks: ../tasks/system/ufw.yaml
     - import_tasks: ../tasks/system/symlink.yaml
@@ -33,6 +36,8 @@
     - import_tasks: ../tasks/system/software/common-software.yaml
     - import_tasks: ../tasks/cloud/cloud-install.yaml
     - import_tasks: ../tasks/system/zsh.yaml
+    - import_tasks: ../tasks/system/software/zoom.yaml
+    - import_tasks: ../tasks/system/software/ncspot.yaml
   # roles:
     # - zsh
     # - ncspot
