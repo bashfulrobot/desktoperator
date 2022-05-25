@@ -5,6 +5,14 @@
       - openssh-server
     state: present
 
+- name: system/services - enable system services
+  become: yes
+  ansible.builtin.service:
+    name: "ssh"
+    enabled: yes
+    state: restarted
+
+
 - name: system/ssh - install gh ssh pub keys
   authorized_key:
     user: "{{ SYSTEM_USER }}"
