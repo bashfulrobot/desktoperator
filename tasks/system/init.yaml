@@ -4,7 +4,6 @@
 - import_tasks: ../tasks/system/ssh.yaml
 - import_tasks: ../tasks/system/services.yaml
 - import_tasks: ../tasks/system/sudo.yaml
-- import_tasks: ../tasks/system/symlink.yaml
 - import_tasks: ../tasks/system/sysctl.yaml
 - import_tasks: ../tasks/system/timezone.yaml
 - import_tasks: ../tasks/system/ufw.yaml

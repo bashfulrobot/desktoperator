@@ -230,3 +230,12 @@
     group: "{{ SYSTEM_USER }}"
     state: link
     mode: "0700"
+
+- name: system/zsh - batcat bat
+  become: yes
+  ansible.builtin.file:
+    src: /usr/bin/batcat
+    dest: /usr/bin/bat
+    owner: root
+    group: root
+    state: link
