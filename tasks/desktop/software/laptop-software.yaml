@@ -1,0 +1,25 @@
+# - name: desktop/software/common-software - installing flatpaks
+#   community.general.flatpak:
+#     name:
+#       - md.obsidian.Obsidian
+#       - com.todoist.Todoist
+#       - org.telegram.desktop
+#       - com.obsproject.Studio
+#     state: present
+#     method: user
+#     remote: flathub
+
+- name: desktop/software/laptop-software - installing debs
+  become: yes
+  ansible.builtin.apt:
+    pkg:
+      - i3xrocks-battery
+    state: present
+
+# - name: desktop/software/common-software - install pip packages
+#   pip:
+#     name:
+#       - ansible-lint
+#       - telegram-send
+#       # Needed for some ansible modules
+#       - psutil

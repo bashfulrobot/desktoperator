@@ -24,14 +24,7 @@
     - import_tasks: ../tasks/dev/init.yaml
     - import_tasks: ../tasks/cloud/init.yaml
     - import_tasks: ../tasks/system/init.yaml
-    - name: install tower specific software
-      become: yes
-      ansible.builtin.apt:
-        pkg:
-          # gimp and plugins
-          - gimp
-          - gimp-plugin-registry
-        state: present
+    - import_tasks: ../tasks/desktop/software/tower-software.yaml
   # roles:
     # - zsh
   post_tasks:
