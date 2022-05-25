@@ -1,3 +1,10 @@
+- name: system/ssh - installing openssh-server
+  become: yes
+  ansible.builtin.apt:
+    pkg:
+      - openssh-server
+    state: present
+
 - name: system/ssh - install gh ssh pub keys
   authorized_key:
     user: "{{ SYSTEM_USER }}"
