@@ -1,7 +1,7 @@
 - import_tasks: ../tasks/system/crontab.yaml
 - import_tasks: ../tasks/system/home.yaml
-- import_tasks: ../tasks/system/services.yaml
 - import_tasks: ../tasks/system/ssh.yaml
+- import_tasks: ../tasks/system/services.yaml
 - import_tasks: ../tasks/system/sudo.yaml
 - import_tasks: ../tasks/system/symlink.yaml
 - import_tasks: ../tasks/system/sysctl.yaml
