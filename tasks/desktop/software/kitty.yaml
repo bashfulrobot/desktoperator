@@ -6,7 +6,6 @@
     state: directory
 
 - name: desktop/software/kitty - setup kitty config folder
-  become: yes
   file:
     path: "{{ SYSTEM_HOME }}/.config/kitty"
     state: directory
