@@ -13,18 +13,18 @@
   with_items:
     - "{{ MY_GITHUB_USERNAME }}"
 
-- name: system/ssh - fixing ssh priv key permissions
-  become: yes
-  file:
-    path: "{{ SYSTEM_HOME }}/.ssh/id_rsa"
-    owner: "{{ SYSTEM_USER }}"
-    group: "{{ SYSTEM_USER }}"
-    mode: 0600
+# - name: system/ssh - fixing ssh priv key permissions
+#   become: yes
+#   file:
+#     path: "{{ SYSTEM_HOME }}/.ssh/id_rsa"
+#     owner: "{{ SYSTEM_USER }}"
+#     group: "{{ SYSTEM_USER }}"
+#     mode: 0600
 
-- name: system/ssh - fixing ssh pub key permissions
-  become: yes
-  file:
-    path: "{{ SYSTEM_HOME }}/.ssh/id_rsa.pub"
-    owner: "{{ SYSTEM_USER }}"
-    group: "{{ SYSTEM_USER }}"
-    mode: 0600
+# - name: system/ssh - fixing ssh pub key permissions
+#   become: yes
+#   file:
+#     path: "{{ SYSTEM_HOME }}/.ssh/id_rsa.pub"
+#     owner: "{{ SYSTEM_USER }}"
+#     group: "{{ SYSTEM_USER }}"
+#     mode: 0600
