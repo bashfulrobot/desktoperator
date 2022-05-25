@@ -36,6 +36,14 @@
     owner: "{{ SYSTEM_USER }}"
     group: "{{ SYSTEM_USER }}"
 
+- name: dependencies - create autostart folder
+  file:
+    path: "{{SYSTEM_HOME}}/.config/autostart/"
+    state: directory
+    mode: "0700"
+    owner: "{{ SYSTEM_USER }}"
+    group: "{{ SYSTEM_USER }}"
+
 - name: dependencies - installing scrape.py andible module
   copy:
     src: ../files/home/.ansible/modules/scrape.py
