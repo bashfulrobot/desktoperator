@@ -43,9 +43,6 @@
       - tmux
       # cargo dependency
       - pkg-config
-     # gimp and plugins
-      - gimp
-      - gimp-plugin-registry
     state: present
 
 - name: desktop/software/common-software - install pip packages
