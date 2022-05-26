@@ -56,6 +56,7 @@ run-bootstrap: ## run all ansible tasks
 	@ansible-playbook --ask-become-pass --ask-vault-pass --connection=local "${BOOTSTRAP}"
 run-desktop: ## run all ansible tasks
 	@echo "${BLUE}running all ansible tasks${RESET}"
+	@git pull
 	@ansible-playbook --ask-become-pass --ask-vault-pass --connection=local "${TOWER-PLAYBOOK}"
 run-sd-laptop: ## run all ansible tasks
 	@echo "${BLUE}running all ansible tasks${RESET}"
