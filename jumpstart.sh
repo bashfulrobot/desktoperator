@@ -52,9 +52,24 @@ chmod 0600 ${HOME}/.ssh/id_rsa*
 
 rm -rf ${RESTORE_WORK_DIR}
 
+# pcloud install
+sudo add-apt-repository universe
+sudo apt install libfuse2 -y
+
+cd ${HOME}/Downloads
+wget https://p-def8.pcloud.com/D4Zu1eKrMZMqwjTqZVFIm7ZXZSzX2r7Z2ZZ9WVZkZPF7pVZfRZF0ZOXZWTVkVZ77HBkyUvPa7KPCVOY00WIbuE3s37/pcloud
+
+sudo apt install software-properties-common -y
+sudo add-apt-repository ppa:appimagelauncher-team/stable
+sudo apt update
+sudo apt install appimagelauncher -y
+
+# AppImageLauncher pcloud
+
+
 # Prep ansible
 read -p "Press [Enter] key to continue..."
-cd /tmp/ && git clone https://github.com/bashfulrobot/desktoperator && cd /tmp/desktoperator
-make install
+cd /tmp/ && git clone https://github.com/bashfulrobot/desktoperator && cd /tmp/desktoperator && make install
 
 echo "'run make' to see your options."
+echo "you will also want to run the pcloud installer in ~/Downloads"
