@@ -37,6 +37,7 @@ echo ">>> Restoring..."
 echo ""
 mkdir -p ${RESTORE_WORK_DIR}
 cd ${RESTORE_WORK_DIR}
+doppler login
 doppler setup
 
 read -p "Press [Enter] key to continue..."
