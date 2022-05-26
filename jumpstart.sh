@@ -64,7 +64,7 @@ sudo add-apt-repository ppa:appimagelauncher-team/stable
 sudo apt update
 sudo apt install appimagelauncher -y
 
-# AppImageLauncher pcloud
+AppImageLauncher pcloud
 
 
 # Prep ansible
@@ -72,4 +72,3 @@ read -p "Press [Enter] key to continue..."
 cd /tmp/ && git clone https://github.com/bashfulrobot/desktoperator && cd /tmp/desktoperator && make install
 
 echo "'run make' to see your options."
-echo "you will also want to run the pcloud installer in ~/Downloads"
