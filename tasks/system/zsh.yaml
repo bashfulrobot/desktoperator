@@ -180,15 +180,6 @@
     owner: "{{ SYSTEM_USER }}"
     group: "{{ SYSTEM_USER }}"
 
-- name: system/zsh - create shell bookmark for devel
-  ansible.builtin.file:
-    src: "{{SYSTEM_HOME }}/Documents/devel"
-    dest: "{{SYSTEM_HOME }}/.bookmarks/@devel"
-    owner: "{{ SYSTEM_USER }}"
-    group: "{{ SYSTEM_USER }}"
-    state: link
-    mode: "0700"
-
 - name: system/zsh- setup code folder
   become: yes
   file:
