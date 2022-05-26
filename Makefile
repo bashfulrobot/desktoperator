@@ -48,16 +48,15 @@ install: ## install software dependencies
 	@sudo pip install ansible Jinja2
 	@echo "${BLUE}installing playbook dependencies ${RESET}"
 	@ansible-galaxy install -r requirements.yaml --ignore-errors --force
-requirements: ## install ansible requirements
+	@doppler setup
+	@chmod +x vaultpass.sh
+requirements-only: ## install ansible requirements
 	@echo "${BLUE}installing ansible requirements${RESET}"
 	@ansible-galaxy install -r requirements.yaml --ignore-errors --force
-run-bootstrap: ## run all ansible tasks
-	@echo "${BLUE}running bootstrap${RESET}"
-	@ansible-playbook --ask-become-pass --ask-vault-pass --connection=local "${BOOTSTRAP}"
 run-desktop: ## run all ansible tasks
 	@echo "${BLUE}running all ansible tasks${RESET}"
 	@git pull
-	@ansible-playbook --ask-become-pass --ask-vault-pass --connection=local "${TOWER-PLAYBOOK}"
+	@ansible-playbook "${TOWER-PLAYBOOK}" --vault-password-file ./vaultpass.sh --connection=local
 run-sd-laptop: ## run all ansible tasks
 	@echo "${BLUE}running all ansible tasks${RESET}"
 	@git pull
