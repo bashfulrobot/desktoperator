@@ -52,3 +52,19 @@
       - telegram-send
       # Needed for some ansible modules
       - psutil
+
+- name: dependencies - create Applications folder
+  file:
+    path: "{{ SYSTEM_HOME }}/Applications"
+    state: directory
+    mode: "0700"
+    owner: "{{ SYSTEM_USER }}"
+    group: "{{ SYSTEM_USER }}"
+
+# - name: desktop/software/common-software - adding todoist
+#   copy:
+#     src: ../files/home/Applications/Todoist.AppImage
+#     dest: "{{ SYSTEM_HOME }}/Applications/Todoist.AppImage"
+#     owner: "{{ SYSTEM_USER }}"
+#     group: "{{ SYSTEM_USER }}"
+#     mode: 0644

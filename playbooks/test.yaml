@@ -1,0 +1,17 @@
+---
+- name: configuring desktop system
+  hosts: localhost
+  become: no
+  pre_tasks:
+    - name: set variables - include all .yaml files in config/shared directory
+      include_vars:
+        dir: ../config/shared
+        extensions:
+          - 'yaml'
+    - name: set variables - include all .yaml files in config/tower directory
+      include_vars:
+        dir: ../config/tower
+        extensions:
+          - 'yaml'
+  tasks:
+    - import_tasks: ../tasks/desktop/software/appimage-launcher.yaml
