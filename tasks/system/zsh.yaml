@@ -25,6 +25,8 @@
     group: "{{ SYSTEM_USER }}"
   with_items:
     - "{{SYSTEM_HOME }}/.config/zsh"
+    - "{{SYSTEM_HOME }}/.bookmarks"
+    - "{{SYSTEM_HOME }}/code"
 
 - name: system/zsh - change current user shell
   become: yes
@@ -171,20 +173,6 @@
     dest: "{{SYSTEM_HOME }}/.config/zsh/z4h-remote-init"
     owner: "{{ SYSTEM_USER }}"
     group: "{{ SYSTEM_USER }}"
-
-- name: system/zsh - setup folders for shell bookmarks
-  file:
-    path: "{{SYSTEM_HOME }}/.bookmarks"
-    state: directory
-    mode: "0700"
-    owner: "{{ SYSTEM_USER }}"
-    group: "{{ SYSTEM_USER }}"
-
-- name: system/zsh- setup code folder
-  become: yes
-  file:
-    path: "{{SYSTEM_HOME }}/code"
-    state: directory
 
 - name: system/zsh - create shell bookmark for code
   ansible.builtin.file:
