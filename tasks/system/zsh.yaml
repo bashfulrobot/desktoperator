@@ -27,6 +27,7 @@
     - "{{SYSTEM_HOME }}/.config/zsh"
     - "{{SYSTEM_HOME }}/.bookmarks"
     - "{{SYSTEM_HOME }}/code"
+    - "{{SYSTEM_HOME }}/tmp"
 
 - name: system/zsh - change current user shell
   become: yes
