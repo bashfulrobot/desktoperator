@@ -19,7 +19,8 @@
       changed_when: false
     - import_tasks: ../tasks/dependencies.yaml
   tasks:
-    - import_tasks: ../tasks/desktop/regolith.yaml
+    # - import_tasks: ../tasks/desktop/regolith.yaml
+    - import_tasks: ../tasks/desktop/popos.yaml
     - import_tasks: ../tasks/desktop/software/init.yaml
     - import_tasks: ../tasks/dev/init.yaml
     - import_tasks: ../tasks/cloud/init.yaml
