@@ -42,9 +42,11 @@ done
 echo ""
 echo ">>> Restoring..."
 echo ""
+doppler login
+
 mkdir -p ${RESTORE_WORK_DIR}
 cd ${RESTORE_WORK_DIR}
-doppler login
+
 doppler setup
 
 read -p "Press [Enter] key to continue..."
