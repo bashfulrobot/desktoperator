@@ -60,11 +60,11 @@ done
 
 chmod 0600 ${HOME}/.ssh/id_rsa*
 
-rm -rf ${RESTORE_WORK_DIR}
+# rm -rf ${RESTORE_WORK_DIR}
 
 
 # Prep ansible
 read -p "Press [Enter] key to continue..."
-cd /tmp/ && git clone https://github.com/bashfulrobot/desktoperator&& cd /tmp/desktoperator && doppler login && doppler setup && make install
+cd ~/tmp/ && git clone https://github.com/bashfulrobot/desktoperator&& cd /tmp/desktoperator && doppler setup && make install
 
 echo "'run make' to see your options."
