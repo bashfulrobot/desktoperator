@@ -33,7 +33,7 @@ RESTORE_WORK_DIR="${HOME}/Downloads/restore"
 
 # Ensure retore folders exist
 for i in "${RESTORE_FOLDERS[@]}"; do
-    mkdir -p "${1}"
+    mkdir -p "${i}"
     chown -R ${USER}:${USER} "${i}"
     chmod -R 0700 "${i}"
 done
