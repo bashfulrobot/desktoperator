@@ -31,6 +31,13 @@ DOPPLER=$(command -v doppler)
 RESTORE_FOLDERS=("${HOME}/.ssh" "${HOME}/.gnupg")
 RESTORE_WORK_DIR="${HOME}/Downloads/restore"
 
+# Ensure retore folders exist
+for i in "${RESTORE_FOLDERS[@]}"; do
+    mkdir -p "${1}"
+    chown -R ${USER}:${USER} "${i}"
+    chmod -R 0700 "${i}"
+done
+
 
 echo ""
 echo ">>> Restoring..."
@@ -52,20 +59,6 @@ done
 chmod 0600 ${HOME}/.ssh/id_rsa*
 
 rm -rf ${RESTORE_WORK_DIR}
-
-# pcloud install
-sudo add-apt-repository universe
-sudo apt install libfuse2 -y
-
-cd ${HOME}/Downloads
-wget https://p-def8.pcloud.com/D4Zu1eKrMZMqwjTqZVFIm7ZXZSzX2r7Z2ZZ9WVZkZPF7pVZfRZF0ZOXZWTVkVZ77HBkyUvPa7KPCVOY00WIbuE3s37/pcloud
-
-sudo apt install software-properties-common -y
-sudo add-apt-repository ppa:appimagelauncher-team/stable
-sudo apt update
-sudo apt install appimagelauncher -y
-
-AppImageLauncher pcloud
 
 
 # Prep ansible
