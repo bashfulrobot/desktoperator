@@ -47,9 +47,9 @@ echo ""
 if [ ! -f doppler-login-complete ]
 then
 
-doppler login
+read -p "please run `doppler login` in another terminal, then press [ENTER] when complete. "
 touch doppler-login-complete
-sleep 10
+
 fi
 
 
@@ -58,12 +58,10 @@ cd ${RESTORE_WORK_DIR}
 
 if [ ! -f doppler-bu-setup-complete ]
 then
-doppler setup
+read -p "please run `doppler setup` in another terminal (within ${RESTORE_WORK_DIR}), then press [ENTER] when complete. "
 touch doppler-bu-setup-complete
-sleep 10
 fi
 
-read -p "Press [Enter] key to continue..."
 
 for i in "${RESTORE_FOLDERS[@]}"; do
     doppler run -- ${RESTIC} restore latest --target ${RESTORE_WORK_DIR} --path "${i}"
@@ -83,7 +81,7 @@ cd ~/tmp/ && git clone https://github.com/bashfulrobot/desktoperator && cd ~/tmp
 
 if [ ! -f doppler-ansible-setup-complete ]
 then
-doppler setup
+read -p "please run `doppler setup` in another terminal (within ~/tmp/desktoperator), then press [ENTER] when complete. "
 touch doppler-ansible-setup-complete
 sleep 10
 fi
