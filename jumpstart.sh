@@ -43,8 +43,7 @@ echo ""
 echo ">>> Restoring..."
 echo ""
 echo "Run: doppler login"
-echo "then [ENTER] to continue."
-read -p
+read -p "then [ENTER] to continue."
 doppler login
 
 mkdir -p ${RESTORE_WORK_DIR}
