@@ -5,7 +5,7 @@
 - import_tasks: ../tasks/desktop/software/element.yaml
 - import_tasks: ../tasks/desktop/software/espanso.yaml
 - import_tasks: ../tasks/desktop/software/flameshot.yaml
-# - import_tasks: ../tasks/desktop/software/kitty.yaml
+- import_tasks: ../tasks/desktop/software/insynchq.yaml
 - import_tasks: ../tasks/desktop/software/nala.yaml
 - import_tasks: ../tasks/desktop/software/ncspot.yaml
 - import_tasks: ../tasks/desktop/software/nord-vpn.yaml
