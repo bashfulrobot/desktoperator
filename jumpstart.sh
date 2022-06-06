@@ -42,14 +42,26 @@ done
 echo ""
 echo ">>> Restoring..."
 echo ""
-echo "Run: doppler login"
-read -p "then [ENTER] to continue."
+
+
+if [ ! -f doppler-login-complete ]
+then
+
 doppler login
+touch doppler-login-complete
+sleep 10
+fi
+
 
 mkdir -p ${RESTORE_WORK_DIR}
 cd ${RESTORE_WORK_DIR}
 
+if [ ! -f doppler-bu-setup-complete ]
+then
 doppler setup
+touch doppler-bu-setup-complete
+sleep 10
+fi
 
 read -p "Press [Enter] key to continue..."
 
@@ -67,6 +79,15 @@ chmod 0600 ${HOME}/.ssh/id_rsa*
 
 # Prep ansible
 read -p "Press [Enter] key to continue..."
-cd ~/tmp/ && git clone https://github.com/bashfulrobot/desktoperator&& cd ~/tmp/desktoperator && doppler setup && make install
+cd ~/tmp/ && git clone https://github.com/bashfulrobot/desktoperator&& cd ~/tmp/desktoperator
+
+if [ ! -f doppler-ansible-setup-complete ]
+then
+doppler setup
+touch doppler-ansible-setup-complete
+sleep 10
+fi
+
+make install
 
 echo "'run make' to see your options."
