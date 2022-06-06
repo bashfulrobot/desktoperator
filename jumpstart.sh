@@ -4,18 +4,7 @@
 SCRIPT_DIR="$( cd -- "$( dirname -- "${BASH_SOURCE[0]:-$0}"; )" &> /dev/null && pwd 2> /dev/null; )";
 
 # Deps
-sudo apt install make curl git gpg openssh-server wget python3-pip apt-transport-https ca-certificates gnupg -y
-
-# Doppler
-curl -sLf --retry 3 --tlsv1.2 --proto "=https" 'https://packages.doppler.com/public/cli/gpg.DE2A7741A397C129.key' | sudo apt-key add -
-echo "deb https://packages.doppler.com/public/cli/deb/debian any-version main" | sudo tee /etc/apt/sources.list.d/doppler-cli.list
-sudo apt update && sudo apt install doppler -y
-
-# Restore sentitive folders
-if ! command -v restic &>/dev/null; then
-    echo "restic could not be found"
-    sudo apt install restic -y
-fi
+sudo apt install restic make curl git gpg openssh-server wget python3-pip apt-transport-https ca-certificates gnupg -y
 
 if ! command -v doppler &>/dev/null; then
     echo "doppler could not be found"
@@ -44,23 +33,12 @@ echo ">>> Restoring..."
 echo ""
 
 
-if [ ! -f doppler-login-complete ]
-then
-
 read -p "please run `doppler login` in another terminal, then press [ENTER] when complete. "
-touch doppler-login-complete
-
-fi
-
 
 mkdir -p ${RESTORE_WORK_DIR}
 cd ${RESTORE_WORK_DIR}
 
-if [ ! -f doppler-bu-setup-complete ]
-then
 read -p "please run `doppler setup` in another terminal (within ${RESTORE_WORK_DIR}), then press [ENTER] when complete. "
-touch doppler-bu-setup-complete
-fi
 
 
 for i in "${RESTORE_FOLDERS[@]}"; do
@@ -72,19 +50,12 @@ done
 
 chmod 0600 ${HOME}/.ssh/id_rsa*
 
-# rm -rf ${RESTORE_WORK_DIR}
-
-
 # Prep ansible
 read -p "Press [Enter] key to continue..."
 cd ~/tmp/ && git clone https://github.com/bashfulrobot/desktoperator && cd ~/tmp/desktoperator
 
-if [ ! -f doppler-ansible-setup-complete ]
-then
 read -p "please run `doppler setup` in another terminal (within ~/tmp/desktoperator), then press [ENTER] when complete. "
-touch doppler-ansible-setup-complete
-sleep 10
-fi
+
 
 make install
 
