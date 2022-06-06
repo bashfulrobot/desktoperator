@@ -33,12 +33,12 @@ echo ">>> Restoring..."
 echo ""
 
 
-read -p "please run `doppler login` in another terminal, then press [ENTER] when complete. "
+read -p "please run doppler login in another terminal, then press [ENTER] when complete. "
 
 mkdir -p ${RESTORE_WORK_DIR}
 cd ${RESTORE_WORK_DIR}
 
-read -p "please run `doppler setup` in another terminal (within ${RESTORE_WORK_DIR}), then press [ENTER] when complete. "
+read -p "please run doppler setup in another terminal (within ${RESTORE_WORK_DIR}), then press [ENTER] when complete. "
 
 
 for i in "${RESTORE_FOLDERS[@]}"; do
@@ -51,10 +51,10 @@ done
 chmod 0600 ${HOME}/.ssh/id_rsa*
 
 # Prep ansible
-read -p "Press [Enter] key to continue..."
+
 cd ~/tmp/ && git clone https://github.com/bashfulrobot/desktoperator && cd ~/tmp/desktoperator
 
-read -p "please run `doppler setup` in another terminal (within ~/tmp/desktoperator), then press [ENTER] when complete. "
+read -p "please run doppler setup in another terminal (within ~/tmp/desktoperator), then press [ENTER] when complete. "
 
 
 make install
