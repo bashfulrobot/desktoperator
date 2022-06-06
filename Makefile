@@ -45,7 +45,7 @@ install: ## install software dependencies
 	@echo "${BLUE}installing software dependencies ${RESET}"
 	@sudo apt update
 	@sudo apt install git curl wget vim-nox python3-pip -y
-	@sudo pip install ansible Jinja2 psutils
+	@sudo pip install ansible Jinja2 psutil
 	@echo "${BLUE}installing playbook dependencies ${RESET}"
 	@ansible-galaxy install -r requirements.yaml --ignore-errors --force
 	@doppler setup
