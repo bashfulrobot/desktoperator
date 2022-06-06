@@ -175,3 +175,6 @@
   dconf:
     key: "/org/gnome/desktop/peripherals/keyboard/numlock-state"
     value: "true"
+
+- name: Opening gnome extention page to enable user-themes
+  ansible.builtin.command: xdg-open https://extensions.gnome.org/extension/19/user-themes/
