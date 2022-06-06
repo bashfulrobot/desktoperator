@@ -9,11 +9,17 @@
 # Had to see the format returned.
 # JSON
 # - debug: msg="{{ cod_release.tag }}"
+- name: desktop/software/espanso - placing libssl deb
+  copy:
+    src: ../files/deb/libssl1.1_1.1.1n-0+deb11u1_amd64.deb
+    dest: "/tmp/libssl1.1_1.1.1n-0+deb11u1_amd64.deb"
+    owner: "{{ lookup('env','USER') }}"
+    group: "{{ lookup('env','USER') }}"
 
 - name: desktop/software/espanso - install libssl deb
   become: yes
   apt:
-    deb: "http://security.ubuntu.com/ubuntu/pool/main/o/openssl/libssl1.1_1.1.1j-1ubuntu3.5_amd64.deb"
+    deb: "/tmp/libssl1.1_1.1.1n-0+deb11u1_amd64.deb"
 
 - name: desktop/software/espanso - install deb
   become: yes
