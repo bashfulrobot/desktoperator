@@ -17,7 +17,7 @@ RESTIC=$(command -v restic)
 DOPPLER=$(command -v doppler)
 
 # Folders to backup
-RESTORE_FOLDERS=("${HOME}/.ssh" "${HOME}/.gnupg" "${HOME}/.aws" "${HOME}/.bazaar" "${HOME}/.fonts" "${HOME}/.icons" "${HOME}/.themes" "${HOME}/.config/espanso" "${HOME}/.local/share/cod" "${HOME}/.password-store" "${HOME}/Documents" "${HOME}/code" "${HOME}/Desktop" "${HOME}/Pictures" "${HOME}/Videos")
+RESTORE_FOLDERS=("${HOME}/.ssh" "${HOME}/.gnupg" "${HOME}/.aws" "${HOME}/.bazaar" "${HOME}/.fonts" "${HOME}/.icons" "${HOME}/.themes" "${HOME}/.config/espanso" "${HOME}/.local/share/cod" "${HOME}/.password-store" "${HOME}/Documents" "${HOME}/code" "${HOME}/Desktop" "${HOME}/Pictures" "${HOME}/Videos" "${HOME}/.kube")
 RESTORE_WORK_DIR="${HOME}/Downloads/restore"
 
 # Ensure retore folders exist
