@@ -17,5 +17,5 @@
 - name: desktop/software/nala - install nala legacy, change once on 22.04
   become: yes
   ansible.builtin.apt:
-    # name: nala
-    name: nala-legacy
+    name: nala
+    #name: nala-legacy
