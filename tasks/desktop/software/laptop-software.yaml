@@ -9,13 +9,7 @@
 #     method: user
 #     remote: flathub
 
-- name: desktop/software/laptop-software - installing debs
-  become: yes
-  ansible.builtin.apt:
-    pkg:
-      - i3xrocks-battery
-    state: present
-
+#
 # - name: desktop/software/common-software - install pip packages
 #   pip:
 #     name:

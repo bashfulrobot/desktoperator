@@ -10,6 +10,11 @@
 # JSON
 # - debug: msg="{{ cod_release.tag }}"
 
+- name: desktop/software/espanso - install libssl deb
+  become: yes
+  apt:
+    deb: "http://security.ubuntu.com/ubuntu/pool/main/o/openssl/libssl1.1_1.1.1j-1ubuntu3.5_amd64.deb"
+
 - name: desktop/software/espanso - install deb
   become: yes
   apt:
