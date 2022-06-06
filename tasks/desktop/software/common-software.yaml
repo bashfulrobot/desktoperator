@@ -45,6 +45,13 @@
       - pkg-config
     state: present
 
+- name: desktop/software/common-software - removing debs
+  become: yes
+  ansible.builtin.apt:
+    pkg:
+      - firefox
+    state: absent
+
 - name: desktop/software/common-software - install pip packages
   pip:
     name:
