@@ -1,8 +1,7 @@
 function do-update() {
 
     if [ -f "/usr/bin/nala" ]; then
-        sudo nala update --install-suggests -y
-        sudo nala upgrade -y
+        sudo nala upgrade --update --autoremove --install-recommends --install-suggests --fix-broken -y
         sleep 1
     else
         runAptUpdateIfNeeded
