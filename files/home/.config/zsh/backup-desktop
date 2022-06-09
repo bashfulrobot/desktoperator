@@ -1,0 +1,9 @@
+function backup-desktop() {
+
+cd $HOME/Insync/dustin@bashfulrobot.com/Google\ Drive/restic/desktop/
+
+bash doppler-restic-r2-desktop.sh
+
+exit 0
+
+}
