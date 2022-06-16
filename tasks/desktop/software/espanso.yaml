@@ -25,3 +25,16 @@
   become: yes
   apt:
     deb: "https://github.com/federico-terzi/espanso/releases/download/{{ cod_release.tag }}/espanso-debian-x11-amd64.deb"
+
+- name: desktop/software/espanso - create espanso cfg folder
+  file:
+    path: "{{SYSTEM_HOME}}/.config/espanso/"
+    state: directory
+    mode: "0700"
+    owner: "{{ SYSTEM_USER }}"
+    group: "{{ SYSTEM_USER }}"
+
+- name: desktop/software/espanso - placing espanso cfg files
+  ansible.posix.synchronize:
+    src: ../files/home/.config/espanso/
+    dest: "{{SYSTEM_HOME}}/.config/espanso"
