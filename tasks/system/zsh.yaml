@@ -26,7 +26,7 @@
   with_items:
     - "{{SYSTEM_HOME }}/.config/zsh"
     - "{{SYSTEM_HOME }}/.bookmarks"
-    - "{{SYSTEM_HOME }}/code"
+    # - "{{SYSTEM_HOME }}/code"
     - "{{SYSTEM_HOME }}/tmp"
 
 - name: system/zsh - change current user shell
@@ -175,14 +175,14 @@
     owner: "{{ SYSTEM_USER }}"
     group: "{{ SYSTEM_USER }}"
 
-- name: system/zsh - create shell bookmark for code
-  ansible.builtin.file:
-    src: "{{SYSTEM_HOME }}/code"
-    dest: "{{SYSTEM_HOME }}/.bookmarks/@code"
-    owner: "{{ SYSTEM_USER }}"
-    group: "{{ SYSTEM_USER }}"
-    state: link
-    mode: "0700"
+# - name: system/zsh - create shell bookmark for code
+#   ansible.builtin.file:
+#     src: "{{SYSTEM_HOME }}/code"
+#     dest: "{{SYSTEM_HOME }}/.bookmarks/@code"
+#     owner: "{{ SYSTEM_USER }}"
+#     group: "{{ SYSTEM_USER }}"
+#     state: link
+#     mode: "0700"
 
 - name: system/zsh - create shell bookmark for tmp
   ansible.builtin.file:
