@@ -1,3 +1,4 @@
 *.retry
 .vscode/dryrun.log
 roles
+.vscode/settings.json
