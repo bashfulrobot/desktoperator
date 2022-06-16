@@ -105,8 +105,10 @@ matches:
     replace: 🤣
   - trigger: ":book"
     replace: "If you would like to meet, my calendar timeslots can be viewed/booked at https://calendly.com/dustin-krysak"
-  - trigger: ":incon"
+  - trigger: ":in"
     replace: "container.name contains 'sysdig'"
+  - trigger: ":cpu"
+    replace: "cpu_used_percent"
   - trigger: ":uapt"
     replace: sudo apt update && sudo apt dist-upgrade -y && sudo apt autoremove -y
   - trigger: ":re"
