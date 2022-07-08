@@ -14,4 +14,4 @@
         extensions:
           - 'yaml'
   tasks:
-    - import_tasks: ../tasks/desktop/software/appimage-launcher.yaml
+    - import_tasks: ../tasks/system/zsh.yaml

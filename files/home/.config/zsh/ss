@@ -1,0 +1,7 @@
+function ss() {
+    # curl -LO "https://download.sysdig.com/scanning/bin/sysdig-cli-scanner/$(curl -L -s https://download.sysdig.com/scanning/sysdig-cli-scanner/latest_version.txt)/linux/amd64/sysdig-cli-scanner"
+
+    cd ~/dev/sysdig-cli-scan
+
+    export SECURE_API_TOKEN=$(op read op://secrets/sysdig-secure-us2-api-token/secure-api-token) && /home/dustin/dev/sysdig-cli-scan/./sysdig-cli-scanner --apiurl https://us2.app.sysdig.com "$1" && unset SECURE_API_TOKEN
+}
