@@ -1,0 +1,3 @@
+function zsh-funcs() {
+    exa ~/.config/zsh
+}
