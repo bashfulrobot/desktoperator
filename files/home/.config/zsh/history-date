@@ -1,0 +1,10 @@
+function history-date() {
+
+    if [ $# -eq 0 ]
+    then
+        echo "No arguments supplied"
+        echo "> please enter a search term."
+    fi
+    history -E | grep "$1"
+
+}
