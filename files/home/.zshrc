@@ -234,3 +234,16 @@ fi
 #####=== Set shell options: http://zsh.sourceforge.net/Doc/Release/Options.html.
 setopt glob_dots     # no special treatment for file names with a leading dot
 setopt no_auto_menu  # require an extra TAB press to open the completion menu
+
+# log history to file
+export HISTFILE=~/.zsh_history
+# Increase history size
+export HISTFILESIZE=1000000000
+export HISTSIZE=1000000000
+# Add to history immediately
+setopt INC_APPEND_HISTORY
+export HISTTIMEFORMAT="[%F %T] "
+# Add Timestamp to history
+setopt EXTENDED_HISTORY
+# Remove duplicates from the history
+setopt HIST_FIND_NO_DUPS
