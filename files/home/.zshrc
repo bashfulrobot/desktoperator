@@ -77,6 +77,7 @@ pathdirs=(
     $GOBIN
     /usr/local/go/bin
     $HOME/.arkade/bin/
+    $HOME/.krew/bin
 )
 for dir in $pathdirs; do
     if [ -d $dir ]; then
