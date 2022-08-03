@@ -36,6 +36,11 @@
     name: status.submoduleSummary
     scope: global
     value: "true"
+- name: dev/git-config - configure password cache for https
+  git_config:
+    name: credential.helper
+    scope: global
+    value: "store"
 - name: dev/git-config - set git config - editor
   git_config:
     name: core.editor
