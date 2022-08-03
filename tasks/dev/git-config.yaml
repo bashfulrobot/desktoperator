@@ -31,6 +31,11 @@
     name: commit.gpgsign
     scope: global
     value: "true"
+- name: dev/git-config - configure submodules
+  git_config:
+    name: status.submoduleSummary
+    scope: global
+    value: "true"
 - name: dev/git-config - set git config - editor
   git_config:
     name: core.editor
