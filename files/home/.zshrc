@@ -219,7 +219,7 @@ alias htop="gotop"
 alias dnd-on="dunstctl set-paused true"
 alias dnd-off="dunstctl set-paused false"
 
-alias rustscan='docker run -it --rm --name rustscan rustscan/rustscan:2.0.0'
+alias rustscan='docker run -it --rm --name rustscan rustscan/rustscan:latest'
 
 if [ -d "$HOME/.bookmarks" ]; then
     export CDPATH=".:$HOME/.bookmarks:/"
