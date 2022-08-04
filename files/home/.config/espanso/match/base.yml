@@ -169,3 +169,15 @@ matches:
     replace: docker-compose down && docker-compose up -d
   - trigger: ":dcu"
     replace: docker-compose pull && docker-compose down && docker-compose up -d
+  - trigger: ":gcb"
+    replace: 'fix: :bug: $|$'
+  - trigger: ":gcd"
+    replace: 'docs: :memo: $|$'
+  - trigger: ":gcr"
+    replace: 'refactor: :recycle: $|$'
+  - trigger: ":gcf"
+    replace: 'feat: :sparkles: $|$'
+  - trigger: ":gcc"
+    replace: 'chore: :art: $|$'
+  - trigger: ":gci"
+    replace: 'chore: :tada: Initial Commit $|$'
