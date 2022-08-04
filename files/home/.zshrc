@@ -219,10 +219,14 @@ alias htop="gotop"
 alias dnd-on="dunstctl set-paused true"
 alias dnd-off="dunstctl set-paused false"
 
-alias lan-inventory="sudo nmap -T4 -oG -sn 192.168.168.0/23"
-alias lan-dhcp="sudo nmap -T4 -oG -sn 192.168.169.0/24"
-alias lan-ssh="sudo nmap -T4 -oG -sS -p 22 192.168.168.0/23"
-alias lan-virtualbox-running="sudo nmap -T4 -oG -sn 192.168.169.0/24 | grep -A2 Oracle"
+alias rg2l="rg -A2"
+
+alias lan-inventory="sudo nmap -sn 192.168.168.0/23"
+alias lan-dhcp="sudo nmap -sn 192.168.169.0/24"
+alias lan-ssh="sudo nmap -sS -p 22 192.168.168.0/23"
+alias lan-virtualbox-running="sudo nmap -sn 192.168.169.0/24 | rg -A2 Oracle"
+
+
 
 if [ -d "$HOME/.bookmarks" ]; then
     export CDPATH=".:$HOME/.bookmarks:/"
