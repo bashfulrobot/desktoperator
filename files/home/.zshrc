@@ -213,8 +213,8 @@ alias g="git"
 alias dc="docker-compose"
 alias lzd="lazydocker"
 
-alias top="gotop"
-alias htop="gotop"
+alias top="btm"
+alias htop="btm"
 
 alias dnd-on="dunstctl set-paused true"
 alias dnd-off="dunstctl set-paused false"

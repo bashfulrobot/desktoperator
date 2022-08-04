@@ -12,3 +12,4 @@
 - import_tasks: ../tasks/desktop/software/slack.yaml
 - import_tasks: ../tasks/desktop/software/tailscale.yaml
 - import_tasks: ../tasks/desktop/software/zoom.yaml
+- import_tasks: ../tasks/desktop/software/bottom.yaml
