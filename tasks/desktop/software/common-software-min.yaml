@@ -1,0 +1,50 @@
+- name: desktop/software/common-software-min - installing debs
+  become: yes
+  ansible.builtin.apt:
+    pkg:
+      - dconf-cli
+      # - xournal
+      - restic
+      - xclip
+      - ncdu
+      - ubuntu-restricted-extras
+      - ubuntu-restricted-addons
+      - gnome-disk-utility
+      - gnome-firmware
+      # - dlocate
+      - ttf-mscorefonts-installer
+      - fonts-powerline
+      - fonts-emojione
+      - ppa-purge
+      # - gnome-calculator
+      - dialog
+      # - stacer
+      - gnupg-agent
+      # - font-manager
+      - v4l-utils
+      - nvme-cli
+      # - celluloid
+      - zoxide
+      - jq
+      - whois
+      - curl
+      - wget
+      - tmux
+      # cargo dependency
+      - pkg-config
+    state: present
+
+- name: desktop/software/common-software-min - removing debs
+  become: yes
+  ansible.builtin.apt:
+    pkg:
+      - firefox
+    state: absent
+
+- name: desktop/software/common-software-min - install pip packages
+  pip:
+    name:
+      - ansible-lint
+      - telegram-send
+      # Needed for some ansible modules
+      - psutil

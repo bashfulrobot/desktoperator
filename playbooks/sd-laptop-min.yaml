@@ -1,0 +1,52 @@
+---
+- name: configuring desktop system
+  hosts: localhost
+  become: no
+  pre_tasks:
+    - name: set variables - include all .yaml files in config/shared directory
+      include_vars:
+        dir: ../config/shared
+        extensions:
+          - 'yaml'
+    - name: set variables - include all .yaml files in config/tower directory
+      include_vars:
+        dir: ../config/sd-laptop
+        extensions:
+          - 'yaml'
+    - name: update repositories
+      become: yes
+      apt: update_cache=yes
+      changed_when: false
+    - import_tasks: ../tasks/dependencies.yaml
+  tasks:
+    # - import_tasks: ../tasks/desktop/regolith.yaml
+    - import_tasks: ../tasks/desktop/popos.yaml
+    - import_tasks: ../tasks/desktop/software/1password.yaml
+    - import_tasks: ../tasks/desktop/software/cod.yaml
+    - import_tasks: ../tasks/desktop/software/edge-browser.yaml
+    - import_tasks: ../tasks/desktop/software/espanso.yaml
+    - import_tasks: ../tasks/desktop/software/flameshot.yaml
+    # - import_tasks: ../tasks/desktop/software/ncspot.yaml
+    # - import_tasks: ../tasks/desktop/software/slack.yaml
+    - import_tasks: ../tasks/desktop/software/tailscale.yaml
+    # - import_tasks: ../tasks/desktop/software/zoom.yaml
+    - import_tasks: ../tasks/desktop/software/common-software-min.yaml
+    # - import_tasks: ../
+    # - import_tasks: ../
+    - import_tasks: ../tasks/dev/init.yaml
+    - import_tasks: ../tasks/cloud/init.yaml
+    - import_tasks: ../tasks/system/init.yaml
+    # - import_tasks: ../tasks/desktop/software/laptop-software.yaml
+  # roles:
+    # - zsh
+  post_tasks:
+    - name: updating the system
+      become: yes
+      apt:
+        update_cache: yes
+        upgrade: dist
+    - name: autoremove and purge apt packages
+      become: yes
+      apt:
+        autoremove: yes
+        purge: yes

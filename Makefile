@@ -38,6 +38,7 @@ POUND = \#
 
 TOWER-PLAYBOOK = playbooks/tower.yaml
 SD-LAPTOP-PLAYBOOK = playbooks/sd-laptop.yaml
+SD-LAPTOP-PLAYBOOK-MIN = playbooks/sd-laptop-min.yaml
 BOOTSTRAP = playbooks/bootstrap.yaml
 TEST-PLAYBOOK = playbooks/test.yaml
 
@@ -61,6 +62,10 @@ run-sd-laptop: ## run all ansible tasks
 	@echo "${BLUE}running all ansible tasks${RESET}"
 	@git pull
 	@ansible-playbook --ask-become-pass --ask-vault-pass --connection=local "${SD-LAPTOP-PLAYBOOK}"
+run-sd-laptop-min: ## run all ansible tasks
+	@echo "${BLUE}running all ansible tasks${RESET}"
+	@git pull
+	@ansible-playbook --ask-become-pass --ask-vault-pass --connection=local "${SD-LAPTOP-PLAYBOOK-MIN}"
 run-test-playbook: ## run all ansible tasks
 	@echo "${BLUE}running all ansible tasks${RESET}"
 	@ansible-playbook --ask-become-pass --ask-vault-pass --connection=local "${TEST-PLAYBOOK}"
