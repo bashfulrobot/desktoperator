@@ -2,3 +2,4 @@
 .vscode/dryrun.log
 roles
 .vscode/settings.json
+playbooks/cv_debug.log
