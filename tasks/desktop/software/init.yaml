@@ -1,7 +1,7 @@
 - import_tasks: ../tasks/desktop/software/1password.yaml
 - import_tasks: ../tasks/desktop/software/cod.yaml
 - import_tasks: ../tasks/desktop/software/common-software.yaml
-- import_tasks: ../tasks/desktop/software/edge-browser.yaml
+- import_tasks: ../tasks/desktop/software/chrome-browser.yaml
 - import_tasks: ../tasks/desktop/software/element.yaml
 - import_tasks: ../tasks/desktop/software/espanso.yaml
 - import_tasks: ../tasks/desktop/software/flameshot.yaml
