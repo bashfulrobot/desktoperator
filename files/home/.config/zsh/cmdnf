@@ -6,8 +6,11 @@ cmdnf() {
 
         # wamp wamp, I forgot the package name
         echo "Hold up cowboy --> missing package name!"
+
+    else
+        links2 http://command-not-found.com/$1
     fi
 
-    links2 http://command-not-found.com/$1
+
 
 }
