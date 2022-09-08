@@ -181,3 +181,5 @@ matches:
     replace: 'chore: :art: $|$'
   - trigger: ":gci"
     replace: 'chore: :tada: Initial Commit $|$'
+  - trigger: ":demo"
+    replace: 'xdotool windowsize $(xdotool selectwindow) 1920 1080'
