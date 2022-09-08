@@ -1,0 +1,13 @@
+cmdnf() {
+    checkInstalledApt links2
+
+    # Make sure I pass the package name
+    if [ -z "$1" ]; then
+
+        # wamp wamp, I forgot the package name
+        echo "Hold up cowboy --> missing package name!"
+    fi
+
+    links2 http://command-not-found.com/$1
+
+}
