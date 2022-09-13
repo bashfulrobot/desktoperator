@@ -1,0 +1,62 @@
+# Create new profile
+
+- name: desktop/popos - create terminal - profile name
+  become: yes
+  become_user: "{{ lookup('env','USER') }}"
+  community.general.dconf:
+    key: "/org/gnome/terminal/legacy/profiles:/:033548d4-6d93-4553-9fe8-fff1be9685be/visible-name"
+    value: "'Dustin'"
+    state: present
+
+- name: desktop/popos - create terminal - profile list
+  become: yes
+  become_user: "{{ lookup('env','USER') }}"
+  community.general.dconf:
+    key: "/org/gnome/terminal/legacy/profiles:/list"
+    value: "['033548d4-6d93-4553-9fe8-fff1be9685be']"
+    state: present
+
+# Set default profile
+
+- name: desktop/popos - set terminal - default profile
+  become: yes
+  become_user: "{{ lookup('env','USER') }}"
+  community.general.dconf:
+    key: "/org/gnome/terminal/legacy/profiles:/default"
+    value: "'033548d4-6d93-4553-9fe8-fff1be9685be'"
+    state: present
+
+- name: desktop/popos - set terminal - font size
+  become: yes
+  become_user: "{{ lookup('env','USER') }}"
+  community.general.dconf:
+    key: "/org/gnome/terminal/legacy/profiles:/:033548d4-6d93-4553-9fe8-fff1be9685be/font"
+    value: "'Fira Mono 20'"
+    state: present
+
+- name: desktop/popos - gnome - automatic timezone
+  dconf:
+    key: "/org/gnome/desktop/datetime/automatic-timezone"
+    value: "true"
+
+- name: desktop/popos - gnome - clock format
+  dconf:
+    key: "/org/gnome/desktop/interface/clock-format"
+    value: "'24h'"
+
+# RT - scheduling
+# I was excited to see that Mutter 3.34 can experimentally give itself a realtime priority 29. I’ve had a lot of situations where a rogue app or userspace process has managed to lock up my desktop system completely. After one of these I resolved to enable the rt-scheduler feature and see if it helped. And what do you know - it does!
+- name: desktop/popos - gnome - mutter real-time scheduling
+  dconf:
+    key: "/org/gnome/mutter/experimental-features"
+    value: "['rt-scheduler']"
+
+- name: desktop/popos - gnome - enable subpixel antialiasing
+  dconf:
+    key: "/org/gnome/settings-daemon/plugins/xsettings/antialiasing"
+    value: "'rgba'"
+
+- name: desktop/popos - gnome - numlock on
+  dconf:
+    key: "/org/gnome/desktop/peripherals/keyboard/numlock-state"
+    value: "true"
