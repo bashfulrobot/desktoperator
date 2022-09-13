@@ -10,9 +10,9 @@
           - 'yaml'
     - name: set variables - include all .yaml files in config/tower directory
       include_vars:
-        dir: ../config/tower
+        #dir: ../config/tower
+        dir: ../config/sd-laptop
         extensions:
           - 'yaml'
   tasks:
-    # - import_tasks: ../tasks/system/zsh.yaml
-    - import_tasks: ../tasks/desktop/software/espanso.yaml
+    - import_tasks: ../tasks/system/zsh.yaml

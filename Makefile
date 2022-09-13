@@ -45,12 +45,12 @@ TEST-PLAYBOOK = playbooks/test.yaml
 install: ## install software dependencies
 	@echo "${BLUE}installing software dependencies ${RESET}"
 	@sudo apt update
-	@sudo apt install git curl wget vim-nox python3-pip -y
+	@sudo apt install git build-essential ncdu curl wget neovim python3-pip -y
 	@sudo pip install ansible Jinja2 psutil
 	@echo "${BLUE}installing playbook dependencies ${RESET}"
 	@ansible-galaxy install -r requirements.yaml --ignore-errors --force
-	@doppler setup
-	@chmod +x vaultpass.sh
+	#@doppler setup
+	#@chmod +x vaultpass.sh
 requirements-only: ## install ansible requirements
 	@echo "${BLUE}installing ansible requirements${RESET}"
 	@ansible-galaxy install -r requirements.yaml --ignore-errors --force
