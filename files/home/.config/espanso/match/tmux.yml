@@ -1,0 +1,5 @@
+matches:
+  - trigger: ":sync"
+    replace: setw synchronize-panes on
+  - trigger: ":unsync"
+    replace: setw synchronize-panes off

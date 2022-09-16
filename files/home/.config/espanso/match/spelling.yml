@@ -1,0 +1,16 @@
+matches:
+  - trigger: hte
+    replace: the
+    word: true
+  - trigger: teh
+    replace: the
+    word: true
+  - trigger: donlt
+    replace: "don't"
+    word: true
+  - trigger: befoire
+    replace: before
+    word: true
+  - trigger: finially
+    replace: finally
+    word: true

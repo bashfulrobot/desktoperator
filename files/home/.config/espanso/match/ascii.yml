@@ -1,0 +1,9 @@
+matches:
+  - trigger: ":shrug"
+    replace: "¯\\_(ツ)_/¯"
+  - trigger: ":flip"
+    replace: (╯°□°）╯︵ ┻━┻
+  - trigger: ":unflip"
+    replace: ┬──┬ ノ( ゜-゜ノ)
+  - trigger: ":lenny"
+    replace: ( ͡° ͜ʖ ͡°)

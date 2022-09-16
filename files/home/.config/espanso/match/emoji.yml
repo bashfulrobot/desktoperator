@@ -1,0 +1,17 @@
+matches:
+  - trigger: ":sm"
+    replace: 🙂
+  - trigger: ":fu"
+    replace: 🖕
+  - trigger: ":th"
+    replace: 👍
+  - trigger: ":cry"
+    replace: 😭
+  - trigger: ":up"
+    replace: 👆
+  - trigger: ":fp"
+    replace: 🤦
+  - trigger: ":po"
+    replace: 🤔
+  - trigger: ":rol"
+    replace: 🤣

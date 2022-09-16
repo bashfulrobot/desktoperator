@@ -1,0 +1,9 @@
+matches:
+  - trigger: ":in"
+    replace: "container.name contains 'sysdig'"
+  - trigger: ":cpu"
+    replace: "cpu_used_percent"
+  - trigger: ":gcpns"
+    replace: "container_label_io_kubernetes_pod_namespace"
+  - trigger: ":zoom"
+    replace: "/zoom join me"

@@ -1,0 +1,31 @@
+matches:
+  - trigger: ":t"
+    replace: tomorrow at 9 am
+    word: true
+  - trigger: ":w"
+    replace: next week
+    word: true
+  - trigger: ":m"
+    replace: next month
+    word: true
+  - trigger: ":1"
+    replace: in 1 hour
+    word: true
+  - trigger: ":2"
+    replace: in 2 hours
+    word: true
+  - trigger: ":3"
+    replace: in 3 hours
+    word: true
+  - trigger: ":2d"
+    replace: in 2 days
+    word: true
+  - trigger: ":3d"
+    replace: in 3 days
+    word: true
+  - trigger: ":2m"
+    replace: in 2 months
+    word: true
+  - trigger: ":3m"
+    replace: in 3 months
+    word: true
