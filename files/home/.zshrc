@@ -140,6 +140,9 @@ z4h source $Z4H/djui/alias-tips/alias-tips.plugin.zsh
 # Enable zioxide (z functionality)
 eval "$(zoxide init zsh)"
 
+# Enable kcli auto completion
+eval "$(register-python-argcomplete kcli)"
+
 #####=== Define key bindings.
 
 z4h bindkey z4h-backward-kill-word  Ctrl+Backspace     Ctrl+H
