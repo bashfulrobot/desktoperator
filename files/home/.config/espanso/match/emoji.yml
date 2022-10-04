@@ -15,3 +15,5 @@ matches:
     replace: 🤔
   - trigger: ":rol"
     replace: 🤣
+  - trigger: ":noo"
+    replace: "NOOoooo。。..."
