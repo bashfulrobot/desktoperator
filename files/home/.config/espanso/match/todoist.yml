@@ -1,11 +1,15 @@
 matches:
-  - trigger: ":t"
+  - trigger: ":tomorrow"
     replace: tomorrow at 9 am
     word: true
-  - trigger: ":w"
+  - trigger: ":1w"
     replace: next week
+  - trigger: ":2w"
+    replace: in 2 weeks
+  - trigger: ":3w"
+    replace: in 3 weeks
     word: true
-  - trigger: ":m"
+  - trigger: ":month"
     replace: next month
     word: true
   - trigger: ":1"
