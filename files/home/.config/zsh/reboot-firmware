@@ -1,0 +1,4 @@
+reboot-firmware() {
+    # reboot to firmware
+    systemctl reboot --firmware-setup
+}
