@@ -28,6 +28,8 @@ let g:vim_markdown_json_frontmatter = 1
 let g:vim_markdown_new_list_item_indent = 2
 " Auto-write when following link
 let g:vim_markdown_autowrite = 1
+" Do not require .md extensions for Markdown links
+let g:vim_markdown_no_extensions_in_markdown = 1
 
 """ --- YAML Settings
 set tabstop=2 softtabstop=2 shiftwidth=2
