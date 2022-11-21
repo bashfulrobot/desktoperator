@@ -1,0 +1,2 @@
+- Install starship.rs
+- change szh to zimfw
