@@ -35,6 +35,25 @@
     name: "{{ SYSTEM_USER }}"
     shell: /usr/bin/zsh
 
+- name: system/zsh - get latest release version of starship from github
+  github_release:
+    user: starship
+    repo: starship
+    action: latest_release
+    token: "{{ GITHUB_TOKEN }}"
+  register: starship_release
+
+# Had to see the format returned.
+# JSON
+# - debug: msg="{{ starship_release.tag }}"
+
+- name: system/zsh - download & extract starship tgz
+  become: yes
+  ansible.builtin.unarchive:
+    src: "https://github.com/starship/starship/releases/download/{{ starship_release.tag }}/starship-x86_64-unknown-linux-gnu.tar.gz"
+    dest: /usr/local/bin
+    remote_src: yes
+
 - name: system/zsh - placing .zshrc
   copy:
     src: ../files/home/.zshrc
@@ -42,17 +61,10 @@
     owner: "{{ SYSTEM_USER }}"
     group: "{{ SYSTEM_USER }}"
 
-- name: system/zsh - placing .zshenv
+- name: system/zsh - placing .zimrc
   copy:
-    src: ../files/home/.zshenv
-    dest: "{{SYSTEM_HOME }}/.zshenv"
-    owner: "{{ SYSTEM_USER }}"
-    group: "{{ SYSTEM_USER }}"
-
-- name: system/zsh - placing .p10k.zsh cfg
-  copy:
-    src: ../files/home/.p10k.zsh
-    dest: "{{SYSTEM_HOME }}/.p10k.zsh"
+    src: ../files/home/.zimrc
+    dest: "{{SYSTEM_HOME }}/.zimrc"
     owner: "{{ SYSTEM_USER }}"
     group: "{{ SYSTEM_USER }}"
 

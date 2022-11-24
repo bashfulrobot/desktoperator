@@ -14,4 +14,3 @@
 - import_tasks: ../tasks/desktop/software/zoom.yaml
 - import_tasks: ../tasks/desktop/software/bottom.yaml
 - import_tasks: ../tasks/desktop/software/kitty.yaml
-- import_tasks: ../tasks/desktop/software/starship.yaml
