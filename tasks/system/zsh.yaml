@@ -25,6 +25,7 @@
     group: "{{ SYSTEM_USER }}"
   with_items:
     - "{{SYSTEM_HOME }}/.config/zsh"
+    - "{{SYSTEM_HOME }}/.zim"
     - "{{SYSTEM_HOME }}/.bookmarks"
     # - "{{SYSTEM_HOME }}/code"
     - "{{SYSTEM_HOME }}/tmp"
@@ -74,14 +75,33 @@
     src: ../files/home/.config/zsh/
     dest: "{{SYSTEM_HOME}}/.config/zsh"
 
-# - name: system/zsh - create shell bookmark for code
-#   ansible.builtin.file:
-#     src: "{{SYSTEM_HOME }}/code"
-#     dest: "{{SYSTEM_HOME }}/.bookmarks/@code"
-#     owner: "{{ SYSTEM_USER }}"
-#     group: "{{ SYSTEM_USER }}"
-#     state: link
-#     mode: "0700"
+- name: system/zsh - placing zim files
+  ansible.posix.synchronize:
+    src: ../files/home/.zim/
+    dest: "{{SYSTEM_HOME}}/.zim"
+
+- name: system/zsh - run zimfw
+  ansible.builtin.shell: zimfw.zsh install
+  args:
+    chdir: /home/dustin/.zim/
+
+- name: system/zsh - create shell bookmark for dev
+  ansible.builtin.file:
+    src: "{{SYSTEM_HOME }}/dev"
+    dest: "{{SYSTEM_HOME }}/.bookmarks/@dev"
+    owner: "{{ SYSTEM_USER }}"
+    group: "{{ SYSTEM_USER }}"
+    state: link
+    mode: "0700"
+
+- name: system/zsh - create shell bookmark for sysdig-dev
+  ansible.builtin.file:
+    src: "{{SYSTEM_HOME }}/dev/sysdig"
+    dest: "{{SYSTEM_HOME }}/.bookmarks/@sysdig"
+    owner: "{{ SYSTEM_USER }}"
+    group: "{{ SYSTEM_USER }}"
+    state: link
+    mode: "0700"
 
 - name: system/zsh - create shell bookmark for tmp
   ansible.builtin.file:
