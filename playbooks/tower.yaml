@@ -39,3 +39,4 @@
       apt:
         autoremove: yes
         purge: yes
+    - import_tasks: ../tasks/final-message.yaml

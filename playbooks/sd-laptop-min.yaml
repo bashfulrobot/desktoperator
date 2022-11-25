@@ -35,3 +35,4 @@
     - import_tasks: ../tasks/cloud/helm.yaml
     - import_tasks: ../tasks/desktop/popos-min.yaml
     - import_tasks: ../tasks/dev/go.yaml
+    - import_tasks: ../tasks/final-message.yaml
