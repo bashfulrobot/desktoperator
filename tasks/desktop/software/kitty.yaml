@@ -58,6 +58,14 @@
     owner: "{{ lookup('env','USER') }}"
     group: "{{ lookup('env','USER') }}"
 
+- name: desktop/software/kitty - add kitty to alternatives
+  become: yes
+  community.general.alternatives:
+    name: x-terminal-emulator
+    path: /usr/local/kitty/bin/kitty
+    link: /usr/bin/x-terminal-emulator
+    priority: "10"
+
 - name: desktop/software/kitty - set kitty as the default terminal
   become: yes
   community.general.alternatives:
