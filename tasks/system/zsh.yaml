@@ -69,6 +69,13 @@
     owner: "{{ SYSTEM_USER }}"
     group: "{{ SYSTEM_USER }}"
 
+- name: system/zsh - placing starship.toml
+  copy:
+    src: ../files/home/.config/starship.toml
+    dest: "{{SYSTEM_HOME }}/.config/starship.toml"
+    owner: "{{ SYSTEM_USER }}"
+    group: "{{ SYSTEM_USER }}"
+
 # ####
 - name: system/zsh - placing zsh function files
   ansible.posix.synchronize:
