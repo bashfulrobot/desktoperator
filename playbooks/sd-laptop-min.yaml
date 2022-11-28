@@ -33,6 +33,7 @@
     - import_tasks: ../tasks/dev/code-insiders.yaml
     - import_tasks: ../tasks/cloud/kubectl-gcp.yaml
     - import_tasks: ../tasks/cloud/helm.yaml
+    - import_tasks: ../tasks/cloud/terraform.yaml
     - import_tasks: ../tasks/desktop/popos-min.yaml
     - import_tasks: ../tasks/dev/go.yaml
     - import_tasks: ../tasks/final-message.yaml
