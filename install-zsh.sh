@@ -3,6 +3,7 @@
 # Install deps
 sudo apt update && sudo apt install curl git fonts-powerline jq zsh neovim -y
 sleep 5
+mkdir -p $HOME/.config/zsh
 
 # Install starship prompt
 STARSHIP_TAG=$(curl -sL https://api.github.com/repos/starship/starship/releases/latest | jq -r ".tag_name") &&DL_URL=$(echo "https://github.com/starship/starship/releases/download/${STARSHIP_TAG}/starship-x86_64-unknown-linux-gnu.tar.gz") && curl -L -o starship-x86_64-unknown-linux-gnu.tar.gz ${DL_URL} && tar xvfz starship-x86_64-unknown-linux-gnu.tar.gz && rm -f starship-x86_64-unknown-linux-gnu.tar.gz && sudo install starship /usr/local/bin && cd $HOME/.config && curl -L -o starship.toml https://raw.githubusercontent.com/bashfulrobot/desktoperator/main/files/home/.config/starship.toml
@@ -19,7 +20,6 @@ curl -fsSL https://raw.githubusercontent.com/zimfw/install/master/install.zsh | 
 # curl -L -o zimfw.zsh https://raw.githubusercontent.com/bashfulrobot/desktoperator/main/files/home/.zim/zimfw.zsh
 
 # add core zsh funcitons
-mkdir -p $HOME/.config/zsh
 cd $HOME/.config/zsh
 curl -L -o do-update https://raw.githubusercontent.com/bashfulrobot/desktoperator/main/files/home/.config/zsh/do-update
 curl -L -o runAptUpdateIfNeeded https://raw.githubusercontent.com/bashfulrobot/desktoperator/main/files/home/.config/zsh/runAptUpdateIfNeeded
