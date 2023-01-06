@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 sudo apt update
-sudo apt install curl git fonts-powerline powerline direnv zoxide bat jq exa fd-find zsh neovim -y
+sudo apt install curl git fonts-powerline powerline jq zsh neovim -y
 mkdir -p $HOME/.config/zsh
 mkdir -p $HOME/.zim
 chsh --shell /usr/bin/zsh $USER
