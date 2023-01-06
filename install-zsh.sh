@@ -4,7 +4,7 @@ sudo apt update
 sudo apt install curl git fonts-powerline powerline jq zsh neovim -y
 mkdir -p $HOME/.config/zsh
 mkdir -p $HOME/.zim
-chsh --shell /usr/bin/zsh $USER
+sudo chsh --shell /usr/bin/zsh $USER
 STARSHIP_TAG=$(curl -sL https://api.github.com/repos/starship/starship/releases/latest | jq -r ".tag_name")
 DL_URL=$(echo "https://github.com/starship/starship/releases/download/${STARSHIP_TAG}/starship-x86_64-unknown-linux-gnu.tar.gz")
 curl -L -o starship-x86_64-unknown-linux-gnu.tar.gz ${DL_URL}
