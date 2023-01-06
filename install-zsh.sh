@@ -20,6 +20,11 @@ cd $HOME/.zim
 curl -L -o .latest_version https://raw.githubusercontent.com/bashfulrobot/desktoperator/main/files/home/.zim/.latest_version
 curl -L -o init.zsh https://raw.githubusercontent.com/bashfulrobot/desktoperator/main/files/home/.zim/init.zsh
 curl -L -o zimfw.zsh https://raw.githubusercontent.com/bashfulrobot/desktoperator/main/files/home/.zim/zimfw.zsh
+cd $HOME/.config/zsh
+curl -L -o do-update https://raw.githubusercontent.com/bashfulrobot/desktoperator/main/files/home/.config/zsh/do-update
+curl -L -o runAptUpdateIfNeeded https://raw.githubusercontent.com/bashfulrobot/desktoperator/main/files/home/.config/zsh/runAptUpdateIfNeeded
+curl -L -o echoHeader https://raw.githubusercontent.com/bashfulrobot/desktoperator/main/files/home/.config/zsh/echoHeader
+curl -L -o echoSection https://raw.githubusercontent.com/bashfulrobot/desktoperator/main/files/home/.config/zsh/echoSection
 sudo ln -s /usr/bin/batcat /usr/bin/bat
 echo "---- after restarting your shell, please run: zimfw install && zimfw upgrade"
 exit 0
