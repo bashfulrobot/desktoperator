@@ -2,5 +2,5 @@
 - import_tasks: ../tasks/dev/editor.yaml
 - import_tasks: ../tasks/dev/git-config.yaml
 - import_tasks: ../tasks/dev/go.yaml
-- import_tasks: ../tasks/dev/hugo.yaml
+# - import_tasks: ../tasks/dev/hugo.yaml
 - import_tasks: ../tasks/dev/shfmt.yaml
