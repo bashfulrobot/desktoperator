@@ -304,8 +304,11 @@ zmodule joke/zim-k9s
 
 zmodule joke/zim-kubectl
 
+# powerlevel10k
+zmodule romkatv/powerlevel10k --use degit
+
 # starship
 
-zmodule joke/zim-starship
+# zmodule joke/zim-starship
 
 # }}} End configuration added by Zim install
