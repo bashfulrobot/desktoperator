@@ -1,3 +1,10 @@
+# Enable Powerlevel10k instant prompt. Should stay close to the top of ~/.zshrc.
+# Initialization code that may require console input (password prompts, [y/n]
+# confirmations, etc.) must go above this block; everything else may go below.
+if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]; then
+  source "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh"
+fi
+
 # Start configuration added by Zim install {{{
 #
 # User configuration sourced by interactive shells
@@ -136,10 +143,21 @@ fpath=( $HOME/.config/zsh "${fpath[@]}" )
 autoload -Uz $fpath[1]/*(.:t)
 
 # Enable starship prompt
-eval "$(starship init zsh)"
+# eval "$(starship init zsh)"
 
 # Enable zioxide (z functionality)
 eval "$(zoxide init zsh)"
+
+# Add auto complete for kcli
+# eval "$(register-python-argcomplete kcli)"
+alias kcli='noglob kcli'
+alias kc='noglob kcli'
+
+# Add auto complet app COD
+source <(cod init $$ zsh)
+
+# To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
+[[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
 
 # Enable Krew
 export PATH="${PATH}:${HOME}/.krew/bin"

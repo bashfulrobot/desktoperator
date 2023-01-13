@@ -65,6 +65,7 @@ run-sd-laptop: ## run all ansible tasks
 run-sd-laptop-min: ## run all ansible tasks
 	@echo "${BLUE}running all ansible tasks${RESET}"
 	@git pull
+	# @sudo rm /etc/apt/sources.list.d/downloads_1password_com_linux_debian_amd64.list #hack
 	@ansible-playbook --ask-become-pass --ask-vault-pass --connection=local "${SD-LAPTOP-PLAYBOOK-MIN}"
 run-test-playbook: ## run all ansible tasks
 	@echo "${BLUE}running all ansible tasks${RESET}"
