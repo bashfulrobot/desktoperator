@@ -147,6 +147,9 @@ eval "$(starship init zsh)"
 eval "$(zoxide init zsh)"
 
 # Add auto complete for kcli
-eval "$(register-python-argcomplete kcli)"
+# eval "$(register-python-argcomplete kcli)"
 alias kcli='noglob kcli'
+alias kc='noglob kcli'
 
+# Add auto complet app COD
+source <(cod init $$ zsh)
