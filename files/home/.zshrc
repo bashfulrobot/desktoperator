@@ -127,11 +127,6 @@ for key ('k') bindkey -M vicmd ${key} history-substring-search-up
 for key ('j') bindkey -M vicmd ${key} history-substring-search-down
 unset key
 
-### DK
-######=== Autoload functions.
-fpath=( $HOME/.config/zsh "${fpath[@]}" )
-autoload -Uz $fpath[1]/*(.:t)
-eval "$(starship init zsh)"
 
 # }}} End configuration added by Zim install
 
@@ -145,3 +140,6 @@ eval "$(starship init zsh)"
 
 # Enable zioxide (z functionality)
 eval "$(zoxide init zsh)"
+
+# Enable Krew
+export PATH="${PATH}:${HOME}/.krew/bin"
