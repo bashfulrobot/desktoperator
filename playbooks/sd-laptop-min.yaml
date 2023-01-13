@@ -24,7 +24,7 @@
     - import_tasks: ../tasks/desktop/software/ncspot.yaml
     - import_tasks: ../tasks/desktop/software/slack.yaml
     - import_tasks: ../tasks/desktop/software/tailscale.yaml
-    - import_tasks: ../tasks/desktop/software/kitty.yaml
+    # - import_tasks: ../tasks/desktop/software/kitty.yaml
     - import_tasks: ../tasks/desktop/software/flameshot.yaml
     - import_tasks: ../tasks/desktop/software/zoom.yaml
     - import_tasks: ../tasks/desktop/software/espanso.yaml
@@ -34,6 +34,6 @@
     - import_tasks: ../tasks/cloud/kubectl-gcp.yaml
     - import_tasks: ../tasks/cloud/helm.yaml
     - import_tasks: ../tasks/cloud/terraform.yaml
-    - import_tasks: ../tasks/desktop/popos-min.yaml
+    - import_tasks: ../tasks/desktop/popos.yaml
     - import_tasks: ../tasks/dev/go.yaml
     - import_tasks: ../tasks/final-message.yaml
