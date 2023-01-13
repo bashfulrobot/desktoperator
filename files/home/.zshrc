@@ -145,3 +145,8 @@ eval "$(starship init zsh)"
 
 # Enable zioxide (z functionality)
 eval "$(zoxide init zsh)"
+
+# Add auto complete for kcli
+eval "$(register-python-argcomplete kcli)"
+alias kcli='noglob kcli'
+
