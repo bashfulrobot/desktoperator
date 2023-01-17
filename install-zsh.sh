@@ -29,6 +29,7 @@ curl -L -o echoSection https://raw.githubusercontent.com/bashfulrobot/desktopera
 # Add Prompt config
 cd $HOME/
 curl -Lo .p10k.zsh https://raw.githubusercontent.com/bashfulrobot/desktoperator/main/files/home/.p10k.zsh
+curl -Lo .tmux.conf https://raw.githubusercontent.com/bashfulrobot/desktoperator/main/files/home/.tmux.conf
 cd $HOME/.config/zsh
 
 # sudo ln -s /usr/bin/batcat /usr/bin/bat
