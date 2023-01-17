@@ -31,3 +31,5 @@ curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o /etc/
 mkdir -p /etc/containerd && containerd config default>/etc/containerd/config.toml && exit
 systemctl restart containerd && systemctl enable containerd
 systemctl enable kubelet && systemctl start kubelet
+
+[ -f /var/run/reboot-required ] && sudo reboot -f
