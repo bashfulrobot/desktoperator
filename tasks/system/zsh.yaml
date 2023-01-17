@@ -62,6 +62,15 @@
     owner: "{{ SYSTEM_USER }}"
     group: "{{ SYSTEM_USER }}"
 
+- name: system/zsh - placing .tmux.conf
+  copy:
+    src: ../files/home/.tmux.conf
+    dest: "{{SYSTEM_HOME }}/.tmux.conf"
+    owner: "{{ SYSTEM_USER }}"
+    group: "{{ SYSTEM_USER }}"
+
+
+
 - name: system/zsh - placing .zimrc
   copy:
     src: ../files/home/.zimrc
