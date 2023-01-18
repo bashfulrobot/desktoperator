@@ -13,4 +13,5 @@
 - import_tasks: ../tasks/desktop/software/tailscale.yaml
 - import_tasks: ../tasks/desktop/software/zoom.yaml
 - import_tasks: ../tasks/desktop/software/bottom.yaml
+- import_tasks: ../tasks/desktop/software/tilix.yaml
 # - import_tasks: ../tasks/desktop/software/kitty.yaml
