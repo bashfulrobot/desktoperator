@@ -57,7 +57,7 @@ requirements-only: ## install ansible requirements
 run-desktop: ## run all ansible tasks
 	@echo "${BLUE}running all ansible tasks${RESET}"
 	@git pull
-	@ansible-playbook "${TOWER-PLAYBOOK}" --vault-password-file ./vaultpass.sh --connection=local
+	@ansible-playbook "${TOWER-PLAYBOOK}" --ask-become-pass --ask-vault-pass --connection=local
 run-sd-laptop: ## run all ansible tasks
 	@echo "${BLUE}running all ansible tasks${RESET}"
 	@git pull
