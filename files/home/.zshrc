@@ -161,3 +161,7 @@ source <(cod init $$ zsh)
 
 # Enable Krew
 export PATH="${PATH}:${HOME}/.krew/bin"
+
+# zsh-hook for kube cluster folder
+
+add-zsh-hook precmd set-kubeconfig
