@@ -1,0 +1,39 @@
+- name: desktop/software/wezterm - get latest release version of wezterm from github
+  github_release:
+    user: wez
+    repo: wezterm
+    action: latest_release
+  register: wezterm_release
+
+- name: desktop/software/wezterm - download & install wezterm deb
+  become: yes
+  ansible.builtin.apt:
+    deb: "https://github.com/wez/wezterm/releases/download/{{ wezterm_release.tag }}/wezterm-{{ wezterm_release.tag }}-Debian10.deb"
+    state: present
+
+- name: desktop/software/wezterm - create wezterm config directory
+  ansible.builtin.file:
+    path: "{{ SYSTEM_HOME }}/.config/wezterm"
+    state: directory
+- name: desktop/software/wezterm - create wezterm color config directory
+  ansible.builtin.file:
+    path: "{{ SYSTEM_HOME }}/.config/wezterm/colors"
+    state: directory
+- name: desktop/software/wezterm - placing wezterm dracula config
+  copy:
+    src: ../files/home/.config/wezterm/colors/dracula.toml
+    dest: "{{ SYSTEM_HOME }}/.config/wezterm/colors/dracula.toml"
+    owner: "{{ SYSTEM_USER }}"
+    group: "{{ SYSTEM_USER }}"
+- name: desktop/software/wezterm - placing wezterm config
+  copy:
+    src: ../files/home/.wezterm.lua
+    dest: "{{ SYSTEM_HOME }}/.wezterm.lua"
+    owner: "{{ SYSTEM_USER }}"
+    group: "{{ SYSTEM_USER }}"
+
+- name: desktop/software/wezterm - set wezterm as the default terminal
+  become: yes
+  community.general.alternatives:
+    name: x-terminal-emulator
+    path: /usr/bin/wezterm
