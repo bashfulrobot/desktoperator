@@ -1,15 +1,22 @@
 ---
 # tasks file for docker
-- name: cloud/docker - add docker's public pgp key to the apt keyring
-  become: yes
-  ansible.builtin.apt_key:
-    id: "9DC858229FC7DD38854AE2D88D81803C0EBFCD88"
-    url: "https://download.docker.com/linux/ubuntu/gpg"
+# - name: cloud/docker - add docker's public pgp key to the apt keyring
+#   become: yes
+#   ansible.builtin.apt_key:
+#     id: "9DC858229FC7DD38854AE2D88D81803C0EBFCD88"
+#     url: "https://download.docker.com/linux/ubuntu/gpg"
 
+- name: cloud/docker - download docker gpg key file
+  become: yes
+  get_url:
+    url: https://download.docker.com/linux/ubuntu/gpg
+    dest: /etc/apt/trusted.gpg.d/docker_gpg.asc
+    mode: '0644'
+    force: true
 - name: cloud/docker - add docker's stable apt repository
   become: yes
   ansible.builtin.apt_repository:
-    repo: "deb [arch=amd64] https://download.docker.com/linux/ubuntu {{ ansible_distribution_release }} stable"
+    repo: "deb [arch=amd64 signed-by=/etc/apt/trusted.gpg.d/docker_gpg.asc] https://download.docker.com/linux/ubuntu {{ ansible_distribution_release }} stable"
     state: present
     filename: docker
     update_cache: true
@@ -18,7 +25,7 @@
 - name: cloud/docker - add docker's stable apt repository for {{ DOCKER_UBUNTU_VERSION }}
   become: yes
   ansible.builtin.apt_repository:
-    repo: "deb [arch=amd64] https://download.docker.com/linux/ubuntu {{ DOCKER_UBUNTU_VERSION }} stable"
+    repo: "deb [arch=amd64 docker_gpg] https://download.docker.com/linux/ubuntu {{ DOCKER_UBUNTU_VERSION }} stable"
     state: present
     filename: docker
     update_cache: true
