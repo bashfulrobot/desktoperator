@@ -1,22 +1,10 @@
 ---
-# - name: desktop/software/slack - set apt gpg key
-#   become: yes
-#   ansible.builtin.apt_key:
-#     url: "https://packagecloud.io/slacktechnologies/slack/gpgkey"
-#     state: present
-
 - name: desktop/software/slack - download slack gpg key file
   get_url:
     url: https://packagecloud.io/slacktechnologies/slack/gpgkey
-    dest: /path/to/slack_gpg.key
-
-- name: desktop/software/slack - import slack gpg key
-  gpg:
-    state: present
-    name: slack
-    key_file: /path/to/slack_gpg.key
-    keyring: /usr/share/keyrings/trusted.gpg.d/slack-keyring.gpg
-    options: --no-default-keyring
+    dest: /etc/apt/trusted.gpg.d/slack_gpg.gpg
+    mode: '0644'
+    force: true
 
 - name: desktop/software/slack - add repository
   become: yes
