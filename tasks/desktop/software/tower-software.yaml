@@ -15,6 +15,7 @@
     pkg:
       - gimp
       - gimp-plugin-registry
+      - nala
     state: present
 
 # - name: desktop/software/common-software - install pip packages
