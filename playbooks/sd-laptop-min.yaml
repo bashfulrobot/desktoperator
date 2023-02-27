@@ -17,7 +17,7 @@
   tasks:
     - import_tasks: ../tasks/dependencies.yaml
     - import_tasks: ../tasks/system/zsh.yaml
-    - import_tasks: ../tasks/desktop/software/tilix.yaml
+    # - import_tasks: ../tasks/desktop/software/tilix.yaml
     - import_tasks: ../tasks/desktop/software/espanso.yaml
     - import_tasks: ../tasks/desktop/software/1password.yaml
     - import_tasks: ../tasks/desktop/software/chrome-browser.yaml
@@ -25,7 +25,7 @@
     - import_tasks: ../tasks/desktop/software/ncspot.yaml
     - import_tasks: ../tasks/desktop/software/slack.yaml
     - import_tasks: ../tasks/desktop/software/tailscale.yaml
-    # - import_tasks: ../tasks/desktop/software/kitty.yaml
+    - import_tasks: ../tasks/desktop/software/wezterm.yaml
     - import_tasks: ../tasks/desktop/software/flameshot.yaml
     - import_tasks: ../tasks/desktop/software/zoom.yaml
     - import_tasks: ../tasks/desktop/software/espanso.yaml
