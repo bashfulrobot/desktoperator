@@ -1,5 +1,6 @@
 ---
 - name: desktop/software/slack - download slack gpg key file
+  become: yes
   get_url:
     url: https://packagecloud.io/slacktechnologies/slack/gpgkey
     dest: /etc/apt/trusted.gpg.d/slack_gpg.gpg
