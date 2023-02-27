@@ -8,7 +8,7 @@
 - name: desktop/software/wezterm - download & install wezterm deb
   become: yes
   ansible.builtin.apt:
-    deb: "https://github.com/wez/wezterm/releases/download/{{ wezterm_release.tag }}/wezterm-{{ wezterm_release.tag }}-Debian10.deb"
+    deb: "https://github.com/wez/wezterm/releases/download/{{ wezterm_release.tag }}/wezterm-{{ wezterm_release.tag }}.Ubuntu22.04.deb"
     state: present
 
 - name: desktop/software/wezterm - create wezterm config directory
