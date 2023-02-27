@@ -3,10 +3,18 @@
   ansible.builtin.apt_key:
     url: "https://packages.element.io/debian/element-io-archive-keyring.gpg"
 
+- name: desktop/software/element - add element's public pgp key to the apt keyring
+  become: yes
+  get_url:
+    url: https://packages.element.io/debian/element-io-archive-keyring.gpg
+    dest: /etc/apt/trusted.gpg.d/element-io-archive-keyring.gpg
+    mode: '0644'
+    force: true
+
 - name: desktop/software/element - add element's stable apt repository
   become: yes
   ansible.builtin.apt_repository:
-    repo: "deb https://packages.element.io/debian/ default main"
+    repo: "deb [arch=amd64 signed-by=/etc/apt/trusted.gpg.d/element-io-archive-keyring.gpg] https://packages.element.io/debian/ default main"
     state: present
     filename: element-io
     update_cache: true

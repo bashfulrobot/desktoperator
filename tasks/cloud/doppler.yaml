@@ -1,13 +1,15 @@
-- name: cloud/doppler - add signing keys
+- name: cloud/doppler - download doppler gpg key file
   become: yes
-  ansible.builtin.apt_key:
+  get_url:
     url: https://packages.doppler.com/public/cli/gpg.DE2A7741A397C129.key
-    state: present
+    dest: /etc/apt/trusted.gpg.d/doppler_gpg.gpg
+    mode: '0644'
+    force: true
 
 - name: cloud/doppler - add  apt repository
   become: yes
   ansible.builtin.apt_repository:
-    repo: "deb https://packages.doppler.com/public/cli/deb/debian any-version main"
+    repo: "deb [signed-by=/etc/apt/trusted.gpg.d/doppler_gpg.gpg] https://packages.doppler.com/public/cli/deb/debian any-version main"
     state: present
     filename: doppler
     update_cache: true
