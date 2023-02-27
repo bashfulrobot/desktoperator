@@ -37,7 +37,6 @@ POUND = \#
 .DEFAULT_GOAL := help
 
 TOWER-PLAYBOOK = playbooks/tower.yaml
-SD-LAPTOP-PLAYBOOK = playbooks/sd-laptop.yaml
 SD-LAPTOP-PLAYBOOK-MIN = playbooks/sd-laptop-min.yaml
 BOOTSTRAP = playbooks/bootstrap.yaml
 TEST-PLAYBOOK = playbooks/test.yaml
@@ -57,11 +56,7 @@ requirements-only: ## install ansible requirements
 run-desktop: ## run all ansible tasks
 	@echo "${BLUE}running all ansible tasks${RESET}"
 	@git pull
-	@ansible-playbook "${TOWER-PLAYBOOK}" --ask-become-pass --ask-vault-pass --connection=local
-run-sd-laptop: ## run all ansible tasks
-	@echo "${BLUE}running all ansible tasks${RESET}"
-	@git pull
-	@ansible-playbook --ask-become-pass --ask-vault-pass --connection=local "${SD-LAPTOP-PLAYBOOK}"
+	@ansible-playbook -vv "${TOWER-PLAYBOOK}" --ask-become-pass --ask-vault-pass --connection=local
 run-sd-laptop-min: ## run all ansible tasks
 	@echo "${BLUE}running all ansible tasks${RESET}"
 	@git pull
