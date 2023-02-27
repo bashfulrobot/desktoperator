@@ -4,27 +4,27 @@
     repo: espanso
     action: latest_release
     token: "{{ GITHUB_TOKEN }}"
-  register: cod_release
+  register: espanso_release
 
 # Had to see the format returned.
 # JSON
-# - debug: msg="{{ cod_release.tag }}"
-- name: desktop/software/espanso - placing libssl deb
-  copy:
-    src: ../files/deb/libssl1.1_1.1.1n-0+deb11u1_amd64.deb
-    dest: "/tmp/libssl1.1_1.1.1n-0+deb11u1_amd64.deb"
-    owner: "{{ lookup('env','USER') }}"
-    group: "{{ lookup('env','USER') }}"
+# - debug: msg="{{ espanso_release.tag }}"
+# - name: desktop/software/espanso - placing libssl deb
+#   copy:
+#     src: ../files/deb/libssl1.1_1.1.1n-0+deb11u1_amd64.deb
+#     dest: "/tmp/libssl1.1_1.1.1n-0+deb11u1_amd64.deb"
+#     owner: "{{ lookup('env','USER') }}"
+#     group: "{{ lookup('env','USER') }}"
 
-- name: desktop/software/espanso - install libssl deb
-  become: yes
-  apt:
-    deb: "/tmp/libssl1.1_1.1.1n-0+deb11u1_amd64.deb"
+# - name: desktop/software/espanso - install libssl deb
+#   become: yes
+#   apt:
+#     deb: "/tmp/libssl1.1_1.1.1n-0+deb11u1_amd64.deb"
 
 - name: desktop/software/espanso - install deb
   become: yes
   apt:
-    deb: "https://github.com/federico-terzi/espanso/releases/download/{{ cod_release.tag }}/espanso-debian-x11-amd64.deb"
+    deb: "https://github.com/federico-terzi/espanso/releases/download/{{ espanso_release.tag }}/espanso-debian-x11-amd64.deb"
 
 - name: desktop/software/espanso - create espanso cfg folder
   file:
