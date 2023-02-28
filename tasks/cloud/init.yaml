@@ -1,6 +1,6 @@
 - import_tasks: ../tasks/cloud/helm.yaml
 - import_tasks: ../tasks/cloud/kubectl-gcp.yaml
-- import_tasks: ../tasks/cloud/monokle.yaml
+  #- import_tasks: ../tasks/cloud/monokle.yaml
 - import_tasks: ../tasks/cloud/terraform.yaml
 - import_tasks: ../tasks/cloud/docker.yaml
 - import_tasks: ../tasks/cloud/doppler.yaml

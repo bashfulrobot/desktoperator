@@ -2,14 +2,14 @@
   become: yes
   get_url:
     url: https://packages.doppler.com/public/cli/gpg.DE2A7741A397C129.key
-    dest: /etc/apt/trusted.gpg.d/doppler_gpg.gpg
+    dest: /etc/apt/trusted.gpg.d/doppler_gpg.asc
     mode: '0644'
     force: true
 
 - name: cloud/doppler - add  apt repository
   become: yes
   ansible.builtin.apt_repository:
-    repo: "deb [signed-by=/etc/apt/trusted.gpg.d/doppler_gpg.gpg] https://packages.doppler.com/public/cli/deb/debian any-version main"
+    repo: "deb [signed-by=/etc/apt/trusted.gpg.d/doppler_gpg.asc] https://packages.doppler.com/public/cli/deb/debian any-version main"
     state: present
     filename: doppler
     update_cache: true
