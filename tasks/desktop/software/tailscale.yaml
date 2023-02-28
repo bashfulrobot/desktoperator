@@ -2,21 +2,21 @@
   become: yes
   get_url:
     url: https://pkgs.tailscale.com/stable/ubuntu/focal.gpg
-    dest: /etc/apt/trusted.gpg.d/tailscale.gpg
+    dest: /etc/apt/trusted.gpg.d/tailscale.asc
     mode: '0644'
     force: true
 
 - name: desktop/software/tailscale - add tailiscale stable repository for previous release
   become: yes
   ansible.builtin.apt_repository:
-    repo: "deb [arch=amd64 signed-by=/etc/apt/trusted.gpg.d/tailscale.gpg] https://pkgs.tailscale.com/stable/ubuntu {{ TAILSCALE_UBUNTU_VERSION }} main"
+    repo: "deb [arch=amd64 signed-by=/etc/apt/trusted.gpg.d/tailscale.asc] https://pkgs.tailscale.com/stable/ubuntu {{ TAILSCALE_UBUNTU_VERSION }} main"
     update_cache: true
   when: TAILSCALE_UBUNTU_VERSION is defined
 
 - name: desktop/software/tailscale - add tailiscale stable repository for the latest release
   become: yes
   ansible.builtin.apt_repository:
-    repo: "deb [arch=amd64 signed-by=/etc/apt/trusted.gpg.d/tailscale.gpg] https://pkgs.tailscale.com/stable/ubuntu {{ ansible_distribution_release }} main"
+    repo: "deb [arch=amd64 signed-by=/etc/apt/trusted.gpg.d/tailscale.asc] https://pkgs.tailscale.com/stable/ubuntu {{ ansible_distribution_release }} main"
     state: present
     filename: tailscale
     update_cache: true
