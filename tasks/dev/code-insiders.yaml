@@ -32,7 +32,8 @@
   ansible.builtin.apt:
     pkg:
       - apt-transport-https
-      - code-insiders
+      - code
+      #- code-insiders
     state: present
 
 - name: dev/code-insiders - install vscode dracula theme locally
@@ -62,11 +63,11 @@
     url: https://raw.githubusercontent.com/harry-cpp/code-nautilus/master/code-nautilus.py
     dest: "{{ SYSTEM_HOME }}/.local/share/nautilus-python/extensions/code-nautilus.py"
 
-- name: dev/code-insiders - create code-insiders to code symbolic link
-  become: yes
-  ansible.builtin.file:
-    src: /usr/bin/code-insiders
-    dest: /usr/bin/code
-    owner: root
-    group: root
-    state: link
+#- name: dev/code-insiders - create code-insiders to code symbolic link
+#  become: yes
+#  ansible.builtin.file:
+#    src: /usr/bin/code-insiders
+#    dest: /usr/bin/code
+#    owner: root
+#    group: root
+#    state: link
