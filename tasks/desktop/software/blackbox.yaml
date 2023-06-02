@@ -1,0 +1,22 @@
+- name: desktop/software/blackbox - placing blackbox launcher
+  become: yes
+  copy:
+    src: ../files/usr/local/bin/blackbox
+    dest: "/usr/local/bin/blackbox"
+    owner: "root"
+    group: "root"
+    mode: 0755
+
+- name: desktop/software/blackbox - add blackbox to alternatives
+  become: yes
+  community.general.alternatives:
+    name: x-terminal-emulator
+    path: /usr/local/bin/blackbox
+    link: /usr/bin/x-terminal-emulator
+    priority: "10"
+
+- name: desktop/software/blackbox - set blackbox as the default terminal
+  become: yes
+  community.general.alternatives:
+    name: x-terminal-emulator
+    path: /usr/local/bin/blackbox

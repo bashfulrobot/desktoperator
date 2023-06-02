@@ -15,4 +15,4 @@
 - import_tasks: ../tasks/desktop/software/bottom.yaml
 #- import_tasks: ../tasks/desktop/software/tilix.yaml
 - import_tasks: ../tasks/desktop/software/sd.yaml
-# - import_tasks: ../tasks/desktop/software/contour.yaml
+- import_tasks: ../tasks/desktop/software/blackbox.yaml
