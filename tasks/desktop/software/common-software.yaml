@@ -5,6 +5,7 @@
       - com.todoist.Todoist
       - org.telegram.desktop
       - com.obsproject.Studio
+      - com.raggesilver.BlackBox
     state: present
     method: user
     remote: flathub
@@ -67,7 +68,6 @@
     mode: "0700"
     owner: "{{ SYSTEM_USER }}"
     group: "{{ SYSTEM_USER }}"
-
 # - name: desktop/software/common-software - adding todoist
 #   copy:
 #     src: ../files/home/Applications/Todoist.AppImage
