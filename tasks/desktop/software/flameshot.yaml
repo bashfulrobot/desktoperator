@@ -9,45 +9,45 @@
   become: yes
   become_user: "{{ SYSTEM_USER }}"
   dconf:
-      key: "/org/gnome/gnome-flashback/screenshot"
-      value: "false"
-      state: present
+    key: "/org/gnome/gnome-flashback/screenshot"
+    value: "false"
+    state: present
 
 - name: desktop/software/screenshot - disable old screenshot shortcut
   become: yes
   become_user: "{{ SYSTEM_USER }}"
   dconf:
-      key: "/org/gnome/settings-daemon/plugins/media-keys/screenshot"
-      # value: "['<Primary><Alt><Super>Calculator']"
-      value: "['']"
-      state: present
+    key: "/org/gnome/settings-daemon/plugins/media-keys/screenshot"
+    # value: "['<Primary><Alt><Super>Calculator']"
+    value: "['']"
+    state: present
 
 # Next four are all needed to create the custom shortcut
 - name: desktop/software/screenshot - set custom print binding
   become: yes
   become_user: "{{ SYSTEM_USER }}"
   dconf:
-      key: "/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0/binding"
-      value: "'Print'"
-      state: present
+    key: "/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0/binding"
+    value: "'<Shift><Super>s'"
+    state: present
 - name: desktop/software/screenshot - set print binding to flameshot command
   become: yes
   become_user: "{{ SYSTEM_USER }}"
   dconf:
-      key: "/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0/command"
-      value: "'flameshot gui'"
-      state: present
+    key: "/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0/command"
+    value: "'flameshot gui'"
+    state: present
 - name: desktop/software/screenshot - set flameshot shortcut name
   become: yes
   become_user: "{{ SYSTEM_USER }}"
   dconf:
-      key: "/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0/name"
-      value: "'Flameshot'"
-      state: present
+    key: "/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0/name"
+    value: "'Flameshot'"
+    state: present
 - name: desktop/software/screenshot - set flameshot shortcut custom binding
   become: yes
   become_user: "{{ SYSTEM_USER }}"
   dconf:
-      key: "/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings"
-      value: "['/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0/']"
-      state: present
+    key: "/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings"
+    value: "['/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0/']"
+    state: present

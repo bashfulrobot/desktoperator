@@ -3,7 +3,7 @@
 - import_tasks: ../tasks/desktop/software/common-software.yaml
 - import_tasks: ../tasks/desktop/software/chrome-browser.yaml
 # - import_tasks: ../tasks/desktop/software/element.yaml
-  # replace with fluffy chat
+# replace with fluffy chat
 - import_tasks: ../tasks/desktop/software/espanso.yaml
 - import_tasks: ../tasks/desktop/software/flameshot.yaml
 - import_tasks: ../tasks/desktop/software/insynchq.yaml
@@ -15,4 +15,4 @@
 - import_tasks: ../tasks/desktop/software/bottom.yaml
 #- import_tasks: ../tasks/desktop/software/tilix.yaml
 - import_tasks: ../tasks/desktop/software/sd.yaml
-#- import_tasks: ../tasks/desktop/software/wezterm.yaml
+# - import_tasks: ../tasks/desktop/software/contour.yaml
