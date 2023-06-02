@@ -40,8 +40,3 @@
 #     dest: "{{ SYSTEM_HOME }}/.contour.lua"
 #     owner: "{{ SYSTEM_USER }}"
 #     group: "{{ SYSTEM_USER }}"
-# - name: desktop/software/contour - set contour as the default terminal
-#   become: yes
-#   community.general.alternatives:
-#     name: x-terminal-emulator
-#     path: /usr/bin/contour
