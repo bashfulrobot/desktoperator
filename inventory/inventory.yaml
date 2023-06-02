@@ -1,6 +1,0 @@
-all:
-  hosts:
-  children:
-    ubuntu-zsh:
-      hosts:
-        192.168.169.19:
