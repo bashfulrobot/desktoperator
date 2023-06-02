@@ -1,5 +1,5 @@
 - import_tasks: ../tasks/desktop/software/1password.yaml
-- import_tasks: ../tasks/desktop/software/cod.yaml
+#- import_tasks: ../tasks/desktop/software/cod.yaml
 - import_tasks: ../tasks/desktop/software/common-software.yaml
 - import_tasks: ../tasks/desktop/software/chrome-browser.yaml
 # - import_tasks: ../tasks/desktop/software/element.yaml
@@ -11,8 +11,8 @@
 - import_tasks: ../tasks/desktop/software/nord-vpn.yaml
 - import_tasks: ../tasks/desktop/software/slack.yaml
 - import_tasks: ../tasks/desktop/software/tailscale.yaml
-- import_tasks: ../tasks/desktop/software/zoom.yaml
+#- import_tasks: ../tasks/desktop/software/zoom.yaml
 - import_tasks: ../tasks/desktop/software/bottom.yaml
-- import_tasks: ../tasks/desktop/software/tilix.yaml
+#- import_tasks: ../tasks/desktop/software/tilix.yaml
 - import_tasks: ../tasks/desktop/software/sd.yaml
-- import_tasks: ../tasks/desktop/software/wezterm.yaml
+#- import_tasks: ../tasks/desktop/software/wezterm.yaml

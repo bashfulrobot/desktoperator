@@ -1,0 +1,8 @@
+## regolith cfg
+REGOLITH_LOOK: "dracula"
+GAPS_INNER_SIZE: 15
+WALLPAPER_PATH: "/home/dustin/Pictures/Wallpapers/_dustin-wallpaper.png"
+# HIDE_BAR: true
+# BAR_POSITION: top
+BAR_FONT_SIZE: 20
+GNOME_TERMINAL_FONT_SIZE: 18

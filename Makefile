@@ -36,7 +36,7 @@ POUND = \#
 
 .DEFAULT_GOAL := help
 
-TOWER-PLAYBOOK = playbooks/tower.yaml
+TOWER-PLAYBOOK = playbooks/poptop.yaml
 SD-LAPTOP-PLAYBOOK-MIN = playbooks/sd-laptop-min.yaml
 BOOTSTRAP = playbooks/bootstrap.yaml
 TEST-PLAYBOOK = playbooks/test.yaml

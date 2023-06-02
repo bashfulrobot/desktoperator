@@ -1,0 +1,1 @@
+BACKUP_SCRIPT: "/home/{{ SYSTEM_USER }}/Insync/dustin@bashfulrobot.com/Google\\ Drive/restic/tower/; bash doppler-restic-r2-tower.sh"
