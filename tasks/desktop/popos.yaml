@@ -62,7 +62,6 @@
     value: "'dracula'"
     state: present
 
-
 # Create new profile
 
 - name: desktop/popos - create terminal - profile name
@@ -175,6 +174,26 @@
   dconf:
     key: "/org/gnome/desktop/peripherals/keyboard/numlock-state"
     value: "true"
+
+- name: desktop/popos - gnome - disable hidpi daemon
+  dconf:
+    key: "/com/system76/hidpi/enable"
+    value: "false"
+
+- name: desktop/popos - gnome - disable hidpi daemon mode
+  dconf:
+    key: "/com/system76/hidpi/mode"
+    value: "'lodpi'"
+
+- name: desktop/popos - gnome - locate pointer
+  dconf:
+    key: "/org/gnome/desktop/interface/locate-pointer"
+    value: "true"
+
+- name: desktop/popos - gnome - remove minimize button
+  dconf:
+    key: "/org/gnome/desktop/wm/preferences/button-layout"
+    value: "'appmenu:'"
 
 - name: Opening gnome extention page to enable user-themes
   ansible.builtin.command: xdg-open https://extensions.gnome.org/extension/19/user-themes/
