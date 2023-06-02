@@ -14,14 +14,14 @@
   become: yes
   get_url:
     url: https://packages.cloud.google.com/apt/doc/apt-key.gpg
-    dest: /etc/apt/trusted.gpg.d/google_cloud.gpg
-    mode: '0644'
+    dest: /etc/apt/trusted.gpg.d/google_cloud.asc
+    mode: "0644"
     force: true
 
 - name: cloud/kubectl-gcp - add google-cloud-sdk main repository
   become: yes
   ansible.builtin.apt_repository:
-    repo: "deb [arch=amd64 signed-by=/etc/apt/trusted.gpg.d/google_cloud.gpg] https://packages.cloud.google.com/apt cloud-sdk main"
+    repo: "deb [arch=amd64 signed-by=/etc/apt/trusted.gpg.d/google_cloud.asc] https://packages.cloud.google.com/apt cloud-sdk main"
     state: present
     filename: google-cloud-sdk
     update_cache: true
