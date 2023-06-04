@@ -1,20 +1,24 @@
 ---
-- name: desktop/software/1password - add the key for the apt repository
-  become: yes
+- name: Add the key for the apt repository - pkgs/1password/ini.yaml
+  become: true
   ansible.builtin.apt_key:
     url: "https://downloads.1password.com/linux/keys/1password.asc"
     keyring: "/usr/share/keyrings/1password-archive-keyring.gpg"
     state: present
+  tags:
+    - init
 
-- name: desktop/software/1password - add repository
-  become: yes
+- name: Add repository - pkgs/1password/ini.yaml
+  become: true
   ansible.builtin.apt_repository:
     repo: deb [arch=amd64 signed-by=/usr/share/keyrings/1password-archive-keyring.gpg] https://downloads.1password.com/linux/debian/amd64 stable main
     state: present
-    update_cache: yes
+    update_cache: true
+  tags:
+    - init
 
 - name: desktop/software/1password - create the debsig-verify policy folders
-  become: yes
+  become: true
   file:
     path: "{{ item }}"
     state: directory
@@ -24,30 +28,38 @@
   with_items:
     - "/etc/debsig/policies/AC2D62742012EA22/"
     - "/usr/share/debsig/keyrings/AC2D62742012EA22"
+  tags:
+    - init
 
 - name: desktop/software/1password - add the debsig-verify policy
-  become: yes
+  become: true
   get_url:
     url: https://downloads.1password.com/linux/debian/debsig/1password.pol
     dest: /etc/debsig/policies/AC2D62742012EA22/1password.pol
     mode: "0600"
+  tags:
+    - init
 
 - name: desktop/software/1password - add the key for the debsig-verify policy
-  become: yes
+  become: true
   ansible.builtin.apt_key:
     url: "https://downloads.1password.com/linux/keys/1password.asc"
     keyring: "/usr/share/debsig/keyrings/AC2D62742012EA22/debsig.gpg"
     state: present
+  tags:
+    - init
 
 - name: desktop/software/1password - install apt packages
-  become: yes
+  become: true
   ansible.builtin.apt:
     name: "{{ item }}"
-    update_cache: yes
+    update_cache: true
   with_items:
     - 1password
     - 1password-cli
     - dex
+  tags:
+    - install
 
 - name: desktop/software/1password - install 1password autostart
   copy:
@@ -55,4 +67,6 @@
     dest: "/home/{{ lookup('env','USER') }}/.config/autostart/ssh-1pass.desktop"
     owner: "{{ lookup('env','USER') }}"
     group: "{{ lookup('env','USER') }}"
-    mode: 0644
+    mode: '0644'
+  tags:
+    - init

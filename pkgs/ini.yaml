@@ -1,0 +1,2 @@
+- name: Importing 1password pkg
+  ansible.builtin.import_tasks: 1password/ini.yaml

@@ -1,41 +1,45 @@
 ---
-- name: configuring desktop system
+- name: Configuring desktop system
   hosts: localhost
-  become: no
+  become: false
   pre_tasks:
-    - name: set variables - include all .yaml files in config/shared directory
-      include_vars:
+    - name: Set variables - include all .yaml files in config/shared directory
+      ansible.builtin.include_vars:
         dir: ../config/shared
         extensions:
           - 'yaml'
-    - name: set variables - include all .yaml files in config/tower directory
-      include_vars:
+    - name: Set variables - include all .yaml files in config/tower directory
+      ansible.builtin.include_vars:
         dir: ../config/poptop
         extensions:
           - 'yaml'
-    - name: update repositories
-      become: yes
-      apt: update_cache=yes
-    - import_tasks: ../pkgs/dependencies.yaml
+    - name: Update apt cache
+      become: true
+      ansible.builtin.apt:
+        update_cache: true
+
   tasks:
-    # - import_tasks: ../tasks/desktop/regolith.yaml
-    - import_tasks: ../tasks/desktop/software/init.yaml
-    - import_tasks: ../tasks/dev/init.yaml
-    - import_tasks: ../tasks/cloud/init.yaml
-    - import_tasks: ../tasks/system/init.yaml
-    - import_tasks: ../tasks/desktop/software/tower-software.yaml
-    - import_tasks: ../tasks/desktop/popos.yaml
+    - name: Importing dependencies
+      ansible.builtin.import_tasks: ../pkgs/dependencies.yaml
+    - name: Importing pkgs
+      ansible.builtin.import_tasks: ../pkgs/ini.yaml
+    - ansible.builtin.import_tasks: ../tasks/desktop/software/init.yaml
+    - ansible.builtin.import_tasks: ../tasks/dev/init.yaml
+    - ansible.builtin.import_tasks: ../tasks/cloud/init.yaml
+    - ansible.builtin.import_tasks: ../tasks/system/init.yaml
+    - ansible.builtin.import_tasks: ../tasks/desktop/software/tower-software.yaml
+    - ansible.builtin.import_tasks: ../tasks/desktop/popos.yaml
   # roles:
     # - zsh
   post_tasks:
     - name: updating the system
-      become: yes
+      become: true
       apt:
         update_cache: yes
         upgrade: dist
     - name: autoremove and purge apt packages
-      become: yes
+      become: true
       apt:
         autoremove: yes
         purge: yes
-    - import_tasks: ../tasks/final-message.yaml
+    - ansible.builtin.import_tasks: ../tasks/final-message.yaml
