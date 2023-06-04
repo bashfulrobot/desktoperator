@@ -15,14 +15,12 @@
           - 'yaml'
     - name: Update apt cache
       become: true
-      ansible.builtin.apt:
+      ansible.builtin.ansible.builtin.apt:
         update_cache: true
 
   tasks:
-    - name: Importing dependencies
-      ansible.builtin.import_tasks: ../pkgs/dependencies.yaml
-    - name: Importing pkgs
-      ansible.builtin.import_tasks: ../pkgs/ini.yaml
+    - ansible.builtin.import_tasks: ../pkgs/dependencies.yaml
+    - ansible.builtin.import_tasks: ../pkgs/ini.yaml
     - ansible.builtin.import_tasks: ../tasks/desktop/software/init.yaml
     - ansible.builtin.import_tasks: ../tasks/dev/init.yaml
     - ansible.builtin.import_tasks: ../tasks/cloud/init.yaml
@@ -34,12 +32,12 @@
   post_tasks:
     - name: updating the system
       become: true
-      apt:
+      ansible.builtin.apt:
         update_cache: yes
         upgrade: dist
     - name: autoremove and purge apt packages
       become: true
-      apt:
+      ansible.builtin.apt:
         autoremove: yes
         purge: yes
     - ansible.builtin.import_tasks: ../tasks/final-message.yaml

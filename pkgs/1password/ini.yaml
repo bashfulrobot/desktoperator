@@ -19,7 +19,7 @@
 
 - name: desktop/software/1password - create the debsig-verify policy folders
   become: true
-  file:
+  ansible.builtin.file:
     path: "{{ item }}"
     state: directory
     owner: root
@@ -62,7 +62,7 @@
     - install
 
 - name: desktop/software/1password - install 1password autostart
-  copy:
+  ansible.builtin.copy:
     src: ../files/home/.config/autostart/ssh-1pass.desktop
     dest: "/home/{{ lookup('env','USER') }}/.config/autostart/ssh-1pass.desktop"
     owner: "{{ lookup('env','USER') }}"
