@@ -15,7 +15,7 @@
         extensions:
           - 'yaml'
   tasks:
-    - import_tasks: ../tasks/dependencies.yaml
+    - import_tasks: ../pkgs/dependencies.yaml
     - import_tasks: ../tasks/system/zsh.yaml
     # - import_tasks: ../tasks/desktop/software/tilix.yaml
     - import_tasks: ../tasks/desktop/software/espanso.yaml

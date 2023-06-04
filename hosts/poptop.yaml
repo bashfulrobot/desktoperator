@@ -16,7 +16,7 @@
     - name: update repositories
       become: yes
       apt: update_cache=yes
-    - import_tasks: ../tasks/dependencies.yaml
+    - import_tasks: ../pkgs/dependencies.yaml
   tasks:
     # - import_tasks: ../tasks/desktop/regolith.yaml
     - import_tasks: ../tasks/desktop/software/init.yaml
