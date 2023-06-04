@@ -19,7 +19,6 @@
     state: present
   tags:
     - init
-    - install
 
 - name: Installing dependencies via pip
   become: true
@@ -29,7 +28,6 @@
       - beautifulsoup4 # for web scraping
   tags:
     - init
-    - install
 
 - name: Add the flathub repository
   community.general.flatpak_remote:

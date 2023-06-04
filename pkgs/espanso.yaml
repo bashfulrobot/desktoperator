@@ -6,7 +6,6 @@
     token: "{{ GITHUB_TOKEN }}"
   register: espanso_release
   tags:
-    - install
     - github
 
 - name: Install deb - pkgs/espanso.yaml
@@ -14,7 +13,6 @@
   apt:
     deb: "https://github.com/federico-terzi/espanso/releases/download/{{ espanso_release.tag }}/espanso-debian-x11-amd64.deb"
   tags:
-    - install
     - github
 
 - name: Create espanso cfg folder - pkgs/espanso.yaml

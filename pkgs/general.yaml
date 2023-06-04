@@ -8,8 +8,6 @@
     state: present
     method: user
     remote: flathub
-    tags:
-      - install
 
 - name: Installing debs - pkgs/general.yaml
   become: true
@@ -46,8 +44,6 @@
       # cargo dependency
       - pkg-config
     state: present
-  tags:
-    - install
 
 - name: removing debs - pkgs/general.yaml
   become: true
@@ -55,8 +51,6 @@
     pkg:
       - firefox
     state: absent
-  tags:
-    - install
 
 - name: Install pip packages - pkgs/general.yaml
   ansible.builtin.pip:
@@ -65,8 +59,6 @@
       - telegram-send
       # Needed for some ansible modules
       - psutil
-  tags:
-    - install
 
 - name: Create Applications folder - pkgs/general.yaml
   ansible.builtin.file:

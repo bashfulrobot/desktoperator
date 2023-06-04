@@ -4,8 +4,6 @@
     pkg:
       - software-properties-common
     state: present
-  tags:
-    - install
 
 - name: Add repository - pkgs/appimage-launcher.yaml - pkgs/appimage-launcher.yaml
   become: true
@@ -23,5 +21,3 @@
     pkg:
       - appimagelauncher
     state: present
-  tags:
-    - install

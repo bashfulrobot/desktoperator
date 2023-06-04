@@ -21,5 +21,3 @@
   become: true
   ansible.builtin.apt:
     name: google-chrome-stable
-  tags:
-    - install

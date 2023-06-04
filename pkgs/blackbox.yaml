@@ -5,8 +5,6 @@
     state: present
     method: user
     remote: flathub
-  tags:
-    - install
 
 - name: Placing blackbox launcher - pkgs/blackbox.yaml
   become: true
