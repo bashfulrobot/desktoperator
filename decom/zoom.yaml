@@ -1,14 +1,14 @@
 ---
 # tasks file for zoom
 - name: desktop/software/zoom - install ca-certificates
-  become: yes
+  become: true
   ansible.builtin.apt:
     name: ca-certificates
     state: latest
     update_cache: true
 
 - name: desktop/software/zoom - install zoom
-  become: yes
+  become: true
   ansible.builtin.apt:
     deb: https://zoom.us/client/latest/zoom_amd64.deb
     state: present

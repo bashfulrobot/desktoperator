@@ -1,0 +1,79 @@
+---
+- name: Configuring desktop system
+  hosts: localhost
+  become: false
+  pre_tasks:
+    # - name: Print variable value
+    #   ansible.builtin.debug:
+    #     var: ansible_playbook_dir
+    - name: Set variables - include all .yaml files in config/shared directory
+      ansible.builtin.include_vars:
+        dir: config/shared
+        extensions:
+          - 'yaml'
+      tags:
+        - cfg
+        - init
+        - install
+        - github
+    - name: Set variables - include all .yaml files in config/tower directory
+      ansible.builtin.include_vars:
+        dir: config/poptop
+        extensions:
+          - 'yaml'
+      tags:
+        - cfg
+        - init
+        - install
+        - github
+    - name: Update apt cache
+      become: true
+      ansible.builtin.apt:
+        update_cache: true
+      tags:
+        - install
+
+  tasks:
+    - name: Import pkgs dependencies
+      ansible.builtin.import_tasks: pkgs/dependencies/ini.yaml
+      tags:
+        - cfg
+        - init
+        - install
+        - github
+    - name: Import pkgs
+      ansible.builtin.include_tasks:
+        file: "{{ item }}"
+      with_fileglob:
+        - "pkgs/*.yaml"
+      tags:
+        - cfg
+        - init
+        - install
+        - github
+    - ansible.builtin.import_tasks: tasks/desktop/software/init.yaml
+    - ansible.builtin.import_tasks: tasks/dev/init.yaml
+    - ansible.builtin.import_tasks: tasks/cloud/init.yaml
+    - ansible.builtin.import_tasks: tasks/system/init.yaml
+    - ansible.builtin.import_tasks: tasks/desktop/software/tower-software.yaml
+  # roles:
+    # - zsh
+  post_tasks:
+    - name: Updating the system
+      become: true
+      ansible.builtin.apt:
+        update_cache: true
+        upgrade: dist
+      tags:
+        - install
+    - name: Autoremove and purge apt packages
+      become: true
+      ansible.builtin.apt:
+        autoremove: true
+        purge: true
+      tags:
+        - install
+    - name: Generating final message
+      ansible.builtin.import_tasks: tasks/final-message.yaml
+      tags:
+        - init

@@ -6,7 +6,7 @@
   register: wezterm_release
 
 - name: desktop/software/wezterm - download & install wezterm deb
-  become: yes
+  become: true
   ansible.builtin.apt:
     deb: "https://github.com/wez/wezterm/releases/download/{{ wezterm_release.tag }}/wezterm-{{ wezterm_release.tag }}.Ubuntu22.04.deb"
     state: present
@@ -21,19 +21,19 @@
     state: directory
 - name: desktop/software/wezterm - placing wezterm dracula config
   copy:
-    src: ../files/home/.config/wezterm/colors/dracula.toml
+    src: files/home/.config/wezterm/colors/dracula.toml
     dest: "{{ SYSTEM_HOME }}/.config/wezterm/colors/dracula.toml"
     owner: "{{ SYSTEM_USER }}"
     group: "{{ SYSTEM_USER }}"
 - name: desktop/software/wezterm - placing wezterm config
   copy:
-    src: ../files/home/.wezterm.lua
+    src: files/home/.wezterm.lua
     dest: "{{ SYSTEM_HOME }}/.wezterm.lua"
     owner: "{{ SYSTEM_USER }}"
     group: "{{ SYSTEM_USER }}"
 
 - name: desktop/software/wezterm - set wezterm as the default terminal
-  become: yes
+  become: true
   community.general.alternatives:
     name: x-terminal-emulator
     path: /usr/bin/wezterm

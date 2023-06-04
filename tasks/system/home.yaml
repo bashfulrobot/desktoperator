@@ -1,6 +1,6 @@
 - name: system/home - placing .hidden file (clean home dir)
   copy:
-    src: ../files/home/.hidden
+    src: files/home/.hidden
     dest: "{{ SYSTEM_HOME }}/.hidden"
     owner: "{{ SYSTEM_USER }}"
     group: "{{ SYSTEM_USER }}"

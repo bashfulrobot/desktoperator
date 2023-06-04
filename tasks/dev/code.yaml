@@ -2,25 +2,25 @@
 # tasks file for code-insiders
 - name: dev/code - copy vscode theme
   copy:
-    src: "../files/tmp/dracula-pro.vsix"
+    src: "files/tmp/dracula-pro.vsix"
     dest: "/tmp/dracula-pro.vsix"
 
 - name: dev/code-insiders - set apt gpg key
-  become: yes
+  become: true
   ansible.builtin.apt_key:
     url: "https://packages.microsoft.com/keys/microsoft.asc"
     state: present
 
 - name: dev/code - download vscode gpg key file
-  become: yes
+  become: true
   get_url:
     url: https://packages.microsoft.com/keys/microsoft.asc
     dest: /etc/apt/trusted.gpg.d/vscode_gpg.asc
-    mode: '0644'
+    mode: "0644"
     force: true
 
 - name: dev/code - add repository
-  become: yes
+  become: true
   ansible.builtin.apt_repository:
     repo: "deb [arch=amd64 signed-by=/etc/apt/trusted.gpg.d/vscode_gpg.asc] http://packages.microsoft.com/repos/code stable main"
     state: present
@@ -28,7 +28,7 @@
     update_cache: true
 
 - name: dev/code - install
-  become: yes
+  become: true
   ansible.builtin.apt:
     pkg:
       - apt-transport-https
@@ -44,7 +44,7 @@
     creates: "{{ SYSTEM_HOME }}/.config/ansible-automation/install-vscode-dracula-theme"
 
 - name: dev/code - install nautilus integration dependencies
-  become: yes
+  become: true
   ansible.builtin.apt:
     pkg:
       - python3-nautilus
@@ -62,9 +62,8 @@
   get_url:
     url: https://raw.githubusercontent.com/harry-cpp/code-nautilus/master/code-nautilus.py
     dest: "{{ SYSTEM_HOME }}/.local/share/nautilus-python/extensions/code-nautilus.py"
-
 #- name: dev/code-insiders - create code-insiders to code symbolic link
-#  become: yes
+#  become: true
 #  ansible.builtin.file:
 #    src: /usr/bin/code-insiders
 #    dest: /usr/bin/code

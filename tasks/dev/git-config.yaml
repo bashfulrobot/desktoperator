@@ -1,6 +1,6 @@
 ---
 - name: dev/git-config - install git
-  become: yes
+  become: true
   ansible.builtin.apt:
     pkg:
       - git
@@ -65,6 +65,6 @@
     gh_cli_version: "{{ gh_cli_release.tag | regex_replace('^v', '') }}"
 
 - name: dev/git-config - install gh cli .deb package from github
-  become: yes
+  become: true
   apt:
     deb: https://github.com/cli/cli/releases/download/{{ gh_cli_release.tag }}/gh_{{ gh_cli_version }}_linux_amd64.deb

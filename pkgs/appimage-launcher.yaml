@@ -1,0 +1,27 @@
+- name: Installing software-properties-common - pkgs/appimage-launcher.yaml
+  become: true
+  ansible.builtin.apt:
+    pkg:
+      - software-properties-common
+    state: present
+  tags:
+    - install
+
+- name: Add repository - pkgs/appimage-launcher.yaml - pkgs/appimage-launcher.yaml
+  become: true
+  ansible.builtin.apt_repository:
+    repo: "ppa:appimagelauncher-team/stable"
+    state: present
+    filename: appimagelauncher
+    update_cache: true
+  tags:
+    - init
+
+- name: Installing appimagelauncher - pkgs/appimage-launcher.yaml
+  become: true
+  ansible.builtin.apt:
+    pkg:
+      - appimagelauncher
+    state: present
+  tags:
+    - install

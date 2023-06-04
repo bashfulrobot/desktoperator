@@ -1,13 +1,13 @@
 - name: cloud/doppler - download doppler gpg key file
-  become: yes
+  become: true
   get_url:
     url: https://packages.doppler.com/public/cli/gpg.DE2A7741A397C129.key
     dest: /etc/apt/trusted.gpg.d/doppler_gpg.asc
-    mode: '0644'
+    mode: "0644"
     force: true
 
 - name: cloud/doppler - add  apt repository
-  become: yes
+  become: true
   ansible.builtin.apt_repository:
     repo: "deb [signed-by=/etc/apt/trusted.gpg.d/doppler_gpg.asc] https://packages.doppler.com/public/cli/deb/debian any-version main"
     state: present
@@ -15,7 +15,7 @@
     update_cache: true
 
 - name: cloud/doppler - install dependencies
-  become: yes
+  become: true
   ansible.builtin.apt:
     pkg:
       - apt-transport-https
@@ -25,7 +25,7 @@
     state: present
 
 - name: cloud/doppler - install
-  become: yes
+  become: true
   ansible.builtin.apt:
     pkg:
       - doppler

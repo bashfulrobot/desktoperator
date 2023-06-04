@@ -11,6 +11,6 @@
     monokle_version: "{{ monokle_release.tag | regex_replace('^v', '') }}"
 
 - name: cloud/monokle - install monokle .deb package from github
-  become: yes
+  become: true
   apt:
     deb: https://github.com/kubeshop/monokle/releases/download/{{ monokle_release.tag }}/Monokle-linux-{{ monokle_version }}-amd64.deb

@@ -1,14 +1,15 @@
 ---
 # this file ensures baseline dependencies are met for the core of other tasks.
 # i.e. tasks that install flatpaks would not work if flatpak was not installed
-- name: Dependencies - add canonical partners ppa
+- name: Add canonical partners ppa - pkgs/dependencies/ini.yaml
   become: true
   ansible.builtin.apt_repository:
     repo: deb http://archive.canonical.com/ubuntu {{ ansible_distribution_release }} partner
     state: present
   tags:
     - init
-- name: Dependencies - installing dependencies via apt
+
+- name: Installing dependencies via apt - pkgs/dependencies/ini.yaml
   become: true
   ansible.builtin.apt:
     pkg:
@@ -18,7 +19,9 @@
     state: present
   tags:
     - init
-- name: Dependencies - installing dependencies via pip
+    - install
+
+- name: Installing dependencies via pip
   become: true
   ansible.builtin.pip:
     name:
@@ -26,8 +29,9 @@
       - beautifulsoup4 # for web scraping
   tags:
     - init
+    - install
 
-- name: Dependencies - add the flathub repository
+- name: Add the flathub repository
   community.general.flatpak_remote:
     name: flathub
     state: present
@@ -36,7 +40,7 @@
   tags:
     - init
 
-- name: Dependencies - create ansible module folder
+- name: Create ansible module folder
   ansible.builtin.file:
     path: "{{ SYSTEM_HOME }}/.ansible/modules/"
     state: directory
@@ -46,7 +50,7 @@
   tags:
     - init
 
-- name: Dependencies - create autostart folder
+- name: Create autostart folder
   ansible.builtin.file:
     path: "{{ SYSTEM_HOME }}/.config/autostart/"
     state: directory
@@ -56,16 +60,17 @@
   tags:
     - init
 
-- name: Dependencies - installing scrape.py andible module
+- name: Installing scrape.py andible module
   ansible.builtin.copy:
-    src: ../files/home/.ansible/modules/scrape.py
+    src: files/home/.ansible/modules/scrape.py
     dest: "{{ SYSTEM_HOME }}/.ansible/modules/scrape.py"
     owner: "{{ SYSTEM_USER }}"
     group: "{{ SYSTEM_USER }}"
+    mode: "0700"
   tags:
     - init
 
-- name: Dependencies - create ansible automation folder
+- name: Create ansible automation folder
   ansible.builtin.file:
     path: "{{ SYSTEM_HOME }}/.config/ansible-automation"
     state: directory

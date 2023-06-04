@@ -1,18 +1,7 @@
-# - import_tasks: ../tasks/desktop/software/1password.yaml
-#- import_tasks: ../tasks/desktop/software/cod.yaml
-- import_tasks: ../tasks/desktop/software/common-software.yaml
-- import_tasks: ../tasks/desktop/software/chrome-browser.yaml
-# - import_tasks: ../tasks/desktop/software/element.yaml
-# replace with fluffy chat
-- import_tasks: ../tasks/desktop/software/espanso.yaml
-- import_tasks: ../tasks/desktop/software/flameshot.yaml
-- import_tasks: ../tasks/desktop/software/insynchq.yaml
-- import_tasks: ../tasks/desktop/software/ncspot.yaml
-- import_tasks: ../tasks/desktop/software/nord-vpn.yaml
-- import_tasks: ../tasks/desktop/software/slack.yaml
-- import_tasks: ../tasks/desktop/software/tailscale.yaml
- #- import_tasks: ../tasks/desktop/software/zoom.yaml
-- import_tasks: ../tasks/desktop/software/bottom.yaml
-#- import_tasks: ../tasks/desktop/software/tilix.yaml
-- import_tasks: ../tasks/desktop/software/sd.yaml
-- import_tasks: ../tasks/desktop/software/blackbox.yaml
+- import_tasks: tasks/desktop/software/flameshot.yaml
+- import_tasks: tasks/desktop/software/insynchq.yaml
+- import_tasks: tasks/desktop/software/ncspot.yaml
+- import_tasks: tasks/desktop/software/nord-vpn.yaml
+- import_tasks: tasks/desktop/software/slack.yaml
+- import_tasks: tasks/desktop/software/tailscale.yaml
+- import_tasks: tasks/desktop/software/sd.yaml

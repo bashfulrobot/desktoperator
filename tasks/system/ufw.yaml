@@ -1,9 +1,9 @@
 - name: system/ufw - enable ufw
-  become: yes
+  become: true
   community.general.ufw:
     state: enabled
 - name: system/ufw - opening tcp ports
-  become: yes
+  become: true
   community.general.ufw:
     rule: allow
     port: "{{ item }}"
@@ -11,7 +11,7 @@
   loop: "{{ TCP_PORTS }}"
   when: TCP_PORTS is defined
 - name: system/ufw - opening udp ports
-  become: yes
+  become: true
   community.general.ufw:
     rule: allow
     port: "{{ item }}"

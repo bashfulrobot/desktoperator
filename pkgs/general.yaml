@@ -1,17 +1,18 @@
-- name: desktop/software/common-software - installing flatpaks
+- name: Installing flatpaks - pkgs/general.yaml
   community.general.flatpak:
     name:
       - md.obsidian.Obsidian
       - com.todoist.Todoist
       - org.telegram.desktop
       - com.obsproject.Studio
-      - com.raggesilver.BlackBox
     state: present
     method: user
     remote: flathub
+    tags:
+      - install
 
-- name: desktop/software/common-software - installing debs
-  become: yes
+- name: Installing debs - pkgs/general.yaml
+  become: true
   ansible.builtin.apt:
     pkg:
       - dconf-cli
@@ -45,33 +46,34 @@
       # cargo dependency
       - pkg-config
     state: present
+  tags:
+    - install
 
-- name: desktop/software/common-software - removing debs
-  become: yes
+- name: removing debs - pkgs/general.yaml
+  become: true
   ansible.builtin.apt:
     pkg:
       - firefox
     state: absent
+  tags:
+    - install
 
-- name: desktop/software/common-software - install pip packages
-  pip:
+- name: Install pip packages - pkgs/general.yaml
+  ansible.builtin.pip:
     name:
       - ansible-lint
       - telegram-send
       # Needed for some ansible modules
       - psutil
+  tags:
+    - install
 
-- name: dependencies - create Applications folder
-  file:
+- name: Create Applications folder - pkgs/general.yaml
+  ansible.builtin.file:
     path: "{{ SYSTEM_HOME }}/Applications"
     state: directory
     mode: "0700"
     owner: "{{ SYSTEM_USER }}"
     group: "{{ SYSTEM_USER }}"
-# - name: desktop/software/common-software - adding todoist
-#   copy:
-#     src: ../files/home/Applications/Todoist.AppImage
-#     dest: "{{ SYSTEM_HOME }}/Applications/Todoist.AppImage"
-#     owner: "{{ SYSTEM_USER }}"
-#     group: "{{ SYSTEM_USER }}"
-#     mode: 0644
+  tags:
+    - init

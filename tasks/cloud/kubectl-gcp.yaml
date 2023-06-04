@@ -1,7 +1,7 @@
 ---
 # tasks file for cloud-tools
 - name: cloud/kubectl-gcp - install kubectl dependencies
-  become: yes
+  become: true
   ansible.builtin.apt:
     pkg:
       - apt-transport-https
@@ -11,7 +11,7 @@
     state: present
 
 - name: cloud/kubectl-gcp - download google gpg key file
-  become: yes
+  become: true
   get_url:
     url: https://packages.cloud.google.com/apt/doc/apt-key.gpg
     dest: /etc/apt/trusted.gpg.d/google_cloud.asc
@@ -19,7 +19,7 @@
     force: true
 
 - name: cloud/kubectl-gcp - add google-cloud-sdk main repository
-  become: yes
+  become: true
   ansible.builtin.apt_repository:
     repo: "deb [arch=amd64 signed-by=/etc/apt/trusted.gpg.d/google_cloud.asc] https://packages.cloud.google.com/apt cloud-sdk main"
     state: present
@@ -27,7 +27,7 @@
     update_cache: true
 
 - name: cloud/kubectl-gcp - install kubectl, google-cloud-sdk tools
-  become: yes
+  become: true
   ansible.builtin.apt:
     pkg:
       - google-cloud-sdk

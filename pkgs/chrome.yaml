@@ -1,20 +1,25 @@
 ---
-# tasks file for chrome-browser
-- name: desktop/software/chrome-browser - set apt gpg key
-  become: yes
+- name: Set apt gpg key - pkgs/chrome.yaml
+  become: true
   ansible.builtin.apt_key:
     url: "https://dl-ssl.google.com/linux/linux_signing_key.pub"
     state: present
+  tags:
+    - init
 
-- name: desktop/software/chrome-browser - add repository
-  become: yes
+- name: Add repository - pkgs/chrome.yaml
+  become: true
   ansible.builtin.apt_repository:
     repo: "deb [arch=amd64] https://dl.google.com/linux/chrome/deb/ stable main"
     state: present
     filename: google-chrome
     update_cache: true
+  tags:
+    - init
 
-- name: desktop/software/chrome-browser - install
-  become: yes
+- name: Install - pkgs/chrome.yaml
+  become: true
   ansible.builtin.apt:
     name: google-chrome-stable
+  tags:
+    - install

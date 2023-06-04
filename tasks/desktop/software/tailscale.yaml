@@ -1,20 +1,20 @@
 - name: desktop/software/tailscale - download tailscale gpg key file
-  become: yes
+  become: true
   get_url:
     url: https://pkgs.tailscale.com/stable/ubuntu/focal.gpg
     dest: /etc/apt/trusted.gpg.d/tailscale.asc
-    mode: '0644'
+    mode: "0644"
     force: true
 
 - name: desktop/software/tailscale - add tailiscale stable repository for previous release
-  become: yes
+  become: true
   ansible.builtin.apt_repository:
     repo: "deb [arch=amd64 signed-by=/etc/apt/trusted.gpg.d/tailscale.asc] https://pkgs.tailscale.com/stable/ubuntu {{ TAILSCALE_UBUNTU_VERSION }} main"
     update_cache: true
   when: TAILSCALE_UBUNTU_VERSION is defined
 
 - name: desktop/software/tailscale - add tailiscale stable repository for the latest release
-  become: yes
+  become: true
   ansible.builtin.apt_repository:
     repo: "deb [arch=amd64 signed-by=/etc/apt/trusted.gpg.d/tailscale.asc] https://pkgs.tailscale.com/stable/ubuntu {{ ansible_distribution_release }} main"
     state: present
@@ -23,7 +23,7 @@
   when: TAILSCALE_UBUNTU_VERSION is undefined
 
 - name: desktop/software/tailscale - install tailiscale vpn
-  become: yes
+  become: true
   ansible.builtin.apt:
     name: tailscale
     update_cache: true

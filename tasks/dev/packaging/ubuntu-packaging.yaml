@@ -1,5 +1,5 @@
 - name: dev/elementary-sdk - install elementary sdk
-  become: yes
+  become: true
   ansible.builtin.apt:
     pkg:
       - build-essential
@@ -16,7 +16,7 @@
 
 - name: dev/ubuntu-packaging - placing .sbuildrc
   copy:
-    src: ../files/home/.sbuildrc
+    src: files/home/.sbuildrc
     dest: "{{ SYSTEM_HOME }}/.sbuildrc"
     owner: "{{ SYSTEM_USER }}"
     group: "{{ SYSTEM_USER }}"
@@ -24,7 +24,7 @@
 
 - name: dev/ubuntu-packaging - placing .mk-sbuild.rc
   copy:
-    src: ../files/home/.mk-sbuild.rc
+    src: files/home/.mk-sbuild.rc
     dest: "{{ SYSTEM_HOME }}/.mk-sbuild.rc"
     owner: "{{ SYSTEM_USER }}"
     group: "{{ SYSTEM_USER }}"
@@ -32,7 +32,7 @@
 
 - name: dev/ubuntu-packaging - placing .quiltrc
   copy:
-    src: ../files/home/.quiltrc
+    src: files/home/.quiltrc
     dest: "{{ SYSTEM_HOME }}/.quiltrc"
     owner: "{{ SYSTEM_USER }}"
     group: "{{ SYSTEM_USER }}"

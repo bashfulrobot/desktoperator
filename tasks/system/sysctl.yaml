@@ -2,7 +2,7 @@
 # Needed so that vscode can monitor larger workspaces
 # If ram is a contraint - may want to lower
 - name: system/sysctl - modify fs.inotify.max_user_watches
-  become: yes
+  become: true
   sysctl:
     name: fs.inotify.max_user_watches
     value: "524288"

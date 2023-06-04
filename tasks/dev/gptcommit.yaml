@@ -17,7 +17,7 @@
     remote_src: yes
 
 - name: tasks/dev - install gptcommit
-  become: yes
+  become: true
   ansible.builtin.copy:
     src: /tmp/gptcommit
     dest: /usr/local/bin/gptcommit
@@ -27,7 +27,7 @@
 
 - name: tasks/dev - configure gptcommit
   copy:
-    src: ../files/home/.config/gptcommit/config.toml
+    src: files/home/.config/gptcommit/config.toml
     dest: "{{SYSTEM_HOME}}/.config/gptcommit/config.toml"
     owner: "{{ SYSTEM_USER }}"
     group: "{{ SYSTEM_USER }}"

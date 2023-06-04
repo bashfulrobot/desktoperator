@@ -1,0 +1,35 @@
+- name: Get latest release version from github - pkgs/espanso.yaml
+  github_release:
+    user: federico-terzi
+    repo: espanso
+    action: latest_release
+    token: "{{ GITHUB_TOKEN }}"
+  register: espanso_release
+  tags:
+    - install
+    - github
+
+- name: Install deb - pkgs/espanso.yaml
+  become: true
+  apt:
+    deb: "https://github.com/federico-terzi/espanso/releases/download/{{ espanso_release.tag }}/espanso-debian-x11-amd64.deb"
+  tags:
+    - install
+    - github
+
+- name: Create espanso cfg folder - pkgs/espanso.yaml
+  file:
+    path: "{{ SYSTEM_HOME }}/.config/espanso/"
+    state: directory
+    mode: "0700"
+    owner: "{{ SYSTEM_USER }}"
+    group: "{{ SYSTEM_USER }}"
+  tags:
+    - init
+
+- name: Placing espanso cfg files - pkgs/espanso.yaml
+  ansible.posix.synchronize:
+    src: files/home/.config/espanso/
+    dest: "{{ SYSTEM_HOME }}/.config/espanso"
+  tags:
+    - cfg

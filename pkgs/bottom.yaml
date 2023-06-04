@@ -1,0 +1,25 @@
+- name: Get latest release version from github - pkgs/bottom.yaml
+  community.general.github_release:
+    user: ClementTsang
+    repo: bottom
+    action: latest_release
+    token: "{{ GITHUB_TOKEN }}"
+  register: bottom_release
+  tags:
+    - install
+    - github
+
+- name: Get version number w/o v - pkgs/bottom.yaml
+  ansible.builtin.set_fact:
+    bottom_version: "{{ bottom_release.tag | regex_replace('^v', '') }}"
+  tags:
+    - install
+    - github
+
+- name: Install deb - pkgs/bottom.yaml
+  become: true
+  ansible.builtin.apt:
+    deb: "https://github.com/ClementTsang/bottom/releases/download/{{ bottom_version }}/bottom_{{ bottom_version }}_amd64.deb"
+  tags:
+    - install
+    - github

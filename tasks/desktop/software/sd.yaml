@@ -11,8 +11,8 @@
     sd_version: "{{ sd_release.tag | regex_replace('^v', '') }}"
 
 - name: desktop/software/sd - install
-  become: yes
+  become: true
   ansible.builtin.get_url:
     url: https://github.com/chmln/sd/releases/download/{{ sd_release.tag }}/sd-{{ sd_release.tag }}-x86_64-unknown-linux-gnu
     dest: /usr/local/bin/sd
-    mode: '0755'
+    mode: "0755"

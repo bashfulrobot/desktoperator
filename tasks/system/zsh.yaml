@@ -1,7 +1,7 @@
 ---
 # tasks file for zsh
 - name: system/zsh - installing shell
-  become: yes
+  become: true
   ansible.builtin.apt:
     pkg:
       - git
@@ -31,7 +31,7 @@
     - "{{SYSTEM_HOME }}/tmp"
 
 - name: system/zsh - change current user shell
-  become: yes
+  become: true
   user:
     name: "{{ SYSTEM_USER }}"
     shell: /usr/bin/zsh
@@ -49,7 +49,7 @@
 # - debug: msg="{{ starship_release.tag }}"
 
 - name: system/zsh - download & extract starship tgz
-  become: yes
+  become: true
   ansible.builtin.unarchive:
     src: "https://github.com/starship/starship/releases/download/{{ starship_release.tag }}/starship-x86_64-unknown-linux-gnu.tar.gz"
     dest: /usr/local/bin
@@ -57,30 +57,28 @@
 
 - name: system/zsh - placing .zshrc
   copy:
-    src: ../files/home/.zshrc
+    src: files/home/.zshrc
     dest: "{{SYSTEM_HOME }}/.zshrc"
     owner: "{{ SYSTEM_USER }}"
     group: "{{ SYSTEM_USER }}"
 
 - name: system/zsh - placing .tmux.conf
   copy:
-    src: ../files/home/.tmux.conf
+    src: files/home/.tmux.conf
     dest: "{{SYSTEM_HOME }}/.tmux.conf"
     owner: "{{ SYSTEM_USER }}"
     group: "{{ SYSTEM_USER }}"
 
-
-
 - name: system/zsh - placing .zimrc
   copy:
-    src: ../files/home/.zimrc
+    src: files/home/.zimrc
     dest: "{{SYSTEM_HOME }}/.zimrc"
     owner: "{{ SYSTEM_USER }}"
     group: "{{ SYSTEM_USER }}"
 
 - name: system/zsh - placing starship.toml
   copy:
-    src: ../files/home/.config/starship.toml
+    src: files/home/.config/starship.toml
     dest: "{{SYSTEM_HOME }}/.config/starship.toml"
     owner: "{{ SYSTEM_USER }}"
     group: "{{ SYSTEM_USER }}"
@@ -88,12 +86,12 @@
 # ####
 - name: system/zsh - placing zsh function files
   ansible.posix.synchronize:
-    src: ../files/home/.config/zsh/
+    src: files/home/.config/zsh/
     dest: "{{SYSTEM_HOME}}/.config/zsh"
 
 - name: system/zsh - placing zim files
   ansible.posix.synchronize:
-    src: ../files/home/.zim/
+    src: files/home/.zim/
     dest: "{{SYSTEM_HOME}}/.zim"
 
 # - name: system/zsh - run zimfw
@@ -147,7 +145,7 @@
     mode: "0700"
 
 - name: system/zsh - batcat bat
-  become: yes
+  become: true
   ansible.builtin.file:
     src: /usr/bin/batcat
     dest: /usr/bin/bat

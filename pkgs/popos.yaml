@@ -1,199 +1,253 @@
-- name: desktop/popos - set wallpaper - picture-uri-dark
-  become: yes
+- name: Set wallpaper picture-uri-dark - pkgs/popos.yaml
+  become: true
   become_user: "{{ lookup('env','USER') }}"
   community.general.dconf:
     key: "/org/gnome/desktop/background/picture-uri-dark"
     value: "'file:///usr/share/backgrounds/pop/nick-nazzaro-ice-cave.png'"
     state: present
+  tags:
+    - cfg
 
-- name: desktop/popos - set wallpaper - picture-uri
-  become: yes
+- name: Set wallpaper picture-uri - pkgs/popos.yaml
+  become: true
   become_user: "{{ lookup('env','USER') }}"
   community.general.dconf:
     key: "/org/gnome/desktop/screensaver/picture-uri"
     value: "'file:///usr/share/backgrounds/pop/nick-nazzaro-ice-cave.png'"
     state: present
+  tags:
+    - cfg
 
-- name: desktop/popos - set dracula GTK theme
-  become: yes
+- name: Set dracula GTK theme - pkgs/popos.yaml
+  become: true
   become_user: "{{ lookup('env','USER') }}"
   community.general.dconf:
     key: "/org/gnome/desktop/interface/gtk-theme"
     value: "'dracula'"
     state: present
+  tags:
+    - cfg
 
-- name: desktop/popos - set dracula wm preferences
-  become: yes
+- name: Set dracula wm preferences - pkgs/popos.yaml
+  become: true
   become_user: "{{ lookup('env','USER') }}"
   community.general.dconf:
     key: "/org/gnome/desktop/wm/preferences/theme"
     value: "'dracula'"
     state: present
+  tags:
+    - cfg
 
-- name: desktop/popos - set dracula icons
-  become: yes
+- name: Set dracula icons - pkgs/popos.yaml
+  become: true
   become_user: "{{ lookup('env','USER') }}"
   community.general.dconf:
     key: "/org/gnome/desktop/interface/icon-theme"
     value: "'Dracula'"
     state: present
+  tags:
+    - cfg
 
-- name: desktop/popos - set dracula - pop-shell/hint-color
-  become: yes
+- name: Set dracula pop-shell/hint-color - pkgs/popos.yaml
+  become: true
   become_user: "{{ lookup('env','USER') }}"
   community.general.dconf:
     key: "/org/gnome/shell/extensions/pop-shell/hint-color-rgba"
     value: "'rgb(141,118,191)'"
     state: present
+  tags:
+    - cfg
 
-- name: desktop/popos - enable gnome-shell exts
-  become: yes
+- name: Enable gnome-shell exts - pkgs/popos.yaml
+  become: true
   become_user: "{{ lookup('env','USER') }}"
   community.general.dconf:
     key: "/org/gnome/shell/enabled-extensions"
     value: "['ding@rastersoft.com', 'pop-cosmic@system76.com', 'pop-shell@system76.com', 'system76-power@system76.com', 'ubuntu-appindicators@ubuntu.com', 'cosmic-dock@system76.com', 'cosmic-workspaces@system76.com', 'user-theme@gnome-shell-extensions.gcampax.github.com']"
     state: present
+  tags:
+    - cfg
 
-- name: desktop/popos - enable cosmic theme
-  become: yes
+- name: Enable cosmic theme - pkgs/popos.yaml
+  become: true
   become_user: "{{ lookup('env','USER') }}"
   community.general.dconf:
     key: "/org/gnome/shell/extensions/user-theme/name"
     value: "'dracula'"
     state: present
+  tags:
+    - cfg
 
 # Create new profile
 
-- name: desktop/popos - create terminal - profile name
-  become: yes
+- name: Create terminal profile name - pkgs/popos.yaml
+  become: true
   become_user: "{{ lookup('env','USER') }}"
   community.general.dconf:
     key: "/org/gnome/terminal/legacy/profiles:/:033548d4-6d93-4553-9fe8-fff1be9685be/visible-name"
     value: "'Dustin'"
     state: present
+  tags:
+    - cfg
 
-- name: desktop/popos - create terminal - profile list
-  become: yes
+- name: Create terminal profile list - pkgs/popos.yaml
+  become: true
   become_user: "{{ lookup('env','USER') }}"
   community.general.dconf:
     key: "/org/gnome/terminal/legacy/profiles:/list"
     value: "['033548d4-6d93-4553-9fe8-fff1be9685be']"
     state: present
+  tags:
+    - cfg
 
 # Set default profile
 
-- name: desktop/popos - set terminal - default profile
-  become: yes
+- name: Set terminal default profile - pkgs/popos.yaml
+  become: true
   become_user: "{{ lookup('env','USER') }}"
   community.general.dconf:
     key: "/org/gnome/terminal/legacy/profiles:/default"
     value: "'033548d4-6d93-4553-9fe8-fff1be9685be'"
     state: present
+  tags:
+    - cfg
 
 # Set Profile Colours
 
-- name: desktop/popos - set terminal - dracula colours
-  become: yes
+- name: Set terminal dracula colours - pkgs/popos.yaml
+  become: true
   become_user: "{{ lookup('env','USER') }}"
   community.general.dconf:
     key: "/org/gnome/terminal/legacy/profiles:/:033548d4-6d93-4553-9fe8-fff1be9685be/palette"
     value: "['#262626', '#E356A7', '#42E66C', '#E4F34A', '#9B6BDF', '#E64747', '#75D7EC', '#EFA554', '#7A7A7A', '#FF79C6', '#50FA7B', '#F1FA8C', '#BD93F9', '#FF5555', '#8BE9FD', '#FFB86C']"
     state: present
+  tags:
+    - cfg
 
-- name: desktop/popos - set terminal - dracula bold-colour
-  become: yes
+- name: Set terminal dracula bold-colour - pkgs/popos.yaml
+  become: true
   become_user: "{{ lookup('env','USER') }}"
   community.general.dconf:
     key: "/org/gnome/terminal/legacy/profiles:/:033548d4-6d93-4553-9fe8-fff1be9685be/bold-color"
     value: "'#6E46A4'"
     state: present
+  tags:
+    - cfg
 
-- name: desktop/popos - set terminal - dracula background-color
-  become: yes
+- name: Set terminal dracula background-color - pkgs/popos.yaml
+  become: true
   become_user: "{{ lookup('env','USER') }}"
   community.general.dconf:
     key: "/org/gnome/terminal/legacy/profiles:/:033548d4-6d93-4553-9fe8-fff1be9685be/background-color"
     value: "'#282A36'"
     state: present
+  tags:
+    - cfg
 
-- name: desktop/popos - set terminal - dracula foreground-colour
-  become: yes
+- name: Set terminal dracula foreground-colour - pkgs/popos.yaml
+  become: true
   become_user: "{{ lookup('env','USER') }}"
   community.general.dconf:
     key: "/org/gnome/terminal/legacy/profiles:/:033548d4-6d93-4553-9fe8-fff1be9685be/foreground-color"
     value: "'#F8F8F2'"
     state: present
+  tags:
+    - cfg
 
-- name: desktop/popos - set terminal - dracula use-theme-colors
-  become: yes
+- name: Set terminal dracula use-theme-colors - pkgs/popos.yaml
+  become: true
   become_user: "{{ lookup('env','USER') }}"
   community.general.dconf:
     key: "/org/gnome/terminal/legacy/profiles:/:033548d4-6d93-4553-9fe8-fff1be9685be/use-theme-colors"
     value: "false"
     state: present
+  tags:
+    - cfg
 
-- name: desktop/popos - set terminal - dracula bold-color-same-as-fg
-  become: yes
+- name: Set terminal dracula bold-color-same-as-fg - pkgs/popos.yaml
+  become: true
   become_user: "{{ lookup('env','USER') }}"
   community.general.dconf:
     key: "/org/gnome/terminal/legacy/profiles:/:033548d4-6d93-4553-9fe8-fff1be9685be/bold-color-same-as-fg"
     value: "false"
     state: present
+  tags:
+    - cfg
 
-- name: desktop/popos - set terminal - font size
-  become: yes
+- name: Set terminal - font size - pkgs/popos.yaml
+  become: true
   become_user: "{{ lookup('env','USER') }}"
   community.general.dconf:
     key: "/org/gnome/terminal/legacy/profiles:/:033548d4-6d93-4553-9fe8-fff1be9685be/font"
     value: "'Fira Mono 20'"
     state: present
+  tags:
+    - cfg
 
-- name: desktop/popos - gnome - automatic timezone
-  dconf:
+- name: Gnome automatic timezone - pkgs/popos.yaml
+  community.general.dconf:
     key: "/org/gnome/desktop/datetime/automatic-timezone"
     value: "true"
+  tags:
+    - cfg
 
-- name: desktop/popos - gnome - clock format
-  dconf:
+- name: Clock format - pkgs/popos.yaml
+  community.general.dconf:
     key: "/org/gnome/desktop/interface/clock-format"
     value: "'24h'"
+  tags:
+    - cfg
 
-# RT - scheduling
-# I was excited to see that Mutter 3.34 can experimentally give itself a realtime priority 29. I’ve had a lot of situations where a rogue app or userspace process has managed to lock up my desktop system completely. After one of these I resolved to enable the rt-scheduler feature and see if it helped. And what do you know - it does!
-- name: desktop/popos - gnome - mutter real-time scheduling
-  dconf:
+- name: Mutter real-time scheduling - pkgs/popos.yaml
+  community.general.dconf:
     key: "/org/gnome/mutter/experimental-features"
     value: "['rt-scheduler']"
+  tags:
+    - cfg
 
-- name: desktop/popos - gnome - enable subpixel antialiasing
-  dconf:
+- name: Enable subpixel antialiasing - pkgs/popos.yaml
+  community.general.dconf:
     key: "/org/gnome/settings-daemon/plugins/xsettings/antialiasing"
     value: "'rgba'"
+  tags:
+    - cfg
 
-- name: desktop/popos - gnome - numlock on
-  dconf:
+- name: Numlock on - pkgs/popos.yaml
+  community.general.dconf:
     key: "/org/gnome/desktop/peripherals/keyboard/numlock-state"
     value: "true"
+  tags:
+    - cfg
 
-- name: desktop/popos - gnome - disable hidpi daemon
-  dconf:
+- name: Disable hidpi daemon - pkgs/popos.yaml
+  community.general.dconf:
     key: "/com/system76/hidpi/enable"
     value: "false"
+  tags:
+    - cfg
 
-- name: desktop/popos - gnome - disable hidpi daemon mode
-  dconf:
+- name: Disable hidpi daemon mode - pkgs/popos.yaml
+  community.general.dconf:
     key: "/com/system76/hidpi/mode"
     value: "'lodpi'"
+  tags:
+    - cfg
 
-- name: desktop/popos - gnome - locate pointer
-  dconf:
+- name: Locate pointer - pkgs/popos.yaml
+  community.general.dconf:
     key: "/org/gnome/desktop/interface/locate-pointer"
     value: "true"
+  tags:
+    - cfg
 
-- name: desktop/popos - gnome - remove minimize button
-  dconf:
+- name: Remove minimize button - pkgs/popos.yaml
+  community.general.dconf:
     key: "/org/gnome/desktop/wm/preferences/button-layout"
     value: "'appmenu:'"
+  tags:
+    - cfg
 
-- name: Opening gnome extention page to enable user-themes
+- name: Opening gnome extention page to enable user-themes - pkgs/popos.yaml
   ansible.builtin.command: xdg-open https://extensions.gnome.org/extension/19/user-themes/
+  tags:
+    - cfg

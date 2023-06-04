@@ -17,7 +17,7 @@
     remote_src: yes
 
 - name: cloud/helm - install helm
-  become: yes
+  become: true
   ansible.builtin.copy:
     src: /tmp/linux-amd64/helm
     dest: /usr/local/bin/helm

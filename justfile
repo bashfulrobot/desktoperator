@@ -63,7 +63,7 @@ help:
     @just --help
 # Run Init items only
 init:
-    @ansible-playbook -vv hosts/poptop.yaml --ask-become-pass --ask-vault-pass --connection=local --tags init
+    @ansible-playbook -vv {{`hostname`}}.yaml --ask-become-pass --ask-vault-pass --connection=local --tags init
 # Install host dependencies
 install:
     @sudo apt update
@@ -73,17 +73,17 @@ install:
 # Install ansible dependencies
 requirements:
     @ansible-galaxy install -r requirements.yaml --ignore-errors --force
-# Run ansible against my tower
-tower:
+# Run ansible playbook
+run:
     @git pull
-    @ansible-playbook -vv hosts/poptop.yaml --ask-become-pass --ask-vault-pass --connection=local
+    @ansible-playbook -vv {{`hostname`}}.yaml --ask-become-pass --ask-vault-pass --connection=local
 # Run ansible against my x13 laptop
-x13:
-    @git pull
-    @ansible-playbook hosts/dustin-krysak.yaml --ask-become-pass --ask-vault-pass --connection=local
+# x13:
+#     @git pull
+#     @ansible-playbook dustin-krysak.yaml --ask-become-pass --ask-vault-pass --connection=local
 # Display all tags used in the playbooks/tasks
 tags:
-    @ansible-playbook -vv hosts/poptop.yaml --list-tags
+    @ansible-playbook -vv {{`hostname`}}.yaml --list-tags
 # Update Flake & Rebuild nixos cfg on your current host.
 # update:
 #     @sudo nixos-rebuild switch --upgrade --flake .#\{{`hostname`}}

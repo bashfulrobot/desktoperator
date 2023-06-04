@@ -1,12 +1,12 @@
 ---
 - name: desktop/regolith - remove apt packages
-  become: yes
+  become: true
   ansible.builtin.apt:
     pkg:
       - i3xrocks-net-traffic
     state: absent
 - name: desktop/regolith - install apt packages
-  become: yes
+  become: true
   ansible.builtin.apt:
     pkg:
       - regolith-look-dracula
@@ -23,7 +23,7 @@
 
 - name: desktop/regolith - placing alttab autostart
   copy:
-    src: ../files/home/.config/autostart/alttab.desktop
+    src: files/home/.config/autostart/alttab.desktop
     dest: "{{ SYSTEM_HOME }}/.config/autostart/alttab.desktop"
     owner: "{{ SYSTEM_USER }}"
     group: "{{ SYSTEM_USER }}"
@@ -36,7 +36,6 @@
     owner: "{{ SYSTEM_USER }}"
     group: "{{ SYSTEM_USER }}"
     mode: 0644
-
 # - name: desktop/regolith - create ~/.config/regolith/i3
 #   ansible.builtin.file:
 #     path: "{{ SYSTEM_HOME }}/.config/regolith/i3"

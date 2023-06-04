@@ -1,8 +1,8 @@
-- import_tasks: ../tasks/dev/code.yaml
-- import_tasks: ../tasks/dev/editor.yaml
-- import_tasks: ../tasks/dev/git-config.yaml
-- import_tasks: ../tasks/dev/go.yaml
-# - import_tasks: ../tasks/dev/hugo.yaml
-- import_tasks: ../tasks/dev/shfmt.yaml
-- import_tasks: ../tasks/dev/gptcommit.yaml
-- import_tasks: ../tasks/dev/shadowenv.yaml
+- import_tasks: tasks/dev/code.yaml
+- import_tasks: tasks/dev/editor.yaml
+- import_tasks: tasks/dev/git-config.yaml
+- import_tasks: tasks/dev/go.yaml
+# - import_tasks: tasks/dev/hugo.yaml
+- import_tasks: tasks/dev/shfmt.yaml
+- import_tasks: tasks/dev/gptcommit.yaml
+- import_tasks: tasks/dev/shadowenv.yaml

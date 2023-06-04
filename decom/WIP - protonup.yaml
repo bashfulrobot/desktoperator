@@ -10,13 +10,13 @@
     - "/home/{{ lookup('env','USER') }}/.config/ansible-automation"
     - "/home/{{ lookup('env','USER') }}/.steam/root/compatibilitytools.d/"
 - name: desktop/software/protonup - install python3-pip apt package for protonup
-  become: yes
+  become: true
   ansible.builtin.apt:
     pkg:
       - python3-pip
     state: present
 - name: desktop/software/protonup - install protonup pip packages
-  become: yes
+  become: true
   pip:
     name:
       - protonup

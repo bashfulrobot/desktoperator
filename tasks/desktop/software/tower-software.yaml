@@ -10,14 +10,13 @@
 #     remote: flathub
 
 - name: desktop/software/tower-software - installing debs
-  become: yes
+  become: true
   ansible.builtin.apt:
     pkg:
       - gimp
       - gimp-plugin-registry
       - nala
     state: present
-
 # - name: desktop/software/common-software - install pip packages
 #   pip:
 #     name:

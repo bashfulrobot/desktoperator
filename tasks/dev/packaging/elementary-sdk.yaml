@@ -1,5 +1,5 @@
 - name: dev/elementary-sdk - install elementary sdk
-  become: yes
+  become: true
   ansible.builtin.apt:
     pkg:
       - build-essential

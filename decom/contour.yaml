@@ -10,13 +10,13 @@
     contour_version: "{{ contour_release.tag | regex_replace('^v', '') }}"
 
 - name: desktop/software/contour - download & install contour deb
-  become: yes
+  become: true
   ansible.builtin.apt:
     deb: "https://github.com/contour-terminal/contour/releases/download/{{ contour_release.tag }}/contour-{{ contour_version }}-ubuntu22.04-amd64.deb"
     state: present
 
 - name: desktop/software/contour - installing dependencies
-  become: yes
+  become: true
   ansible.builtin.apt:
     pkg:
       - libyaml-cpp0.7
@@ -30,13 +30,13 @@
 #     state: directory
 # - name: desktop/software/contour - placing contour dracula config
 #   copy:
-#     src: ../files/home/.config/contour/colors/dracula.toml
+#     src: files/home/.config/contour/colors/dracula.toml
 #     dest: "{{ SYSTEM_HOME }}/.config/contour/colors/dracula.toml"
 #     owner: "{{ SYSTEM_USER }}"
 #     group: "{{ SYSTEM_USER }}"
 # - name: desktop/software/contour - placing contour config
 #   copy:
-#     src: ../files/home/.contour.lua
+#     src: files/home/.contour.lua
 #     dest: "{{ SYSTEM_HOME }}/.contour.lua"
 #     owner: "{{ SYSTEM_USER }}"
 #     group: "{{ SYSTEM_USER }}"

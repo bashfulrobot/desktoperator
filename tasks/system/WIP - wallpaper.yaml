@@ -1,12 +1,12 @@
 # - name: system/wallpaper - disable gnome flashback for peek
-#   # become: yes
+#   # become: true
 #   community.general.dconf:
 #     key: "/org/gnome/gnome-flashback/screencast"
 #     value: "false"
 #     state: present
 
 - name: system/wallpaper - set desktop background
-  # become: yes
+  # become: true
   community.general.dconf:
     key: "/org/gnome/desktop/background/picture-uri"
     value: "{{ WALLPAPER_PATH }}"
@@ -14,7 +14,7 @@
   when: WALLPAPER_PATH is defined
 
 - name: system/wallpaper - set screensaver background
-  # become: yes
+  # become: true
   community.general.dconf:
     key: "/org/gnome/desktop/screensaver/picture-uri"
     value: "{{ WALLPAPER_PATH }}"

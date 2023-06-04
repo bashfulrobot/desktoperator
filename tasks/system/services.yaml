@@ -1,5 +1,5 @@
 - name: system/services - enable system services
-  become: yes
+  become: true
   ansible.builtin.service:
     name: "{{ item }}"
     enabled: yes
@@ -8,8 +8,8 @@
   when: SERVICES is defined
 
 - name: system/services - fixing ubuntu .local name resolution
-  become: yes
+  become: true
   replace:
     path: /etc/nsswitch.conf
-    regexp: '^hosts:(.*)files mdns.*'
-    replace: 'hosts:          files dns mdns4_minimal [NOTFOUND=return] myhostname'
+    regexp: "^hosts:(.*)files mdns.*"
+    replace: "hosts:          files dns mdns4_minimal [NOTFOUND=return] myhostname"

@@ -9,20 +9,20 @@
 
 - name: desktop/software/tilix - placing tilix dracula theme
   copy:
-    src: ../files/home/.config/tilix/schemes/Dracula.json
+    src: files/home/.config/tilix/schemes/Dracula.json
     dest: "/home/{{ lookup('env','USER') }}/.config/tilix/schemes/Dracula.json"
     owner: "{{ lookup('env','USER') }}"
     group: "{{ lookup('env','USER') }}"
 
 - name: desktop/software/tilix - install
-  become: yes
+  become: true
   ansible.builtin.apt:
     pkg:
       - tilix
     state: present
 
 - name: desktop/software/tilix - set tilix as the default terminal
-  become: yes
+  become: true
   community.general.alternatives:
     name: x-terminal-emulator
     path: /usr/bin/tilix.wrapper
@@ -30,7 +30,7 @@
 # Create new profile
 
 - name: desktop/software/tilix - create terminal - profile name
-  become: yes
+  become: true
   become_user: "{{ lookup('env','USER') }}"
   community.general.dconf:
     key: "/com/gexperts/Tilix/profiles/9a4bb7dc-cedd-4c18-9eda-3f6301b51ad4/visible-name"
@@ -38,7 +38,7 @@
     state: present
 
 - name: desktop/software/tilix - create terminal - profile list
-  become: yes
+  become: true
   become_user: "{{ lookup('env','USER') }}"
   community.general.dconf:
     key: "/com/gexperts/Tilix/profiles/list"
@@ -48,7 +48,7 @@
 # Set default profile
 
 - name: desktop/software/tilix - set terminal - default profile
-  become: yes
+  become: true
   become_user: "{{ lookup('env','USER') }}"
   community.general.dconf:
     key: "/com/gexperts/Tilix/profiles/default"
@@ -56,7 +56,7 @@
     state: present
 
 - name: desktop/software/tilix - set terminal - font size
-  become: yes
+  become: true
   become_user: "{{ lookup('env','USER') }}"
   community.general.dconf:
     key: "/com/gexperts/Tilix/profiles/9a4bb7dc-cedd-4c18-9eda-3f6301b51ad4/font"
@@ -64,7 +64,7 @@
     state: present
 
 - name: desktop/software/tilix - set terminal - cursor shape
-  become: yes
+  become: true
   become_user: "{{ lookup('env','USER') }}"
   community.general.dconf:
     key: "/com/gexperts/Tilix/profiles/9a4bb7dc-cedd-4c18-9eda-3f6301b51ad4/cursor-shape"
@@ -72,7 +72,7 @@
     state: present
 
 - name: desktop/software/tilix - set terminal - cursor blink
-  become: yes
+  become: true
   become_user: "{{ lookup('env','USER') }}"
   community.general.dconf:
     key: "/com/gexperts/Tilix/profiles/9a4bb7dc-cedd-4c18-9eda-3f6301b51ad4/cursor-blink-mode"
@@ -80,7 +80,7 @@
     state: present
 
 - name: desktop/software/tilix - set terminal - vte fix
-  become: yes
+  become: true
   become_user: "{{ lookup('env','USER') }}"
   community.general.dconf:
     key: "/com/gexperts/Tilix/profiles/9a4bb7dc-cedd-4c18-9eda-3f6301b51ad4/login-shell"
@@ -88,7 +88,7 @@
     state: present
 
 - name: desktop/software/tilix - set terminal - theme
-  become: yes
+  become: true
   become_user: "{{ lookup('env','USER') }}"
   community.general.dconf:
     key: "/com/gexperts/Tilix/profiles/9a4bb7dc-cedd-4c18-9eda-3f6301b51ad4/palette"
@@ -96,7 +96,7 @@
     state: present
 
 - name: desktop/software/tilix - set terminal - use theme colors for fore/background
-  become: yes
+  become: true
   become_user: "{{ lookup('env','USER') }}"
   community.general.dconf:
     key: "/com/gexperts/Tilix/profiles/9a4bb7dc-cedd-4c18-9eda-3f6301b51ad4/use-theme-colors"
@@ -104,7 +104,7 @@
     state: present
 
 - name: desktop/software/tilix - set terminal - Notify new activity
-  become: yes
+  become: true
   become_user: "{{ lookup('env','USER') }}"
   community.general.dconf:
     key: "/com/gexperts/Tilix/profiles/9a4bb7dc-cedd-4c18-9eda-3f6301b51ad4/notify-silence-enabled"
@@ -112,7 +112,7 @@
     state: present
 
 - name: desktop/software/tilix - set terminal - title style
-  become: yes
+  become: true
   become_user: "{{ lookup('env','USER') }}"
   community.general.dconf:
     key: "/com/gexperts/Tilix/terminal-title-style"
@@ -120,7 +120,7 @@
     state: present
 
 - name: desktop/software/tilix - set terminal - create sync shortcut
-  become: yes
+  become: true
   become_user: "{{ lookup('env','USER') }}"
   community.general.dconf:
     key: "/com/gexperts/Tilix/keybindings/session-synchronize-input"
@@ -128,7 +128,7 @@
     state: present
 
 - name: desktop/software/tilix - set terminal - disable titlebar
-  become: yes
+  become: true
   become_user: "{{ lookup('env','USER') }}"
   community.general.dconf:
     key: "/com/gexperts/Tilix/window-style"

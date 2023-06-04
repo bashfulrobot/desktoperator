@@ -1,14 +1,14 @@
 ---
 - name: desktop/software/slack - download slack gpg key file
-  become: yes
+  become: true
   get_url:
     url: https://packagecloud.io/slacktechnologies/slack/gpgkey
     dest: /etc/apt/trusted.gpg.d/slack_gpg.asc
-    mode: '0644'
+    mode: "0644"
     force: true
 
 - name: desktop/software/slack - add repository
-  become: yes
+  become: true
   ansible.builtin.apt_repository:
     repo: "deb [arch=amd64 signed-by=/etc/apt/trusted.gpg.d/slack_gpg.asc] https://packagecloud.io/slacktechnologies/slack/debian/ jessie main"
     state: present
@@ -16,6 +16,6 @@
     update_cache: true
 
 - name: desktop/software/slack - install
-  become: yes
+  become: true
   ansible.builtin.apt:
     name: slack-desktop

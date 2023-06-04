@@ -11,7 +11,7 @@
 # - debug: msg="{{ shfmt_release.tag }}"
 
 - name: dev/shfmt - download
-  become: yes
+  become: true
   get_url:
     url: "https://github.com/mvdan/sh/releases/download/{{ shfmt_release.tag }}/shfmt_{{ shfmt_release.tag }}_linux_amd64"
     dest: /usr/local/bin/shfmt

@@ -1,6 +1,6 @@
 ---
 - name: desktop/software/kitty - setup kitty folder
-  become: yes
+  become: true
   file:
     path: "/usr/local/kitty"
     state: directory
@@ -9,7 +9,6 @@
   file:
     path: "{{ SYSTEM_HOME }}/.config/kitty"
     state: directory
-
 
 - name: desktop/software/kitty - get latest release version of kitty from github
   github_release:
@@ -24,16 +23,16 @@
     kitty_version: "{{ kitty_release.tag | regex_replace('^v', '') }}"
 
 - name: desktop/software/kitty - download & extract kitty txz #noqa 503
-  become: yes
+  become: true
   unarchive:
     src: "https://github.com/kovidgoyal/kitty/releases/download/{{ kitty_release.tag }}/kitty-{{ kitty_version }}-x86_64.txz"
     dest: /usr/local/kitty
     remote_src: yes
 
 - name: desktop/software/kitty - placing kitty desktop file
-  become: yes
+  become: true
   copy:
-    src: ../files/usr/share/applications/kitty.desktop
+    src: files/usr/share/applications/kitty.desktop
     dest: "/usr/share/applications/kitty.desktop"
     owner: "root"
     group: "root"
@@ -41,25 +40,25 @@
 
 - name: desktop/software/kitty - placing kitty.conf cfg
   copy:
-    src: ../files/home/.config/kitty/kitty.conf
+    src: files/home/.config/kitty/kitty.conf
     dest: "/home/{{ lookup('env','USER') }}/.config/kitty/kitty.conf"
     owner: "{{ lookup('env','USER') }}"
     group: "{{ lookup('env','USER') }}"
 - name: desktop/software/kitty - placing kitty diff.conf cfg
   copy:
-    src: ../files/home/.config/kitty/diff.conf
+    src: files/home/.config/kitty/diff.conf
     dest: "/home/{{ lookup('env','USER') }}/.config/kitty/diff.conf"
     owner: "{{ lookup('env','USER') }}"
     group: "{{ lookup('env','USER') }}"
 - name: desktop/software/kitty - placing kitty dracula.conf cfg
   copy:
-    src: ../files/home/.config/kitty/dracula.conf
+    src: files/home/.config/kitty/dracula.conf
     dest: "/home/{{ lookup('env','USER') }}/.config/kitty/dracula.conf"
     owner: "{{ lookup('env','USER') }}"
     group: "{{ lookup('env','USER') }}"
 
 - name: desktop/software/kitty - add kitty to alternatives
-  become: yes
+  become: true
   community.general.alternatives:
     name: x-terminal-emulator
     path: /usr/local/kitty/bin/kitty
@@ -67,7 +66,7 @@
     priority: "10"
 
 - name: desktop/software/kitty - set kitty as the default terminal
-  become: yes
+  become: true
   community.general.alternatives:
     name: x-terminal-emulator
     path: /usr/local/kitty/bin/kitty

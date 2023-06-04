@@ -1,5 +1,5 @@
 - name: dev/editor - install editor dependencies
-  become: yes
+  become: true
   ansible.builtin.apt:
     pkg:
       - editorconfig
@@ -24,7 +24,7 @@
 
 - name: dev/editor - installing .editorconfig default file
   copy:
-    src: ../files/home/.config/editorconfig/.editorconfig
+    src: files/home/.config/editorconfig/.editorconfig
     dest: "{{ SYSTEM_HOME }}/.config/editorconfig/.editorconfig"
     owner: "{{ SYSTEM_USER }}"
     group: "{{ SYSTEM_USER }}"
@@ -32,7 +32,7 @@
 
 - name: dev/editor - installing uncrustify.cfg
   copy:
-    src: ../files/home/.config/uncrustify/uncrustify.cfg
+    src: files/home/.config/uncrustify/uncrustify.cfg
     dest: "{{ SYSTEM_HOME }}/.config/uncrustify/uncrustify.cfg"
     owner: "{{ SYSTEM_USER }}"
     group: "{{ SYSTEM_USER }}"

@@ -11,6 +11,6 @@
     drawio_version: "{{ drawio_release.tag | regex_replace('^v', '') }}"
 
 - name: desktop/software/draw.io - install
-  become: yes
+  become: true
   apt:
     deb: https://github.com/jgraph/drawio-desktop/releases/download/{{ drawio_release.tag }}/drawio-amd64-{{ drawio_version }}.deb

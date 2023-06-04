@@ -1,11 +1,11 @@
 - name: desktop/software/insynchq - set insynchq release apt gpg key
-  become: yes
+  become: true
   ansible.builtin.apt_key:
     keyserver: hkp://keyserver.ubuntu.com:80
     id: ACCAF35C
 
 - name: desktop/software/insynchq - add insynchq stable apt repository for previous release
-  become: yes
+  become: true
   ansible.builtin.apt_repository:
     repo: "deb http://apt.insync.io/ubuntu {{ INSYNC_UBUNTU_VERSION }} non-free contrib"
     state: present
@@ -14,18 +14,18 @@
   when: INSYNC_UBUNTU_VERSION is defined
 
 - name: desktop/software/insynchq - add insynchq stable apt repository for the latest release
-  become: yes
+  become: true
   ansible.builtin.apt_repository:
     repo: "deb http://apt.insync.io/ubuntu {{ ansible_distribution_release }} non-free contrib"
     update_cache: true
   when: INSYNC_UBUNTU_VERSION is undefined
 
 - name: desktop/software/insynchq - install insynchq
-  become: yes
+  become: true
   apt:
     name: insync
     update_cache: true
 - name: desktop/software/insynchq - install insynchq nautilus
-  become: yes
+  become: true
   apt:
     name: insync-nautilus

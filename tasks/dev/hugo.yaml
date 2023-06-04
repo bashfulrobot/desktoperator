@@ -11,6 +11,6 @@
     hugo_version: "{{ hugo_release.tag | regex_replace('^v', '') }}"
 
 - name: dev/hugo - install
-  become: yes
+  become: true
   apt:
     deb: https://github.com/gohugoio/hugo/releases/download/{{ hugo_release.tag }}/hugo_extended_{{ hugo_version }}_Linux-64bit.deb

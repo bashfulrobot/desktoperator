@@ -6,7 +6,7 @@
   register: ncspot_release
 
 - name: desktop/software/ncspot - download & extract ncspot tgz
-  become: yes
+  become: true
   unarchive:
     src: "https://github.com/hrkfdn/ncspot/releases/download/{{ ncspot_release.tag }}/ncspot-{{ ncspot_release.tag }}-linux-x86_64.tar.gz"
     dest: /usr/local/bin
@@ -21,7 +21,7 @@
   when: NCSPOT_THEME is defined
 - name: desktop/software/ncspot - placing ncspot dracula config
   copy:
-    src: ../files/home/.config/ncspot/dracula-config.toml
+    src: files/home/.config/ncspot/dracula-config.toml
     dest: "{{ SYSTEM_HOME }}/.config/ncspot/config.toml"
     owner: "{{ SYSTEM_USER }}"
     group: "{{ SYSTEM_USER }}"
