@@ -1,9 +1,9 @@
 # Enable Powerlevel10k instant prompt. Should stay close to the top of ~/.zshrc.
 # Initialization code that may require console input (password prompts, [y/n]
 # confirmations, etc.) must go above this block; everything else may go below.
-if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]; then
-  source "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh"
-fi
+# if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]; then
+#   source "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh"
+# fi
 
 # Start configuration added by Zim install {{{
 #
@@ -134,7 +134,6 @@ for key ('k') bindkey -M vicmd ${key} history-substring-search-up
 for key ('j') bindkey -M vicmd ${key} history-substring-search-down
 unset key
 
-
 # }}} End configuration added by Zim install
 
 ### DK
@@ -143,7 +142,7 @@ fpath=( $HOME/.config/zsh "${fpath[@]}" )
 autoload -Uz $fpath[1]/*(.:t)
 
 # Enable starship prompt
-# eval "$(starship init zsh)"
+eval "$(starship init zsh)"
 
 # Enable zioxide (z functionality)
 eval "$(zoxide init zsh)"
@@ -154,7 +153,7 @@ alias kcli='noglob kcli'
 alias kc='noglob kcli'
 
 # Add auto complet app COD
-source <(cod init $$ zsh)
+# source <(cod init $$ zsh)
 
 # To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
 [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
