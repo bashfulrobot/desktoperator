@@ -65,7 +65,7 @@ help:
 install:
     @sudo apt update
     @sudo apt install git build-essential ncdu curl wget neovim python3-pip -y
-	@sudo pip install ansible Jinja2 psutil
+    @sudo pip install ansible Jinja2 psutil
     @just requirements
 # Install ansible dependencies
 requirements:
@@ -73,7 +73,7 @@ requirements:
 # Run ansible against my tower
 tower:
     @git pull
-	@ansible-playbook playbooks/poptop.yaml --ask-become-pass --ask-vault-pass --connection=local
+    @ansible-playbook playbooks/poptop.yaml --ask-become-pass --ask-vault-pass --connection=local
 # Run ansible against my x13 laptop
 x13:
     @git pull
