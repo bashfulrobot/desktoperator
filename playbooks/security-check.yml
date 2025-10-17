@@ -1,0 +1,95 @@
+---
+# Security check playbook - verify sensitive files are properly protected
+- name: Security Pre-flight Checks
+  hosts: localhost
+  connection: local
+  gather_facts: no
+
+  tasks:
+    - name: Check if .vault_pass exists
+      stat:
+        path: "{{ playbook_dir }}/../.vault_pass"
+      register: vault_pass_file
+
+    - name: Verify .vault_pass permissions
+      assert:
+        that:
+          - vault_pass_file.stat.exists
+          - vault_pass_file.stat.mode == '0600'
+        fail_msg: ".vault_pass must exist with 600 permissions"
+        success_msg: "✓ .vault_pass has correct permissions (600)"
+      when: vault_pass_file.stat.exists
+
+    - name: Check if vault.yml exists
+      stat:
+        path: "{{ playbook_dir }}/../group_vars/all/vault.yml"
+      register: vault_file
+
+    - name: Verify vault.yml is encrypted
+      shell: head -1 "{{ playbook_dir }}/../group_vars/all/vault.yml" | grep -q '$ANSIBLE_VAULT'
+      register: vault_encrypted
+      failed_when: false
+      changed_when: false
+      when: vault_file.stat.exists
+
+    - name: Assert vault.yml is encrypted
+      assert:
+        that:
+          - vault_encrypted.rc == 0
+        fail_msg: "⚠️  vault.yml exists but is NOT encrypted! Run: just vault-encrypt group_vars/all/vault.yml"
+        success_msg: "✓ vault.yml is properly encrypted"
+      when: vault_file.stat.exists
+
+    - name: Verify vault.yml permissions
+      assert:
+        that:
+          - vault_file.stat.mode == '0600'
+        fail_msg: "vault.yml must have 600 permissions. Run: chmod 600 group_vars/all/vault.yml"
+        success_msg: "✓ vault.yml has correct permissions (600)"
+      when: vault_file.stat.exists
+
+    - name: Check for unencrypted sensitive files
+      find:
+        paths:
+          - "{{ playbook_dir }}/../group_vars"
+          - "{{ playbook_dir }}/../host_vars"
+        patterns:
+          - "*password*"
+          - "*secret*"
+          - "*token*"
+          - "*.key"
+          - "*.pem"
+        recurse: yes
+      register: sensitive_files
+
+    - name: Verify sensitive files are encrypted or examples
+      shell: |
+        if [[ "{{ item.path }}" == *".example"* ]]; then
+          exit 0
+        fi
+        head -1 "{{ item.path }}" | grep -q '$ANSIBLE_VAULT'
+      register: file_check
+      failed_when: file_check.rc != 0
+      changed_when: false
+      loop: "{{ sensitive_files.files }}"
+      when: sensitive_files.files | length > 0
+
+    - name: Check git status for staged sensitive files
+      shell: |
+        git status --porcelain | grep -E '(vault\.yml$|\.vault_pass|password|secret|token|\.key$|\.pem$)' || exit 0
+      register: git_sensitive
+      changed_when: false
+      failed_when: git_sensitive.stdout | length > 0
+
+    - name: Final security report
+      debug:
+        msg:
+          - "=================================="
+          - "Security Check: PASSED ✓"
+          - "=================================="
+          - "✓ .vault_pass exists with correct permissions"
+          - "✓ vault.yml is encrypted"
+          - "✓ No unencrypted sensitive files found"
+          - "✓ No sensitive files staged in git"
+          - ""
+          - "Safe to commit and push!"

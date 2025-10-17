@@ -1,0 +1,22 @@
+---
+# Main playbook - runs all configuration
+- name: Configure Desktop Systems
+  hosts: all
+  become: yes
+
+  roles:
+    # Bootstrap role - only run with --tags bootstrap (never runs by default)
+    - role: bootstrap
+      tags: [bootstrap, never]
+
+    # Core system configuration
+    - role: system
+      tags: [system, core]
+
+    # Desktop environment configuration
+    - role: desktop
+      tags: [desktop, core]
+
+    # User applications
+    - role: apps
+      tags: [apps]

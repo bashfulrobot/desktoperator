@@ -1,0 +1,12 @@
+# Python requirements for Desktop Operator
+# Install with: pip3 install -r requirements.txt
+
+# Ansible (pinned version for stability)
+ansible==2.17.0
+
+# Ansible linting
+ansible-lint==24.2.0
+
+# Additional useful tools
+jmespath==1.0.1
+netaddr==1.3.0

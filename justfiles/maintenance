@@ -1,0 +1,40 @@
+# Maintenance Operations - Justfile
+# Run periodic maintenance tasks, updates, and system cleanup
+# Usage: just -f justfiles/maintenance [recipe]
+
+# Set working directory to repo root
+set working-directory := justfile_directory() + "/.."
+
+# Default recipe - show help
+default:
+    @just -f justfiles/maintenance --list
+
+# === Maintenance Tasks ===
+
+# Run maintenance tasks (updates, cleanup)
+run:
+    ansible-playbook playbooks/maintenance.yml --limit $(hostname)
+
+# Run maintenance with check mode (dry run)
+check:
+    ansible-playbook playbooks/maintenance.yml --limit $(hostname) --check --diff
+
+# === Ansible Updates ===
+
+# Update Ansible to pinned version
+update-ansible:
+    pip3 install --upgrade -r requirements.txt
+
+# Update Ansible to latest version
+update-ansible-latest:
+    pip3 install --upgrade ansible
+
+# Update Ansible collections
+update-collections:
+    ansible-galaxy collection install -r collections/requirements.yml --upgrade
+
+# === Information ===
+
+# Show Ansible version
+version:
+    ansible --version

@@ -1,0 +1,40 @@
+---
+# Bootstrap playbook - initial system setup
+- name: Bootstrap New System
+  hosts: all
+  become: yes
+  # For initial bootstrap, you may need to add --ask-become-pass
+  # if the user doesn't have NOPASSWD sudo yet
+
+  tasks:
+    - name: Update apt cache
+      apt:
+        update_cache: yes
+        cache_valid_time: 3600
+
+    - name: Install minimal required packages
+      apt:
+        name:
+          - python3
+          - python3-pip
+          - git
+          - curl
+        state: present
+
+    - name: Ensure user has sudo privileges
+      user:
+        name: "{{ user.name }}"
+        groups: sudo
+        append: yes
+
+    - name: Create .ssh directory
+      file:
+        path: "{{ user.home }}/.ssh"
+        state: directory
+        owner: "{{ user.name }}"
+        group: "{{ user.name }}"
+        mode: '0700'
+
+    - name: Bootstrap complete message
+      debug:
+        msg: "Bootstrap complete! Run 'just all' to apply full configuration."

@@ -1,7 +1,70 @@
+# Ansible
 *.retry
-.vscode/dryrun.log
-roles
-.vscode/settings.json
-playbooks/cv_debug.log
-files/home/.config/upgit/FIX_SECRET!!!!!!config.toml
-files/home/.config/Typora
+*.log
+.vault_pass
+.vault_password
+vault_pass.txt
+
+# Ansible Galaxy
+roles/
+collections/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+.venv/
+ENV/
+env/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Secrets (never commit these)
+# Catch both .yml and .yaml extensions
+*secret*.yml
+*secret*.yaml
+*password*.yml
+*password*.yaml
+*token*.yml
+*token*.yaml
+*.pem
+*.key
+!*.key.example
+
+# Ansible vault files
+# vault.yml files CAN be committed when encrypted
+# .example files are templates with dummy data (safe to commit)
+# Block any vault files with .yaml extension (project uses .yml only)
+**/vault.yaml
+**/vault.yaml.*
+
+# SSH keys and certificates
+*.pub.key
+id_rsa
+id_ed25519
+*.crt
+*.csr
+
+# Temporary files with potential secrets
+# Catch both .yml and .yaml extensions
+*.yml.backup
+*.yaml.backup
+*.yml.bak
+*.yaml.bak
+*.yml.tmp
+*.yaml.tmp
+*.backup
+*.bak
+*.tmp

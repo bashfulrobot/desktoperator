@@ -1,0 +1,31 @@
+---
+# Version pinning for packages and tools
+# Set version_strategy in settings.yml to control behavior
+# - 'latest': Always use latest version (version specs here are ignored)
+# - 'pinned': Use versions specified below
+
+# Ansible version (managed via pip)
+ansible_version: "2.17.0"
+
+# Python packages
+python_packages:
+  ansible: "2.17.0"
+  ansible-lint: "24.2.0"
+
+# System packages (when version pinning is needed)
+# Most packages will use 'latest' from apt
+system_package_versions:
+  docker-ce: "latest"
+  git: "latest"
+
+# Application versions
+# For .deb packages that support version pinning
+app_versions:
+  code: "latest"
+  slack-desktop: "latest"
+
+# Flatpak apps (usually always latest)
+flatpak_apps: {}
+
+# Snap apps (usually always latest)
+snap_apps: {}

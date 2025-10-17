@@ -1,0 +1,9 @@
+---
+# Host-specific configuration for tower
+
+hostname: tower
+
+# Host-specific apps
+host_specific_apps:
+  - gimp
+  - inkscape

@@ -1,0 +1,103 @@
+# Security Operations - Justfile
+# Manage vault files, encryption, and security checks
+# Usage: just -f justfiles/security [recipe]
+
+# Set working directory to repo root
+set working-directory := justfile_directory() + "/.."
+
+# Default recipe - show help
+default:
+    @just -f justfiles/security --list
+
+# === Vault Management ===
+
+# Create/edit encrypted vault file
+vault-edit:
+    ansible-vault edit group_vars/all/vault.yml
+
+# View encrypted vault file
+vault-view:
+    ansible-vault view group_vars/all/vault.yml
+
+# Encrypt existing file
+vault-encrypt FILE:
+    ansible-vault encrypt {{FILE}}
+
+# Decrypt file for editing
+vault-decrypt FILE:
+    ansible-vault decrypt {{FILE}}
+
+# Create initial vault file from example
+vault-init:
+    cp group_vars/all/vault.yml.example group_vars/all/vault.yml
+    ansible-vault encrypt group_vars/all/vault.yml
+
+# Rekey vault (change vault password)
+vault-rekey:
+    ansible-vault rekey group_vars/all/vault.yml
+
+# === Security Checks ===
+
+# Run security checks on sensitive files
+check-secrets:
+    ansible-playbook playbooks/security-check.yml --limit $(hostname)
+
+# Setup sensitive files (vault password, vault.yml, etc)
+secure-setup:
+    ./scripts/secure-setup.sh
+
+# Verify no sensitive files are staged in git and vault.yml is encrypted
+check-git:
+    #!/usr/bin/env bash
+    ERROR=0
+
+    # Check for files that should NEVER be committed
+    if git status --porcelain | grep -qE '(\.vault_pass|\.vault_password|vault_pass\.txt)'; then
+        echo "❌ ERROR: Vault password file detected in git staging!"
+        git status --porcelain | grep -E '(\.vault_pass|\.vault_password|vault_pass\.txt)'
+        echo ""
+        echo "These files should NEVER be committed. Run:"
+        echo "  git reset <file>  # to unstage"
+        ERROR=1
+    fi
+
+    # Check if vault.yml is staged
+    if git status --porcelain | grep -q 'vault\.yml$'; then
+        echo "Checking vault.yml files are encrypted..."
+        for vault_file in $(git status --porcelain | grep 'vault\.yml$' | awk '{print $2}'); do
+            if [ -f "$vault_file" ]; then
+                if head -1 "$vault_file" | grep -q '\$ANSIBLE_VAULT'; then
+                    echo "✓ $vault_file is encrypted (safe to commit)"
+                else
+                    echo "❌ ERROR: $vault_file is NOT encrypted!"
+                    echo "  Run: ansible-vault encrypt $vault_file"
+                    ERROR=1
+                fi
+            fi
+        done
+    fi
+
+    # Check for other sensitive patterns
+    if git status --porcelain | grep -qE '(password|secret|token|\.key$|\.pem$)' | grep -v 'vault\.yml'; then
+        echo "⚠️  WARNING: Files with sensitive names detected:"
+        git status --porcelain | grep -E '(password|secret|token|\.key$|\.pem$)' | grep -v 'vault\.yml'
+        echo ""
+        echo "Review these files carefully before committing."
+        echo "If they contain secrets, unstage with:"
+        echo "  git reset <file>"
+    fi
+
+    if [ $ERROR -eq 0 ]; then
+        echo "✓ Security check passed - safe to commit"
+    else
+        exit 1
+    fi
+
+# Fix permissions on sensitive files
+fix-permissions:
+    #!/usr/bin/env bash
+    echo "Fixing permissions on sensitive files..."
+    [ -f .vault_pass ] && chmod 600 .vault_pass && echo "✓ .vault_pass (600)"
+    [ -f group_vars/all/vault.yml ] && chmod 600 group_vars/all/vault.yml && echo "✓ vault.yml (600)"
+    find files/home/.ssh -type f -exec chmod 600 {} \; 2>/dev/null && echo "✓ SSH files (600)" || true
+    echo "Done!"

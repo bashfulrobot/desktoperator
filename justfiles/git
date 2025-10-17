@@ -1,0 +1,39 @@
+# Git Operations - Justfile (Advanced/Less Common)
+# Advanced git operations and multi-host deployment
+# Usage: just -f justfiles/git [recipe]
+#
+# NOTE: Common operations (commit, pull) are in the main justfile
+
+# Set working directory to repo root
+set working-directory := justfile_directory() + "/.."
+
+# Default recipe - show help
+default:
+    @just -f justfiles/git --list
+
+# === Advanced Git Operations ===
+
+# Show git status with Ansible-specific context
+status:
+    #!/usr/bin/env bash
+    echo "=== Git Status ==="
+    git status
+    echo ""
+    echo "=== Vault File Status ==="
+    for vault_file in $(find group_vars host_vars -name "vault.yml" 2>/dev/null || true); do
+        if [ -f "$vault_file" ]; then
+            if head -1 "$vault_file" | grep -q '\$ANSIBLE_VAULT'; then
+                echo "✓ $vault_file - encrypted"
+            else
+                echo "⚠ $vault_file - NOT encrypted!"
+            fi
+        fi
+    done
+
+# View diff with syntax highlighting (requires delta or similar)
+diff:
+    git diff
+
+# Interactive rebase for cleaning up commits (use with caution)
+rebase-interactive COMMITS="5":
+    git rebase -i HEAD~{{COMMITS}}

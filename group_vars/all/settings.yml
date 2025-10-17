@@ -1,0 +1,171 @@
+---
+# Central settings for all hosts
+# Non-sensitive configuration only - secrets go in vault.yml
+
+# User configuration
+user:
+  name: dustin
+  home: /home/dustin
+  shell: /usr/bin/fish
+
+  # Groups the user should be a member of
+  groups:
+    - sudo
+    - audio
+    - video
+    - plugdev
+
+  # Enable passwordless sudo (creates sudoers.d file)
+  sudo_nopasswd: true
+
+  # User directories to create (optional)
+  directories:
+    - "{{ user.home }}/.config"
+    - "{{ user.home }}/.ssh"
+    - "{{ user.home }}/dev"
+
+  # Custom directory permissions (optional)
+  directory_modes:
+    "{{ user.home }}/.ssh": "0700"
+    "{{ user.home }}/.config": "0755"
+
+# Git configuration
+git:
+  user:
+    name: "bashfulrobot"
+    email: "dustin@bashfulrobot.com"
+
+  config:
+    init:
+      defaultBranch: "main"
+    merge:
+      ff: "only"
+    push:
+      default: "simple"
+    pull:
+      ff: "only"
+    rebase:
+      autoSquash: true
+    commit:
+      gpgsign: true
+    tag:
+      gpgsign: true
+    gpg:
+      format: "ssh"
+    core:
+      fsmonitor: true
+    credential:
+      helper: "store"
+
+  # URL rewrites
+  url_rewrites:
+    - insteadOf: "https://github.com"
+      pushInsteadOf: "git@github.com:"
+
+  # Aliases
+  aliases:
+    a: "add"
+    c: "commit"
+
+  # Difftastic configuration
+  difftastic:
+    enable: true
+    background: "dark"
+    color: "always"
+
+# Package management preferences
+packages:
+  # Prefer order: deb > flatpak > snap
+  prefer_order:
+    - deb
+    - flatpak
+    - snap
+
+# Version pinning strategy (use 'latest' or specific version)
+# Set to 'latest' for always-current packages
+# Set to specific version for stability
+version_strategy: latest
+
+# Core system packages (always installed)
+core_packages:
+  - openssh-server
+  - gpg
+  - git
+  - curl
+  - wget
+  - btop
+  - fish
+  - flatpak
+
+# Development packages
+dev_packages:
+  - build-essential
+  - python3
+  - python3-pip
+  - python3-venv
+
+# Python packages (installed via pip)
+python_packages:
+  - ansible-lint
+  - yamllint
+
+# Common applications (installed on all systems)
+common_apps:
+  - 1password
+  - restic
+  - zellij
+  - helix
+  - zen-browser
+
+# Application states (present/absent)
+# Override in host_vars for host-specific control
+app_states:
+  1password: present
+  restic: present
+  zellij: present
+  helix: present
+  zen-browser: present
+
+# Firewall configuration
+firewall:
+  enabled: true
+  allowed_ports:
+    - 22/tcp  # SSH
+
+# Restic/Autorestic backup configuration
+restic:
+  # Folder name for backups (usually hostname)
+  folder_name: "{{ ansible_hostname }}"
+
+  # Backup schedule (cron format for autorestic)
+  schedule: "0 2 * * *"  # 2 AM daily
+
+  # Timer schedule (systemd OnCalendar format)
+  timer_schedule: "02:00"  # 2 AM daily
+
+  # Retention policy
+  retention_policy:
+    keep_last: 5      # Keep last 5 snapshots
+    keep_hourly: 24   # Keep 24 hourly snapshots
+    keep_daily: 7     # Keep 7 daily snapshots
+    keep_weekly: 4    # Keep 4 weekly snapshots
+    keep_monthly: 6   # Keep 6 monthly snapshots
+    keep_yearly: 2    # Keep 2 yearly snapshots
+
+  # Optional local backup (in addition to B2)
+  local_backup:
+    enable: false
+    path: ""  # e.g., "/mnt/backup" - mount point must exist
+
+  # Exclude large media files (ISOs, DMGs, etc)
+  exclude_large_media: true
+
+  # Custom exclude patterns (in addition to defaults)
+  custom_excludes: []
+    # - "specific/path/to/exclude"
+    # - "**/*.log"
+
+# System update preferences
+updates:
+  auto_update: false
+  auto_reboot: false

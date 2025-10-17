@@ -1,0 +1,23 @@
+# Ansible Lint Configuration
+---
+profile: production
+
+# Exclude specific paths
+exclude_paths:
+  - .git/
+  - .vscode/
+  - collections/  # External collections downloaded via Galaxy
+  # Note: roles/ is NOT excluded - we lint our own roles
+
+# Skip specific rules if needed
+skip_list:
+  - yaml[line-length]  # Allow longer lines in some cases
+
+# Warn only for certain rules
+warn_list:
+  - experimental
+  - no-changed-when
+
+# Use custom rules path (if you have custom rules)
+# rulesdir:
+#   - ./custom-rules/
