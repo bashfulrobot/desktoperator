@@ -51,7 +51,9 @@ sudo apt-get install -y 1password-cli restic
 
 # Install autorestic
 echo "Installing autorestic..."
-wget -qO - https://raw.githubusercontent.com/cupcakearmy/autorestic/master/install.sh | sudo bash
+curl -fsSL https://raw.githubusercontent.com/cupcakearmy/autorestic/master/install.sh -o /tmp/autorestic-install.sh
+sudo bash /tmp/autorestic-install.sh
+rm /tmp/autorestic-install.sh
 
 # Clone the repository (if not already cloned)
 # Default location: ~/dev/iac/desktoperator
