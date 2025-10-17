@@ -1,1 +1,0 @@
-BACKUP_SCRIPT: "/home/{{ SYSTEM_USER }}/Documents/restic/sysdig-laptop/doppler-restic-r2-sysdig-laptop.sh"

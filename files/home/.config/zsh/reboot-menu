@@ -1,4 +1,0 @@
-reboot-menu() {
-    # Reboot into the boot loader menu once
-    systemctl reboot --boot-loader-menu=30
-}

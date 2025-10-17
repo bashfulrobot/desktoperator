@@ -1,4 +1,0 @@
-- name: system/hostname - setting a hostname
-  become: true
-  ansible.builtin.hostname:
-    name: "{{ MY_HOST }}"

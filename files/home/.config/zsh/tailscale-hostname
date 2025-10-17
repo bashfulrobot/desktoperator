@@ -1,3 +1,0 @@
-function tailscale-hostname() {
-    tailscale status --self --json | jq -r ".Self.HostName,.CertDomains[0]"
-}

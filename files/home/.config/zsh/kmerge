@@ -1,8 +1,0 @@
-kmerge() {
-    today=$(date +%Y-%m-%d-%H%M%S)
-    cp ~/.kube/config ~/.kube/${today}-config.bak
-    cd ~/.kube/config
-    # remove all but 5
-    ls *.bak | head -n -5 | xargs -d '\n' rm
-
-}

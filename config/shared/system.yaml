@@ -1,8 +1,0 @@
-# System User Info
-SYSTEM_USER: "{{ lookup('env','USER') }}"
-SYSTEM_HOME: "/home/{{ SYSTEM_USER }}"
-ANSIBLE_AUTOMATION_STATE: "{{ SYSTEM_HOME }}/.config/ansible-automation"
-
-MY_TIMEZONE: "America/Vancouver"
-
-NCSPOT_THEME: "dracula"

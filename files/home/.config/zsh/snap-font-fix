@@ -1,5 +1,0 @@
-snap-font-fix() {
-    sudo rm /var/cache/fontconfig/*
-    rm ~/.cache/fontconfig/*
-    fc-cache -r
-}

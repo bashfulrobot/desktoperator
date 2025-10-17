@@ -1,3 +1,0 @@
-function myip() {
-    curl -s https://myip.biturl.top/ | cut -d "%" -f1
-}

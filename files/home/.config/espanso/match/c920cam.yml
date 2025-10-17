@@ -1,7 +1,0 @@
-matches:
-  - trigger: ":zm"
-    replace: v4l2-ctl -d /dev/video0 --set-ctrl zoom_absolute=
-  - trigger: ":br"
-    replace: v4l2-ctl -d /dev/video0 --set-ctrl brightness=
-  - trigger: ":sat"
-    replace: v4l2-ctl -d /dev/video0 --set-ctrl saturation=160

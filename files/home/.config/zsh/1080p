@@ -1,4 +1,0 @@
-1080p() {
-    checkInstalledApt xdotool
-    xdotool windowsize $(xdotool selectwindow) 1920 1080
-}

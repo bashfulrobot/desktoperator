@@ -1,4 +1,0 @@
-#!/usr/bin/env bash
-
-/usr/bin/dex /home/dustin/.local/share/flatpak/exports/share/applications/com.raggesilver.BlackBox.desktop
-exit 0

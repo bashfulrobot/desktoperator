@@ -1,7 +1,0 @@
-- import_tasks: tasks/desktop/software/flameshot.yaml
-- import_tasks: tasks/desktop/software/insynchq.yaml
-- import_tasks: tasks/desktop/software/ncspot.yaml
-- import_tasks: tasks/desktop/software/nord-vpn.yaml
-- import_tasks: tasks/desktop/software/slack.yaml
-- import_tasks: tasks/desktop/software/tailscale.yaml
-- import_tasks: tasks/desktop/software/sd.yaml

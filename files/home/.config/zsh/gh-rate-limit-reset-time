@@ -1,7 +1,0 @@
-function gh-rate-limit-reset-time() {
-    # Are the apps installed?
-    checkInstalledApt jq
-    checkInstalledApt curl
-
-    date -d @$(curl -X GET https://api.github.com/rate_limit | jq .rate.reset)
-}

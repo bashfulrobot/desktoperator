@@ -1,4 +1,0 @@
-function tailscale-ip() {
-    tailscale status --self --json | jq -r ".Self.TailscaleIPs[0]"
-    tailscale status --self --json | jq -r ".Self.TailscaleIPs[1]"
-}
