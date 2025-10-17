@@ -9,9 +9,9 @@ echo "Desktop Operator Bootstrap"
 echo "=================================="
 echo ""
 
-# Check if running on Ubuntu
-if ! grep -q "Ubuntu" /etc/os-release; then
-    echo "ERROR: This script is designed for Ubuntu systems only."
+# Check if running on Ubuntu or Pop!_OS
+if ! grep -qE "(Ubuntu|Pop)" /etc/os-release; then
+    echo "ERROR: This script is designed for Ubuntu-based systems only (Ubuntu, Pop!_OS)."
     exit 1
 fi
 
