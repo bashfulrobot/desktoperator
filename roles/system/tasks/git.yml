@@ -83,6 +83,13 @@
     owner: "{{ user.name }}"
     mode: '0644'
 
+- name: Create gh config directory
+  ansible.builtin.file:
+    path: "{{ user.home }}/.config/gh"
+    state: directory
+    owner: "{{ user.name }}"
+    mode: '0755'
+
 - name: Deploy gh (GitHub CLI) config
   ansible.builtin.template:
     src: gh-config.yml.j2
