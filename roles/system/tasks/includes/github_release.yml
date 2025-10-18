@@ -57,7 +57,8 @@
   block:
     - name: "Find matching asset for {{ repo }}"
       ansible.builtin.set_fact:
-        github_release_asset: "{{ system_github_release_data.json.assets | selectattr('name', 'search', filename_substring) | first }}"
+        github_release_asset: "{{ system_github_release_data.json.assets | selectattr('name', 'search', filename_substring) | list | first }}"
+      failed_when: (system_github_release_data.json.assets | selectattr('name', 'search', filename_substring) | list | length) == 0
 
     - name: "Create temporary extraction directory"
       ansible.builtin.tempfile:
