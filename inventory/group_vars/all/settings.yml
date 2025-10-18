@@ -106,9 +106,9 @@ dev_packages:
   - python3-venv
 
 # Python packages (installed via pip)
-python_packages:
-  - ansible-lint
-  - yamllint
+# Note: Due to PEP 668, use pipx for development tools instead
+# Example: pipx install ansible-lint, pipx install yamllint
+python_packages: []
 
 # Common applications (installed on all systems)
 common_apps:
