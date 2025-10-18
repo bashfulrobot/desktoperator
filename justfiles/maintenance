@@ -13,11 +13,11 @@ default:
 
 # Run maintenance tasks (updates, cleanup)
 run:
-    ansible-playbook playbooks/maintenance.yml --limit $(hostname)
+    ansible-playbook maintenance.yml --limit $(hostname)
 
 # Run maintenance with check mode (dry run)
 check:
-    ansible-playbook playbooks/maintenance.yml --limit $(hostname) --check --diff
+    ansible-playbook maintenance.yml --limit $(hostname) --check --diff
 
 # === Ansible Updates ===
 

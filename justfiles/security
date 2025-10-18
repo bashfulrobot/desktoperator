@@ -40,7 +40,7 @@ vault-rekey:
 
 # Run security checks on sensitive files
 check-secrets:
-    ansible-playbook playbooks/security-check.yml --limit $(hostname)
+    ansible-playbook security-check.yml --limit $(hostname)
 
 # Setup sensitive files (vault password, vault.yml, etc)
 secure-setup:
