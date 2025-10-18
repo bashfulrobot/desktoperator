@@ -39,7 +39,7 @@
     org: extrawurst
     repo: gitui
     binary_name: gitui
-    filename_substring: linux-musl.tar.gz
+    filename_substring: linux-x86_64.tar.gz
 
 - name: Check if gh (GitHub CLI) is installed
   ansible.builtin.stat:
