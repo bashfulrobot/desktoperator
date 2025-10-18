@@ -1,0 +1,58 @@
+---
+# Slack Desktop installation via .deb package
+
+- name: Check if Slack is installed
+  command: dpkg-query -W -f='${Version}' slack-desktop
+  register: slack_installed_version
+  changed_when: false
+  failed_when: false
+  when: app_states['slack'] | default('present') == 'present'
+
+- name: Get latest Slack version from release notes
+  shell: |
+    curl -sL "https://slack.com/release-notes/linux" 2>/dev/null | grep -oP '<h2[^>]*>Slack \K[\d.]+' | head -1
+  register: slack_latest_version
+  changed_when: false
+  when: app_states['slack'] | default('present') == 'present'
+
+- name: Determine if Slack needs update
+  set_fact:
+    slack_needs_update: "{{ slack_installed_version.rc != 0 or slack_installed_version.stdout != slack_latest_version.stdout }}"
+  when: app_states['slack'] | default('present') == 'present'
+
+- name: Download Slack .deb package
+  get_url:
+    url: "https://downloads.slack-edge.com/desktop-releases/linux/x64/{{ slack_latest_version.stdout }}/slack-desktop-{{ slack_latest_version.stdout }}-amd64.deb"
+    dest: "/tmp/slack-desktop-{{ slack_latest_version.stdout }}.deb"
+    mode: '0644'
+  when:
+    - app_states['slack'] | default('present') == 'present'
+    - slack_needs_update | bool
+  become: yes
+
+- name: Install Slack .deb package
+  apt:
+    deb: "/tmp/slack-desktop-{{ slack_latest_version.stdout }}.deb"
+    state: present
+  become: yes
+  when:
+    - app_states['slack'] | default('present') == 'present'
+    - slack_needs_update | bool
+
+- name: Clean up downloaded .deb package
+  file:
+    path: "/tmp/slack-desktop-{{ slack_latest_version.stdout }}.deb"
+    state: absent
+  when:
+    - app_states['slack'] | default('present') == 'present'
+    - slack_needs_update | bool
+  become: yes
+
+# Cleanup when absent
+- name: Remove Slack when absent
+  apt:
+    name: slack-desktop
+    state: absent
+    purge: yes
+  become: yes
+  when: app_states['slack'] | default('present') == 'absent'

@@ -28,5 +28,11 @@
 - name: Include Zen Browser
   include_role:
     name: apps/zen-browser
-  tags: [zen-browser, browser, flatpak]
+  tags: [zen-browser, browser]
   when: "'zen-browser' in common_apps or app_states['zen-browser'] is defined"
+
+- name: Include Slack
+  include_role:
+    name: apps/slack
+  tags: [slack, communication]
+  when: "'slack' in common_apps or app_states['slack'] is defined"

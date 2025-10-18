@@ -118,6 +118,7 @@ common_apps:
   - zellij
   - helix
   - zen-browser
+  - slack
 
 # Application states (present/absent)
 # Override in host_vars for host-specific control
@@ -127,6 +128,7 @@ app_states:
   zellij: present
   helix: present
   zen-browser: present
+  slack: present
 
 # Firewall configuration
 firewall:
