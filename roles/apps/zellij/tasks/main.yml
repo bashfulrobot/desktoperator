@@ -1,11 +1,13 @@
 ---
 # Zellij terminal multiplexer installation and configuration
 
-- name: Install zellij
-  apt:
-    name: zellij
-    state: "{{ app_states.zellij | default('present') }}"
-  become: yes
+- name: Install zellij from GitHub
+  ansible.builtin.include_tasks: ../../system/tasks/includes/github_release.yml
+  vars:
+    org: zellij-org
+    repo: zellij
+    binary_name: zellij
+    filename_substring: x86_64-unknown-linux-musl.tar.gz
   when: app_states.zellij | default('present') == 'present'
 
 - name: Create zellij config directory
@@ -27,6 +29,13 @@
     mode: '0644'
   become: yes
   when: app_states.zellij | default('present') == 'present'
+
+- name: Remove zellij binary when absent
+  file:
+    path: /usr/local/bin/zellij
+    state: absent
+  when: app_states.zellij | default('present') == 'absent'
+  become: yes
 
 - name: Remove zellij config when absent
   file:
