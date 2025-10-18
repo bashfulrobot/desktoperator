@@ -286,6 +286,10 @@ For detailed information on specific topics, see the documentation in the `docs/
 - **[Key Management](docs/KEY_MANAGEMENT.md)** - SSH and GPG key management
 - **[Key Restore Strategy](docs/KEY_RESTORE_STRATEGY.md)** - How to recover keys in disaster scenarios
 
+### Development & Planning
+- **[TODO](TODO.md)** - Outstanding tasks and future enhancements
+- **[Directory Structure](STRUCTURE.md)** - Ansible best practices and project layout
+
 ### Other
 - **[Nix to Ansible Mapping](docs/NIX_TO_ANSIBLE_MAPPING.md)** - Translation guide for Nix users migrating to Ansible
 - **[Zen Browser Cosmic Integration](docs/ZEN_BROWSER_COSMIC_INTEGRATION.md)** - Zen Browser configuration for COSMIC desktop

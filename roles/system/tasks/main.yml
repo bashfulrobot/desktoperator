@@ -33,9 +33,10 @@
   import_tasks: ssh.yml
   tags: [ssh]
 
-- name: Import GPG configuration
-  import_tasks: gpg.yml
-  tags: [gpg]
+# GPG import disabled - see TODO.md for configuration requirements
+# - name: Import GPG configuration
+#   import_tasks: gpg.yml
+#   tags: [gpg]
 
 - name: Import firewall configuration
   import_tasks: firewall.yml
