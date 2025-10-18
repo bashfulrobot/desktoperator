@@ -1,9 +1,0 @@
----
-# Host-specific configuration for poptop
-
-hostname: poptop
-
-# Host-specific apps (in addition to common apps)
-host_specific_apps:
-  - obs-studio
-  - kdenlive

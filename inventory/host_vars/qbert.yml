@@ -1,0 +1,7 @@
+---
+# Host-specific configuration for qbert
+
+hostname: qbert
+
+# Host-specific apps (in addition to common apps)
+host_specific_apps: []
