@@ -27,7 +27,7 @@
     - claude_installed.rc != 0 or claude_current_version.rc != 0
 
 - name: Install Claude Code (latest version)
-  shell: bash /tmp/claude-install.sh -s latest
+  shell: bash /tmp/claude-install.sh latest
   environment:
     HOME: "{{ user.home }}"
   become: yes
