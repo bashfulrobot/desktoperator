@@ -96,6 +96,7 @@ core_packages:
   - btop
   - fish
   - flatpak
+  - just
 
 # Development packages
 dev_packages:

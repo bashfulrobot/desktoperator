@@ -1,6 +1,10 @@
 ---
 # System role - core system configuration
 
+- name: Import core packages installation
+  import_tasks: packages.yml
+  tags: [packages]
+
 - name: Import hostname configuration
   import_tasks: hostname.yml
   tags: [hostname]
@@ -36,3 +40,7 @@
 - name: Import firewall configuration
   import_tasks: firewall.yml
   tags: [firewall]
+
+- name: Import Tailscale VPN configuration
+  import_tasks: tailscale.yml
+  tags: [tailscale, vpn]

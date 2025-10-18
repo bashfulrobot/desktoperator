@@ -1,0 +1,24 @@
+---
+# Core system packages installation
+
+- name: Update apt cache
+  apt:
+    update_cache: yes
+    cache_valid_time: 3600
+  become: yes
+  tags: [packages]
+
+- name: Install core system packages
+  apt:
+    name: "{{ core_packages }}"
+    state: present
+  become: yes
+  tags: [packages]
+
+- name: Install development packages
+  apt:
+    name: "{{ dev_packages }}"
+    state: present
+  become: yes
+  when: dev_packages is defined
+  tags: [packages, dev]
