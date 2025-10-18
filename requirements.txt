@@ -1,12 +1,13 @@
 # Python requirements for Desktop Operator
-# Install with: pip3 install -r requirements.txt
+# NOTE: On Ubuntu/Pop!_OS, Ansible is installed via apt from the official PPA
+# This file is for reference and non-Ubuntu systems only
 
-# Ansible (pinned version for stability)
-ansible==12.1.0
+# Ansible version reference (installed via apt on Ubuntu/Pop!_OS)
+# ansible==12.1.0
 
-# Ansible linting
-ansible-lint==25.6.1
+# Ansible linting (optional, for development)
+# ansible-lint==25.6.1
 
-# Additional useful tools
-jmespath==1.0.1
-netaddr==1.3.0
+# Additional useful tools (if needed)
+# jmespath==1.0.1
+# netaddr==1.3.0

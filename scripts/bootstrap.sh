@@ -21,18 +21,14 @@ sudo apt-get update
 
 # Install minimal dependencies
 echo "Installing minimal dependencies..."
-sudo apt-get install -y python3 python3-pip python3-venv pipx git curl
+sudo apt-get install -y software-properties-common git curl
 
-# Ensure pipx path is configured
-pipx ensurepath
+# Add Ansible PPA and install Ansible
+echo "Adding Ansible PPA..."
+sudo add-apt-repository --yes --update ppa:ansible/ansible
 
-# Install Ansible and ansible-lint via pipx
-echo "Installing Ansible and ansible-lint..."
-pipx install ansible==12.1.0
-pipx inject ansible ansible-lint==25.6.1
-
-# Ensure pipx bin directory is in PATH for current session
-export PATH="$HOME/.local/bin:$PATH"
+echo "Installing Ansible..."
+sudo apt-get install -y ansible
 
 # Install 1Password CLI for vault password retrieval
 echo "Installing 1Password CLI..."
@@ -54,6 +50,8 @@ echo "Installing autorestic..."
 curl -fsSL https://raw.githubusercontent.com/cupcakearmy/autorestic/master/install.sh -o /tmp/autorestic-install.sh
 sudo bash /tmp/autorestic-install.sh
 rm /tmp/autorestic-install.sh
+# Clean up .bz2 file if it exists
+sudo rm -f /usr/local/bin/autorestic.bz2
 
 # Clone the repository (if not already cloned)
 # Default location: ~/dev/iac/desktoperator

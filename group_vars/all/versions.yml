@@ -4,13 +4,14 @@
 # - 'latest': Always use latest version (version specs here are ignored)
 # - 'pinned': Use versions specified below
 
-# Ansible version (managed via pip)
-ansible_version: "2.17.0"
+# Ansible version (managed via apt from PPA)
+# Note: Installed from ppa:ansible/ansible, always uses latest from PPA
+ansible_version: "latest"
 
-# Python packages
-python_packages:
-  ansible: "2.17.0"
-  ansible-lint: "24.2.0"
+# Python packages (optional development tools)
+python_package_versions:
+  ansible-lint: "latest"
+  yamllint: "latest"
 
 # System packages (when version pinning is needed)
 # Most packages will use 'latest' from apt
