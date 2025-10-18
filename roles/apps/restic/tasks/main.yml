@@ -101,6 +101,12 @@
   when: app_states.restic | default('present') == 'present'
 
 # Systemd service and timer (user-level)
+- name: Get user UID
+  command: id -u {{ user.name }}
+  register: user_uid_result
+  changed_when: false
+  when: app_states.restic | default('present') == 'present'
+
 - name: Create systemd user directory
   file:
     path: "{{ user.home }}/.config/systemd/user"
@@ -137,7 +143,7 @@
     - app_states.restic | default('present') == 'present'
     - systemd_service.changed or systemd_timer.changed
   environment:
-    XDG_RUNTIME_DIR: "/run/user/{{ ansible_facts['getent_passwd'][user.name][1] }}"
+    XDG_RUNTIME_DIR: "/run/user/{{ user_uid_result.stdout }}"
 
 - name: Enable and start autorestic timer
   systemd:
@@ -149,9 +155,15 @@
   become_user: "{{ user.name }}"
   when: app_states.restic | default('present') == 'present'
   environment:
-    XDG_RUNTIME_DIR: "/run/user/{{ ansible_facts['getent_passwd'][user.name][1] }}"
+    XDG_RUNTIME_DIR: "/run/user/{{ user_uid_result.stdout }}"
 
 # Cleanup when state is absent
+- name: Get user UID for cleanup
+  command: id -u {{ user.name }}
+  register: user_uid_cleanup
+  changed_when: false
+  when: app_states.restic | default('present') == 'absent'
+
 - name: Stop and disable autorestic timer when state is absent
   systemd:
     name: autorestic-backup.timer
@@ -162,7 +174,7 @@
   become_user: "{{ user.name }}"
   when: app_states.restic | default('present') == 'absent'
   environment:
-    XDG_RUNTIME_DIR: "/run/user/{{ ansible_facts['getent_passwd'][user.name][1] }}"
+    XDG_RUNTIME_DIR: "/run/user/{{ user_uid_cleanup.stdout }}"
   failed_when: false
 
 - name: Remove systemd units when state is absent
