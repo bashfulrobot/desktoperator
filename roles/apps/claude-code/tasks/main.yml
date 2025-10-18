@@ -44,8 +44,80 @@
     - app_states['claude-code'] | default('present') == 'present'
     - claude_installed.rc != 0 or claude_current_version.rc != 0
 
+# Deploy configuration files
+- name: Create .claude directory
+  file:
+    path: "{{ user.home }}/.claude"
+    state: directory
+    owner: "{{ user.name }}"
+    mode: '0755'
+  when: app_states['claude-code'] | default('present') == 'present'
+
+- name: Create .claude/agents directory
+  file:
+    path: "{{ user.home }}/.claude/agents"
+    state: directory
+    owner: "{{ user.name }}"
+    mode: '0755'
+  when: app_states['claude-code'] | default('present') == 'present'
+
+- name: Create .claude/commands directory
+  file:
+    path: "{{ user.home }}/.claude/commands"
+    state: directory
+    owner: "{{ user.name }}"
+    mode: '0755'
+  when: app_states['claude-code'] | default('present') == 'present'
+
+- name: Deploy CLAUDE.md configuration
+  copy:
+    src: CLAUDE.md
+    dest: "{{ user.home }}/.claude/CLAUDE.md"
+    owner: "{{ user.name }}"
+    mode: '0644'
+  when: app_states['claude-code'] | default('present') == 'present'
+
+- name: Deploy settings.json
+  copy:
+    src: settings.json
+    dest: "{{ user.home }}/.claude/settings.json"
+    owner: "{{ user.name }}"
+    mode: '0644'
+  when: app_states['claude-code'] | default('present') == 'present'
+
+- name: Deploy agent files
+  copy:
+    src: "agents/{{ item }}"
+    dest: "{{ user.home }}/.claude/agents/{{ item }}"
+    owner: "{{ user.name }}"
+    mode: '0644'
+  loop:
+    - api.md
+    - bash.md
+    - frontend.md
+    - go.md
+    - nix.md
+    - product.md
+    - rust.md
+    - testing.md
+  when: app_states['claude-code'] | default('present') == 'present'
+
+- name: Deploy commit command
+  copy:
+    src: commands/commit.md
+    dest: "{{ user.home }}/.claude/commands/commit.md"
+    owner: "{{ user.name }}"
+    mode: '0644'
+  when: app_states['claude-code'] | default('present') == 'present'
+
 # Cleanup when absent
-- name: Remove Claude Code when absent
+- name: Remove Claude Code configuration directory when absent
+  file:
+    path: "{{ user.home }}/.claude"
+    state: absent
+  when: app_states['claude-code'] | default('present') == 'absent'
+
+- name: Remove Claude Code data directory when absent
   file:
     path: "{{ user.home }}/.local/share/claude-code"
     state: absent
