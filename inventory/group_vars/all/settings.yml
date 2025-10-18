@@ -119,6 +119,7 @@ common_apps:
   - helix
   - zen-browser
   - slack
+  - claude-code
 
 # Application states (present/absent)
 # Override in host_vars for host-specific control
@@ -129,6 +130,7 @@ app_states:
   helix: present
   zen-browser: present
   slack: present
+  claude-code: present
 
 # Firewall configuration
 firewall:

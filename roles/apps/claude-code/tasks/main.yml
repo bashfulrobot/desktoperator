@@ -1,0 +1,58 @@
+---
+# Claude Code installation via native binary
+
+- name: Check if Claude Code is installed
+  command: which claude
+  register: claude_installed
+  changed_when: false
+  failed_when: false
+  when: app_states['claude-code'] | default('present') == 'present'
+
+- name: Get current Claude Code version
+  command: claude --version
+  register: claude_current_version
+  changed_when: false
+  failed_when: false
+  when:
+    - app_states['claude-code'] | default('present') == 'present'
+    - claude_installed.rc == 0
+
+- name: Download Claude Code installation script
+  get_url:
+    url: https://claude.ai/install.sh
+    dest: /tmp/claude-install.sh
+    mode: '0755'
+  when:
+    - app_states['claude-code'] | default('present') == 'present'
+    - claude_installed.rc != 0 or claude_current_version.rc != 0
+
+- name: Install Claude Code (latest version)
+  shell: bash /tmp/claude-install.sh -s latest
+  environment:
+    HOME: "{{ user.home }}"
+  become: yes
+  become_user: "{{ user.name }}"
+  when:
+    - app_states['claude-code'] | default('present') == 'present'
+    - claude_installed.rc != 0 or claude_current_version.rc != 0
+
+- name: Clean up installation script
+  file:
+    path: /tmp/claude-install.sh
+    state: absent
+  when:
+    - app_states['claude-code'] | default('present') == 'present'
+    - claude_installed.rc != 0 or claude_current_version.rc != 0
+
+# Cleanup when absent
+- name: Remove Claude Code when absent
+  file:
+    path: "{{ user.home }}/.local/share/claude-code"
+    state: absent
+  when: app_states['claude-code'] | default('present') == 'absent'
+
+- name: Remove Claude Code binary when absent
+  file:
+    path: "{{ user.home }}/.local/bin/claude"
+    state: absent
+  when: app_states['claude-code'] | default('present') == 'absent'

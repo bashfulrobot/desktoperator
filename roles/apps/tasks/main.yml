@@ -36,3 +36,9 @@
     name: apps/slack
   tags: [slack, communication]
   when: "'slack' in common_apps or app_states['slack'] is defined"
+
+- name: Include Claude Code
+  include_role:
+    name: apps/claude-code
+  tags: [claude-code, ai, development]
+  when: "'claude-code' in common_apps or app_states['claude-code'] is defined"
