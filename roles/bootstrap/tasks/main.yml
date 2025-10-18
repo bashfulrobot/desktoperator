@@ -1,6 +1,17 @@
 ---
 # Bootstrap role - initial system setup tasks
 
-- name: Bootstrap placeholder
-  debug:
-    msg: "Bootstrap role - tasks will be added here"
+- name: Configure NOPASSWD sudo for user
+  copy:
+    content: |
+      # Sudo configuration for {{ user.name }}
+      # Managed by Ansible - DO NOT EDIT MANUALLY
+
+      {{ user.name }} ALL=(ALL) NOPASSWD: ALL
+    dest: "/etc/sudoers.d/{{ user.name }}"
+    owner: root
+    group: root
+    mode: '0440'
+    validate: 'visudo -cf %s'
+  become: yes
+  tags: [bootstrap]
