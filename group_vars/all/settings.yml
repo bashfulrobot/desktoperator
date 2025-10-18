@@ -20,14 +20,14 @@ user:
 
   # User directories to create (optional)
   directories:
-    - "{{ user.home }}/.config"
-    - "{{ user.home }}/.ssh"
-    - "{{ user.home }}/dev"
+    - ".config"
+    - ".ssh"
+    - "dev"
 
   # Custom directory permissions (optional)
   directory_modes:
-    "{{ user.home }}/.ssh": "0700"
-    "{{ user.home }}/.config": "0755"
+    ".ssh": "0700"
+    ".config": "0755"
 
 # Git configuration
 git:

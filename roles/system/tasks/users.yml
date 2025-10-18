@@ -21,7 +21,7 @@
 
 - name: Create user directories
   file:
-    path: "{{ item }}"
+    path: "{{ user.home }}/{{ item }}"
     state: directory
     owner: "{{ user.name }}"
     group: "{{ user.name }}"
