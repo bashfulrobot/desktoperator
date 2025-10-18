@@ -31,7 +31,7 @@
     org: jesseduffield
     repo: lazygit
     binary_name: lazygit
-    filename_substring: Linux_x86_64.tar.gz
+    filename_substring: linux_x86_64.tar.gz
 
 - name: Install gitui from GitHub
   ansible.builtin.include_tasks: includes/github_release.yml
