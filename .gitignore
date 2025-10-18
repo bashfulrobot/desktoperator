@@ -6,7 +6,6 @@
 vault_pass.txt
 
 # Ansible Galaxy
-roles/
 collections/
 
 # Python
