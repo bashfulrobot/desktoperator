@@ -6,6 +6,9 @@
   # For initial bootstrap, you may need to add --ask-become-pass
   # if the user doesn't have NOPASSWD sudo yet
 
+  vars_files:
+    - ../group_vars/all/settings.yml
+
   tasks:
     - name: Update apt cache
       apt:

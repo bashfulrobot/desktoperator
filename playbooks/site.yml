@@ -4,6 +4,10 @@
   hosts: all
   become: yes
 
+  vars_files:
+    - ../group_vars/all/settings.yml
+    - ../group_vars/all/versions.yml
+
   roles:
     # Bootstrap role - only run with --tags bootstrap (never runs by default)
     - role: bootstrap
