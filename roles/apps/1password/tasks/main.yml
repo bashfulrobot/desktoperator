@@ -65,6 +65,32 @@
     state: "{{ app_states['1password'] | default('present') }}"
   become: yes
 
+- name: Create autostart directory
+  file:
+    path: "{{ user.home }}/.config/autostart"
+    state: directory
+    owner: "{{ user.name }}"
+    mode: '0755'
+  when: app_states['1password'] | default('present') == 'present'
+
+- name: Enable 1Password autostart
+  copy:
+    dest: "{{ user.home }}/.config/autostart/1password.desktop"
+    owner: "{{ user.name }}"
+    mode: '0644'
+    content: |
+      [Desktop Entry]
+      Type=Application
+      Name=1Password
+      Exec=1password --silent
+      Icon=1password
+      Comment=Password manager and secure digital wallet
+      Terminal=false
+      Categories=Office;Security;
+      StartupNotify=false
+      X-GNOME-Autostart-enabled=true
+  when: app_states['1password'] | default('present') == 'present'
+
 - name: Remove 1Password repository when absent
   apt_repository:
     repo: "deb [arch=amd64 signed-by=/usr/share/keyrings/1password-archive-keyring.gpg] https://downloads.1password.com/linux/debian/amd64 stable main"
@@ -82,4 +108,10 @@
     - /usr/share/debsig/keyrings/AC2D62742012EA22/debsig.gpg
     - /etc/debsig/policies/AC2D62742012EA22/1password.pol
   become: yes
+  when: app_states['1password'] | default('present') == 'absent'
+
+- name: Remove 1Password autostart when absent
+  file:
+    path: "{{ user.home }}/.config/autostart/1password.desktop"
+    state: absent
   when: app_states['1password'] | default('present') == 'absent'
