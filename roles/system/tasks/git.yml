@@ -33,14 +33,6 @@
     binary_name: lazygit
     filename_substring: linux_x86_64.tar.gz
 
-- name: Install gitui from GitHub
-  ansible.builtin.include_tasks: includes/github_release.yml
-  vars:
-    org: extrawurst
-    repo: gitui
-    binary_name: gitui
-    filename_substring: linux-x86_64.tar.gz
-
 - name: Check if gh (GitHub CLI) is installed
   ansible.builtin.stat:
     path: /usr/bin/gh
