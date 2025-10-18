@@ -1,0 +1,6 @@
+---
+# Bootstrap role - initial system setup tasks
+
+- name: Bootstrap placeholder
+  debug:
+    msg: "Bootstrap role - tasks will be added here"

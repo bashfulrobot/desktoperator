@@ -1,0 +1,34 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Restic list files wrapper script
+# Search for files in backups
+
+echo "==================================="
+echo "Restic File Search"
+echo "==================================="
+echo ""
+
+# Get available backends
+BACKENDS=$(autorestic info | grep -E '^\s+[a-z0-9_-]+:' | sed 's/://g' | xargs)
+
+echo "Available backends: $BACKENDS"
+read -p "Select backend (default: b2): " BACKEND
+BACKEND=${BACKEND:-b2}
+
+echo ""
+read -p "Snapshot ID (or 'latest'): " SNAPSHOT
+SNAPSHOT=${SNAPSHOT:-latest}
+
+echo ""
+read -p "Search pattern (e.g., '*.sh', '.ssh/*', or leave empty to list all): " PATTERN
+
+echo ""
+echo "Searching in $BACKEND:$SNAPSHOT..."
+echo ""
+
+if [ -z "$PATTERN" ]; then
+    autorestic exec -b "$BACKEND" -- ls "$SNAPSHOT"
+else
+    autorestic exec -b "$BACKEND" -- ls "$SNAPSHOT" | grep -E "$PATTERN" || echo "No matches found"
+fi

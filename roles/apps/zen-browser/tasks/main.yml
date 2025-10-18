@@ -1,0 +1,60 @@
+---
+# Zen Browser installation via Flatpak
+
+- name: Install Zen Browser from Flathub
+  community.general.flatpak:
+    name: io.github.zen_browser.zen
+    state: "{{ app_states['zen-browser'] | default('present') }}"
+    remote: flathub
+  become: yes
+
+# 1Password Integration for Zen Browser
+- name: Create 1Password config directory
+  file:
+    path: /etc/1password
+    state: directory
+    mode: '0755'
+  become: yes
+  when: app_states['zen-browser'] | default('present') == 'present'
+
+- name: Create 1Password custom allowed browsers file
+  file:
+    path: /etc/1password/custom_allowed_browsers
+    state: touch
+    mode: '0644'
+  become: yes
+  when: app_states['zen-browser'] | default('present') == 'present'
+
+- name: Add Zen Browser to 1Password allowed browsers
+  lineinfile:
+    path: /etc/1password/custom_allowed_browsers
+    line: "{{ item }}"
+    create: yes
+    mode: '0644'
+  loop:
+    - zen-bin           # Native binary name
+    - zen               # Possible alternative name
+    - io.github.zen_browser.zen  # Flatpak application ID
+  become: yes
+  when: app_states['zen-browser'] | default('present') == 'present'
+
+# Cleanup when absent
+- name: Remove Zen Browser when absent
+  community.general.flatpak:
+    name: io.github.zen_browser.zen
+    state: absent
+  become: yes
+  when: app_states['zen-browser'] | default('present') == 'absent'
+
+- name: Remove Zen Browser from 1Password allowed browsers when absent
+  lineinfile:
+    path: /etc/1password/custom_allowed_browsers
+    line: "{{ item }}"
+    state: absent
+  loop:
+    - zen-bin
+    - zen
+    - io.github.zen_browser.zen
+  become: yes
+  when: app_states['zen-browser'] | default('present') == 'absent'
+  failed_when: false

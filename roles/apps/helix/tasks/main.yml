@@ -1,0 +1,28 @@
+---
+# Helix editor installation
+
+- name: Install software-properties-common for add-apt-repository
+  apt:
+    name: software-properties-common
+    state: present
+  become: yes
+
+- name: Add Helix PPA
+  apt_repository:
+    repo: ppa:maveonair/helix-editor
+    state: "{{ 'present' if app_states.helix | default('present') == 'present' else 'absent' }}"
+  become: yes
+
+- name: Install Helix editor
+  apt:
+    name: helix
+    state: "{{ app_states.helix | default('present') }}"
+    update_cache: yes
+  become: yes
+
+- name: Remove Helix PPA when absent
+  apt_repository:
+    repo: ppa:maveonair/helix-editor
+    state: absent
+  become: yes
+  when: app_states.helix | default('present') == 'absent'

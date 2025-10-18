@@ -1,0 +1,54 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Restic restore wrapper script
+# Interactive restore with pattern matching
+
+echo "==================================="
+echo "Restic Restore"
+echo "==================================="
+echo ""
+
+# Get available backends
+BACKENDS=$(autorestic info | grep -E '^\s+[a-z0-9_-]+:' | sed 's/://g' | xargs)
+
+echo "Available backends: $BACKENDS"
+read -p "Select backend (default: b2): " BACKEND
+BACKEND=${BACKEND:-b2}
+
+echo ""
+echo "Latest snapshots:"
+autorestic exec -b "$BACKEND" -- snapshots --compact
+
+echo ""
+read -p "Snapshot ID (or 'latest'): " SNAPSHOT
+SNAPSHOT=${SNAPSHOT:-latest}
+
+echo ""
+read -p "Path pattern to restore (e.g., .ssh, .config/*, or leave empty for all): " PATTERN
+
+echo ""
+read -p "Restore target directory (default: /): " TARGET
+TARGET=${TARGET:-/}
+
+echo ""
+echo "Restore summary:"
+echo "  Backend: $BACKEND"
+echo "  Snapshot: $SNAPSHOT"
+echo "  Pattern: ${PATTERN:-all files}"
+echo "  Target: $TARGET"
+echo ""
+read -p "Proceed? [y/N]: " CONFIRM
+
+if [[ "$CONFIRM" =~ ^[Yy]$ ]]; then
+    if [ -z "$PATTERN" ]; then
+        autorestic exec -b "$BACKEND" -- restore "$SNAPSHOT" --target "$TARGET"
+    else
+        autorestic exec -b "$BACKEND" -- restore "$SNAPSHOT" --target "$TARGET" --include "$PATTERN"
+    fi
+    echo ""
+    echo "✓ Restore completed!"
+else
+    echo "Restore cancelled."
+    exit 0
+fi

@@ -1,0 +1,36 @@
+---
+# Zellij terminal multiplexer installation and configuration
+
+- name: Install zellij
+  apt:
+    name: zellij
+    state: "{{ app_states.zellij | default('present') }}"
+  become: yes
+  when: app_states.zellij | default('present') == 'present'
+
+- name: Create zellij config directory
+  file:
+    path: "{{ user.home }}/.config/zellij"
+    state: directory
+    owner: "{{ user.name }}"
+    group: "{{ user.name }}"
+    mode: '0755'
+  become: yes
+  when: app_states.zellij | default('present') == 'present'
+
+- name: Deploy zellij config
+  template:
+    src: config.kdl.j2
+    dest: "{{ user.home }}/.config/zellij/config.kdl"
+    owner: "{{ user.name }}"
+    group: "{{ user.name }}"
+    mode: '0644'
+  become: yes
+  when: app_states.zellij | default('present') == 'present'
+
+- name: Remove zellij config when absent
+  file:
+    path: "{{ user.home }}/.config/zellij"
+    state: absent
+  when: app_states.zellij | default('present') == 'absent'
+  become: yes

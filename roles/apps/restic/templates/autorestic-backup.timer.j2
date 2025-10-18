@@ -1,0 +1,17 @@
+[Unit]
+Description=Autorestic Backup Timer
+Requires=autorestic-backup.service
+
+[Timer]
+# Run based on cron schedule from settings
+# Default: 2 AM daily
+OnCalendar={{ restic.timer_schedule | default('02:00') }}
+
+# Randomize start time by up to 15 minutes to avoid load spikes
+RandomizedDelaySec=15min
+
+# If system was off during scheduled time, run on next boot
+Persistent=yes
+
+[Install]
+WantedBy=timers.target

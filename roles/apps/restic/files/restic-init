@@ -1,0 +1,38 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Restic repository initialization script
+# Initializes backends if they don't exist
+
+echo "==================================="
+echo "Restic Repository Initialization"
+echo "==================================="
+echo ""
+
+echo "This will initialize all configured restic repositories."
+echo "⚠️  Only run this on first-time setup!"
+echo ""
+read -p "Continue? [y/N]: " CONFIRM
+
+if [[ ! "$CONFIRM" =~ ^[Yy]$ ]]; then
+    echo "Initialization cancelled."
+    exit 0
+fi
+
+echo ""
+echo "Initializing repositories..."
+echo ""
+
+# Check backends and initialize if needed
+autorestic check -a || {
+    echo "Backends not initialized. Initializing now..."
+    autorestic exec -a -- init
+}
+
+echo ""
+echo "✓ Repositories initialized successfully!"
+echo ""
+echo "Next steps:"
+echo "1. Run 'restic-backup none' to create first backup"
+echo "2. Run 'restic-status' to verify backup"
+echo "3. Backups will run automatically via systemd timer"

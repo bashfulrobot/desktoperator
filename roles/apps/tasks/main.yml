@@ -1,0 +1,27 @@
+---
+# Apps role - application installations
+
+- name: Import 1Password installation
+  import_tasks: ../1password/tasks/main.yml
+  tags: [1password]
+  when: "'1password' in common_apps or app_states['1password'] is defined"
+
+- name: Import restic/autorestic installation
+  import_tasks: ../restic/tasks/main.yml
+  tags: [restic, backup]
+  when: "'restic' in common_apps or app_states['restic'] is defined"
+
+- name: Import Helix editor installation
+  import_tasks: ../helix/tasks/main.yml
+  tags: [helix, editor]
+  when: "'helix' in common_apps or app_states['helix'] is defined"
+
+- name: Import Zellij terminal multiplexer
+  import_tasks: ../zellij/tasks/main.yml
+  tags: [zellij, terminal]
+  when: "'zellij' in common_apps or app_states['zellij'] is defined"
+
+- name: Import Zen Browser
+  import_tasks: ../zen-browser/tasks/main.yml
+  tags: [zen-browser, browser, flatpak]
+  when: "'zen-browser' in common_apps or app_states['zen-browser'] is defined"

@@ -1,0 +1,15 @@
+---
+# Flatpak configuration
+
+- name: Install flatpak
+  apt:
+    name: flatpak
+    state: present
+  become: yes
+
+- name: Add Flathub repository
+  community.general.flatpak_remote:
+    name: flathub
+    state: present
+    flatpakrepo_url: https://dl.flathub.org/repo/flathub.flatpakrepo
+  become: yes

@@ -1,0 +1,109 @@
+---
+# Reusable task for installing GitHub releases
+# Based on: https://corymollet.com/posts/github-release-ansible-task/
+#
+# Required variables:
+#   org: GitHub organization/user (e.g., "Wilfred")
+#   repo: Repository name (e.g., "difftastic")
+#   binary_name: Name of the binary to install (e.g., "difft")
+#   filename_substring: String to match in asset name (e.g., "x86_64-unknown-linux-gnu.tar.gz")
+#
+# Optional variables:
+#   version: Specific version or "latest" (default: "latest")
+#   install_dir: Where to install binary (default: /usr/local/bin)
+
+- name: "Set default values for {{ repo }}"
+  ansible.builtin.set_fact:
+    github_release_version: "{{ version | default('latest') }}"
+    github_release_install_dir: "{{ install_dir | default('/usr/local/bin') }}"
+    github_release_state_dir: "/var/lib/ansible/github_releases/{{ org }}/{{ repo }}"
+
+- name: "Create state directory for {{ repo }}"
+  ansible.builtin.file:
+    path: "{{ github_release_state_dir }}"
+    state: directory
+    mode: '0755'
+  become: true
+
+- name: "Check if binary exists for {{ repo }}"
+  ansible.builtin.stat:
+    path: "{{ github_release_install_dir }}/{{ binary_name }}"
+  register: system_github_binary_exists
+
+- name: "Read installed version metadata for {{ repo }}"
+  ansible.builtin.slurp:
+    src: "{{ github_release_state_dir }}/version.json"
+  register: system_github_installed_version
+  when: system_github_binary_exists.stat.exists
+  failed_when: false
+
+- name: "Get latest release info from GitHub API for {{ repo }}"
+  ansible.builtin.uri:
+    url: "https://api.github.com/repos/{{ org }}/{{ repo }}/releases/{{ github_release_version }}"
+    return_content: true
+  register: system_github_release_data
+
+- name: "Parse installed version metadata"
+  ansible.builtin.set_fact:
+    github_installed_published_at: "{{ (system_github_installed_version.content | b64decode | from_json).published_at | default('') }}"
+  when: system_github_installed_version.content is defined
+
+- name: "Determine if update is needed for {{ repo }}"
+  ansible.builtin.set_fact:
+    github_needs_update: "{{ not system_github_binary_exists.stat.exists or (github_installed_published_at | default('')) != system_github_release_data.json.published_at }}"
+
+- name: "Download and install release from GitHub for {{ repo }}"
+  when: github_needs_update | bool
+  block:
+    - name: "Find matching asset for {{ repo }}"
+      ansible.builtin.set_fact:
+        github_release_asset: "{{ system_github_release_data.json.assets | selectattr('name', 'search', filename_substring) | first }}"
+
+    - name: "Create temporary extraction directory"
+      ansible.builtin.tempfile:
+        state: directory
+        suffix: "_{{ repo }}"
+      register: system_github_temp_dir
+
+    - name: "Download and extract release for {{ repo }}"
+      ansible.builtin.unarchive:
+        src: "{{ github_release_asset.browser_download_url }}"
+        dest: "{{ system_github_temp_dir.path }}"
+        remote_src: true
+        mode: '0755'
+
+    - name: "Find extracted binary"
+      ansible.builtin.find:
+        paths: "{{ system_github_temp_dir.path }}"
+        patterns: "{{ binary_name }}"
+        recurse: true
+      register: system_github_found_binary
+
+    - name: "Install binary to system path for {{ repo }}"
+      ansible.builtin.copy:
+        src: "{{ system_github_found_binary.files[0].path }}"
+        dest: "{{ github_release_install_dir }}/{{ binary_name }}"
+        mode: '0755'
+        remote_src: true
+      become: true
+
+    - name: "Save version metadata for {{ repo }}"
+      ansible.builtin.copy:
+        content: |
+          {
+            "tag_name": "{{ system_github_release_data.json.tag_name }}",
+            "published_at": "{{ system_github_release_data.json.published_at }}",
+            "html_url": "{{ system_github_release_data.json.html_url }}"
+          }
+        dest: "{{ github_release_state_dir }}/version.json"
+        mode: '0644'
+      become: true
+
+    - name: "Clean up temporary directory"
+      ansible.builtin.file:
+        path: "{{ system_github_temp_dir.path }}"
+        state: absent
+
+- name: "Show installation status for {{ repo }}"
+  ansible.builtin.debug:
+    msg: "{{ repo }} {{ system_github_release_data.json.tag_name }} is {{ 'now installed' if github_needs_update else 'already up to date' }}"

@@ -1,0 +1,42 @@
+---
+# User management tasks
+
+- name: Ensure user exists with correct configuration
+  user:
+    name: "{{ user.name }}"
+    shell: "{{ user.shell }}"
+    groups: "{{ user.groups }}"
+    append: yes
+    state: present
+    create_home: yes
+  become: yes
+
+- name: Set user password (if defined in vault)
+  user:
+    name: "{{ user.name }}"
+    password: "{{ vault_user_password | password_hash('sha512') }}"
+  when: vault_user_password is defined
+  become: yes
+  no_log: true
+
+- name: Create user directories
+  file:
+    path: "{{ item }}"
+    state: directory
+    owner: "{{ user.name }}"
+    group: "{{ user.name }}"
+    mode: "{{ user.directory_modes[item] | default('0755') }}"
+  loop: "{{ user.directories }}"
+  when: user.directories is defined
+  become: yes
+
+- name: Configure sudo access
+  template:
+    src: sudoers.j2
+    dest: "/etc/sudoers.d/{{ user.name }}"
+    owner: root
+    group: root
+    mode: '0440'
+    validate: 'visudo -cf %s'
+  when: user.sudo_nopasswd | default(false)
+  become: yes

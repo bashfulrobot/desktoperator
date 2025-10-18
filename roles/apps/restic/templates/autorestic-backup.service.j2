@@ -1,0 +1,28 @@
+[Unit]
+Description=Autorestic Backup Service
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+User={{ user.name }}
+Group={{ user.name }}
+
+# Environment variables
+Environment="HOME={{ user.home }}"
+Environment="XDG_CONFIG_HOME={{ user.home }}/.config"
+
+# Run backup with quick validation
+ExecStart={{ user.home }}/.local/bin/restic-backup quick
+
+# Logging
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=autorestic-backup
+
+# Security hardening
+PrivateTmp=yes
+NoNewPrivileges=yes
+ProtectSystem=strict
+ProtectHome=read-only
+ReadWritePaths={{ user.home }}/.config/autorestic {{ user.home }}/.local/share/autorestic

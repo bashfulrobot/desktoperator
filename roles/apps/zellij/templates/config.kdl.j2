@@ -1,0 +1,42 @@
+// Zellij Configuration
+// Managed by Ansible - changes may be overwritten
+
+// Default shell
+default_shell "{{ user.shell }}"
+
+// Theme
+theme "dracula"
+
+// Copy settings
+copy_command "wl-copy"
+
+// Scrollback
+scroll_buffer_size 10000
+
+// Mouse mode
+mouse_mode true
+
+// Pane frames
+pane_frames true
+
+// Simplified UI
+simplified_ui false
+
+// Default layout
+default_layout "compact"
+
+// Keybindings
+keybinds {
+    normal {
+        // Use Ctrl+a as prefix (like screen/tmux)
+        bind "Ctrl a" { SwitchToMode "tmux"; }
+    }
+}
+
+// Session options
+session_serialization false
+pane_viewport_serialization false
+scrollback_lines_to_serialize 0
+
+// Auto layout
+auto_layout true

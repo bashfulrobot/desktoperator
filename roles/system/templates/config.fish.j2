@@ -1,0 +1,44 @@
+# Fish shell configuration
+# Managed by Ansible - changes may be overwritten
+
+# Set PATH
+set -gx PATH $HOME/.local/bin $HOME/bin $PATH
+
+# Git configuration (from Ansible vars)
+set -gx GIT_AUTHOR_NAME "{{ git.name }}"
+set -gx GIT_AUTHOR_EMAIL "{{ git.email }}"
+set -gx GIT_COMMITTER_NAME "{{ git.name }}"
+set -gx GIT_COMMITTER_EMAIL "{{ git.email }}"
+
+# Editor
+set -gx EDITOR vim
+
+# Disable greeting
+set fish_greeting
+
+# Aliases
+alias ll 'ls -lah'
+alias g 'git'
+alias k 'kubectl'
+alias d 'docker'
+
+# Ansible environment
+if test -d $HOME/dev/iac/desktoperator
+    set -gx ANSIBLE_CONFIG $HOME/dev/iac/desktoperator/ansible.cfg
+end
+
+# Custom prompt (optional - uncomment to use)
+# function fish_prompt
+#     set_color brblue
+#     echo -n (whoami)
+#     set_color normal
+#     echo -n '@'
+#     set_color yellow
+#     echo -n (hostname)
+#     set_color normal
+#     echo -n ':'
+#     set_color green
+#     echo -n (prompt_pwd)
+#     set_color normal
+#     echo -n '> '
+# end

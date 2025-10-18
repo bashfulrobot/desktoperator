@@ -1,0 +1,13 @@
+---
+# GPG configuration tasks
+
+- name: Import GPG private keys
+  ansible.builtin.shell: |
+    set -o pipefail
+    echo "{{ item.value }}" | gpg --import
+  loop: "{{ gpg_private_keys | dict2items }}"
+  when: gpg_private_keys is defined
+  become: true
+  become_user: "{{ user.name }}"
+  no_log: true
+  changed_when: false

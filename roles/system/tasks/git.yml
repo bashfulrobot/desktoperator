@@ -1,0 +1,113 @@
+---
+# Git installation and configuration
+
+- name: Install git (from core_packages)
+  ansible.builtin.apt:
+    name: git
+    state: present
+  become: true
+
+- name: Install git-related tools
+  ansible.builtin.apt:
+    name:
+      - git-lfs
+      - gitk
+      - git-gui
+    state: present
+  become: true
+
+- name: Install difftastic from GitHub
+  ansible.builtin.include_tasks: includes/github_release.yml
+  vars:
+    org: Wilfred
+    repo: difftastic
+    binary_name: difft
+    filename_substring: x86_64-unknown-linux-gnu.tar.gz
+  when: git.difftastic.enable | default(false)
+
+- name: Install lazygit from GitHub
+  ansible.builtin.include_tasks: includes/github_release.yml
+  vars:
+    org: jesseduffield
+    repo: lazygit
+    binary_name: lazygit
+    filename_substring: Linux_x86_64.tar.gz
+
+- name: Install gitui from GitHub
+  ansible.builtin.include_tasks: includes/github_release.yml
+  vars:
+    org: extrawurst
+    repo: gitui
+    binary_name: gitui
+    filename_substring: linux-musl.tar.gz
+
+- name: Check if gh (GitHub CLI) is installed
+  ansible.builtin.stat:
+    path: /usr/bin/gh
+  register: system_gh_installed
+
+- name: Add GitHub CLI repository key
+  ansible.builtin.apt_key:
+    url: https://cli.github.com/packages/githubcli-archive-keyring.gpg
+    keyring: /usr/share/keyrings/githubcli-archive-keyring.gpg
+    state: present
+  become: true
+  when: not system_gh_installed.stat.exists
+
+- name: Add GitHub CLI repository
+  ansible.builtin.apt_repository:
+    repo: "deb [arch=amd64 signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main"
+    state: present
+    filename: github-cli
+  become: true
+  when: not system_gh_installed.stat.exists
+
+- name: Install GitHub CLI
+  ansible.builtin.apt:
+    name: gh
+    state: present
+    update_cache: true
+  become: true
+  when: not system_gh_installed.stat.exists
+
+- name: Create git config directory
+  ansible.builtin.file:
+    path: "{{ user.home }}/.config/git"
+    state: directory
+    owner: "{{ user.name }}"
+    mode: '0755'
+
+- name: Deploy gitconfig
+  ansible.builtin.template:
+    src: gitconfig.j2
+    dest: "{{ user.home }}/.gitconfig"
+    owner: "{{ user.name }}"
+    mode: '0644'
+
+- name: Deploy git allowed_signers for SSH signing
+  ansible.builtin.template:
+    src: git-allowed_signers.j2
+    dest: "{{ user.home }}/.config/git/allowed_signers"
+    owner: "{{ user.name }}"
+    mode: '0644'
+
+- name: Deploy gh (GitHub CLI) config
+  ansible.builtin.template:
+    src: gh-config.yml.j2
+    dest: "{{ user.home }}/.config/gh/config.yml"
+    owner: "{{ user.name }}"
+    mode: '0644'
+
+- name: Create lazygit config directory
+  ansible.builtin.file:
+    path: "{{ user.home }}/.config/lazygit"
+    state: directory
+    owner: "{{ user.name }}"
+    mode: '0755'
+
+- name: Deploy lazygit config
+  ansible.builtin.template:
+    src: lazygit-config.yml.j2
+    dest: "{{ user.home }}/.config/lazygit/config.yml"
+    owner: "{{ user.name }}"
+    mode: '0644'

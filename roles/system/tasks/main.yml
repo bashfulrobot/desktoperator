@@ -1,0 +1,38 @@
+---
+# System role - core system configuration
+
+- name: Import hostname configuration
+  import_tasks: hostname.yml
+  tags: [hostname]
+
+- name: Import user management tasks
+  import_tasks: users.yml
+  tags: [users]
+
+- name: Import Python packages installation
+  import_tasks: python.yml
+  tags: [python, dev]
+
+- name: Import flatpak configuration
+  import_tasks: flatpak.yml
+  tags: [flatpak]
+
+- name: Import fish shell configuration
+  import_tasks: fish.yml
+  tags: [fish, shell]
+
+- name: Import git configuration
+  import_tasks: git.yml
+  tags: [git]
+
+- name: Import SSH configuration
+  import_tasks: ssh.yml
+  tags: [ssh]
+
+- name: Import GPG configuration
+  import_tasks: gpg.yml
+  tags: [gpg]
+
+- name: Import firewall configuration
+  import_tasks: firewall.yml
+  tags: [firewall]

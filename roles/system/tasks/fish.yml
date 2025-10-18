@@ -1,0 +1,34 @@
+---
+# Fish shell configuration
+
+- name: Install fish shell
+  apt:
+    name: fish
+    state: present
+  become: yes
+
+- name: Create fish config directory
+  file:
+    path: "{{ user.home }}/.config/fish"
+    state: directory
+    owner: "{{ user.name }}"
+    group: "{{ user.name }}"
+    mode: '0755'
+  become: yes
+
+- name: Deploy fish config
+  template:
+    src: config.fish.j2
+    dest: "{{ user.home }}/.config/fish/config.fish"
+    owner: "{{ user.name }}"
+    group: "{{ user.name }}"
+    mode: '0644'
+  become: yes
+  when: fish_config_enabled | default(true)
+
+- name: Set fish as default shell
+  user:
+    name: "{{ user.name }}"
+    shell: "{{ user.shell }}"
+  become: yes
+  when: user.shell == '/usr/bin/fish'

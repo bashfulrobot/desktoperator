@@ -1,0 +1,6 @@
+---
+# Desktop role - desktop environment configuration
+
+- name: Desktop placeholder
+  debug:
+    msg: "Desktop role - tasks will be added here"

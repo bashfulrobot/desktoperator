@@ -1,0 +1,41 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Restic backup wrapper script
+# Runs autorestic backup with optional validation
+
+VALIDATE="${1:-quick}"  # quick, thorough, or none
+
+echo "==================================="
+echo "Restic Backup"
+echo "==================================="
+echo ""
+
+# Run backup
+echo "Starting backup..."
+autorestic backup -a
+
+if [ "$VALIDATE" != "none" ]; then
+    echo ""
+    echo "Running validation check: $VALIDATE"
+    case "$VALIDATE" in
+        quick)
+            # Quick check - just verify repo integrity
+            autorestic exec -a -- check
+            ;;
+        thorough)
+            # Thorough check - read all data
+            autorestic exec -a -- check --read-data
+            ;;
+        *)
+            echo "Unknown validation mode: $VALIDATE"
+            echo "Use: quick, thorough, or none"
+            exit 1
+            ;;
+    esac
+fi
+
+echo ""
+echo "==================================="
+echo "Backup completed successfully!"
+echo "==================================="
