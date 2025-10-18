@@ -1,6 +1,11 @@
 ---
 # Core system packages installation
 
+- name: Debug - Show all variables
+  debug:
+    msg: "core_packages={{ core_packages | default('UNDEFINED') }}, hostvars keys={{ hostvars[inventory_hostname].keys() | list }}"
+  tags: [packages, debug]
+
 - name: Update apt cache
   apt:
     update_cache: yes
