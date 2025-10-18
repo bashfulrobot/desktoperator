@@ -27,3 +27,19 @@
   become: yes
   when: dev_packages is defined
   tags: [packages, dev]
+
+- name: Create .local/bin directory
+  file:
+    path: "{{ user.home }}/.local/bin"
+    state: directory
+    owner: "{{ user.name }}"
+    mode: '0755'
+  tags: [packages]
+
+- name: Create fd symlink to fdfind
+  file:
+    src: /usr/bin/fdfind
+    dest: "{{ user.home }}/.local/bin/fd"
+    state: link
+    owner: "{{ user.name }}"
+  tags: [packages]
