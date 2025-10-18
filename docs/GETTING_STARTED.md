@@ -21,17 +21,14 @@ just secure-setup
 # - Script encrypts vault.yml automatically
 
 # 4. Review and customize settings
-vim group_vars/all/settings.yml
+vim inventory/group_vars/all/settings.yml
 vim inventory/hosts.yml
 
 # 5. Commit encrypted vault (this is safe!)
 just commit
 
-# 6. Bootstrap current machine
-just bootstrap-ask $(hostname)  # Use -ask if no NOPASSWD sudo yet
-
-# 7. Apply full configuration
-just all
+# 6. Apply full configuration
+just run
 
 # Done! Now iterate and commit with `just commit`
 ```
@@ -69,11 +66,8 @@ export PATH="$HOME/bin:$PATH"
 vim inventory/hosts.yml
 # Add your new machine to the inventory
 
-# 6. Bootstrap this machine
-just bootstrap-ask $(hostname)  # First time needs -ask for sudo password
-
-# 7. Apply full configuration
-just all
+# 6. Apply full configuration
+just run
 
 # Done! This machine is now fully configured
 ```
@@ -85,24 +79,22 @@ just all
 git clone ...
 just secure-setup    # Create secrets
 just commit          # Commit encrypted vault
-just bootstrap-ask   # Setup machine
-just all            # Apply config
+just run             # Apply config
 ```
 
 ### Additional Machines
 ```bash
 ./bootstrap.sh       # Download and run from GitHub
 cd ~/dev/iac/desktoperator
-just bootstrap-ask   # Setup machine
-just all            # Apply config
+just run             # Apply config
 ```
 
 ### Daily Workflow (Any Machine)
 ```bash
-vim group_vars/all/settings.yml  # Make changes
-just check                        # Dry run
-just host <hostname>              # Test on one host
-just commit                       # Safe commit with encryption check
+vim inventory/group_vars/all/settings.yml  # Make changes
+just check                                  # Dry run
+just run                                    # Apply to local host
+just commit                                 # Safe commit with encryption check
 ```
 
 ## Verification Steps
@@ -117,7 +109,7 @@ ansible --version
 ls -la .vault_pass  # Should be 600 permissions
 
 # Check vault is encrypted
-head -1 group_vars/all/vault.yml  # Should show $ANSIBLE_VAULT
+head -1 inventory/group_vars/all/vault.yml  # Should show $ANSIBLE_VAULT
 
 # Check inventory
 just hosts
@@ -195,8 +187,8 @@ just secure-setup  # Option 3: Retrieve from 1Password
 After setup:
 
 1. **Customize for your needs**:
-   - Edit `group_vars/all/settings.yml`
-   - Add host-specific config in `host_vars/`
+   - Edit `inventory/group_vars/all/settings.yml`
+   - Add host-specific config in `inventory/host_vars/`
    - Create roles for your applications
 
 2. **Add your first application**:
@@ -227,7 +219,7 @@ cat > roles/apps/myapp/tasks/main.yml << 'EOF'
 EOF
 
 # 3. Add to settings
-vim group_vars/all/settings.yml
+vim inventory/group_vars/all/settings.yml
 # Add 'myapp' to common_apps list
 
 # 4. Test
@@ -282,9 +274,9 @@ just commit
 | File | Purpose | Committed? |
 |------|---------|-----------|
 | `.vault_pass` | Vault password (plaintext) | ❌ Never |
-| `group_vars/all/vault.yml` | Secrets (encrypted) | ✅ Yes (encrypted) |
-| `group_vars/all/vault.yml.example` | Template (dummy data) | ✅ Yes |
-| `group_vars/all/settings.yml` | Non-secret config | ✅ Yes |
+| `inventory/group_vars/all/vault.yml` | Secrets (encrypted) | ✅ Yes (encrypted) |
+| `inventory/group_vars/all/vault.yml.example` | Template (dummy data) | ✅ Yes |
+| `inventory/group_vars/all/settings.yml` | Non-secret config | ✅ Yes |
 | `inventory/hosts.yml` | Host inventory | ✅ Yes |
 
 ## Success Indicators

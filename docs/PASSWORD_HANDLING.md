@@ -52,19 +52,22 @@ become_ask_pass = False
 
 ### Scenario 1: Fresh System Bootstrap
 
-**First run on a brand new system** where user doesn't have NOPASSWD sudo yet:
+**First run on a brand new system**:
 
 ```bash
-# Use this command for first-time bootstrap
-just bootstrap-ask poptop
+# Run the bootstrap script first (handled via bootstrap.sh)
+./scripts/bootstrap.sh
 
-# You'll be prompted once for sudo password
-# After this run, NOPASSWD sudo is configured
+# Then apply configuration
+just run
+
+# If sudo password is required, you'll be prompted
+# After first run, NOPASSWD sudo is configured
 ```
 
 **What happens**:
-1. You're prompted for sudo password
-2. Ansible configures NOPASSWD sudo
+1. Bootstrap script installs dependencies
+2. Ansible configures NOPASSWD sudo during first run
 3. Future runs don't require password
 
 ### Scenario 2: Existing System
@@ -201,11 +204,14 @@ chmod 600 .vault_pass
 
 **Solution**:
 ```bash
-# First-time bootstrap with password prompt
-just bootstrap-ask hostname
+# Run bootstrap script first
+./scripts/bootstrap.sh
 
-# Or run with password prompt
-ansible-playbook playbooks/site.yml --ask-become-pass
+# Then run Ansible (may prompt for password on first run)
+just run
+
+# Or explicitly request password prompt
+ansible-playbook site.yml --ask-become-pass --limit $(hostname)
 ```
 
 ### "Failed to authenticate"
@@ -226,8 +232,8 @@ chmod 644 ~/.ssh/id_rsa.pub
 
 | Command | Vault Password | Become Password | Notes |
 |---------|---------------|-----------------|-------|
-| `just all` | No prompt | No prompt | Normal operation |
-| `just bootstrap-ask poptop` | No prompt | **Prompts** | First-time setup |
+| `just run` | No prompt | No prompt | Normal operation |
+| `./scripts/bootstrap.sh` | No prompt | **May prompt** | First-time setup |
 | `just vault-edit` | No prompt | N/A | After bootstrap |
 | `just vault-init` | **Prompts** | N/A | Creating new vault |
 | `just check` | No prompt | No prompt | Dry run |
@@ -238,5 +244,5 @@ chmod 644 ~/.ssh/id_rsa.pub
 2. **Keep .vault_pass secure** with `600` permissions
 3. **Use NOPASSWD sudo** for automation convenience on personal systems
 4. **Delete .vault_pass** when not actively managing infrastructure
-5. **Use `just bootstrap-ask`** for first-time system setup
+5. **Use bootstrap script** for first-time system setup
 6. **Store vault password** in 1Password for secure retrieval
