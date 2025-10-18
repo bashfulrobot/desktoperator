@@ -97,6 +97,7 @@ core_packages:
   - fish
   - flatpak
   - just
+  - fd-find
 
 # Development packages
 dev_packages:
