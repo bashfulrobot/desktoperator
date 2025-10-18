@@ -55,12 +55,8 @@ uninstall PACKAGE:
 
 # === Bootstrap ===
 
-# Bootstrap this system (first-time setup)
+# Bootstrap this system (first-time setup, prompts for sudo password)
 bootstrap:
-    ansible-playbook playbooks/bootstrap.yml --limit $(hostname) --tags bootstrap
-
-# Bootstrap with sudo password prompt (for fresh systems without NOPASSWD sudo)
-bootstrap-ask:
     ansible-playbook playbooks/bootstrap.yml --limit $(hostname) --tags bootstrap --ask-become-pass
 
 # === Git & Version Control ===
