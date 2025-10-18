@@ -4,12 +4,6 @@
 # Set PATH
 set -gx PATH $HOME/.local/bin $HOME/bin $PATH
 
-# Git configuration (from Ansible vars)
-set -gx GIT_AUTHOR_NAME "{{ git.user.name }}"
-set -gx GIT_AUTHOR_EMAIL "{{ git.user.email }}"
-set -gx GIT_COMMITTER_NAME "{{ git.user.name }}"
-set -gx GIT_COMMITTER_EMAIL "{{ git.user.email }}"
-
 # Editor
 set -gx EDITOR vim
 
