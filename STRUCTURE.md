@@ -22,7 +22,12 @@ This repository follows the official Ansible best practices for directory struct
 ├── roles/                 # Ansible roles
 │   ├── system/           # Core system configuration
 │   ├── desktop/          # Desktop environment
-│   ├── apps/             # Application management
+│   ├── apps/             # Application management (parent role)
+│   │   ├── 1password/   # Individual app sub-roles
+│   │   ├── restic/
+│   │   ├── helix/
+│   │   ├── zellij/
+│   │   └── zen-browser/
 │   └── bootstrap/        # Initial system setup
 │
 ├── site.yml              # Master playbook
@@ -67,6 +72,26 @@ Ansible loads variables in this order (lowest to highest priority):
 6. Playbook vars_files and vars
 7. Extra vars (`-e` on command line) - Highest priority
 
+## Nested Role Structure
+
+This project uses a nested role structure for applications (`apps/1password/`, `apps/restic/`, etc.) rather than top-level roles. This deviates from standard Ansible practices but provides better organization for this use case.
+
+**Important:** When including nested roles, use `include_role` rather than `import_tasks`:
+
+```yaml
+# Correct - properly sets role context for templates
+- name: Include restic installation
+  include_role:
+    name: apps/restic
+  tags: [restic, backup]
+
+# Incorrect - templates searched relative to parent role
+# - name: Import restic installation
+#   import_tasks: ../restic/tasks/main.yml
+```
+
+**Reference:** [Ansible Roles - Include vs Import](https://docs.ansible.com/ansible/latest/playbook_guide/playbooks_reuse_roles.html)
+
 ## Maintenance
 
 When adding new hosts, playbooks, or roles:
@@ -76,7 +101,9 @@ When adding new hosts, playbooks, or roles:
 3. Place group variables in `inventory/group_vars/`
 4. Place host variables in `inventory/host_vars/`
 5. Keep roles in the `roles/` directory
-6. Document changes in this file if structure changes
+6. For application roles, nest under `roles/apps/<app-name>/`
+7. Use `include_role` to include nested roles, not `import_tasks`
+8. Document changes in this file if structure changes
 
 ## References
 
