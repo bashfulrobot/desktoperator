@@ -27,6 +27,19 @@
         groups: sudo
         append: yes
 
+    - name: Configure NOPASSWD sudo for user
+      copy:
+        content: |
+          # Sudo configuration for {{ user.name }}
+          # Managed by Ansible - DO NOT EDIT MANUALLY
+
+          {{ user.name }} ALL=(ALL) NOPASSWD: ALL
+        dest: "/etc/sudoers.d/{{ user.name }}"
+        owner: root
+        group: root
+        mode: '0440'
+        validate: 'visudo -cf %s'
+
     - name: Create .ssh directory
       file:
         path: "{{ user.home }}/.ssh"
