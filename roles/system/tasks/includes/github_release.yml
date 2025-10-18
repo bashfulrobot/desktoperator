@@ -55,10 +55,18 @@
 - name: "Download and install release from GitHub for {{ repo }}"
   when: github_needs_update | bool
   block:
-    - name: "Find matching asset for {{ repo }}"
+    - name: "Filter matching assets for {{ repo }}"
       ansible.builtin.set_fact:
-        github_release_asset: "{{ system_github_release_data.json.assets | selectattr('name', 'search', filename_substring) | list | first }}"
-      failed_when: (system_github_release_data.json.assets | selectattr('name', 'search', filename_substring) | list | length) == 0
+        github_release_assets_filtered: "{{ system_github_release_data.json.assets | selectattr('name', 'search', filename_substring) | list }}"
+
+    - name: "Verify asset was found for {{ repo }}"
+      ansible.builtin.fail:
+        msg: "No asset found matching '{{ filename_substring }}' in {{ repo }} release {{ system_github_release_data.json.tag_name }}"
+      when: github_release_assets_filtered | length == 0
+
+    - name: "Set matching asset for {{ repo }}"
+      ansible.builtin.set_fact:
+        github_release_asset: "{{ github_release_assets_filtered | first }}"
 
     - name: "Create temporary extraction directory"
       ansible.builtin.tempfile:
