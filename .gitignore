@@ -67,3 +67,4 @@ id_ed25519
 *.backup
 *.bak
 *.tmp
+tmp
