@@ -1,4 +1,5 @@
 {
   "cleanupPeriod": 15,
-  "coAuthor": ""
+  "coAuthor": "",
+  "includeCoAuthoredBy": false
 }
