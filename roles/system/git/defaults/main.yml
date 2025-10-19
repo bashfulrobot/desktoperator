@@ -1,0 +1,42 @@
+---
+# Git role defaults
+# All git-related configuration
+
+# Git configuration
+git_config:
+  init:
+    defaultBranch: "main"
+  merge:
+    ff: "only"
+  push:
+    default: "simple"
+  pull:
+    ff: "only"
+  rebase:
+    autoSquash: true
+  commit:
+    gpgsign: true
+  tag:
+    gpgsign: true
+  gpg:
+    format: "ssh"
+  core:
+    fsmonitor: true
+  credential:
+    helper: "store"
+
+# URL rewrites
+git_url_rewrites:
+  - insteadOf: "https://github.com"
+    pushInsteadOf: "git@github.com:"
+
+# Aliases
+git_aliases:
+  a: "add"
+  c: "commit"
+
+# Difftastic configuration
+git_difftastic:
+  enable: true
+  background: "dark"
+  color: "always"

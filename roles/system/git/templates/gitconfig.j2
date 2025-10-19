@@ -1,0 +1,62 @@
+[user]
+	name = {{ personal.name }}
+	email = {{ personal.email }}
+	signingkey = {{ git_ssh_signing_key }}
+
+[init]
+	defaultBranch = {{ git_config.init.defaultBranch }}
+
+[merge]
+	ff = {{ git_config.merge.ff }}
+
+[push]
+	default = {{ git_config.push.default }}
+
+[pull]
+	ff = {{ git_config.pull.ff }}
+
+[rebase]
+	autoSquash = {{ git_config.rebase.autoSquash | lower }}
+
+[commit]
+	gpgsign = {{ git_config.commit.gpgsign | lower }}
+
+[tag]
+	gpgsign = {{ git_config.tag.gpgsign | lower }}
+
+[gpg]
+	format = {{ git_config.gpg.format }}
+
+[gpg "ssh"]
+	allowedSignersFile = {{ user.home }}/.config/git/allowed_signers
+
+[core]
+	fsmonitor = {{ git_config.core.fsmonitor | lower }}
+	editor = hx
+
+[credential]
+	helper = {{ git_config.credential.helper }}
+
+{% for url_rewrite in git_url_rewrites %}
+[url "{{ url_rewrite.pushInsteadOf }}"]
+	pushInsteadOf = {{ url_rewrite.insteadOf }}
+{% endfor %}
+
+[alias]
+{% for alias, command in git_aliases.items() %}
+	{{ alias }} = {{ command }}
+{% endfor %}
+
+{% if git_difftastic.enable %}
+[diff]
+	tool = difftastic
+
+[difftool]
+	prompt = false
+
+[difftool "difftastic"]
+	cmd = difft "$LOCAL" "$REMOTE"
+
+[pager]
+	difftool = true
+{% endif %}

@@ -30,8 +30,9 @@
   import_tasks: fish.yml
   tags: [fish, shell]
 
-- name: Import git configuration
-  import_tasks: git.yml
+- name: Include git role
+  include_role:
+    name: system/git
   tags: [git]
 
 - name: Import SSH configuration
