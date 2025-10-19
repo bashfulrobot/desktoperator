@@ -7,3 +7,14 @@
 --enable-features=WaylandWindowDecorations
 --ozone-platform-hint=wayland
 --gtk-version=4
+
+# Hardware acceleration
+--enable-features=VaapiVideoDecoder,VaapiVideoEncoder
+--ignore-gpu-blocklist
+
+# WebRTC PipeWire for screen sharing on Wayland
+--enable-features=WebRTCPipeWireCapturer
+
+# GPU optimizations
+--enable-gpu-rasterization
+--enable-zero-copy
