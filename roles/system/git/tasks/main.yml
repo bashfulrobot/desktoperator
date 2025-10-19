@@ -17,7 +17,7 @@
   become: true
 
 - name: Install difftastic from GitHub
-  ansible.builtin.include_tasks: ../includes/github_release.yml
+  ansible.builtin.include_tasks: ../../tasks/includes/github_release.yml
   vars:
     org: Wilfred
     repo: difftastic
@@ -26,7 +26,7 @@
   when: git_difftastic.enable | default(false)
 
 - name: Install lazygit from GitHub
-  ansible.builtin.include_tasks: ../includes/github_release.yml
+  ansible.builtin.include_tasks: ../../tasks/includes/github_release.yml
   vars:
     org: jesseduffield
     repo: lazygit
