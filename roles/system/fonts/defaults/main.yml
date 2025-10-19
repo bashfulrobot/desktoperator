@@ -1,9 +1,12 @@
 ---
 # Nerd Fonts to install from GitHub releases
-# Format: { name: "FontName", version: "v3.4.0" }
+# version: "latest" automatically fetches newest release
 nerd_fonts:
   - name: "JetBrainsMono"
-    version: "v3.4.0"
+    version: "latest"
 
 # System font directory for all users
 system_fonts_dir: "/usr/local/share/fonts/nerd-fonts"
+
+# Version metadata directory
+nerd_fonts_state_dir: "/var/lib/ansible/nerd-fonts"
