@@ -1,0 +1,65 @@
+---
+- name: Install font management tools
+  apt:
+    name:
+      - fontconfig
+      - unzip
+    state: present
+  become: true
+
+- name: Create system fonts directory
+  file:
+    path: "{{ system_fonts_dir }}"
+    state: directory
+    mode: '0755'
+  become: true
+
+- name: Download Nerd Fonts
+  get_url:
+    url: "https://github.com/ryanoasis/nerd-fonts/releases/download/{{ item.version }}/{{ item.name }}.zip"
+    dest: "/tmp/{{ item.name }}-{{ item.version }}.zip"
+    mode: '0644'
+  loop: "{{ nerd_fonts }}"
+  become: true
+
+- name: Create temporary extraction directory
+  file:
+    path: "/tmp/nerd-fonts-{{ item.name }}"
+    state: directory
+    mode: '0755'
+  loop: "{{ nerd_fonts }}"
+  become: true
+
+- name: Extract Nerd Fonts
+  unarchive:
+    src: "/tmp/{{ item.name }}-{{ item.version }}.zip"
+    dest: "/tmp/nerd-fonts-{{ item.name }}"
+    remote_src: yes
+  loop: "{{ nerd_fonts }}"
+  become: true
+
+- name: Install font files (*.ttf and *.otf only)
+  shell: |
+    find "/tmp/nerd-fonts-{{ item.name }}" -type f \( -name "*.ttf" -o -name "*.otf" \) -exec cp {} "{{ system_fonts_dir }}/" \;
+  loop: "{{ nerd_fonts }}"
+  become: true
+  changed_when: true
+
+- name: Update font cache
+  command: fc-cache -f -v
+  become: true
+  changed_when: true
+
+- name: Clean up temporary extraction directories
+  file:
+    path: "/tmp/nerd-fonts-{{ item.name }}"
+    state: absent
+  loop: "{{ nerd_fonts }}"
+  become: true
+
+- name: Clean up temporary font archives
+  file:
+    path: "/tmp/{{ item.name }}-{{ item.version }}.zip"
+    state: absent
+  loop: "{{ nerd_fonts }}"
+  become: true

@@ -1,0 +1,9 @@
+---
+# Nerd Fonts to install from GitHub releases
+# Format: { name: "FontName", version: "v3.4.0" }
+nerd_fonts:
+  - name: "JetBrainsMono"
+    version: "v3.4.0"
+
+# System font directory for all users
+system_fonts_dir: "/usr/local/share/fonts/nerd-fonts"

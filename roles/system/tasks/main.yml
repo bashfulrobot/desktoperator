@@ -5,6 +5,11 @@
   import_tasks: packages.yml
   tags: [packages]
 
+- name: Include fonts installation
+  include_role:
+    name: system/fonts
+  tags: [fonts]
+
 - name: Import hostname configuration
   import_tasks: hostname.yml
   tags: [hostname]
