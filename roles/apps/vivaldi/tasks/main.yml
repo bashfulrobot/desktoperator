@@ -76,6 +76,17 @@
   become: yes
   when: app_states['vivaldi'] | default('present') == 'present'
 
+- name: Add Vivaldi-bin to 1Password allowed browsers
+  lineinfile:
+    path: /etc/1password/custom_allowed_browsers
+    line: vivaldi-bin
+    create: yes
+    owner: root
+    group: root
+    mode: '0755'
+  become: yes
+  when: app_states['vivaldi'] | default('present') == 'present'
+
 # Cleanup when absent
 - name: Remove Vivaldi browser when absent
   apt:
@@ -113,6 +124,15 @@
   lineinfile:
     path: /etc/1password/custom_allowed_browsers
     line: vivaldi-stable
+    state: absent
+  become: yes
+  when: app_states['vivaldi'] | default('present') == 'absent'
+  failed_when: false
+
+- name: Remove Vivaldi-bin from 1Password allowed browsers when absent
+  lineinfile:
+    path: /etc/1password/custom_allowed_browsers
+    line: vivaldi-bin
     state: absent
   become: yes
   when: app_states['vivaldi'] | default('present') == 'absent'
