@@ -1,0 +1,7 @@
+# Starship prompt configuration
+# Managed by Ansible - starship role
+
+# Initialize starship prompt
+if type -q starship
+    starship init fish | source
+end

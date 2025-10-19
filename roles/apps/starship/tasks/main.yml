@@ -40,6 +40,22 @@
     mode: '0644'
   when: app_states['starship'] | default('present') == 'present'
 
+- name: Ensure Fish conf.d directory exists
+  file:
+    path: "{{ user.home }}/.config/fish/conf.d"
+    state: directory
+    owner: "{{ user.name }}"
+    mode: '0755'
+  when: app_states['starship'] | default('present') == 'present'
+
+- name: Deploy Fish configuration for starship
+  template:
+    src: starship.fish.j2
+    dest: "{{ user.home }}/.config/fish/conf.d/starship.fish"
+    owner: "{{ user.name }}"
+    mode: '0644'
+  when: app_states['starship'] | default('present') == 'present'
+
 # Cleanup when absent
 - name: Remove starship binary when absent
   file:
@@ -51,5 +67,11 @@
 - name: Remove starship configuration when absent
   file:
     path: "{{ user.home }}/.config/starship.toml"
+    state: absent
+  when: app_states['starship'] | default('present') == 'absent'
+
+- name: Remove Fish configuration for starship when absent
+  file:
+    path: "{{ user.home }}/.config/fish/conf.d/starship.fish"
     state: absent
   when: app_states['starship'] | default('present') == 'absent'
