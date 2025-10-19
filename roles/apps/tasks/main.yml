@@ -48,3 +48,15 @@
     name: apps/starship
   tags: [starship, shell, prompt]
   when: "'starship' in common_apps or app_states['starship'] is defined"
+
+- name: Include Todoist
+  include_role:
+    name: apps/todoist
+  tags: [todoist, productivity]
+  when: "'todoist' in common_apps or app_states['todoist'] is defined"
+
+- name: Include Vivaldi browser
+  include_role:
+    name: apps/vivaldi
+  tags: [vivaldi, browser]
+  when: "'vivaldi' in common_apps or app_states['vivaldi'] is defined"

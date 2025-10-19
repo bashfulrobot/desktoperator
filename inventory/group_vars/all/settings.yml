@@ -117,10 +117,11 @@ common_apps:
   - restic
   - zellij
   - helix
-  - zen-browser
   - slack
   - claude-code
   - starship
+  - todoist
+  - vivaldi
 
 # Application states (present/absent)
 # Override in host_vars for host-specific control
@@ -129,10 +130,12 @@ app_states:
   restic: present
   zellij: present
   helix: present
-  zen-browser: present
+  zen-browser: absent
   slack: present
   claude-code: present
   starship: present
+  todoist: present
+  vivaldi: present
 
 # Firewall configuration
 firewall:

@@ -1,0 +1,119 @@
+---
+# Vivaldi Browser installation via APT repository
+
+- name: Add Vivaldi GPG key
+  get_url:
+    url: https://repo.vivaldi.com/archive/linux_signing_key.pub
+    dest: /tmp/vivaldi-signing-key.pub
+    mode: '0644'
+  when: app_states['vivaldi'] | default('present') == 'present'
+
+- name: Import Vivaldi GPG key
+  shell: |
+    gpg --dearmor < /tmp/vivaldi-signing-key.pub > /usr/share/keyrings/vivaldi.gpg
+  args:
+    creates: /usr/share/keyrings/vivaldi.gpg
+  become: yes
+  when: app_states['vivaldi'] | default('present') == 'present'
+
+- name: Add Vivaldi APT repository
+  apt_repository:
+    repo: "deb [arch=amd64 signed-by=/usr/share/keyrings/vivaldi.gpg] https://repo.vivaldi.com/archive/deb/ stable main"
+    filename: vivaldi
+    state: present
+  become: yes
+  when: app_states['vivaldi'] | default('present') == 'present'
+
+- name: Update APT cache
+  apt:
+    update_cache: yes
+  become: yes
+  when: app_states['vivaldi'] | default('present') == 'present'
+
+- name: Install Vivaldi browser
+  apt:
+    name: vivaldi-stable
+    state: present
+  become: yes
+  when: app_states['vivaldi'] | default('present') == 'present'
+
+- name: Clean up GPG key file
+  file:
+    path: /tmp/vivaldi-signing-key.pub
+    state: absent
+  when: app_states['vivaldi'] | default('present') == 'present'
+
+# 1Password Integration for Vivaldi Browser
+- name: Create 1Password config directory
+  file:
+    path: /etc/1password
+    state: directory
+    owner: root
+    group: root
+    mode: '0755'
+  become: yes
+  when: app_states['vivaldi'] | default('present') == 'present'
+
+- name: Add Vivaldi to 1Password allowed browsers
+  lineinfile:
+    path: /etc/1password/custom_allowed_browsers
+    line: vivaldi
+    create: yes
+    owner: root
+    group: root
+    mode: '0755'
+  become: yes
+  when: app_states['vivaldi'] | default('present') == 'present'
+
+- name: Add Vivaldi-stable to 1Password allowed browsers
+  lineinfile:
+    path: /etc/1password/custom_allowed_browsers
+    line: vivaldi-stable
+    create: yes
+    owner: root
+    group: root
+    mode: '0755'
+  become: yes
+  when: app_states['vivaldi'] | default('present') == 'present'
+
+# Cleanup when absent
+- name: Remove Vivaldi browser when absent
+  apt:
+    name: vivaldi-stable
+    state: absent
+    purge: yes
+  become: yes
+  when: app_states['vivaldi'] | default('present') == 'absent'
+
+- name: Remove Vivaldi repository when absent
+  apt_repository:
+    repo: "deb [arch=amd64 signed-by=/usr/share/keyrings/vivaldi.gpg] https://repo.vivaldi.com/archive/deb/ stable main"
+    filename: vivaldi
+    state: absent
+  become: yes
+  when: app_states['vivaldi'] | default('present') == 'absent'
+
+- name: Remove Vivaldi GPG key when absent
+  file:
+    path: /usr/share/keyrings/vivaldi.gpg
+    state: absent
+  become: yes
+  when: app_states['vivaldi'] | default('present') == 'absent'
+
+- name: Remove Vivaldi from 1Password allowed browsers when absent
+  lineinfile:
+    path: /etc/1password/custom_allowed_browsers
+    line: vivaldi
+    state: absent
+  become: yes
+  when: app_states['vivaldi'] | default('present') == 'absent'
+  failed_when: false
+
+- name: Remove Vivaldi-stable from 1Password allowed browsers when absent
+  lineinfile:
+    path: /etc/1password/custom_allowed_browsers
+    line: vivaldi-stable
+    state: absent
+  become: yes
+  when: app_states['vivaldi'] | default('present') == 'absent'
+  failed_when: false

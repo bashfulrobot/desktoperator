@@ -1,0 +1,17 @@
+---
+# Todoist installation via Flatpak
+
+- name: Install Todoist from Flathub
+  community.general.flatpak:
+    name: com.todoist.Todoist
+    state: present
+    remote: flathub
+  become: yes
+  when: app_states['todoist'] | default('present') == 'present'
+
+- name: Remove Todoist when absent
+  community.general.flatpak:
+    name: com.todoist.Todoist
+    state: absent
+  become: yes
+  when: app_states['todoist'] | default('present') == 'absent'
