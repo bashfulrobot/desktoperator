@@ -1,0 +1,29 @@
+---
+# Apps role defaults
+# Application inventory and states
+
+# Common applications (installed on all systems)
+common_apps:
+  - 1password
+  - restic
+  - zellij
+  - helix
+  - slack
+  - claude-code
+  - starship
+  - todoist
+  - vivaldi
+
+# Application states (present/absent)
+# Override in host_vars for host-specific control
+app_states:
+  1password: present
+  restic: present
+  zellij: present
+  helix: present
+  zen-browser: absent
+  slack: present
+  claude-code: present
+  starship: present
+  todoist: present
+  vivaldi: present
