@@ -87,6 +87,14 @@
   become: yes
   when: app_states['vivaldi'] | default('present') == 'present'
 
+- name: Deploy Vivaldi command-line flags configuration
+  template:
+    src: vivaldi-stable.conf.j2
+    dest: "{{ user.home }}/.config/vivaldi-stable.conf"
+    owner: "{{ user.name }}"
+    mode: '0644'
+  when: app_states['vivaldi'] | default('present') == 'present'
+
 # Cleanup when absent
 - name: Remove Vivaldi browser when absent
   apt:
@@ -137,3 +145,9 @@
   become: yes
   when: app_states['vivaldi'] | default('present') == 'absent'
   failed_when: false
+
+- name: Remove Vivaldi configuration file when absent
+  file:
+    path: "{{ user.home }}/.config/vivaldi-stable.conf"
+    state: absent
+  when: app_states['vivaldi'] | default('present') == 'absent'
