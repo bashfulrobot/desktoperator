@@ -1,0 +1,55 @@
+---
+# Starship prompt installation and configuration
+
+- name: Check if starship is installed
+  command: which starship
+  register: starship_installed
+  changed_when: false
+  failed_when: false
+  when: app_states['starship'] | default('present') == 'present'
+
+- name: Download starship installer
+  get_url:
+    url: https://starship.rs/install.sh
+    dest: /tmp/starship-install.sh
+    mode: '0755'
+  when:
+    - app_states['starship'] | default('present') == 'present'
+    - starship_installed.rc != 0
+
+- name: Install starship
+  shell: /tmp/starship-install.sh --yes
+  become: yes
+  when:
+    - app_states['starship'] | default('present') == 'present'
+    - starship_installed.rc != 0
+
+- name: Clean up starship installer
+  file:
+    path: /tmp/starship-install.sh
+    state: absent
+  when:
+    - app_states['starship'] | default('present') == 'present'
+    - starship_installed.rc != 0
+
+- name: Deploy starship configuration
+  template:
+    src: starship.toml.j2
+    dest: "{{ user.home }}/.config/starship.toml"
+    owner: "{{ user.name }}"
+    mode: '0644'
+  when: app_states['starship'] | default('present') == 'present'
+
+# Cleanup when absent
+- name: Remove starship binary when absent
+  file:
+    path: /usr/local/bin/starship
+    state: absent
+  become: yes
+  when: app_states['starship'] | default('present') == 'absent'
+
+- name: Remove starship configuration when absent
+  file:
+    path: "{{ user.home }}/.config/starship.toml"
+    state: absent
+  when: app_states['starship'] | default('present') == 'absent'

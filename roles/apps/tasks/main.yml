@@ -42,3 +42,9 @@
     name: apps/claude-code
   tags: [claude-code, ai, development]
   when: "'claude-code' in common_apps or app_states['claude-code'] is defined"
+
+- name: Include Starship prompt
+  include_role:
+    name: apps/starship
+  tags: [starship, shell, prompt]
+  when: "'starship' in common_apps or app_states['starship'] is defined"

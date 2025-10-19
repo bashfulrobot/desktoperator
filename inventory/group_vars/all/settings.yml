@@ -120,6 +120,7 @@ common_apps:
   - zen-browser
   - slack
   - claude-code
+  - starship
 
 # Application states (present/absent)
 # Override in host_vars for host-specific control
@@ -131,6 +132,7 @@ app_states:
   zen-browser: present
   slack: present
   claude-code: present
+  starship: present
 
 # Firewall configuration
 firewall:
