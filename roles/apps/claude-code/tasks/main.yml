@@ -24,7 +24,7 @@
     mode: '0755'
   when:
     - app_states['claude-code'] | default('present') == 'present'
-    - claude_installed.rc != 0 or claude_current_version.rc != 0
+    - claude_installed.rc != 0 or (claude_current_version is defined and not claude_current_version.skipped and claude_current_version.rc != 0)
 
 - name: Install Claude Code (latest version)
   shell: bash /tmp/claude-install.sh latest
@@ -34,7 +34,7 @@
   become_user: "{{ user.name }}"
   when:
     - app_states['claude-code'] | default('present') == 'present'
-    - claude_installed.rc != 0 or claude_current_version.rc != 0
+    - claude_installed.rc != 0 or (claude_current_version is defined and not claude_current_version.skipped and claude_current_version.rc != 0)
 
 - name: Clean up installation script
   file:
@@ -42,7 +42,7 @@
     state: absent
   when:
     - app_states['claude-code'] | default('present') == 'present'
-    - claude_installed.rc != 0 or claude_current_version.rc != 0
+    - claude_installed.rc != 0 or (claude_current_version is defined and not claude_current_version.skipped and claude_current_version.rc != 0)
 
 # Deploy configuration files
 - name: Create .claude directory
