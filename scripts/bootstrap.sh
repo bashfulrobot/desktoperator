@@ -30,6 +30,10 @@ sudo add-apt-repository --yes --update ppa:ansible/ansible
 echo "Installing Ansible..."
 sudo apt-get install -y ansible
 
+# Install just command runner
+echo "Installing just..."
+curl --proto '=https' --tlsv1.2 -sSf https://just.systems/install.sh | sudo bash -s -- --to /usr/local/bin
+
 # Install 1Password CLI and Desktop for vault password retrieval
 echo "Installing 1Password (Desktop + CLI)..."
 curl -sS https://downloads.1password.com/linux/keys/1password.asc | \
@@ -234,12 +238,28 @@ fi
 # Verify no sensitive files are staged for git
 echo ""
 echo "Checking for accidentally staged sensitive files..."
-git status --porcelain | grep -E '(vault\.yml$|\.vault_pass|password|secret|token|\.key$|\.pem$)' && {
-    echo "⚠️  WARNING: Sensitive files detected in git staging area!"
-    echo "Please review 'git status' and unstage any sensitive files."
-} || {
+
+# Check for sensitive files in staging, excluding encrypted vault.yml
+STAGED_SENSITIVE=$(git status --porcelain | grep -E '(\.vault_pass|password|secret|token|\.key$|\.pem$)' || true)
+
+# Check for unencrypted vault.yml (should start with $ANSIBLE_VAULT if encrypted)
+if git status --porcelain | grep -q 'vault\.yml$'; then
+    for vault_file in $(find . -name "vault.yml" 2>/dev/null); do
+        if [ -f "$vault_file" ]; then
+            if ! head -1 "$vault_file" | grep -q '\$ANSIBLE_VAULT'; then
+                STAGED_SENSITIVE="${STAGED_SENSITIVE}\nUnencrypted: $vault_file"
+            fi
+        fi
+    done
+fi
+
+if [ -n "$STAGED_SENSITIVE" ]; then
+    echo "⚠️  WARNING: Sensitive files detected!"
+    echo "$STAGED_SENSITIVE"
+    echo "Please review 'git status' and ensure files are encrypted or excluded."
+else
     echo "✓ No sensitive files detected in git staging"
-}
+fi
 
 echo ""
 echo "=================================="
