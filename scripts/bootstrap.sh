@@ -100,6 +100,64 @@ fi
 
 cd "$REPO_DIR"
 
+# Restore Vivaldi profile from SSH server
+if [ ! -d "$HOME/.config/vivaldi/Default" ]; then
+    echo ""
+    echo "==================================="
+    echo "Vivaldi Profile Restoration"
+    echo "==================================="
+    echo ""
+    echo "This will restore your Vivaldi browser settings and extensions"
+    echo "from the encrypted backup stored on your internal server."
+    echo ""
+
+    read -p "Would you like to restore the Vivaldi profile now? [Y/n]: " RESTORE_VIVALDI
+
+    if [[ ! "$RESTORE_VIVALDI" =~ ^[Nn]$ ]]; then
+        echo ""
+        echo "Default SSH location: dustin@192.168.168.1:~/bootstrap/vivaldi-default-profile.tar.gz.vault"
+        read -p "Press Enter to use default, or enter alternate SSH location: " SSH_LOCATION
+
+        if [ -z "$SSH_LOCATION" ]; then
+            SSH_LOCATION="dustin@192.168.168.1:~/bootstrap/vivaldi-default-profile.tar.gz.vault"
+        fi
+
+        echo ""
+        echo "Downloading encrypted Vivaldi profile from $SSH_LOCATION..."
+
+        # Download from SSH server
+        scp "$SSH_LOCATION" /tmp/vivaldi-default-profile.tar.gz.vault
+
+        if [ $? -eq 0 ]; then
+            echo ""
+            echo "Decrypting and restoring Vivaldi profile..."
+            echo "You will be prompted for the vault password."
+            echo ""
+
+            # Decrypt to temporary location (will prompt for password)
+            ansible-vault decrypt /tmp/vivaldi-default-profile.tar.gz.vault \
+                --output=/tmp/vivaldi-default-profile.tar.gz \
+                --ask-vault-pass
+
+            # Extract to Vivaldi config location
+            mkdir -p ~/.config/vivaldi
+            tar -xzf /tmp/vivaldi-default-profile.tar.gz -C ~/.config/vivaldi
+
+            # Clean up temporary files
+            rm /tmp/vivaldi-default-profile.tar.gz
+            rm /tmp/vivaldi-default-profile.tar.gz.vault
+
+            echo "✓ Vivaldi profile restored"
+        else
+            echo "⚠️  Failed to download Vivaldi profile from SSH server."
+            echo "You can restore it later using the instructions in extras/vivaldi-profile/README.md"
+        fi
+    else
+        echo "Skipping Vivaldi profile restoration."
+        echo "You can restore it later using the instructions in extras/vivaldi-profile/README.md"
+    fi
+fi
+
 # Launch 1Password GUI for authentication
 echo ""
 echo "==================================="
