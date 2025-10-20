@@ -67,17 +67,36 @@ fi
 
 cd "$REPO_DIR"
 
-# Retrieve vault password from 1Password
+# Launch 1Password GUI for authentication
 echo ""
-echo "Retrieving vault password from 1Password..."
-echo "You will need to authenticate to 1Password CLI."
+echo "==================================="
+echo "1Password Authentication"
+echo "==================================="
+echo ""
+echo "Launching 1Password desktop application..."
 echo ""
 
-# Sign in to 1Password (user will be prompted)
-eval $(op signin)
+# Launch 1Password in the background
+1password &
+ONEPASSWORD_PID=$!
+
+echo "Please complete the following steps:"
+echo ""
+echo "1. Sign in to 1Password desktop application"
+echo "2. Enable CLI integration:"
+echo "   • Go to Settings → Developer"
+echo "   • Enable 'Connect with 1Password CLI'"
+echo "   • Authorize CLI access when prompted"
+echo ""
+echo "Once you've signed in and enabled CLI integration,"
+read -p "press Enter to continue..."
+
+# Wait a moment for CLI integration to be ready
+sleep 2
 
 # Retrieve vault password and save to .vault_pass
-echo "Retrieving vault password..."
+echo ""
+echo "Retrieving vault password from 1Password..."
 op read "op://Personal/desktoperator-bootstrap/ansible-vault" > .vault_pass
 chmod 600 .vault_pass
 echo "✓ Vault password saved to .vault_pass (permissions: 600)"
@@ -186,21 +205,30 @@ else
     echo "You can configure it later by running Ansible with the restic role."
 fi
 
-# Create vault.yml if it doesn't exist
-if [ ! -f "group_vars/all/vault.yml" ]; then
-    echo ""
-    echo "Creating initial vault file..."
-    cp group_vars/all/vault.yml.example group_vars/all/vault.yml
-
-    echo "Please edit group_vars/all/vault.yml with your actual secrets, then we'll encrypt it."
-    read -p "Press Enter when you've added your secrets to vault.yml..."
-
-    # Encrypt the vault file
-    ansible-vault encrypt group_vars/all/vault.yml
-    chmod 600 group_vars/all/vault.yml
-    echo "✓ Vault file encrypted and secured (permissions: 600)"
-else
+# Check vault.yml status
+echo ""
+if [ -f "inventory/group_vars/all/vault.yml" ]; then
+    echo "✓ Vault file already exists (cloned from repository)"
+    chmod 600 inventory/group_vars/all/vault.yml
+elif [ -f "group_vars/all/vault.yml" ]; then
     echo "✓ Vault file already exists"
+    chmod 600 group_vars/all/vault.yml
+else
+    echo "Creating initial vault file..."
+    echo "⚠️  Note: For existing installations, vault.yml should be in the repository."
+
+    if [ -f "group_vars/all/vault.yml.example" ]; then
+        cp group_vars/all/vault.yml.example group_vars/all/vault.yml
+        echo "Please edit group_vars/all/vault.yml with your actual secrets, then we'll encrypt it."
+        read -p "Press Enter when you've added your secrets to vault.yml..."
+
+        # Encrypt the vault file
+        ansible-vault encrypt group_vars/all/vault.yml
+        chmod 600 group_vars/all/vault.yml
+        echo "✓ Vault file encrypted and secured (permissions: 600)"
+    else
+        echo "⚠️  Warning: vault.yml.example not found. You'll need to create vault.yml manually."
+    fi
 fi
 
 # Verify no sensitive files are staged for git
