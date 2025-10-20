@@ -210,6 +210,36 @@
     - WorkspaceButton.svg
   when: app_states['vivaldi'] | default('present') == 'present'
 
+- name: Extract COSMIC Dark theme colors
+  ansible.builtin.shell: |
+    export HOME="{{ user.home }}"
+    extract-cosmic-colors Dark
+  register: cosmic_colors_dark_raw
+  changed_when: false
+  become: false
+  become_user: "{{ user.name }}"
+  when: app_states['vivaldi'] | default('present') == 'present'
+
+- name: Parse COSMIC Dark theme colors
+  ansible.builtin.set_fact:
+    theme_colors_dark: "{{ cosmic_colors_dark_raw.stdout | from_json }}"
+  when: app_states['vivaldi'] | default('present') == 'present'
+
+- name: Extract COSMIC Light theme colors
+  ansible.builtin.shell: |
+    export HOME="{{ user.home }}"
+    extract-cosmic-colors Light
+  register: cosmic_colors_light_raw
+  changed_when: false
+  become: false
+  become_user: "{{ user.name }}"
+  when: app_states['vivaldi'] | default('present') == 'present'
+
+- name: Parse COSMIC Light theme colors
+  ansible.builtin.set_fact:
+    theme_colors_light: "{{ cosmic_colors_light_raw.stdout | from_json }}"
+  when: app_states['vivaldi'] | default('present') == 'present'
+
 - name: Generate Vivaldi Dark theme settings.json
   ansible.builtin.template:
     src: theme-settings-dark.json.j2
