@@ -37,4 +37,13 @@ The GPG import task is currently commented out in `roles/system/tasks/main.yml` 
 
 ## Future Enhancements
 
+### Browser Theming
+
+**Gmail System Theme Mode Extension**
+- Chrome/Vivaldi extension for Gmail to follow system dark/light mode
+- Repository: https://github.com/bernardolob/Gmail-System-Theme-mode
+- Consider adding to Vivaldi role if needed
+
+---
+
 (Add additional TODOs here as needed)
