@@ -216,13 +216,21 @@ build_color_json() {
 }
 
 main() {
+    local force_mode="${1:-}"  # Optional argument: "Dark" or "Light"
+
     if [[ ! -d "$COSMIC_CONFIG" ]]; then
         echo "Error: COSMIC config directory not found at $COSMIC_CONFIG" >&2
         exit 1
     fi
 
-    # Determine active theme
-    local mode=$(get_active_mode)
+    # Determine theme mode
+    local mode
+    if [[ -n "$force_mode" ]]; then
+        mode="$force_mode"
+    else
+        mode=$(get_active_mode)
+    fi
+
     local theme_dir="${COSMIC_CONFIG}/com.system76.CosmicTheme.${mode}/v1"
 
     if [[ ! -d "$theme_dir" ]]; then

@@ -2,11 +2,9 @@
 
 After the `cosmic-theme.yml` tasks run, the `theme_colors` variable is available to all subsequent roles.
 
-## JSON File Location
-
-`~/.config/theme-colors.json`
-
 ## Available in Ansible as Variable
+
+Colors are extracted in-memory during each Ansible run (not persisted to disk).
 
 The `theme_colors` fact contains the parsed JSON:
 
@@ -84,22 +82,17 @@ theme_colors:
     dest: "{{ user.home }}/.config/myapp/colors.env"
 ```
 
-## Accessing from Scripts
+## Manual Color Inspection
 
-Other applications can read the JSON directly:
-
-```bash
-# Get accent color in hex
-accent=$(jq -r '.colors.accent.hex' ~/.config/theme-colors.json)
-
-# Get background RGB values
-bg_r=$(jq -r '.colors.background.rgb.r' ~/.config/theme-colors.json)
-```
-
-## Regenerating Colors
-
-The colors are extracted during each Ansible run. To manually regenerate:
+The script is installed system-wide for manual inspection:
 
 ```bash
-extract-cosmic-colors > ~/.config/theme-colors.json
+# View all colors in JSON format
+extract-cosmic-colors | jq '.'
+
+# Get specific color
+extract-cosmic-colors | jq -r '.colors.accent.hex'
+
+# Save to file if needed for external tools
+extract-cosmic-colors > /tmp/theme-colors.json
 ```

@@ -11,34 +11,35 @@
     group: root
   become: true
 
-- name: Ensure user config directory exists
-  ansible.builtin.file:
-    path: "{{ user.home }}/.config"
-    state: directory
-    owner: "{{ user.name }}"
-    mode: '0755'
-
-- name: Extract COSMIC theme colors to JSON
-  ansible.builtin.shell: /usr/local/bin/extract-cosmic-colors > {{ user.home }}/.config/theme-colors.json
-  args:
-    creates: "{{ user.home }}/.config/theme-colors.json"
-  register: theme_extraction
+- name: Extract COSMIC theme colors for active mode (in-memory)
+  ansible.builtin.shell: /usr/local/bin/extract-cosmic-colors
+  register: theme_colors_json
+  changed_when: false
   become: true
   become_user: "{{ user.name }}"
 
-- name: Force theme color regeneration if COSMIC config changed
-  ansible.builtin.shell: /usr/local/bin/extract-cosmic-colors > {{ user.home }}/.config/theme-colors.json
-  when: theme_extraction.changed
+- name: Parse active theme colors as Ansible variable
+  ansible.builtin.set_fact:
+    theme_colors: "{{ theme_colors_json.stdout | from_json }}"
+
+- name: Extract COSMIC Dark theme colors
+  ansible.builtin.shell: /usr/local/bin/extract-cosmic-colors Dark
+  register: theme_colors_dark_json
+  changed_when: false
   become: true
   become_user: "{{ user.name }}"
 
-- name: Set permissions on theme colors file
-  ansible.builtin.file:
-    path: "{{ user.home }}/.config/theme-colors.json"
-    owner: "{{ user.name }}"
-    mode: '0644'
+- name: Parse Dark theme colors
+  ansible.builtin.set_fact:
+    theme_colors_dark: "{{ theme_colors_dark_json.stdout | from_json }}"
 
-- name: Load theme colors as Ansible variable
-  ansible.builtin.include_vars:
-    file: "{{ user.home }}/.config/theme-colors.json"
-    name: theme_colors
+- name: Extract COSMIC Light theme colors
+  ansible.builtin.shell: /usr/local/bin/extract-cosmic-colors Light
+  register: theme_colors_light_json
+  changed_when: false
+  become: true
+  become_user: "{{ user.name }}"
+
+- name: Parse Light theme colors
+  ansible.builtin.set_fact:
+    theme_colors_light: "{{ theme_colors_light_json.stdout | from_json }}"
