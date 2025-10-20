@@ -15,6 +15,35 @@ if ! grep -qE "(Ubuntu|Pop)" /etc/os-release; then
     exit 1
 fi
 
+# Configure hostname
+echo "==================================="
+echo "Hostname Configuration"
+echo "==================================="
+echo ""
+echo "Current hostname: $(hostname)"
+echo ""
+echo "The hostname must match an entry in inventory/hosts.yml"
+echo "for Ansible to work correctly (e.g., qbert, donkeykong)."
+echo ""
+read -p "Enter hostname for this system: " NEW_HOSTNAME
+
+if [ -z "$NEW_HOSTNAME" ]; then
+    echo "ERROR: Hostname cannot be empty."
+    exit 1
+fi
+
+# Set the hostname
+echo "Setting hostname to: $NEW_HOSTNAME"
+sudo hostnamectl set-hostname "$NEW_HOSTNAME"
+
+# Update /etc/hosts
+if ! grep -q "127.0.1.1.*$NEW_HOSTNAME" /etc/hosts; then
+    sudo sed -i "s/127.0.1.1.*/127.0.1.1\t$NEW_HOSTNAME.local\t$NEW_HOSTNAME/" /etc/hosts
+fi
+
+echo "✓ Hostname set to: $NEW_HOSTNAME"
+echo ""
+
 # Update package list
 echo "Updating package list..."
 sudo apt-get update
@@ -266,13 +295,16 @@ echo "=================================="
 echo "Bootstrap Complete!"
 echo "=================================="
 echo ""
-echo "Security Checklist:"
+echo "Configuration Summary:"
+echo "✓ Hostname set to: $(hostname)"
 echo "✓ .vault_pass created (600 permissions)"
 echo "✓ vault.yml encrypted (600 permissions)"
 echo "✓ Sensitive files protected by .gitignore"
+echo "✓ Just command installed"
 echo ""
 echo "Next steps:"
-echo "1. Review inventory/hosts.yml"
+echo "1. Verify inventory/hosts.yml contains '$(hostname)' as a host"
+echo "   (If not, add it to the appropriate group in inventory/hosts.yml)"
 echo "2. Run: just bootstrap"
 echo "3. Run: just run"
 echo ""
