@@ -88,10 +88,12 @@ managed-versions:
     echo ""
     echo "Pinned Versions (from versions.yml):"
     echo "─────────────────────────────────────────────────────────"
+{% endraw %}
     cd {{ justfile_ansible_project_dir }}
+{% raw %}
     if [ -f inventory/group_vars/all/versions.yml ]; then
-        echo "  Go:         $(yq '.go_version' roles/system/go/defaults/main.yml 2>/dev/null || echo 'not configured')"
-        echo "  Ansible:    $(yq '.ansible_version' inventory/group_vars/all/versions.yml)"
+        echo "  Go:         $(grep '^go_version:' roles/system/go/defaults/main.yml 2>/dev/null | awk '{print $2}' | tr -d '"' || echo 'not configured')"
+        echo "  Ansible:    $(grep '^ansible_version:' inventory/group_vars/all/versions.yml | awk '{print $2}' | tr -d '"')"
         echo ""
         echo "  Strategy:   See inventory/group_vars/all/versions.yml"
     else
@@ -108,9 +110,11 @@ check-updates:
     {{ error_msg }}
 
     header "Checking for Updates"
+{% endraw %}
 
     cd {{ justfile_ansible_project_dir }}
 
+{% raw %}
     echo "→ Running Ansible in check mode to find updates..."
     echo ""
 
