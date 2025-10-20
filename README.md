@@ -12,6 +12,7 @@ Desktop Operator automates the setup and configuration of Ubuntu desktop systems
 - 📦 Smart package management (.deb → Flatpak → Snap)
 - ⚡ Fast targeted execution via tags
 - 🚀 Simple bootstrap for fresh systems
+- 🎨 Full COSMIC desktop environment management (30 components, 132 config files)
 
 **→ See [Getting Started Guide](docs/GETTING_STARTED.md) for detailed setup instructions**
 
@@ -244,6 +245,26 @@ just commit
 just pull
 ```
 
+### 🎨 Managing COSMIC Desktop Settings
+
+```bash
+# 1. Make changes in COSMIC Settings app
+# 2. Capture changes to repository
+just cosmic-capture
+
+# 3. Review what changed
+git diff cosmic-config/
+
+# 4. Commit changes
+just commit
+
+# 5. Apply to other machines
+just pull    # Pull and apply
+just cosmic  # Or just apply COSMIC config
+```
+
+**→ See [COSMIC Desktop Guide](docs/COSMIC_DESKTOP.md) for complete desktop management workflow**
+
 ---
 
 ## Common Commands
@@ -253,7 +274,10 @@ just pull
 just run              # Apply full configuration
 just check            # Dry run preview
 just system           # Only system config
+just desktop          # Only desktop config
 just apps             # Only applications
+just cosmic           # Only COSMIC desktop config
+just cosmic-capture   # Capture COSMIC settings to repo
 just install firefox  # Install single app
 just commit           # Safe commit with security checks
 just pull             # Pull and apply latest config
@@ -289,6 +313,9 @@ For detailed information on specific topics, see the documentation in the `docs/
 ### Development & Planning
 - **[TODO](TODO.md)** - Outstanding tasks and future enhancements
 - **[Directory Structure](STRUCTURE.md)** - Ansible best practices and project layout
+
+### Desktop Environment
+- **[COSMIC Desktop Management](docs/COSMIC_DESKTOP.md)** - Complete guide to managing COSMIC desktop configuration
 
 ### Other
 - **[Nix to Ansible Mapping](docs/NIX_TO_ANSIBLE_MAPPING.md)** - Translation guide for Nix users migrating to Ansible

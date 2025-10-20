@@ -123,3 +123,17 @@ tasks:
 # Show all tags available in playbooks
 tags:
     ansible-playbook site.yml --list-tags
+
+# === COSMIC Desktop ===
+
+# Capture current COSMIC configuration to repository
+cosmic-capture:
+    @echo "Capturing COSMIC desktop configuration..."
+    @./scripts/capture-cosmic-config.sh
+    @echo ""
+    @echo "Review changes with: git diff cosmic-config/"
+    @echo "Commit with: just commit"
+
+# Run only COSMIC desktop configuration
+cosmic:
+    ansible-playbook site.yml --limit $(hostname) --tags cosmic
