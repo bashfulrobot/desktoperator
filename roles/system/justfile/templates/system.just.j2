@@ -1,0 +1,368 @@
+# SPDX-FileCopyrightText: {{ user.name }}
+# SPDX-License-Identifier: MIT
+#
+# System Management Justfile
+# Managed by Ansible - changes may be overwritten
+#
+# This justfile provides system administration commands
+# Run 'jsys' or 'jsys --list' to see available commands
+
+{% raw %}
+# Set shell for all recipes
+set shell := ["bash", "-uc"]
+
+# Enable colored output
+set dotenv-load := false
+
+# Define helper functions for reuse across recipes
+header_msg := '
+header() {
+    echo ""
+    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    echo "  $1"
+    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    echo ""
+}
+'
+
+success_msg := '
+success() {
+    echo "✓ $1"
+}
+'
+
+error_msg := '
+error() {
+    echo "✗ Error: $1" >&2
+}
+'
+{% endraw %}
+
+# Ansible project directory
+ansible_dir := "{{ justfile_ansible_project_dir }}"
+
+{% raw %}
+# Default recipe - show available commands
+default:
+    @just --justfile {{ justfile() }} --list --unsorted
+
+# ============================================================================
+# UPDATE MANAGEMENT
+# ============================================================================
+
+# Update everything (all package managers + Ansible configuration)
+[group('updates')]
+update-all: update-apt update-flatpak update-npm update-go update-ansible
+    @{{ header_msg }}
+    @header "All Updates Complete"
+    @{{ success_msg }}
+    @success "System is up to date!"
+
+# Update APT packages and clean up
+[group('updates')]
+update-apt:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    {{ header_msg }}
+    {{ success_msg }}
+    {{ error_msg }}
+
+    header "Updating APT Packages"
+
+    echo "→ Updating package lists..."
+    sudo apt update || { error "Failed to update package lists"; exit 1; }
+
+    echo "→ Upgrading packages..."
+    sudo apt upgrade -y || { error "Failed to upgrade packages"; exit 1; }
+
+    echo "→ Removing unused packages..."
+    sudo apt autoremove -y || { error "Failed to autoremove"; exit 1; }
+
+    success "APT packages updated"
+
+# Show what APT packages can be upgraded (dry run)
+[group('updates')]
+update-apt-check:
+    @echo "Packages that can be upgraded:"
+    @apt list --upgradable 2>/dev/null | grep -v "Listing..."
+
+# Update Flatpak applications
+[group('updates')]
+update-flatpak:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    {{ header_msg }}
+    {{ success_msg }}
+    {{ error_msg }}
+
+    header "Updating Flatpak Applications"
+
+    if ! command -v flatpak &> /dev/null; then
+        echo "Flatpak not installed, skipping..."
+        exit 0
+    fi
+
+    echo "→ Updating flatpak packages..."
+    flatpak update -y || { error "Failed to update flatpak packages"; exit 1; }
+
+    success "Flatpak packages updated"
+
+# Update global npm packages
+[group('updates')]
+update-npm:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    {{ header_msg }}
+    {{ success_msg }}
+    {{ error_msg }}
+
+    header "Updating Global NPM Packages"
+
+    if ! command -v npm &> /dev/null; then
+        echo "npm not installed, skipping..."
+        exit 0
+    fi
+
+    echo "→ Updating npm packages..."
+    npm update -g || { error "Failed to update npm packages"; exit 1; }
+
+    success "npm packages updated"
+
+# Update Go language servers and tools
+[group('updates')]
+update-go:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    {{ header_msg }}
+    {{ success_msg }}
+    {{ error_msg }}
+
+    header "Updating Go Tools"
+
+    if ! command -v go &> /dev/null; then
+        echo "Go not installed, skipping..."
+        exit 0
+    fi
+
+    echo "→ Updating gopls..."
+    GOBIN=/usr/local/bin /usr/local/go/bin/go install golang.org/x/tools/gopls@latest || { error "Failed to update gopls"; exit 1; }
+
+    success "Go tools updated"
+{% endraw %}
+
+# Run full Ansible playbook (updates all Ansible-managed configuration)
+[group('updates')]
+update-ansible:
+    #!/usr/bin/env bash
+    set -euo pipefail
+{% raw %}
+    {{ header_msg }}
+    {{ success_msg }}
+    {{ error_msg }}
+
+    header "Running Ansible Playbook"
+{% endraw %}
+
+    if [[ ! -d "{{ justfile_ansible_project_dir }}" ]]; then
+        error "Ansible directory not found: {{ justfile_ansible_project_dir }}"
+        exit 1
+    fi
+
+    cd {{ justfile_ansible_project_dir }}
+    echo "→ Running ansible-playbook site.yml..."
+{% raw %}
+    ansible-playbook site.yml --limit $(hostname) || { error "Ansible playbook failed"; exit 1; }
+
+    success "Ansible playbook completed"
+{% endraw %}
+
+# Run Ansible with specific tags
+[group('updates')]
+update-ansible-tags TAGS:
+    #!/usr/bin/env bash
+    set -euo pipefail
+{% raw %}
+    {{ header_msg }}
+    {{ success_msg }}
+    {{ error_msg }}
+
+    header "Running Ansible with tags: {{ TAGS }}"
+{% endraw %}
+
+    if [[ ! -d "{{ justfile_ansible_project_dir }}" ]]; then
+        error "Ansible directory not found: {{ justfile_ansible_project_dir }}"
+        exit 1
+    fi
+
+    cd {{ justfile_ansible_project_dir }}
+{% raw %}
+    echo "→ Running ansible-playbook site.yml --tags {{ TAGS }}..."
+    ansible-playbook site.yml --limit $(hostname) --tags {{ TAGS }} || { error "Ansible playbook failed"; exit 1; }
+
+    success "Ansible playbook completed"
+{% endraw %}
+
+# Dry-run Ansible (see what would change)
+[group('updates')]
+update-ansible-check:
+    #!/usr/bin/env bash
+    set -euo pipefail
+{% raw %}
+    {{ header_msg }}
+
+    header "Ansible Dry Run (Check Mode)"
+{% endraw %}
+
+    cd {{ justfile_ansible_project_dir }}
+    echo "→ Running ansible-playbook in check mode..."
+    ansible-playbook site.yml --limit $(hostname) --check --diff
+
+{% raw %}
+# ============================================================================
+# SYSTEM MAINTENANCE
+# ============================================================================
+
+# Clean up system (APT cache, old kernels, logs, temp files)
+[group('maintenance')]
+clean-system:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    {{ header_msg }}
+    {{ success_msg }}
+
+    header "Cleaning System"
+
+    echo "→ Removing unused APT packages..."
+    sudo apt autoremove -y
+
+    echo "→ Cleaning APT cache..."
+    sudo apt autoclean
+
+    echo "→ Vacuuming journal logs (keeping 7 days)..."
+    sudo journalctl --vacuum-time=7d
+
+    echo "→ Cleaning user cache..."
+    rm -rf ~/.cache/thumbnails/*
+
+    success "System cleaned"
+
+# Check disk usage
+[group('maintenance')]
+disk-usage:
+    #!/usr/bin/env bash
+    {{ header_msg }}
+
+    header "Disk Usage"
+
+    echo "Filesystem usage:"
+    df -h / /home
+
+    echo ""
+    echo "Largest directories in /home:"
+    du -sh /home/*/ 2>/dev/null | sort -rh | head -10
+
+# Check system health (services, disk, memory)
+[group('maintenance')]
+health-check:
+    #!/usr/bin/env bash
+    {{ header_msg }}
+
+    header "System Health Check"
+
+    echo "Failed systemd services:"
+    systemctl --failed --no-pager
+
+    echo ""
+    echo "Disk usage:"
+    df -h / /home | grep -v tmpfs
+
+    echo ""
+    echo "Memory usage:"
+    free -h
+
+# ============================================================================
+# GENERATORS / UTILITIES
+# ============================================================================
+
+# Extract COSMIC theme colors (regenerate theme data)
+[group('generators')]
+generate-cosmic-colors MODE="Dark":
+    #!/usr/bin/env bash
+    set -euo pipefail
+    {{ header_msg }}
+    {{ success_msg }}
+
+    header "Extracting COSMIC {{ MODE }} Theme Colors"
+
+    if ! command -v extract-cosmic-colors &> /dev/null; then
+        {{ error_msg }}
+        error "extract-cosmic-colors command not found"
+        exit 1
+    fi
+
+    echo "→ Extracting {{ MODE }} theme colors..."
+    extract-cosmic-colors {{ MODE }}
+
+    success "COSMIC colors extracted"
+{% endraw %}
+
+# Regenerate Vivaldi themes from COSMIC colors
+[group('generators')]
+generate-vivaldi-themes:
+    #!/usr/bin/env bash
+    set -euo pipefail
+{% raw %}
+    {{ header_msg }}
+
+    header "Regenerating Vivaldi Themes"
+{% endraw %}
+
+    cd {{ justfile_ansible_project_dir }}
+    echo "→ Running Ansible with vivaldi tag..."
+    ansible-playbook site.yml --limit $(hostname) --tags vivaldi
+
+{% raw %}
+# ============================================================================
+# INFORMATION / DIAGNOSTICS
+# ============================================================================
+
+# Show system information
+[group('info')]
+system-info:
+    #!/usr/bin/env bash
+    {{ header_msg }}
+
+    header "System Information"
+
+    hostnamectl
+
+    echo ""
+    echo "Disk Usage:"
+    df -h / /home | grep -v tmpfs
+
+# Show installed software versions
+[group('info')]
+versions:
+    #!/usr/bin/env bash
+    {{ header_msg }}
+
+    header "Installed Software Versions"
+
+    echo "Go:         $(go version 2>/dev/null || echo 'not installed')"
+    echo "Node:       $(node --version 2>/dev/null || echo 'not installed')"
+    echo "npm:        $(npm --version 2>/dev/null || echo 'not installed')"
+    echo "Helix:      $(hx --version 2>/dev/null | head -1 || echo 'not installed')"
+    echo "Zellij:     $(zellij --version 2>/dev/null || echo 'not installed')"
+    echo "just:       $(just --version 2>/dev/null || echo 'not installed')"
+    echo "Ansible:    $(ansible --version 2>/dev/null | head -1 || echo 'not installed')"
+{% endraw %}
+
+# List all Ansible tags available
+[group('info')]
+ansible-tags:
+    @cd {{ justfile_ansible_project_dir }} && ansible-playbook site.yml --limit $(hostname) --list-tags
+
+# List all Ansible tasks for a specific tag
+[group('info')]
+ansible-tasks TAG:
+    @cd {{ justfile_ansible_project_dir }} && ansible-playbook site.yml --limit $(hostname) --tags {% raw %}{{ TAG }}{% endraw %} --list-tasks
