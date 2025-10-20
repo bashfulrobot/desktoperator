@@ -1,6 +1,7 @@
 ---
 # Desktop role - desktop environment configuration
 
-- name: Desktop placeholder
-  debug:
-    msg: "Desktop role - tasks will be added here"
+- name: Include COSMIC desktop configuration
+  include_role:
+    name: desktop/cosmic
+  tags: [cosmic, desktop]

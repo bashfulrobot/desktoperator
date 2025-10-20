@@ -1,0 +1,26 @@
+---
+# COSMIC Desktop configuration management
+
+- name: Ensure COSMIC config directory exists
+  file:
+    path: "{{ cosmic_config_path }}"
+    state: directory
+    owner: "{{ user.name }}"
+    mode: '0755'
+
+- name: Backup existing COSMIC config
+  command: cp -r {{ cosmic_config_path }} {{ cosmic_backup_dir }}
+  args:
+    creates: "{{ cosmic_backup_dir }}"
+  when: cosmic_backup_existing | default(true)
+  failed_when: false
+
+- name: Sync COSMIC configurations from repository
+  synchronize:
+    src: "{{ playbook_dir }}/cosmic-config/"
+    dest: "{{ cosmic_config_path }}/"
+    delete: yes
+    rsync_opts:
+      - "--chown={{ user.name }}:{{ user.name }}"
+      - "--chmod=D0755,F0644"
+  delegate_to: "{{ inventory_hostname }}"
