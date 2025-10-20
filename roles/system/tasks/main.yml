@@ -5,6 +5,10 @@
   import_tasks: packages.yml
   tags: [packages]
 
+- name: Import COSMIC theme color extraction
+  import_tasks: cosmic-theme.yml
+  tags: [cosmic, theme, colors]
+
 - name: Include fonts installation
   include_role:
     name: system/fonts
