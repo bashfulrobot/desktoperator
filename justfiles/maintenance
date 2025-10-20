@@ -5,36 +5,115 @@
 # Set working directory to repo root
 set working-directory := justfile_directory() + "/.."
 
+# Set shell for all recipes
+set shell := ["bash", "-uc"]
+
+# Disable dotenv loading
+set dotenv-load := false
+
+# Define reusable helper functions
+header_msg := '
+header() {
+    echo ""
+    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    echo "  $1"
+    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    echo ""
+}
+'
+
+success_msg := '
+success() {
+    echo "✓ $1"
+}
+'
+
+error_msg := '
+error() {
+    echo "✗ Error: $1" >&2
+}
+'
+
 # Default recipe - show help
 default:
-    @just -f justfiles/maintenance --list
+    @just -f justfiles/maintenance --list --unsorted
 
-# === Maintenance Tasks ===
+# ============================================================================
+# MAINTENANCE TASKS
+# ============================================================================
 
 # Run maintenance tasks (updates, cleanup)
+[group('maintenance')]
 run:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    {{ header_msg }}
+    {{ success_msg }}
+
+    header "Running Maintenance Playbook"
+    echo "→ Executing maintenance tasks on $(hostname)..."
     ansible-playbook maintenance.yml --limit $(hostname)
+    success "Maintenance completed successfully"
 
 # Run maintenance with check mode (dry run)
+[group('maintenance')]
 check:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    {{ header_msg }}
+
+    header "Maintenance Dry Run (Check Mode)"
+    echo "→ Running in check mode on $(hostname)..."
     ansible-playbook maintenance.yml --limit $(hostname) --check --diff
 
-# === Ansible Updates ===
+# ============================================================================
+# ANSIBLE UPDATES
+# ============================================================================
 
 # Update Ansible to pinned version
+[group('ansible')]
 update-ansible:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    {{ header_msg }}
+    {{ success_msg }}
+
+    header "Updating Ansible to Pinned Version"
+    echo "→ Installing from requirements.txt..."
     pip3 install --upgrade -r requirements.txt
+    success "Ansible updated successfully"
 
 # Update Ansible to latest version
+[group('ansible')]
 update-ansible-latest:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    {{ header_msg }}
+    {{ success_msg }}
+
+    header "Updating Ansible to Latest Version"
+    echo "→ Installing latest version..."
     pip3 install --upgrade ansible
+    success "Ansible updated to latest version"
 
 # Update Ansible collections
+[group('ansible')]
 update-collections:
-    ansible-galaxy collection install -r collections/requirements.yml --upgrade
+    #!/usr/bin/env bash
+    set -euo pipefail
+    {{ header_msg }}
+    {{ success_msg }}
 
-# === Information ===
+    header "Updating Ansible Collections"
+    echo "→ Installing collections from requirements.yml..."
+    ansible-galaxy collection install -r collections/requirements.yml --upgrade
+    success "Collections updated successfully"
+
+# ============================================================================
+# INFORMATION
+# ============================================================================
 
 # Show Ansible version
+[group('info')]
 version:
-    ansible --version
+    @ansible --version

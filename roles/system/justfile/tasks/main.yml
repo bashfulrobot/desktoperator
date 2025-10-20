@@ -1,0 +1,74 @@
+---
+# Justfile system management installation
+
+- name: Install just command runner from GitHub
+  ansible.builtin.include_tasks: ../../system/tasks/includes/github_release.yml
+  vars:
+    org: casey
+    repo: just
+    binary_name: just
+    filename_substring: x86_64-unknown-linux-musl.tar.gz
+
+- name: Create just system config directory
+  file:
+    path: /usr/local/share/just
+    state: directory
+    mode: '0755'
+  become: yes
+
+- name: Deploy system justfile
+  template:
+    src: system.just.j2
+    dest: "{{ justfile_system_path }}"
+    mode: '0644'
+  become: yes
+  tags: [always]
+
+- name: Create jsys wrapper command
+  copy:
+    content: |
+      #!/usr/bin/env bash
+      # jsys - System management command wrapper
+      # Runs the system justfile from anywhere
+      just --justfile {{ justfile_system_path }} "$@"
+    dest: "/usr/local/bin/{{ justfile_wrapper_command }}"
+    mode: '0755'
+  become: yes
+
+- name: Verify just installation
+  command: just --version
+  register: just_version_output
+  changed_when: false
+  failed_when: just_version_output.rc != 0
+
+# Fish shell completion for jsys
+- name: Create fish completions directory
+  file:
+    path: "{{ user.home }}/.config/fish/completions"
+    state: directory
+    owner: "{{ user.name }}"
+    mode: '0755'
+
+- name: Create fish completion for jsys
+  copy:
+    content: |
+      # jsys completion - wraps system justfile
+      function __fish_jsys_complete_recipes
+          printf "%s\n" (string split " " (jsys --summary 2>/dev/null))
+      end
+
+      # don't suggest files right off
+      complete -c jsys -n "__fish_is_first_arg" --no-files
+
+      # complete recipes
+      complete -c jsys -a '(__fish_jsys_complete_recipes)'
+
+      # common options
+      complete -c jsys -l list -d 'List available recipes'
+      complete -c jsys -l summary -d 'List recipe names'
+      complete -c jsys -l help -d 'Print help information'
+    dest: "{{ user.home }}/.config/fish/completions/jsys.fish"
+    owner: "{{ user.name }}"
+    mode: '0644'
+  become: yes
+  tags: [always]

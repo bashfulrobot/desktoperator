@@ -1,0 +1,14 @@
+---
+# Justfile system management configuration
+
+# Path to Ansible project directory
+justfile_ansible_project_dir: "/home/{{ user.name }}/dev/iac/desktoperator"
+
+# System justfile installation path
+justfile_system_path: "/usr/local/share/just/system.just"
+
+# Wrapper command name
+justfile_wrapper_command: "jsys"
+
+# Color output support
+justfile_use_color: true

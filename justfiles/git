@@ -7,33 +7,77 @@
 # Set working directory to repo root
 set working-directory := justfile_directory() + "/.."
 
+# Set shell for all recipes
+set shell := ["bash", "-uc"]
+
+# Disable dotenv loading
+set dotenv-load := false
+
+# Define reusable helper functions
+header_msg := '
+header() {
+    echo ""
+    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    echo "  $1"
+    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    echo ""
+}
+'
+
+success_msg := '
+success() {
+    echo "✓ $1"
+}
+'
+
+error_msg := '
+error() {
+    echo "✗ Error: $1" >&2
+}
+'
+
 # Default recipe - show help
 default:
-    @just -f justfiles/git --list
+    @just -f justfiles/git --list --unsorted
 
-# === Advanced Git Operations ===
+# ============================================================================
+# ADVANCED GIT OPERATIONS
+# ============================================================================
 
 # Show git status with Ansible-specific context
+[group('git')]
 status:
     #!/usr/bin/env bash
-    echo "=== Git Status ==="
+    set -euo pipefail
+    {{ header_msg }}
+
+    header "Git Status with Vault Context"
+    echo "→ Git Status:"
     git status
     echo ""
-    echo "=== Vault File Status ==="
+    echo "→ Vault File Status:"
     for vault_file in $(find group_vars host_vars -name "vault.yml" 2>/dev/null || true); do
         if [ -f "$vault_file" ]; then
             if head -1 "$vault_file" | grep -q '\$ANSIBLE_VAULT'; then
-                echo "✓ $vault_file - encrypted"
+                echo "  ✓ $vault_file - encrypted"
             else
-                echo "⚠ $vault_file - NOT encrypted!"
+                echo "  ⚠ $vault_file - NOT encrypted!"
             fi
         fi
     done
 
 # View diff with syntax highlighting (requires delta or similar)
+[group('git')]
 diff:
-    git diff
+    @git diff
 
 # Interactive rebase for cleaning up commits (use with caution)
+[group('git')]
 rebase-interactive COMMITS="5":
+    #!/usr/bin/env bash
+    set -euo pipefail
+    {{ header_msg }}
+
+    header "Interactive Rebase (Last {{COMMITS}} commits)"
+    echo "→ Starting interactive rebase..."
     git rebase -i HEAD~{{COMMITS}}
