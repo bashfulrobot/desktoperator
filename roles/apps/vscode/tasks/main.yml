@@ -11,11 +11,47 @@
   become: yes
   when: app_states['vscode'] | default('present') == 'present'
 
-- name: Add Microsoft GPG key
-  apt_key:
+- name: Remove conflicting VSCode repository files
+  file:
+    path: "{{ item }}"
+    state: absent
+  loop:
+    - /etc/apt/sources.list.d/vscode.list
+    - /etc/apt/sources.list.d/vscode.sources
+  become: yes
+  when: app_states['vscode'] | default('present') == 'present'
+
+- name: Remove conflicting Microsoft GPG keys
+  file:
+    path: "{{ item }}"
+    state: absent
+  loop:
+    - /usr/share/keyrings/microsoft.gpg
+    - /etc/apt/trusted.gpg.d/microsoft.gpg
+  become: yes
+  when: app_states['vscode'] | default('present') == 'present'
+
+- name: Download Microsoft GPG key
+  get_url:
     url: https://packages.microsoft.com/keys/microsoft.asc
-    keyring: /usr/share/keyrings/packages.microsoft.gpg
-    state: present
+    dest: /tmp/microsoft.asc
+    mode: '0644'
+  become: yes
+  when: app_states['vscode'] | default('present') == 'present'
+
+- name: Add Microsoft GPG key to keyrings
+  shell: |
+    gpg --dearmor < /tmp/microsoft.asc > /usr/share/keyrings/packages.microsoft.gpg
+    chmod 644 /usr/share/keyrings/packages.microsoft.gpg
+  args:
+    creates: /usr/share/keyrings/packages.microsoft.gpg
+  become: yes
+  when: app_states['vscode'] | default('present') == 'present'
+
+- name: Clean up temporary GPG key file
+  file:
+    path: /tmp/microsoft.asc
+    state: absent
   become: yes
   when: app_states['vscode'] | default('present') == 'present'
 
@@ -26,7 +62,6 @@
     state: present
   become: yes
   when: app_states['vscode'] | default('present') == 'present'
-  notify: Update apt cache
 
 - name: Flush handlers to ensure apt cache is updated
   meta: flush_handlers
