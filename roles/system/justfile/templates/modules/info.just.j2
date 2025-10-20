@@ -26,23 +26,102 @@ versions:
     #!/usr/bin/env bash
     {{ header_msg }}
 
-    header "Installed Software Versions"
+    header "Development Tools"
 
-    # Check Go (may be in /usr/local/go/bin if not in PATH)
+    # Languages & Runtimes
+    echo "Languages & Runtimes:"
     if command -v go &> /dev/null; then
-        echo "Go:         $(go version 2>/dev/null)"
+        echo "  Go:         $(go version 2>/dev/null)"
     elif [ -x /usr/local/go/bin/go ]; then
-        echo "Go:         $(/usr/local/go/bin/go version 2>/dev/null)"
+        echo "  Go:         $(/usr/local/go/bin/go version 2>/dev/null)"
     else
-        echo "Go:         not installed"
+        echo "  Go:         not installed"
+    fi
+    echo "  Node:       $(node --version 2>/dev/null || echo 'not installed')"
+    echo "  npm:        $(npm --version 2>/dev/null || echo 'not installed')"
+    echo "  Python:     $(python3 --version 2>/dev/null || echo 'not installed')"
+
+    echo ""
+    echo "Development Tools:"
+    echo "  Ansible:    $(ansible --version 2>/dev/null | head -1 || echo 'not installed')"
+    echo "  Helix:      $(hx --version 2>/dev/null | head -1 || echo 'not installed')"
+    echo "  VS Code:    $(code --version 2>/dev/null | head -1 || echo 'not installed')"
+    echo "  just:       $(just --version 2>/dev/null || echo 'not installed')"
+
+    echo ""
+    echo "Terminal Tools:"
+    echo "  Zellij:     $(zellij --version 2>/dev/null || echo 'not installed')"
+    echo "  Starship:   $(starship --version 2>/dev/null || echo 'not installed')"
+    echo "  Fish:       $(fish --version 2>/dev/null || echo 'not installed')"
+
+# Show versions of all Ansible-managed software with update status
+[group('info')]
+managed-versions:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    {{ header_msg }}
+    {{ success_msg }}
+
+    header "Ansible-Managed Software"
+
+    echo "GitHub Release Installations:"
+    echo "─────────────────────────────────────────────────────────"
+
+    if [ -d /var/lib/ansible/github_releases ]; then
+        for org_dir in /var/lib/ansible/github_releases/*; do
+            if [ -d "$org_dir" ]; then
+                for repo_dir in "$org_dir"/*; do
+                    if [ -d "$repo_dir" ] && [ -f "$repo_dir/version.json" ]; then
+                        org=$(basename "$org_dir")
+                        repo=$(basename "$repo_dir")
+                        tag_name=$(jq -r '.tag_name' "$repo_dir/version.json" 2>/dev/null || echo "unknown")
+                        published=$(jq -r '.published_at' "$repo_dir/version.json" 2>/dev/null | cut -d'T' -f1 || echo "unknown")
+                        printf "  %-20s %s (installed: %s)\n" "$repo" "$tag_name" "$published"
+                    fi
+                done
+            fi
+        done
+    else
+        echo "  No GitHub releases tracked"
     fi
 
-    echo "Node:       $(node --version 2>/dev/null || echo 'not installed')"
-    echo "npm:        $(npm --version 2>/dev/null || echo 'not installed')"
-    echo "Helix:      $(hx --version 2>/dev/null | head -1 || echo 'not installed')"
-    echo "Zellij:     $(zellij --version 2>/dev/null || echo 'not installed')"
-    echo "just:       $(just --version 2>/dev/null || echo 'not installed')"
-    echo "Ansible:    $(ansible --version 2>/dev/null | head -1 || echo 'not installed')"
+    echo ""
+    echo "Pinned Versions (from versions.yml):"
+    echo "─────────────────────────────────────────────────────────"
+    cd {{ justfile_ansible_project_dir }}
+    if [ -f inventory/group_vars/all/versions.yml ]; then
+        echo "  Go:         $(yq '.go_version' roles/system/go/defaults/main.yml 2>/dev/null || echo 'not configured')"
+        echo "  Ansible:    $(yq '.ansible_version' inventory/group_vars/all/versions.yml)"
+        echo ""
+        echo "  Strategy:   See inventory/group_vars/all/versions.yml"
+    else
+        echo "  No versions.yml found"
+    fi
+
+# Check which Ansible-managed software has updates available
+[group('info')]
+check-updates:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    {{ header_msg }}
+    {{ success_msg }}
+    {{ error_msg }}
+
+    header "Checking for Updates"
+
+    cd {{ justfile_ansible_project_dir }}
+
+    echo "→ Running Ansible in check mode to find updates..."
+    echo ""
+
+    # Run playbook in check mode to see what would be updated
+    if ansible-playbook site.yml --limit $(hostname) --check --diff 2>&1 | grep -E "(TASK|changed:|ok:)" | grep -B1 "changed:"; then
+        echo ""
+        success "Updates available (run 'jsys update-ansible' to apply)"
+    else
+        echo ""
+        success "All Ansible-managed software is up to date"
+    fi
 {% endraw %}
 
 # List all Ansible tags available
