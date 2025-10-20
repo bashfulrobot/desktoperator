@@ -16,7 +16,27 @@
     mode: '0755'
   become: yes
 
-- name: Deploy system justfile
+- name: Create just modules directory
+  file:
+    path: /usr/local/share/just/modules
+    state: directory
+    mode: '0755'
+  become: yes
+
+- name: Deploy system justfile modules
+  template:
+    src: "{{ item }}"
+    dest: "/usr/local/share/just/modules/{{ item | basename | regex_replace('\\.j2$', '') }}"
+    mode: '0644'
+  become: yes
+  loop:
+    - modules/updates.just.j2
+    - modules/maintenance.just.j2
+    - modules/generators.just.j2
+    - modules/info.just.j2
+  tags: [always]
+
+- name: Deploy main system justfile
   template:
     src: system.just.j2
     dest: "{{ justfile_system_path }}"

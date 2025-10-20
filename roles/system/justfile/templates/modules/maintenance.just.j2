@@ -1,0 +1,66 @@
+# System Maintenance Module
+# Handles system cleanup, health checks, and diagnostics
+
+{% raw %}
+# ============================================================================
+# SYSTEM MAINTENANCE
+# ============================================================================
+
+# Clean up system (APT cache, old kernels, logs, temp files)
+[group('maintenance')]
+clean-system:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    {{ header_msg }}
+    {{ success_msg }}
+
+    header "Cleaning System"
+
+    echo "→ Removing unused APT packages..."
+    sudo apt autoremove -y
+
+    echo "→ Cleaning APT cache..."
+    sudo apt autoclean
+
+    echo "→ Vacuuming journal logs (keeping 7 days)..."
+    sudo journalctl --vacuum-time=7d
+
+    echo "→ Cleaning user cache..."
+    rm -rf ~/.cache/thumbnails/*
+
+    success "System cleaned"
+
+# Check disk usage
+[group('maintenance')]
+disk-usage:
+    #!/usr/bin/env bash
+    {{ header_msg }}
+
+    header "Disk Usage"
+
+    echo "Filesystem usage:"
+    df -h / /home
+
+    echo ""
+    echo "Largest directories in /home:"
+    du -sh /home/*/ 2>/dev/null | sort -rh | head -10
+
+# Check system health (services, disk, memory)
+[group('maintenance')]
+health-check:
+    #!/usr/bin/env bash
+    {{ header_msg }}
+
+    header "System Health Check"
+
+    echo "Failed systemd services:"
+    systemctl --failed --no-pager
+
+    echo ""
+    echo "Disk usage:"
+    df -h / /home | grep -v tmpfs
+
+    echo ""
+    echo "Memory usage:"
+    free -h
+{% endraw %}

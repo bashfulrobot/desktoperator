@@ -1,0 +1,44 @@
+# Generators Module
+# Handles theme generation and other regeneration tasks
+
+{% raw %}
+# ============================================================================
+# GENERATORS / UTILITIES
+# ============================================================================
+
+# Extract COSMIC theme colors (regenerate theme data)
+[group('generators')]
+generate-cosmic-colors MODE="Dark":
+    #!/usr/bin/env bash
+    set -euo pipefail
+    {{ header_msg }}
+    {{ success_msg }}
+
+    header "Extracting COSMIC {{ MODE }} Theme Colors"
+
+    if ! command -v extract-cosmic-colors &> /dev/null; then
+        {{ error_msg }}
+        error "extract-cosmic-colors command not found"
+        exit 1
+    fi
+
+    echo "→ Extracting {{ MODE }} theme colors..."
+    extract-cosmic-colors {{ MODE }}
+
+    success "COSMIC colors extracted"
+{% endraw %}
+
+# Regenerate Vivaldi themes from COSMIC colors
+[group('generators')]
+generate-vivaldi-themes:
+    #!/usr/bin/env bash
+    set -euo pipefail
+{% raw %}
+    {{ header_msg }}
+
+    header "Regenerating Vivaldi Themes"
+{% endraw %}
+
+    cd {{ justfile_ansible_project_dir }}
+    echo "→ Running Ansible with vivaldi tag..."
+    ansible-playbook site.yml --limit $(hostname) --tags vivaldi

@@ -1,0 +1,174 @@
+# System Updates Module
+# Handles package manager updates (APT, Flatpak, npm, Go, Ansible)
+
+{% raw %}
+# ============================================================================
+# PACKAGE UPDATES
+# ============================================================================
+
+# Update everything (all package managers + Ansible configuration)
+[group('updates')]
+update-all: update-apt update-flatpak update-npm update-go update-ansible
+    @{{ header_msg }}
+    @header "All Updates Complete"
+    @{{ success_msg }}
+    @success "System is up to date!"
+
+# Update APT packages and clean up
+[group('updates')]
+update-apt:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    {{ header_msg }}
+    {{ success_msg }}
+    {{ error_msg }}
+
+    header "Updating APT Packages"
+
+    echo "→ Updating package lists..."
+    sudo apt update || { error "Failed to update package lists"; exit 1; }
+
+    echo "→ Upgrading packages..."
+    sudo apt upgrade -y || { error "Failed to upgrade packages"; exit 1; }
+
+    echo "→ Removing unused packages..."
+    sudo apt autoremove -y || { error "Failed to autoremove"; exit 1; }
+
+    success "APT packages updated"
+
+# Show what APT packages can be upgraded (dry run)
+[group('updates')]
+update-apt-check:
+    @echo "Packages that can be upgraded:"
+    @apt list --upgradable 2>/dev/null | grep -v "Listing..."
+
+# Update Flatpak applications
+[group('updates')]
+update-flatpak:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    {{ header_msg }}
+    {{ success_msg }}
+    {{ error_msg }}
+
+    header "Updating Flatpak Applications"
+
+    if ! command -v flatpak &> /dev/null; then
+        echo "Flatpak not installed, skipping..."
+        exit 0
+    fi
+
+    echo "→ Updating flatpak packages..."
+    flatpak update -y || { error "Failed to update flatpak packages"; exit 1; }
+
+    success "Flatpak packages updated"
+
+# Update global npm packages
+[group('updates')]
+update-npm:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    {{ header_msg }}
+    {{ success_msg }}
+    {{ error_msg }}
+
+    header "Updating Global NPM Packages"
+
+    if ! command -v npm &> /dev/null; then
+        echo "npm not installed, skipping..."
+        exit 0
+    fi
+
+    echo "→ Updating npm packages..."
+    npm update -g || { error "Failed to update npm packages"; exit 1; }
+
+    success "npm packages updated"
+
+# Update Go language servers and tools
+[group('updates')]
+update-go:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    {{ header_msg }}
+    {{ success_msg }}
+    {{ error_msg }}
+
+    header "Updating Go Tools"
+
+    if ! command -v go &> /dev/null; then
+        echo "Go not installed, skipping..."
+        exit 0
+    fi
+
+    echo "→ Updating gopls..."
+    GOBIN=/usr/local/bin /usr/local/go/bin/go install golang.org/x/tools/gopls@latest || { error "Failed to update gopls"; exit 1; }
+
+    success "Go tools updated"
+{% endraw %}
+
+# Run full Ansible playbook (updates all Ansible-managed configuration)
+[group('updates')]
+update-ansible:
+    #!/usr/bin/env bash
+    set -euo pipefail
+{% raw %}
+    {{ header_msg }}
+    {{ success_msg }}
+    {{ error_msg }}
+
+    header "Running Ansible Playbook"
+{% endraw %}
+
+    if [[ ! -d "{{ justfile_ansible_project_dir }}" ]]; then
+        error "Ansible directory not found: {{ justfile_ansible_project_dir }}"
+        exit 1
+    fi
+
+    cd {{ justfile_ansible_project_dir }}
+    echo "→ Running ansible-playbook site.yml..."
+{% raw %}
+    ansible-playbook site.yml --limit $(hostname) || { error "Ansible playbook failed"; exit 1; }
+
+    success "Ansible playbook completed"
+{% endraw %}
+
+# Run Ansible with specific tags
+[group('updates')]
+update-ansible-tags TAGS:
+    #!/usr/bin/env bash
+    set -euo pipefail
+{% raw %}
+    {{ header_msg }}
+    {{ success_msg }}
+    {{ error_msg }}
+
+    header "Running Ansible with tags: {{ TAGS }}"
+{% endraw %}
+
+    if [[ ! -d "{{ justfile_ansible_project_dir }}" ]]; then
+        error "Ansible directory not found: {{ justfile_ansible_project_dir }}"
+        exit 1
+    fi
+
+    cd {{ justfile_ansible_project_dir }}
+{% raw %}
+    echo "→ Running ansible-playbook site.yml --tags {{ TAGS }}..."
+    ansible-playbook site.yml --limit $(hostname) --tags {{ TAGS }} || { error "Ansible playbook failed"; exit 1; }
+
+    success "Ansible playbook completed"
+{% endraw %}
+
+# Dry-run Ansible (see what would change)
+[group('updates')]
+update-ansible-check:
+    #!/usr/bin/env bash
+    set -euo pipefail
+{% raw %}
+    {{ header_msg }}
+
+    header "Ansible Dry Run (Check Mode)"
+{% endraw %}
+
+    cd {{ justfile_ansible_project_dir }}
+    echo "→ Running ansible-playbook in check mode..."
+    ansible-playbook site.yml --limit $(hostname) --check --diff

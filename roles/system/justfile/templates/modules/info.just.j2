@@ -1,0 +1,56 @@
+# Information Module
+# System information and diagnostics
+
+{% raw %}
+# ============================================================================
+# INFORMATION / DIAGNOSTICS
+# ============================================================================
+
+# Show system information
+[group('info')]
+system-info:
+    #!/usr/bin/env bash
+    {{ header_msg }}
+
+    header "System Information"
+
+    hostnamectl
+
+    echo ""
+    echo "Disk Usage:"
+    df -h / /home | grep -v tmpfs
+
+# Show installed software versions
+[group('info')]
+versions:
+    #!/usr/bin/env bash
+    {{ header_msg }}
+
+    header "Installed Software Versions"
+
+    # Check Go (may be in /usr/local/go/bin if not in PATH)
+    if command -v go &> /dev/null; then
+        echo "Go:         $(go version 2>/dev/null)"
+    elif [ -x /usr/local/go/bin/go ]; then
+        echo "Go:         $(/usr/local/go/bin/go version 2>/dev/null)"
+    else
+        echo "Go:         not installed"
+    fi
+
+    echo "Node:       $(node --version 2>/dev/null || echo 'not installed')"
+    echo "npm:        $(npm --version 2>/dev/null || echo 'not installed')"
+    echo "Helix:      $(hx --version 2>/dev/null | head -1 || echo 'not installed')"
+    echo "Zellij:     $(zellij --version 2>/dev/null || echo 'not installed')"
+    echo "just:       $(just --version 2>/dev/null || echo 'not installed')"
+    echo "Ansible:    $(ansible --version 2>/dev/null | head -1 || echo 'not installed')"
+{% endraw %}
+
+# List all Ansible tags available
+[group('info')]
+ansible-tags:
+    @cd {{ justfile_ansible_project_dir }} && ansible-playbook site.yml --limit $(hostname) --list-tags
+
+# List all Ansible tasks for a specific tag
+[group('info')]
+ansible-tasks TAG:
+    @cd {{ justfile_ansible_project_dir }} && ansible-playbook site.yml --limit $(hostname) --tags {% raw %}{{ TAG }}{% endraw %} --list-tasks
