@@ -60,3 +60,9 @@
     name: apps/vivaldi
   tags: [vivaldi, browser]
   when: "'vivaldi' in common_apps or app_states['vivaldi'] is defined"
+
+- name: Include Visual Studio Code
+  include_role:
+    name: apps/vscode
+  tags: [vscode, editor, development]
+  when: "'vscode' in common_apps or app_states['vscode'] is defined"

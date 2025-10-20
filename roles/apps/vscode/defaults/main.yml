@@ -1,0 +1,5 @@
+---
+# Visual Studio Code default variables
+
+# Installation state (present/absent)
+vscode_state: present

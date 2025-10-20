@@ -13,6 +13,7 @@ common_apps:
   - starship
   - todoist
   - vivaldi
+  - vscode
 
 # Application states (present/absent)
 # Override in host_vars for host-specific control
@@ -27,3 +28,4 @@ app_states:
   starship: present
   todoist: present
   vivaldi: present
+  vscode: present
