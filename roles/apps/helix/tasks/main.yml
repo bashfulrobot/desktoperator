@@ -23,6 +23,7 @@
 
 # Install language servers and tools
 # Note: gopls requires Go to be installed (system/go role)
+# Note: yaml-language-server requires Node.js/npm (system/nodejs role)
 - name: Install Go language server (gopls)
   shell: |
     /usr/local/go/bin/go install golang.org/x/tools/gopls@latest
@@ -32,11 +33,20 @@
   environment:
     GOBIN: "/usr/local/bin"
 
+- name: Check if npm is available
+  command: which npm
+  register: npm_check
+  failed_when: false
+  changed_when: false
+  when: app_states.helix | default('present') == 'present'
+
 - name: Install YAML language server via npm
   shell: |
     npm install -g yaml-language-server
   become: yes
-  when: app_states.helix | default('present') == 'present'
+  when:
+    - app_states.helix | default('present') == 'present'
+    - npm_check.rc == 0
   ignore_errors: yes
 
 - name: Install Marksman (Markdown LSP)
