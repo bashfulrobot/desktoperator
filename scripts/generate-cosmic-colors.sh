@@ -82,7 +82,7 @@ main() {
 ---
 # Auto-generated COSMIC theme color variables
 # Generated: $(date '+%Y-%m-%d %H:%M:%S')
-# DO NOT EDIT MANUALLY - Run 'just colors' to regenerate
+# DO NOT EDIT MANUALLY - Run 'just generate-cosmic-colors' to regenerate
 
 EOF
 

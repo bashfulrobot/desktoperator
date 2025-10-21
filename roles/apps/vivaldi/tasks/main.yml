@@ -106,7 +106,7 @@
   become: no
 
 - name: Generate color variables if missing
-  command: "{{ playbook_dir }}/scripts/generate-color-vars.sh"
+  command: "{{ playbook_dir }}/scripts/generate-cosmic-colors.sh"
   args:
     chdir: "{{ playbook_dir }}"
   delegate_to: localhost

@@ -254,7 +254,7 @@ cosmic-capture:
 
 # Generate color variables from COSMIC themes
 [group('cosmic')]
-colors:
+generate-cosmic-colors:
     #!/usr/bin/env bash
     set -euo pipefail
     {{ header_msg }}
@@ -262,7 +262,7 @@ colors:
 
     header "Generating Color Variables from COSMIC Themes"
     echo "→ Extracting Dark and Light theme colors..."
-    ./scripts/generate-color-vars.sh
+    ./scripts/generate-cosmic-colors.sh
     echo ""
     echo "Review changes with: git diff group_vars/all/auto-colors.yml"
     success "Color variables generated"
