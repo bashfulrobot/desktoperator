@@ -2,6 +2,13 @@
 # Insync installation via APT repository
 # Cloud storage sync client for Google Drive, OneDrive, and Dropbox
 
+- name: Remove deprecated Insync GPG key from trusted.gpg.d
+  file:
+    path: /etc/apt/trusted.gpg.d/insynchq.gpg
+    state: absent
+  become: yes
+  when: app_states['insync'] | default('present') == 'present'
+
 - name: Download Insync GPG key
   get_url:
     url: https://apt.insync.io/insynchq.gpg
@@ -9,11 +16,12 @@
     mode: '0644'
   when: app_states['insync'] | default('present') == 'present'
 
-- name: Import Insync GPG key
+- name: Import Insync GPG key to modern keyring location
   shell: |
-    gpg --dearmor < /tmp/insynchq.gpg > /etc/apt/trusted.gpg.d/insynchq.gpg
+    gpg --dearmor < /tmp/insynchq.gpg > /usr/share/keyrings/insynchq.gpg
+    chmod 644 /usr/share/keyrings/insynchq.gpg
   args:
-    creates: /etc/apt/trusted.gpg.d/insynchq.gpg
+    creates: /usr/share/keyrings/insynchq.gpg
   become: yes
   when: app_states['insync'] | default('present') == 'present'
 
@@ -25,7 +33,7 @@
 
 - name: Add Insync APT repository
   apt_repository:
-    repo: "deb http://apt.insync.io/ubuntu {{ ubuntu_codename.stdout }} non-free contrib"
+    repo: "deb [signed-by=/usr/share/keyrings/insynchq.gpg] http://apt.insync.io/ubuntu {{ ubuntu_codename.stdout }} non-free contrib"
     filename: insync
     state: present
   become: yes
@@ -50,7 +58,58 @@
     state: absent
   when: app_states['insync'] | default('present') == 'present'
 
+# Fix for COSMIC Desktop - Insync requires XCB platform on Wayland
+- name: Create Insync wrapper script for COSMIC/Wayland
+  copy:
+    content: |
+      #!/bin/bash
+      # Insync wrapper for COSMIC Desktop (Wayland)
+      # Insync's Qt5 interface requires XCB platform to function properly
+      export QT_QPA_PLATFORM=xcb
+      exec /usr/bin/insync.real "$@"
+    dest: /usr/local/bin/insync-wrapper
+    mode: '0755'
+  become: yes
+  when: app_states['insync'] | default('present') == 'present'
+
+- name: Backup original insync binary
+  command: mv /usr/bin/insync /usr/bin/insync.real
+  args:
+    creates: /usr/bin/insync.real
+  become: yes
+  when: app_states['insync'] | default('present') == 'present'
+
+- name: Create symlink to wrapper script
+  file:
+    src: /usr/local/bin/insync-wrapper
+    dest: /usr/bin/insync
+    state: link
+  become: yes
+  when: app_states['insync'] | default('present') == 'present'
+
 # Cleanup when absent
+- name: Remove insync symlink when absent
+  file:
+    path: /usr/bin/insync
+    state: absent
+  become: yes
+  when: app_states['insync'] | default('present') == 'absent'
+
+- name: Restore original insync binary when absent
+  command: mv /usr/bin/insync.real /usr/bin/insync
+  args:
+    removes: /usr/bin/insync.real
+  become: yes
+  when: app_states['insync'] | default('present') == 'absent'
+  ignore_errors: yes
+
+- name: Remove Insync wrapper script when absent
+  file:
+    path: /usr/local/bin/insync-wrapper
+    state: absent
+  become: yes
+  when: app_states['insync'] | default('present') == 'absent'
+
 - name: Remove Insync when absent
   apt:
     name: insync
@@ -61,7 +120,7 @@
 
 - name: Remove Insync repository when absent
   apt_repository:
-    repo: "deb http://apt.insync.io/ubuntu {{ ubuntu_codename.stdout }} non-free contrib"
+    repo: "deb [signed-by=/usr/share/keyrings/insynchq.gpg] http://apt.insync.io/ubuntu {{ ubuntu_codename.stdout }} non-free contrib"
     filename: insync
     state: absent
   become: yes
@@ -69,7 +128,10 @@
 
 - name: Remove Insync GPG key when absent
   file:
-    path: /etc/apt/trusted.gpg.d/insynchq.gpg
+    path: "{{ item }}"
     state: absent
+  loop:
+    - /usr/share/keyrings/insynchq.gpg
+    - /etc/apt/trusted.gpg.d/insynchq.gpg
   become: yes
   when: app_states['insync'] | default('present') == 'absent'
