@@ -6,39 +6,37 @@
 # GENERATORS / UTILITIES
 # ============================================================================
 
-# Extract COSMIC theme colors (regenerate theme data)
+# Extract COSMIC theme colors to Ansible variables
 [group('generators')]
-generate-cosmic-colors MODE="Dark":
+generate-cosmic-colors:
     #!/usr/bin/env bash
     set -euo pipefail
     {{ header_msg }}
     {{ success_msg }}
 
-    header "Extracting COSMIC {{ MODE }} Theme Colors"
+    header "Generating Color Variables from COSMIC Themes"
 
-    if ! command -v extract-cosmic-colors &> /dev/null; then
-        {{ error_msg }}
-        error "extract-cosmic-colors command not found"
-        exit 1
-    fi
+    cd {{ ansible_dir }}
+    echo "→ Extracting Dark and Light theme colors..."
+    ./scripts/generate-cosmic-colors.sh
+    echo ""
+    echo "Review changes with: git diff group_vars/all/auto-colors.yml"
+    success "Color variables generated"
 
-    echo "→ Extracting {{ MODE }} theme colors..."
-    extract-cosmic-colors {{ MODE }}
-
-    success "COSMIC colors extracted"
-{% endraw %}
-
-# Regenerate Vivaldi themes from COSMIC colors
+# Generate all theme files (VSCode, Vivaldi, etc.)
 [group('generators')]
-generate-vivaldi-themes:
+generate-theme-files:
     #!/usr/bin/env bash
     set -euo pipefail
-{% raw %}
     {{ header_msg }}
+    {{ success_msg }}
 
-    header "Regenerating Vivaldi Themes"
+    header "Generating All COSMIC Theme Files"
+
+    cd {{ ansible_dir }}
+    echo "→ Generating VSCode and Vivaldi themes..."
+    ./scripts/generate-theme-files.sh
+    echo ""
+    echo "Review changes with: git diff extras/themes/"
+    success "Theme files generated"
 {% endraw %}
-
-    cd {{ justfile_ansible_project_dir }}
-    echo "→ Running Ansible with vivaldi tag..."
-    ansible-playbook site.yml --limit $(hostname) --tags vivaldi

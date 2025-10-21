@@ -263,6 +263,22 @@ just pull    # Pull and apply
 just cosmic  # Or just apply COSMIC config
 ```
 
+### 🎨 Managing COSMIC Theme Colors
+
+When you change COSMIC theme colors, regenerate application themes:
+
+```bash
+# 1. Extract new colors from COSMIC themes
+just generate-cosmic-colors
+
+# 2. Generate theme files for all apps (VSCode, Vivaldi, etc.)
+just generate-theme-files
+
+# 3. Review and commit theme changes
+git diff group_vars/all/auto-colors.yml extras/themes/
+just commit
+```
+
 **→ See [COSMIC Desktop Guide](docs/COSMIC_DESKTOP.md) for complete desktop management workflow**
 
 ---
@@ -271,16 +287,18 @@ just cosmic  # Or just apply COSMIC config
 
 **Day-to-day operations:**
 ```bash
-just run              # Apply full configuration
-just check            # Dry run preview
-just system           # Only system config
-just desktop          # Only desktop config
-just apps             # Only applications
-just cosmic           # Only COSMIC desktop config
-just cosmic-capture   # Capture COSMIC settings to repo
-just install firefox  # Install single app
-just commit           # Safe commit with security checks
-just pull             # Pull and apply latest config
+just run                    # Apply full configuration
+just check                  # Dry run preview
+just system                 # Only system config
+just desktop                # Only desktop config
+just apps                   # Only applications
+just cosmic                 # Only COSMIC desktop config
+just cosmic-capture         # Capture COSMIC settings to repo
+just generate-cosmic-colors # Extract colors from COSMIC themes
+just generate-theme-files   # Generate all app theme files
+just install firefox        # Install single app
+just commit                 # Safe commit with security checks
+just pull                   # Pull and apply latest config
 ```
 
 **Run `just` to see all available commands**

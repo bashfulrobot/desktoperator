@@ -267,6 +267,21 @@ generate-cosmic-colors:
     echo "Review changes with: git diff group_vars/all/auto-colors.yml"
     success "Color variables generated"
 
+# Generate all theme files (VSCode, Vivaldi, etc.)
+[group('cosmic')]
+generate-theme-files:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    {{ header_msg }}
+    {{ success_msg }}
+
+    header "Generating All COSMIC Theme Files"
+    echo "→ Generating VSCode and Vivaldi themes..."
+    ./scripts/generate-theme-files.sh
+    echo ""
+    echo "Review changes with: git diff extras/themes/"
+    success "Theme files generated"
+
 # Run only COSMIC desktop configuration
 [group('cosmic')]
 cosmic:

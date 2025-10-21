@@ -1,7 +1,7 @@
 ---
 # Auto-generated COSMIC theme color variables
-# Generated: 2025-10-21 09:03:12
-# DO NOT EDIT MANUALLY - Run 'just colors' to regenerate
+# Generated: 2025-10-21 10:00:17
+# DO NOT EDIT MANUALLY - Run 'just generate-cosmic-colors' to regenerate
 
 theme_colors_dark:
   colors:

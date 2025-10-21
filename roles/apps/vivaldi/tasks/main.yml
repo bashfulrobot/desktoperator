@@ -96,191 +96,28 @@
   when: app_states['vivaldi'] | default('present') == 'present'
 
 # Generate COSMIC themes for Vivaldi (both Dark and Light)
+# Theme ZIP files are generated manually with: just generate-theme-files
+# Ansible only checks that they exist
 
-# Ensure color variables exist (auto-generate if missing)
-- name: Check if auto-colors.yml exists
+- name: Check if Vivaldi theme ZIP files exist
   stat:
-    path: "{{ playbook_dir }}/group_vars/all/auto-colors.yml"
-  register: auto_colors_file
+    path: "{{ playbook_dir }}/extras/themes/vivaldi/{{ item }}"
+  register: vivaldi_zip_files
+  loop:
+    - cosmic-dark.zip
+    - cosmic-light.zip
   delegate_to: localhost
   become: no
 
-- name: Generate color variables if missing
-  command: "{{ playbook_dir }}/scripts/generate-cosmic-colors.sh"
+- name: Generate Vivaldi themes if missing
+  command: "{{ playbook_dir }}/scripts/generate-vivaldi-themes.sh"
   args:
     chdir: "{{ playbook_dir }}"
   delegate_to: localhost
   become: no
   when:
-    - not auto_colors_file.stat.exists
     - app_states['vivaldi'] | default('present') == 'present'
-
-- name: Load auto-generated color variables
-  include_vars:
-    file: "{{ playbook_dir }}/group_vars/all/auto-colors.yml"
-  when: app_states['vivaldi'] | default('present') == 'present'
-
-- name: Ensure extras/themes/vivaldi directories exist in repo
-  ansible.builtin.file:
-    path: "{{ item }}"
-    state: directory
-    mode: '0755'
-  become: false
-  loop:
-    - "{{ playbook_dir }}/extras/themes/vivaldi"
-    - "{{ playbook_dir }}/extras/themes/vivaldi/cosmic-dark-build"
-    - "{{ playbook_dir }}/extras/themes/vivaldi/cosmic-light-build"
-  when: app_states['vivaldi'] | default('present') == 'present'
-
-- name: Copy theme assets for Dark theme
-  ansible.builtin.copy:
-    src: "{{ item }}"
-    dest: "{{ playbook_dir }}/extras/themes/vivaldi/cosmic-dark-build/{{ item }}"
-    mode: '0644'
-  become: false
-  loop:
-    - Back.svg
-    - BreakMode.svg
-    - COMMAND_ckqjdk4o7000001l58zh17egm.svg
-    - COMMAND_ckqjhvf430003c5429ni7i7bz.svg
-    - COMMAND_ckqkoqycf0003wv4210uduu8n.svg
-    - CalendarStatus.svg
-    - CaptureImages.svg
-    - Clock.svg
-    - DownloadButton.svg
-    - Extensions.svg
-    - FastForward.svg
-    - Forward.svg
-    - Home.svg
-    - ImagesToggle.svg
-    - MailStatus.svg
-    - PageActions.svg
-    - PanelBookmarks.svg
-    - PanelCalendar.svg
-    - PanelContacts.svg
-    - PanelDownloads.svg
-    - PanelFeeds.svg
-    - PanelHistory.svg
-    - PanelMail.svg
-    - PanelNotes.svg
-    - PanelReadingList.svg
-    - PanelSession.svg
-    - PanelTasks.svg
-    - PanelToggle.svg
-    - PanelTranslate.svg
-    - PanelWeb.svg
-    - PanelWindow.svg
-    - Proxy.svg
-    - ReadingList.svg
-    - Reload.svg
-    - Rewind.svg
-    - SearchField.svg
-    - Settings.svg
-    - Stop.svg
-    - SyncStatus.svg
-    - TilingToggle.svg
-    - UpdateButton.svg
-    - WorkspaceButton.svg
-  when: app_states['vivaldi'] | default('present') == 'present'
-
-- name: Copy theme assets for Light theme
-  ansible.builtin.copy:
-    src: "{{ item }}"
-    dest: "{{ playbook_dir }}/extras/themes/vivaldi/cosmic-light-build/{{ item }}"
-    mode: '0644'
-  become: false
-  loop:
-    - Back.svg
-    - BreakMode.svg
-    - COMMAND_ckqjdk4o7000001l58zh17egm.svg
-    - COMMAND_ckqjhvf430003c5429ni7i7bz.svg
-    - COMMAND_ckqkoqycf0003wv4210uduu8n.svg
-    - CalendarStatus.svg
-    - CaptureImages.svg
-    - Clock.svg
-    - DownloadButton.svg
-    - Extensions.svg
-    - FastForward.svg
-    - Forward.svg
-    - Home.svg
-    - ImagesToggle.svg
-    - MailStatus.svg
-    - PageActions.svg
-    - PanelBookmarks.svg
-    - PanelCalendar.svg
-    - PanelContacts.svg
-    - PanelDownloads.svg
-    - PanelFeeds.svg
-    - PanelHistory.svg
-    - PanelMail.svg
-    - PanelNotes.svg
-    - PanelReadingList.svg
-    - PanelSession.svg
-    - PanelTasks.svg
-    - PanelToggle.svg
-    - PanelTranslate.svg
-    - PanelWeb.svg
-    - PanelWindow.svg
-    - Proxy.svg
-    - ReadingList.svg
-    - Reload.svg
-    - Rewind.svg
-    - SearchField.svg
-    - Settings.svg
-    - Stop.svg
-    - SyncStatus.svg
-    - TilingToggle.svg
-    - UpdateButton.svg
-    - WorkspaceButton.svg
-  when: app_states['vivaldi'] | default('present') == 'present'
-
-- name: Generate Vivaldi Dark theme settings.json
-  ansible.builtin.template:
-    src: theme-settings-dark.json.j2
-    dest: "{{ playbook_dir }}/extras/themes/vivaldi/cosmic-dark-build/settings.json"
-    mode: '0644'
-  become: false
-  when: app_states['vivaldi'] | default('present') == 'present'
-
-- name: Generate Vivaldi Light theme settings.json
-  ansible.builtin.template:
-    src: theme-settings-light.json.j2
-    dest: "{{ playbook_dir }}/extras/themes/vivaldi/cosmic-light-build/settings.json"
-    mode: '0644'
-  become: false
-  when: app_states['vivaldi'] | default('present') == 'present'
-
-- name: Create Vivaldi Dark theme ZIP file
-  community.general.archive:
-    path: "{{ playbook_dir }}/extras/themes/vivaldi/cosmic-dark-build/*"
-    dest: "{{ playbook_dir }}/extras/themes/vivaldi/cosmic-dark.zip"
-    format: zip
-    remove: false
-  become: false
-  when: app_states['vivaldi'] | default('present') == 'present'
-
-- name: Create Vivaldi Light theme ZIP file
-  community.general.archive:
-    path: "{{ playbook_dir }}/extras/themes/vivaldi/cosmic-light-build/*"
-    dest: "{{ playbook_dir }}/extras/themes/vivaldi/cosmic-light.zip"
-    format: zip
-    remove: false
-  become: false
-  when: app_states['vivaldi'] | default('present') == 'present'
-
-- name: Clean up Dark theme build directory
-  ansible.builtin.file:
-    path: "{{ playbook_dir }}/extras/themes/vivaldi/cosmic-dark-build"
-    state: absent
-  become: false
-  when: app_states['vivaldi'] | default('present') == 'present'
-
-- name: Clean up Light theme build directory
-  ansible.builtin.file:
-    path: "{{ playbook_dir }}/extras/themes/vivaldi/cosmic-light-build"
-    state: absent
-  become: false
-  when: app_states['vivaldi'] | default('present') == 'present'
+    - vivaldi_zip_files.results | selectattr('stat.exists', 'equalto', false) | list | length > 0
 
 # Cleanup when absent
 - name: Remove Vivaldi browser when absent

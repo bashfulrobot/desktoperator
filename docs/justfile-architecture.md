@@ -71,7 +71,7 @@ jsys health-check            # System health check
 **Generators:**
 ```bash
 jsys generate-cosmic-colors  # Extract COSMIC theme colors
-jsys generate-vivaldi-themes # Regenerate Vivaldi themes
+jsys generate-theme-files    # Generate all app themes (VSCode, Vivaldi)
 ```
 
 **Information:**

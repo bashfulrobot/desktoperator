@@ -180,10 +180,31 @@
     mode: '0644'
   when: app_states['vscode'] | default('present') == 'present'
 
-# COSMIC Theme Integration - VSIX Packaging Approach
-# Generate themes in extras/themes/vscode, package as VSIX, then install
+# COSMIC Theme Integration
+# Theme VSIX files are generated manually with: just generate-theme-files
+# Ansible only checks that they exist
 
-# Install vsce globally for packaging VSCode extensions
+- name: Check if VSCode theme VSIX files exist
+  stat:
+    path: "{{ playbook_dir }}/extras/themes/vscode/{{ item }}"
+  register: vscode_vsix_files
+  loop:
+    - cosmic-theme-dark.vsix
+    - cosmic-theme-light.vsix
+  delegate_to: localhost
+  become: no
+
+- name: Generate VSCode themes if missing
+  command: "{{ playbook_dir }}/scripts/generate-vscode-themes.sh"
+  args:
+    chdir: "{{ playbook_dir }}"
+  delegate_to: localhost
+  become: no
+  when:
+    - app_states['vscode'] | default('present') == 'present'
+    - vscode_vsix_files.results | selectattr('stat.exists', 'equalto', false) | list | length > 0
+
+# Install vsce globally for packaging VSCode extensions (needed by generation script)
 - name: Install vsce globally via npm
   shell: npm install -g @vscode/vsce
   become: yes
@@ -191,147 +212,6 @@
   register: vsce_install
   failed_when: false
   changed_when: vsce_install.rc == 0
-
-# Dark Theme Build Directory
-- name: Create COSMIC Dark theme build directory
-  file:
-    path: "{{ playbook_dir }}/extras/themes/vscode/cosmic-theme-dark"
-    state: directory
-    mode: '0755'
-  when: app_states['vscode'] | default('present') == 'present'
-
-- name: Create COSMIC Dark theme themes subdirectory
-  file:
-    path: "{{ playbook_dir }}/extras/themes/vscode/cosmic-theme-dark/themes"
-    state: directory
-    mode: '0755'
-  when: app_states['vscode'] | default('present') == 'present'
-
-- name: Deploy COSMIC Dark theme package.json
-  template:
-    src: package.json.j2
-    dest: "{{ playbook_dir }}/extras/themes/vscode/cosmic-theme-dark/package.json"
-    mode: '0644'
-  vars:
-    mode: "Dark"
-    is_dark: true
-  when: app_states['vscode'] | default('present') == 'present'
-
-- name: Deploy COSMIC Dark theme JSON
-  template:
-    src: cosmic-theme.json.j2
-    dest: "{{ playbook_dir }}/extras/themes/vscode/cosmic-theme-dark/themes/cosmic-dark.json"
-    mode: '0644'
-  vars:
-    mode: "Dark"
-    is_dark: true
-    colors: "{{ theme_colors_dark.colors }}"
-  when: app_states['vscode'] | default('present') == 'present'
-
-- name: Deploy COSMIC Dark theme .vscodeignore
-  template:
-    src: vscodeignore.j2
-    dest: "{{ playbook_dir }}/extras/themes/vscode/cosmic-theme-dark/.vscodeignore"
-    mode: '0644'
-  when: app_states['vscode'] | default('present') == 'present'
-
-# Light Theme Build Directory
-- name: Create COSMIC Light theme build directory
-  file:
-    path: "{{ playbook_dir }}/extras/themes/vscode/cosmic-theme-light"
-    state: directory
-    mode: '0755'
-  when: app_states['vscode'] | default('present') == 'present'
-
-- name: Create COSMIC Light theme themes subdirectory
-  file:
-    path: "{{ playbook_dir }}/extras/themes/vscode/cosmic-theme-light/themes"
-    state: directory
-    mode: '0755'
-  when: app_states['vscode'] | default('present') == 'present'
-
-- name: Deploy COSMIC Light theme package.json
-  template:
-    src: package.json.j2
-    dest: "{{ playbook_dir }}/extras/themes/vscode/cosmic-theme-light/package.json"
-    mode: '0644'
-  vars:
-    mode: "Light"
-    is_dark: false
-  when: app_states['vscode'] | default('present') == 'present'
-
-- name: Deploy COSMIC Light theme JSON
-  template:
-    src: cosmic-theme.json.j2
-    dest: "{{ playbook_dir }}/extras/themes/vscode/cosmic-theme-light/themes/cosmic-light.json"
-    mode: '0644'
-  vars:
-    mode: "Light"
-    is_dark: false
-    colors: "{{ theme_colors_light.colors }}"
-  when: app_states['vscode'] | default('present') == 'present'
-
-- name: Deploy COSMIC Light theme .vscodeignore
-  template:
-    src: vscodeignore.j2
-    dest: "{{ playbook_dir }}/extras/themes/vscode/cosmic-theme-light/.vscodeignore"
-    mode: '0644'
-  when: app_states['vscode'] | default('present') == 'present'
-
-# Package themes as VSIX files
-- name: Package COSMIC Dark theme as VSIX
-  shell: |
-    cd "{{ playbook_dir }}/extras/themes/vscode/cosmic-theme-dark"
-    vsce package --out "{{ playbook_dir }}/extras/themes/vscode/cosmic-theme-dark.vsix"
-  when: app_states['vscode'] | default('present') == 'present'
-  register: dark_vsix_package
-  failed_when: dark_vsix_package.rc != 0
-
-- name: Package COSMIC Light theme as VSIX
-  shell: |
-    cd "{{ playbook_dir }}/extras/themes/vscode/cosmic-theme-light"
-    vsce package --out "{{ playbook_dir }}/extras/themes/vscode/cosmic-theme-light.vsix"
-  when: app_states['vscode'] | default('present') == 'present'
-  register: light_vsix_package
-  failed_when: light_vsix_package.rc != 0
-
-# Clean up build directories (leave VSIX files for manual installation)
-- name: Remove COSMIC Dark theme build directory
-  file:
-    path: "{{ playbook_dir }}/extras/themes/vscode/cosmic-theme-dark"
-    state: absent
-  when: app_states['vscode'] | default('present') == 'present'
-
-- name: Remove COSMIC Light theme build directory
-  file:
-    path: "{{ playbook_dir }}/extras/themes/vscode/cosmic-theme-light"
-    state: absent
-  when: app_states['vscode'] | default('present') == 'present'
-
-# Remove old incorrectly-deployed theme directories
-- name: Remove old COSMIC Dark theme directory (from direct deployment)
-  file:
-    path: "{{ user.home }}/.vscode/extensions/cosmic.cosmic-theme-dark-1.0.0"
-    state: absent
-  when: app_states['vscode'] | default('present') == 'present'
-
-- name: Remove old COSMIC Light theme directory (from direct deployment)
-  file:
-    path: "{{ user.home }}/.vscode/extensions/cosmic.cosmic-theme-light-1.0.0"
-    state: absent
-  when: app_states['vscode'] | default('present') == 'present'
-
-- name: Remove old COSMIC Dark theme directory (incorrect naming)
-  file:
-    path: "{{ user.home }}/.vscode/extensions/cosmic-theme-dark"
-    state: absent
-  when: app_states['vscode'] | default('present') == 'present'
-
-- name: Remove old COSMIC Light theme directory (incorrect naming)
-  file:
-    path: "{{ user.home }}/.vscode/extensions/cosmic-theme-light"
-    state: absent
-  when: app_states['vscode'] | default('present') == 'present'
 
 # Cleanup when absent
 - name: Remove VSCode repository when absent
