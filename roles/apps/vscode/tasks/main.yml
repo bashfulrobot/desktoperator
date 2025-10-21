@@ -73,6 +73,134 @@
     update_cache: yes
   become: yes
 
+# Install high-resolution icon in proper icon theme directory
+# VSCode package installs 1024x1024 PNG to pixmaps, copy to hicolor theme
+- name: Ensure hicolor 1024x1024 apps directory exists
+  file:
+    path: /usr/share/icons/hicolor/1024x1024/apps
+    state: directory
+    mode: '0755'
+  become: yes
+  when: app_states['vscode'] | default('present') == 'present'
+
+- name: Copy VSCode icon to hicolor theme directory (1024x1024)
+  copy:
+    src: /usr/share/pixmaps/vscode.png
+    dest: /usr/share/icons/hicolor/1024x1024/apps/vscode.png
+    remote_src: yes
+    mode: '0644'
+  become: yes
+  when: app_states['vscode'] | default('present') == 'present'
+
+- name: Update icon cache for VSCode
+  command: gtk-update-icon-cache -f -t /usr/share/icons/hicolor
+  become: yes
+  when: app_states['vscode'] | default('present') == 'present'
+  ignore_errors: yes
+
+# Fix keyring access on COSMIC Desktop (Chromium doesn't recognize COSMIC)
+# Force VSCode to use gnome-libsecret for password storage + Wayland optimizations
+- name: Create VSCode config directory
+  file:
+    path: "{{ user.home }}/.config/Code/User"
+    state: directory
+    owner: "{{ user.name }}"
+    mode: '0755'
+  when: app_states['vscode'] | default('present') == 'present'
+
+- name: Configure VSCode runtime arguments (argv.json)
+  copy:
+    content: |
+      {
+        "password-store": "gnome-libsecret",
+        "enable-features": "UseOzonePlatform,WaylandWindowDecorations",
+        "ozone-platform": "wayland"
+      }
+    dest: "{{ user.home }}/.config/Code/User/argv.json"
+    owner: "{{ user.name }}"
+    mode: '0644'
+  when: app_states['vscode'] | default('present') == 'present'
+
+# COSMIC Theme Integration - Dark Mode
+- name: Create COSMIC Dark theme extension directory
+  file:
+    path: "{{ user.home }}/.vscode/extensions/cosmic-theme-dark"
+    state: directory
+    owner: "{{ user.name }}"
+    mode: '0755'
+  when: app_states['vscode'] | default('present') == 'present'
+
+- name: Create COSMIC Dark theme themes subdirectory
+  file:
+    path: "{{ user.home }}/.vscode/extensions/cosmic-theme-dark/themes"
+    state: directory
+    owner: "{{ user.name }}"
+    mode: '0755'
+  when: app_states['vscode'] | default('present') == 'present'
+
+- name: Deploy COSMIC Dark theme package.json
+  template:
+    src: package.json.j2
+    dest: "{{ user.home }}/.vscode/extensions/cosmic-theme-dark/package.json"
+    owner: "{{ user.name }}"
+    mode: '0644'
+  vars:
+    mode: "Dark"
+    is_dark: true
+  when: app_states['vscode'] | default('present') == 'present'
+
+- name: Deploy COSMIC Dark theme
+  template:
+    src: cosmic-theme.json.j2
+    dest: "{{ user.home }}/.vscode/extensions/cosmic-theme-dark/themes/cosmic-dark.json"
+    owner: "{{ user.name }}"
+    mode: '0644'
+  vars:
+    mode: "Dark"
+    is_dark: true
+    colors: "{{ theme_colors_dark.colors }}"
+  when: app_states['vscode'] | default('present') == 'present'
+
+# COSMIC Theme Integration - Light Mode
+- name: Create COSMIC Light theme extension directory
+  file:
+    path: "{{ user.home }}/.vscode/extensions/cosmic-theme-light"
+    state: directory
+    owner: "{{ user.name }}"
+    mode: '0755'
+  when: app_states['vscode'] | default('present') == 'present'
+
+- name: Create COSMIC Light theme themes subdirectory
+  file:
+    path: "{{ user.home }}/.vscode/extensions/cosmic-theme-light/themes"
+    state: directory
+    owner: "{{ user.name }}"
+    mode: '0755'
+  when: app_states['vscode'] | default('present') == 'present'
+
+- name: Deploy COSMIC Light theme package.json
+  template:
+    src: package.json.j2
+    dest: "{{ user.home }}/.vscode/extensions/cosmic-theme-light/package.json"
+    owner: "{{ user.name }}"
+    mode: '0644'
+  vars:
+    mode: "Light"
+    is_dark: false
+  when: app_states['vscode'] | default('present') == 'present'
+
+- name: Deploy COSMIC Light theme
+  template:
+    src: cosmic-theme.json.j2
+    dest: "{{ user.home }}/.vscode/extensions/cosmic-theme-light/themes/cosmic-light.json"
+    owner: "{{ user.name }}"
+    mode: '0644'
+  vars:
+    mode: "Light"
+    is_dark: false
+    colors: "{{ theme_colors_light.colors }}"
+  when: app_states['vscode'] | default('present') == 'present'
+
 # Cleanup when absent
 - name: Remove VSCode repository when absent
   apt_repository:
