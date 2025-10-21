@@ -169,7 +169,7 @@
 
 - name: Create COSMIC Dark theme themes subdirectory
   file:
-    path: "{{ user.home }}/.vscode/extensions/cosmic-theme-dark/themes"
+    path: "{{ user.home }}/.vscode/extensions/cosmic.cosmic-theme-dark-1.0.0/themes"
     state: directory
     owner: "{{ user.name }}"
     group: "{{ user.name }}"
@@ -179,7 +179,7 @@
 - name: Deploy COSMIC Dark theme package.json
   template:
     src: package.json.j2
-    dest: "{{ user.home }}/.vscode/extensions/cosmic-theme-dark/package.json"
+    dest: "{{ user.home }}/.vscode/extensions/cosmic.cosmic-theme-dark-1.0.0/package.json"
     owner: "{{ user.name }}"
     group: "{{ user.name }}"
     mode: '0644'
@@ -191,7 +191,7 @@
 - name: Deploy COSMIC Dark theme
   template:
     src: cosmic-theme.json.j2
-    dest: "{{ user.home }}/.vscode/extensions/cosmic-theme-dark/themes/cosmic-dark.json"
+    dest: "{{ user.home }}/.vscode/extensions/cosmic.cosmic-theme-dark-1.0.0/themes/cosmic-dark.json"
     owner: "{{ user.name }}"
     group: "{{ user.name }}"
     mode: '0644'
@@ -213,7 +213,7 @@
 
 - name: Create COSMIC Light theme themes subdirectory
   file:
-    path: "{{ user.home }}/.vscode/extensions/cosmic-theme-light/themes"
+    path: "{{ user.home }}/.vscode/extensions/cosmic.cosmic-theme-light-1.0.0/themes"
     state: directory
     owner: "{{ user.name }}"
     group: "{{ user.name }}"
@@ -223,7 +223,7 @@
 - name: Deploy COSMIC Light theme package.json
   template:
     src: package.json.j2
-    dest: "{{ user.home }}/.vscode/extensions/cosmic-theme-light/package.json"
+    dest: "{{ user.home }}/.vscode/extensions/cosmic.cosmic-theme-light-1.0.0/package.json"
     owner: "{{ user.name }}"
     group: "{{ user.name }}"
     mode: '0644'
@@ -235,7 +235,7 @@
 - name: Deploy COSMIC Light theme
   template:
     src: cosmic-theme.json.j2
-    dest: "{{ user.home }}/.vscode/extensions/cosmic-theme-light/themes/cosmic-light.json"
+    dest: "{{ user.home }}/.vscode/extensions/cosmic.cosmic-theme-light-1.0.0/themes/cosmic-light.json"
     owner: "{{ user.name }}"
     group: "{{ user.name }}"
     mode: '0644'
@@ -243,6 +243,19 @@
     mode: "Light"
     is_dark: false
     colors: "{{ theme_colors_light.colors }}"
+  when: app_states['vscode'] | default('present') == 'present'
+
+# Remove old incorrectly-named theme directories
+- name: Remove old COSMIC Dark theme directory (incorrect naming)
+  file:
+    path: "{{ user.home }}/.vscode/extensions/cosmic-theme-dark"
+    state: absent
+  when: app_states['vscode'] | default('present') == 'present'
+
+- name: Remove old COSMIC Light theme directory (incorrect naming)
+  file:
+    path: "{{ user.home }}/.vscode/extensions/cosmic-theme-light"
+    state: absent
   when: app_states['vscode'] | default('present') == 'present'
 
 # Cleanup when absent
