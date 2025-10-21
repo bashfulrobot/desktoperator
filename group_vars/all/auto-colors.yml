@@ -1,0 +1,110 @@
+---
+# Auto-generated COSMIC theme color variables
+# Generated: 2025-10-21 09:03:12
+# DO NOT EDIT MANUALLY - Run 'just colors' to regenerate
+
+theme_colors_dark:
+  colors:
+    accent:
+      hex: "#63d0df"
+      r: 99
+      g: 208
+      b: 223
+    success:
+      hex: "#92cf9c"
+      r: 146
+      g: 207
+      b: 156
+    warning:
+      hex: "#f7e062"
+      r: 247
+      g: 224
+      b: 98
+    destructive:
+      hex: "#fda1a0"
+      r: 253
+      g: 161
+      b: 160
+    background:
+      hex: "#1b1b1b"
+      r: 27
+      g: 27
+      b: 27
+    primary:
+      hex: "#272727"
+      r: 39
+      g: 39
+      b: 39
+    secondary:
+      hex: "#343434"
+      r: 52
+      g: 52
+      b: 52
+    text_primary:
+      hex: "#e0e0e0"
+      r: 224
+      g: 224
+      b: 224
+    text_secondary:
+      hex: "#909090"
+      r: 144
+      g: 144
+      b: 144
+    text_tertiary:
+      hex: "#808080"
+      r: 128
+      g: 128
+      b: 128
+
+theme_colors_light:
+  colors:
+    accent:
+      hex: "#00525a"
+      r: 0
+      g: 82
+      b: 90
+    success:
+      hex: "#185529"
+      r: 24
+      g: 85
+      b: 41
+    warning:
+      hex: "#534800"
+      r: 83
+      g: 72
+      b: 0
+    destructive:
+      hex: "#78292e"
+      r: 120
+      g: 41
+      b: 46
+    background:
+      hex: "#d7d7d7"
+      r: 215
+      g: 215
+      b: 215
+    primary:
+      hex: "#ebebeb"
+      r: 235
+      g: 235
+      b: 235
+    secondary:
+      hex: "#fcfcfc"
+      r: 252
+      g: 252
+      b: 252
+    text_primary:
+      hex: "#202020"
+      r: 32
+      g: 32
+      b: 32
+    text_secondary:
+      hex: "#505050"
+      r: 80
+      g: 80
+      b: 80
+    text_tertiary:
+      hex: "#707070"
+      r: 112
+      g: 112
+      b: 112

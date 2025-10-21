@@ -1,6 +1,29 @@
 ---
 # Visual Studio Code installation via official Microsoft repository
 
+# Ensure color variables exist (auto-generate if missing)
+- name: Check if auto-colors.yml exists
+  stat:
+    path: "{{ playbook_dir }}/group_vars/all/auto-colors.yml"
+  register: auto_colors_file
+  delegate_to: localhost
+  become: no
+
+- name: Generate color variables if missing
+  command: "{{ playbook_dir }}/scripts/generate-color-vars.sh"
+  args:
+    chdir: "{{ playbook_dir }}"
+  delegate_to: localhost
+  become: no
+  when:
+    - not auto_colors_file.stat.exists
+    - app_states['vscode'] | default('present') == 'present'
+
+- name: Load auto-generated color variables
+  include_vars:
+    file: "{{ playbook_dir }}/group_vars/all/auto-colors.yml"
+  when: app_states['vscode'] | default('present') == 'present'
+
 - name: Install dependencies for VSCode
   apt:
     name:
@@ -272,26 +295,7 @@
   register: light_vsix_package
   failed_when: light_vsix_package.rc != 0
 
-# Install VSIX files to VSCode
-- name: Install COSMIC Dark theme VSIX
-  become: yes
-  become_user: "{{ user.name }}"
-  shell: |
-    code --install-extension "{{ playbook_dir }}/extras/themes/vscode/cosmic-theme-dark.vsix" --force
-  when: app_states['vscode'] | default('present') == 'present'
-  register: dark_vsix_install
-  failed_when: false
-
-- name: Install COSMIC Light theme VSIX
-  become: yes
-  become_user: "{{ user.name }}"
-  shell: |
-    code --install-extension "{{ playbook_dir }}/extras/themes/vscode/cosmic-theme-light.vsix" --force
-  when: app_states['vscode'] | default('present') == 'present'
-  register: light_vsix_install
-  failed_when: false
-
-# Clean up build directories (leave VSIX files for user)
+# Clean up build directories (leave VSIX files for manual installation)
 - name: Remove COSMIC Dark theme build directory
   file:
     path: "{{ playbook_dir }}/extras/themes/vscode/cosmic-theme-dark"
