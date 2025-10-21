@@ -39,4 +39,52 @@ generate-theme-files:
     echo ""
     echo "Review changes with: git diff extras/themes/"
     success "Theme files generated"
+
+# Capture current COSMIC configuration to repository
+[group('generators')]
+cosmic-capture:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    {{ header_msg }}
+    {{ success_msg }}
+
+    header "Capturing COSMIC Configuration"
+
+    cd {{ ansible_dir }}
+    echo "→ Running capture script..."
+    ./scripts/capture-cosmic-config.sh
+    echo ""
+    echo "Review changes with: git diff cosmic-config/"
+    echo "Commit with: just -f {{ ansible_dir }}/justfiles/git commit"
+    success "COSMIC configuration captured"
+
+# Apply COSMIC desktop configuration
+[group('generators')]
+cosmic-apply:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    {{ header_msg }}
+    {{ success_msg }}
+
+    header "Applying COSMIC Configuration"
+
+    cd {{ ansible_dir }}
+    echo "→ Running ansible-playbook for COSMIC..."
+    ansible-playbook site.yml --limit $(hostname) --tags cosmic
+    success "COSMIC configuration applied"
+
+# Deploy application configuration (e.g., jsys app vscode)
+[group('generators')]
+app APP:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    {{ header_msg }}
+    {{ success_msg }}
+
+    header "Deploying {{ APP }} Configuration"
+
+    cd {{ ansible_dir }}
+    echo "→ Running ansible-playbook for {{ APP }}..."
+    ansible-playbook site.yml --limit $(hostname) --tags apps -e "enabled_apps=[{{ APP }}]"
+    success "{{ APP }} configuration applied"
 {% endraw %}

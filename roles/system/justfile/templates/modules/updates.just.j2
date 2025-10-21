@@ -80,7 +80,7 @@ update-npm:
     fi
 
     echo "→ Updating npm packages..."
-    npm update -g || { error "Failed to update npm packages"; exit 1; }
+    sudo npm update -g || { error "Failed to update npm packages"; exit 1; }
 
     success "npm packages updated"
 
@@ -101,7 +101,7 @@ update-go:
     fi
 
     echo "→ Updating gopls..."
-    GOBIN=/usr/local/bin /usr/local/go/bin/go install golang.org/x/tools/gopls@latest || { error "Failed to update gopls"; exit 1; }
+    /usr/local/go/bin/go install golang.org/x/tools/gopls@latest || { error "Failed to update gopls"; exit 1; }
 
     success "Go tools updated"
 {% endraw %}
