@@ -48,6 +48,22 @@
     - slack_needs_update | bool
   become: yes
 
+# Install high-resolution icon for better display in dock
+- name: Download Slack SVG icon
+  get_url:
+    url: "https://raw.githubusercontent.com/simple-icons/simple-icons/develop/icons/slack.svg"
+    dest: "/usr/share/icons/hicolor/scalable/apps/slack.svg"
+    mode: '0644'
+  become: yes
+  when: app_states['slack'] | default('present') == 'present'
+  ignore_errors: yes
+
+- name: Update icon cache for Slack
+  command: gtk-update-icon-cache -f -t /usr/share/icons/hicolor
+  become: yes
+  when: app_states['slack'] | default('present') == 'present'
+  ignore_errors: yes
+
 # Cleanup when absent
 - name: Remove Slack when absent
   apt:
