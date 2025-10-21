@@ -1,0 +1,75 @@
+---
+# Insync installation via APT repository
+# Cloud storage sync client for Google Drive, OneDrive, and Dropbox
+
+- name: Download Insync GPG key
+  get_url:
+    url: https://apt.insync.io/insynchq.gpg
+    dest: /tmp/insynchq.gpg
+    mode: '0644'
+  when: app_states['insync'] | default('present') == 'present'
+
+- name: Import Insync GPG key
+  shell: |
+    gpg --dearmor < /tmp/insynchq.gpg > /etc/apt/trusted.gpg.d/insynchq.gpg
+  args:
+    creates: /etc/apt/trusted.gpg.d/insynchq.gpg
+  become: yes
+  when: app_states['insync'] | default('present') == 'present'
+
+- name: Get Ubuntu codename
+  command: lsb_release -cs
+  register: ubuntu_codename
+  changed_when: false
+  when: app_states['insync'] | default('present') == 'present'
+
+- name: Add Insync APT repository
+  apt_repository:
+    repo: "deb http://apt.insync.io/ubuntu {{ ubuntu_codename.stdout }} non-free contrib"
+    filename: insync
+    state: present
+  become: yes
+  when: app_states['insync'] | default('present') == 'present'
+
+- name: Update APT cache
+  apt:
+    update_cache: yes
+  become: yes
+  when: app_states['insync'] | default('present') == 'present'
+
+- name: Install Insync
+  apt:
+    name: insync
+    state: present
+  become: yes
+  when: app_states['insync'] | default('present') == 'present'
+
+- name: Clean up GPG key file
+  file:
+    path: /tmp/insynchq.gpg
+    state: absent
+  when: app_states['insync'] | default('present') == 'present'
+
+# Cleanup when absent
+- name: Remove Insync when absent
+  apt:
+    name: insync
+    state: absent
+    purge: yes
+  become: yes
+  when: app_states['insync'] | default('present') == 'absent'
+
+- name: Remove Insync repository when absent
+  apt_repository:
+    repo: "deb http://apt.insync.io/ubuntu {{ ubuntu_codename.stdout }} non-free contrib"
+    filename: insync
+    state: absent
+  become: yes
+  when: app_states['insync'] | default('present') == 'absent'
+
+- name: Remove Insync GPG key when absent
+  file:
+    path: /etc/apt/trusted.gpg.d/insynchq.gpg
+    state: absent
+  become: yes
+  when: app_states['insync'] | default('present') == 'absent'

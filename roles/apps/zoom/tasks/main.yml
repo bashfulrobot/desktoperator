@@ -1,0 +1,58 @@
+---
+# Zoom Desktop installation via .deb package
+
+- name: Check if Zoom is installed
+  command: dpkg-query -W -f='${Version}' zoom
+  register: zoom_installed_version
+  changed_when: false
+  failed_when: false
+  when: app_states['zoom'] | default('present') == 'present'
+
+- name: Get latest Zoom version from API
+  shell: |
+    curl -sL "https://zoom.us/rest/download?os=linux" 2>/dev/null | grep -oP '"version"\s*:\s*"\K[^"]+' | head -1
+  register: zoom_latest_version
+  changed_when: false
+  when: app_states['zoom'] | default('present') == 'present'
+
+- name: Determine if Zoom needs update
+  set_fact:
+    zoom_needs_update: "{{ zoom_installed_version.rc != 0 or zoom_installed_version.stdout != zoom_latest_version.stdout }}"
+  when: app_states['zoom'] | default('present') == 'present'
+
+- name: Download Zoom .deb package
+  get_url:
+    url: "https://cdn.zoom.us/prod/{{ zoom_latest_version.stdout }}/zoom_amd64.deb"
+    dest: "/tmp/zoom-{{ zoom_latest_version.stdout }}.deb"
+    mode: '0644'
+  when:
+    - app_states['zoom'] | default('present') == 'present'
+    - zoom_needs_update | bool
+  become: yes
+
+- name: Install Zoom .deb package
+  apt:
+    deb: "/tmp/zoom-{{ zoom_latest_version.stdout }}.deb"
+    state: present
+  become: yes
+  when:
+    - app_states['zoom'] | default('present') == 'present'
+    - zoom_needs_update | bool
+
+- name: Clean up downloaded .deb package
+  file:
+    path: "/tmp/zoom-{{ zoom_latest_version.stdout }}.deb"
+    state: absent
+  when:
+    - app_states['zoom'] | default('present') == 'present'
+    - zoom_needs_update | bool
+  become: yes
+
+# Cleanup when absent
+- name: Remove Zoom when absent
+  apt:
+    name: zoom
+    state: absent
+    purge: yes
+  become: yes
+  when: app_states['zoom'] | default('present') == 'absent'

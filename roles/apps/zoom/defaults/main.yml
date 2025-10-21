@@ -1,0 +1,5 @@
+---
+# Zoom Desktop default variables
+
+# Installation state (present/absent)
+zoom_state: present

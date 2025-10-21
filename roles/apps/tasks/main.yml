@@ -66,3 +66,15 @@
     name: apps/vscode
   tags: [vscode, editor, development]
   when: "'vscode' in common_apps or app_states['vscode'] is defined"
+
+- name: Include Zoom
+  include_role:
+    name: apps/zoom
+  tags: [zoom, communication]
+  when: "'zoom' in common_apps or app_states['zoom'] is defined"
+
+- name: Include Insync
+  include_role:
+    name: apps/insync
+  tags: [insync, sync, cloud]
+  when: "'insync' in common_apps or app_states['insync'] is defined"

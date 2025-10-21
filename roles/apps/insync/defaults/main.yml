@@ -1,0 +1,5 @@
+---
+# Insync default variables
+
+# Installation state (present/absent)
+insync_state: present
