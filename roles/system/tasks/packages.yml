@@ -13,6 +13,13 @@
   become: yes
   tags: [packages]
 
+- name: Add Ansible PPA
+  apt_repository:
+    repo: ppa:ansible/ansible
+    state: present
+  become: yes
+  tags: [packages, dev]
+
 - name: Install core system packages
   apt:
     name: "{{ core_packages }}"

@@ -57,7 +57,7 @@ echo "Adding Ansible PPA..."
 sudo add-apt-repository --yes --update ppa:ansible/ansible
 
 echo "Installing Ansible..."
-sudo apt-get install -y ansible
+sudo apt-get install -y ansible ansible-lint
 
 # Install just command runner
 echo "Installing just..."
