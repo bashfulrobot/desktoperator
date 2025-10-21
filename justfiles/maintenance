@@ -110,6 +110,25 @@ update-collections:
     success "Collections updated successfully"
 
 # ============================================================================
+# COSMIC THEME MANAGEMENT
+# ============================================================================
+
+# Generate color variables from COSMIC themes
+[group('cosmic')]
+colors:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    {{ header_msg }}
+    {{ success_msg }}
+
+    header "Generating Color Variables from COSMIC Themes"
+    echo "→ Extracting Dark and Light theme colors..."
+    ./scripts/generate-color-vars.sh
+    echo ""
+    echo "Review changes with: git diff group_vars/all/auto-colors.yml"
+    success "Color variables generated"
+
+# ============================================================================
 # INFORMATION
 # ============================================================================
 
