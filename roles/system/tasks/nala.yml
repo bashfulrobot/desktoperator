@@ -1,0 +1,10 @@
+---
+# Nala package manager installation
+# Nala is a front-end for libapt-pkg using the python-apt API
+
+- name: Install nala package manager
+  apt:
+    name: nala
+    state: present
+    update_cache: yes
+  become: yes

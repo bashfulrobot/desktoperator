@@ -1,6 +1,10 @@
 ---
 # System role - core system configuration
 
+- name: Import nala package manager installation
+  import_tasks: nala.yml
+  tags: [nala, packages]
+
 - name: Import core packages installation
   import_tasks: packages.yml
   tags: [packages]
