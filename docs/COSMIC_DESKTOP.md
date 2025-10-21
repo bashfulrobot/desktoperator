@@ -385,13 +385,28 @@ desktoperator/
 
 ## Integration with Theme Management
 
-Desktop Operator also includes COSMIC theme color extraction for other applications. See:
+Desktop Operator automatically extracts COSMIC theme colors and applies them to other applications, maintaining visual consistency across your desktop.
 
-- `extract-cosmic-colors` script (roles/system/tasks/cosmic-theme.yml:14)
-- Vivaldi theme generation (roles/apps/vivaldi/)
-- Starship prompt color integration (roles/apps/starship/)
+**Supported Applications**:
+- **VSCode** - Color theme extension
+- **Vivaldi** - Browser theme
 
-These automatically extract colors from your COSMIC theme and apply them to other applications, maintaining visual consistency across your desktop.
+**Quick Commands**:
+```bash
+# Extract colors from COSMIC
+jsys generate-cosmic-colors
+
+# Generate all application themes
+jsys generate-theme-files
+
+# Deploy to specific apps
+jsys app vscode
+jsys app vivaldi
+```
+
+For detailed information about theme generation, see:
+- [Theme Generation Documentation](THEME_GENERATION.md) - Complete theme system guide
+- [Scripts Reference](SCRIPTS.md) - All script documentation
 
 ## See Also
 

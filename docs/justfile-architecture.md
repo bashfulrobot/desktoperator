@@ -4,119 +4,113 @@ This document describes the hybrid justfile architecture used for managing syste
 
 ## Overview
 
-The architecture uses a **hybrid approach** with clear separation of concerns:
+The architecture uses a **three-tier approach** with clear separation by lifecycle:
 
-- **`jsys`** - System-level operations (requires sudo, affects whole system)
-- **`just`** - Project-level operations (local to repository, no sudo)
-- **`just -f justfiles/*`** - Specialized workflows (security, git, maintenance)
+- **`just`** - Bootstrap & initial setup only (one-time use)
+- **`jsys`** - Daily operations & system management (primary interface)
+- **`just -f justfiles/*`** - Specialized workflows (advanced/infrequent operations)
 
 ## Architecture Diagram
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│ SYSTEM OPERATIONS (jsys)                                     │
+│ BOOTSTRAP (just) - ONE-TIME USE                              │
+│ ~/dev/iac/desktoperator/justfile                            │
+├─────────────────────────────────────────────────────────────┤
+│ Purpose: Initial system setup only                           │
+│   just bootstrap  → Install Ansible & dependencies          │
+│   just run        → Apply initial configuration             │
+│   just check      → Dry run preview                         │
+│   [dev] group     → Linting, syntax checking, inventory     │
+└─────────────────────────────────────────────────────────────┘
+                              ↓
+                    (After bootstrap, use jsys)
+                              ↓
+┌─────────────────────────────────────────────────────────────┐
+│ DAILY OPERATIONS (jsys) - PRIMARY INTERFACE                  │
 │ /usr/local/bin/jsys → /usr/local/share/just/system.just     │
 ├─────────────────────────────────────────────────────────────┤
 │ system.just (main, imports modules)                          │
-│   ├─ modules/updates.just      → System package updates     │
-│   ├─ modules/maintenance.just  → System cleanup & health    │
-│   ├─ modules/generators.just   → Theme generation           │
-│   └─ modules/info.just         → System diagnostics         │
+│   ├─ modules/updates.just      → Package updates (APT, etc)│
+│   ├─ modules/maintenance.just  → System cleanup & health   │
+│   ├─ modules/generators.just   → Themes, COSMIC, apps      │
+│   └─ modules/info.just         → System diagnostics        │
+│                                                              │
+│ Key Commands:                                                │
+│   jsys update-all           → Update everything             │
+│   jsys update-ansible       → Re-apply Ansible config       │
+│   jsys generate-cosmic-colors → Extract theme colors        │
+│   jsys cosmic-capture       → Capture COSMIC config         │
+│   jsys app <name>           → Deploy app configuration      │
 └─────────────────────────────────────────────────────────────┘
 
 ┌─────────────────────────────────────────────────────────────┐
-│ PROJECT OPERATIONS (just)                                    │
-│ ~/dev/iac/desktoperator/justfile                            │
-├─────────────────────────────────────────────────────────────┤
-│ Groups:                                                      │
-│   [playbook]   → Ansible playbook execution                 │
-│   [packages]   → Package install/uninstall                  │
-│   [bootstrap]  → System bootstrap                           │
-│   [git]        → Git operations (commit, pull)              │
-│   [validation] → Testing & validation                       │
-│   [cosmic]     → COSMIC desktop management                  │
-└─────────────────────────────────────────────────────────────┘
-
-┌─────────────────────────────────────────────────────────────┐
-│ SPECIALIZED WORKFLOWS                                        │
+│ SPECIALIZED WORKFLOWS (just -f justfiles/*)                  │
 │ ~/dev/iac/desktoperator/justfiles/*                         │
 ├─────────────────────────────────────────────────────────────┤
-│ justfiles/git         → Advanced git operations             │
-│ justfiles/security    → Vault & security management         │
-│ justfiles/maintenance → Ansible maintenance tasks           │
+│ Purpose: Advanced/infrequent operations                      │
+│   justfiles/git         → Advanced git operations           │
+│   justfiles/security    → Vault & security management       │
+│   justfiles/maintenance → Ansible maintenance tasks         │
 └─────────────────────────────────────────────────────────────┘
 ```
 
 ## Command Reference
 
-### System Operations (`jsys`)
+### Bootstrap Operations (`just`) - ONE-TIME USE
 
-**Updates:**
+**Initial Setup:**
 ```bash
-jsys update-all              # Update everything
-jsys update-apt              # Update APT packages
-jsys update-flatpak          # Update Flatpak apps
-jsys update-npm              # Update npm packages
-jsys update-go               # Update Go tools
-jsys update-ansible          # Run Ansible playbook
+just bootstrap               # Install Ansible and dependencies
+just run                     # Apply initial configuration
+just check                   # Dry run to preview changes
 ```
 
-**Maintenance:**
+**Development/Testing:**
+```bash
+just syntax                  # Syntax check playbooks
+just lint                    # Lint Ansible files
+just hosts                   # List inventory hosts
+just info                    # Show this host's inventory
+just ping                    # Test connectivity
+just tasks                   # List all tasks
+just tags                    # List all tags
+```
+
+### Daily Operations (`jsys`) - PRIMARY INTERFACE
+
+**System Updates:**
+```bash
+jsys update-all              # Update everything (APT, Flatpak, npm, Go, Ansible)
+jsys update-apt              # Update APT packages
+jsys update-flatpak          # Update Flatpak apps
+jsys update-npm              # Update global npm packages
+jsys update-go               # Update Go tools (gopls, etc)
+jsys update-ansible          # Re-apply Ansible configuration
+```
+
+**Theme & Desktop:**
+```bash
+jsys generate-cosmic-colors  # Extract COSMIC theme colors
+jsys generate-theme-files    # Generate app themes (VSCode, Vivaldi)
+jsys cosmic-capture          # Capture current COSMIC config
+jsys cosmic-apply            # Apply COSMIC configuration
+jsys app <name>              # Deploy app config (e.g., jsys app vscode)
+```
+
+**System Maintenance:**
 ```bash
 jsys clean-system            # Clean system (cache, logs, etc)
 jsys disk-usage              # Check disk usage
 jsys health-check            # System health check
 ```
 
-**Generators:**
-```bash
-jsys generate-cosmic-colors  # Extract COSMIC theme colors
-jsys generate-theme-files    # Generate all app themes (VSCode, Vivaldi)
-```
-
 **Information:**
 ```bash
 jsys system-info             # Show system information
 jsys versions                # Show installed software versions
-jsys ansible-tags            # List Ansible tags
-```
-
-### Project Operations (`just`)
-
-**Playbook Execution:**
-```bash
-just run                     # Run full playbook
-just check                   # Dry run (check mode)
-just system                  # Run system config only
-just desktop                 # Run desktop config only
-just apps                    # Run apps only
-just tag <TAG>               # Run specific tag
-```
-
-**Package Management:**
-```bash
-just install <PACKAGE>       # Install package
-just uninstall <PACKAGE>     # Uninstall package
-```
-
-**Git Operations:**
-```bash
-just commit                  # Safe commit (vault checks + AI)
-just pull                    # Pull and apply config
-```
-
-**Validation:**
-```bash
-just syntax                  # Syntax check
-just lint                    # Lint playbooks
-just tasks                   # List tasks
-just tags                    # List tags
-```
-
-**COSMIC:**
-```bash
-just cosmic-capture          # Capture COSMIC config
-just cosmic                  # Deploy COSMIC config
+jsys ansible-tags            # List available Ansible tags
+jsys ansible-tasks           # List all Ansible tasks
 ```
 
 ### Specialized Workflows
@@ -159,27 +153,26 @@ The system justfile uses a modular architecture:
 - Clear organization (grouped by purpose)
 - Manageable file sizes (~100-200 lines per module)
 
-### 2. Clear Separation of Concerns
+### 2. Clear Separation by Lifecycle
 
-**System (`jsys`):**
-- Requires sudo/root access
-- Affects entire system
-- Package manager updates
-- System-wide configuration
-- Health checks
+**Bootstrap (`just`):**
+- One-time use during initial setup
+- Sets up Ansible and applies first configuration
+- Development/testing helpers (syntax, lint, inventory)
+- No longer used after initial setup
 
-**Project (`just`):**
-- No sudo required
-- Local to repository
-- Ansible operations
-- Git operations
-- Development tasks
+**Daily Operations (`jsys`):**
+- Primary interface for all system management
+- Updates (packages, Ansible, Go tools)
+- Theme generation and application deployment
+- COSMIC desktop management
+- System health and maintenance
 
 **Specialized (`just -f justfiles/*`):**
-- Complex workflows
-- Domain expertise required
-- Less frequently used
-- Advanced operations
+- Advanced/infrequent workflows
+- Domain expertise required (git, security, maintenance)
+- Operations that need careful attention
+- Not part of daily routine
 
 ### 3. Consistent UX
 
