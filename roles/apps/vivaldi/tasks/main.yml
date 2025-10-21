@@ -96,6 +96,30 @@
   when: app_states['vivaldi'] | default('present') == 'present'
 
 # Generate COSMIC themes for Vivaldi (both Dark and Light)
+
+# Ensure color variables exist (auto-generate if missing)
+- name: Check if auto-colors.yml exists
+  stat:
+    path: "{{ playbook_dir }}/group_vars/all/auto-colors.yml"
+  register: auto_colors_file
+  delegate_to: localhost
+  become: no
+
+- name: Generate color variables if missing
+  command: "{{ playbook_dir }}/scripts/generate-color-vars.sh"
+  args:
+    chdir: "{{ playbook_dir }}"
+  delegate_to: localhost
+  become: no
+  when:
+    - not auto_colors_file.stat.exists
+    - app_states['vivaldi'] | default('present') == 'present'
+
+- name: Load auto-generated color variables
+  include_vars:
+    file: "{{ playbook_dir }}/group_vars/all/auto-colors.yml"
+  when: app_states['vivaldi'] | default('present') == 'present'
+
 - name: Ensure extras/themes/vivaldi directories exist in repo
   ansible.builtin.file:
     path: "{{ item }}"
@@ -208,36 +232,6 @@
     - TilingToggle.svg
     - UpdateButton.svg
     - WorkspaceButton.svg
-  when: app_states['vivaldi'] | default('present') == 'present'
-
-- name: Extract COSMIC Dark theme colors
-  ansible.builtin.shell: |
-    export HOME="{{ user.home }}"
-    extract-cosmic-colors Dark
-  register: cosmic_colors_dark_raw
-  changed_when: false
-  become: false
-  become_user: "{{ user.name }}"
-  when: app_states['vivaldi'] | default('present') == 'present'
-
-- name: Parse COSMIC Dark theme colors
-  ansible.builtin.set_fact:
-    theme_colors_dark: "{{ cosmic_colors_dark_raw.stdout | from_json }}"
-  when: app_states['vivaldi'] | default('present') == 'present'
-
-- name: Extract COSMIC Light theme colors
-  ansible.builtin.shell: |
-    export HOME="{{ user.home }}"
-    extract-cosmic-colors Light
-  register: cosmic_colors_light_raw
-  changed_when: false
-  become: false
-  become_user: "{{ user.name }}"
-  when: app_states['vivaldi'] | default('present') == 'present'
-
-- name: Parse COSMIC Light theme colors
-  ansible.builtin.set_fact:
-    theme_colors_light: "{{ cosmic_colors_light_raw.stdout | from_json }}"
   when: app_states['vivaldi'] | default('present') == 'present'
 
 - name: Generate Vivaldi Dark theme settings.json

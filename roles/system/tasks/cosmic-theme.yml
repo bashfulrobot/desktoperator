@@ -1,8 +1,29 @@
 ---
-# COSMIC theme color extraction
-# Must run early so other roles can consume the generated color palette
+# COSMIC theme color variables
+# Loads auto-generated color palette for all roles to consume
 
-- name: Install color extraction script
+# Ensure color variables exist (auto-generate if missing)
+- name: Check if auto-colors.yml exists
+  stat:
+    path: "{{ playbook_dir }}/group_vars/all/auto-colors.yml"
+  register: auto_colors_file
+  delegate_to: localhost
+  become: no
+
+- name: Generate color variables if missing
+  command: "{{ playbook_dir }}/scripts/generate-color-vars.sh"
+  args:
+    chdir: "{{ playbook_dir }}"
+  delegate_to: localhost
+  become: no
+  when: not auto_colors_file.stat.exists
+
+- name: Load auto-generated color variables
+  include_vars:
+    file: "{{ playbook_dir }}/group_vars/all/auto-colors.yml"
+
+# Install extraction script to /usr/local/bin for manual use
+- name: Install color extraction script for manual use
   ansible.builtin.copy:
     src: ../../../scripts/extract-cosmic-colors.sh
     dest: /usr/local/bin/extract-cosmic-colors
@@ -10,36 +31,3 @@
     owner: root
     group: root
   become: true
-
-- name: Extract COSMIC theme colors for active mode (in-memory)
-  ansible.builtin.shell: /usr/local/bin/extract-cosmic-colors
-  register: theme_colors_json
-  changed_when: false
-  become: true
-  become_user: "{{ user.name }}"
-
-- name: Parse active theme colors as Ansible variable
-  ansible.builtin.set_fact:
-    theme_colors: "{{ theme_colors_json.stdout | from_json }}"
-
-- name: Extract COSMIC Dark theme colors
-  ansible.builtin.shell: /usr/local/bin/extract-cosmic-colors Dark
-  register: theme_colors_dark_json
-  changed_when: false
-  become: true
-  become_user: "{{ user.name }}"
-
-- name: Parse Dark theme colors
-  ansible.builtin.set_fact:
-    theme_colors_dark: "{{ theme_colors_dark_json.stdout | from_json }}"
-
-- name: Extract COSMIC Light theme colors
-  ansible.builtin.shell: /usr/local/bin/extract-cosmic-colors Light
-  register: theme_colors_light_json
-  changed_when: false
-  become: true
-  become_user: "{{ user.name }}"
-
-- name: Parse Light theme colors
-  ansible.builtin.set_fact:
-    theme_colors_light: "{{ theme_colors_light_json.stdout | from_json }}"
