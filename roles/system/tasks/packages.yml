@@ -13,12 +13,8 @@
   become: yes
   tags: [packages]
 
-- name: Add Ansible PPA
-  apt_repository:
-    repo: ppa:ansible/ansible
-    state: present
-  become: yes
-  tags: [packages, dev]
+# Note: Ansible PPA is managed by bootstrap script
+# No need to manage it here as Ansible can't reliably update its own installation source
 
 - name: Install core system packages
   apt:
