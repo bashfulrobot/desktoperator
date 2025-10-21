@@ -26,3 +26,17 @@
       - "--exclude=com.system76.CosmicTheme.Mode/v1/is_dark"
       - "--exclude=com.system76.CosmicTheme.Mode/v1/is_light"
   delegate_to: "{{ inventory_hostname }}"
+
+- name: Install COSMIC Tweaks from Flathub
+  community.general.flatpak:
+    name: dev.edfloreshz.CosmicTweaks
+    state: present
+    remote: flathub
+  become: yes
+
+- name: Remove COSMIC Tweaks when absent
+  community.general.flatpak:
+    name: dev.edfloreshz.CosmicTweaks
+    state: absent
+  become: yes
+  when: false
