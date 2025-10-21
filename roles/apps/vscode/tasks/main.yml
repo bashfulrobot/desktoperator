@@ -163,6 +163,7 @@
     path: "{{ user.home }}/.vscode/extensions/cosmic-theme-dark"
     state: directory
     owner: "{{ user.name }}"
+    group: "{{ user.name }}"
     mode: '0755'
   when: app_states['vscode'] | default('present') == 'present'
 
@@ -171,6 +172,7 @@
     path: "{{ user.home }}/.vscode/extensions/cosmic-theme-dark/themes"
     state: directory
     owner: "{{ user.name }}"
+    group: "{{ user.name }}"
     mode: '0755'
   when: app_states['vscode'] | default('present') == 'present'
 
@@ -179,6 +181,7 @@
     src: package.json.j2
     dest: "{{ user.home }}/.vscode/extensions/cosmic-theme-dark/package.json"
     owner: "{{ user.name }}"
+    group: "{{ user.name }}"
     mode: '0644'
   vars:
     mode: "Dark"
@@ -190,6 +193,7 @@
     src: cosmic-theme.json.j2
     dest: "{{ user.home }}/.vscode/extensions/cosmic-theme-dark/themes/cosmic-dark.json"
     owner: "{{ user.name }}"
+    group: "{{ user.name }}"
     mode: '0644'
   vars:
     mode: "Dark"
@@ -203,6 +207,7 @@
     path: "{{ user.home }}/.vscode/extensions/cosmic-theme-light"
     state: directory
     owner: "{{ user.name }}"
+    group: "{{ user.name }}"
     mode: '0755'
   when: app_states['vscode'] | default('present') == 'present'
 
@@ -211,6 +216,7 @@
     path: "{{ user.home }}/.vscode/extensions/cosmic-theme-light/themes"
     state: directory
     owner: "{{ user.name }}"
+    group: "{{ user.name }}"
     mode: '0755'
   when: app_states['vscode'] | default('present') == 'present'
 
@@ -219,6 +225,7 @@
     src: package.json.j2
     dest: "{{ user.home }}/.vscode/extensions/cosmic-theme-light/package.json"
     owner: "{{ user.name }}"
+    group: "{{ user.name }}"
     mode: '0644'
   vars:
     mode: "Light"
@@ -230,6 +237,7 @@
     src: cosmic-theme.json.j2
     dest: "{{ user.home }}/.vscode/extensions/cosmic-theme-light/themes/cosmic-light.json"
     owner: "{{ user.name }}"
+    group: "{{ user.name }}"
     mode: '0644'
   vars:
     mode: "Light"
