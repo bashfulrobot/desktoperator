@@ -23,8 +23,12 @@ if [[ -d "$DEST_DIR" ]]; then
     mv "$DEST_DIR" "$backup_dir"
 fi
 
-# Copy the entire cosmic config directory
-cp -r "$COSMIC_CONFIG_DIR" "$DEST_DIR"
+# Copy the cosmic config directory, excluding theme mode settings
+# We exclude is_dark files since theme mode should be managed by the system, not Ansible
+rsync -av \
+    --exclude='com.system76.CosmicTheme.Dark/v1/is_dark' \
+    --exclude='com.system76.CosmicTheme.Mode/v1/is_dark' \
+    "$COSMIC_CONFIG_DIR/" "$DEST_DIR/"
 
 echo ""
 echo "✓ COSMIC configuration captured successfully!"
