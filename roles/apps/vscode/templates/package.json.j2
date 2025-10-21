@@ -1,7 +1,7 @@
 {
-  "name": "cosmic-theme-{{ mode | lower }}",
-  "displayName": "COSMIC Theme {{ mode }}",
-  "description": "Auto-generated theme from COSMIC Desktop colors ({{ mode }} mode)",
+  "name": "cosmic-theme",
+  "displayName": "COSMIC Theme",
+  "description": "Auto-generated theme from COSMIC Desktop colors",
   "version": "1.0.0",
   "publisher": "cosmic",
   "repository": {
@@ -17,9 +17,14 @@
   "contributes": {
     "themes": [
       {
-        "label": "COSMIC {{ mode }}",
-        "uiTheme": "{{ 'vs-dark' if is_dark else 'vs' }}",
-        "path": "./themes/cosmic-{{ mode | lower }}.json"
+        "label": "COSMIC Dark",
+        "uiTheme": "vs-dark",
+        "path": "./themes/cosmic-dark.json"
+      },
+      {
+        "label": "COSMIC Light",
+        "uiTheme": "vs",
+        "path": "./themes/cosmic-light.json"
       }
     ]
   }

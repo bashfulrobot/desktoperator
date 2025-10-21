@@ -186,11 +186,8 @@
 
 - name: Check if VSCode theme VSIX files exist
   stat:
-    path: "{{ playbook_dir }}/extras/themes/vscode/{{ item }}"
-  register: vscode_vsix_files
-  loop:
-    - cosmic-theme-dark.vsix
-    - cosmic-theme-light.vsix
+    path: "{{ playbook_dir }}/extras/themes/vscode/cosmic-theme.vsix"
+  register: vscode_vsix_file
   delegate_to: localhost
   become: no
 
@@ -202,7 +199,7 @@
   become: no
   when:
     - app_states['vscode'] | default('present') == 'present'
-    - vscode_vsix_files.results | selectattr('stat.exists', 'equalto', false) | list | length > 0
+    - not vscode_vsix_file.stat.exists
 
 # Install vsce globally for packaging VSCode extensions (needed by generation script)
 - name: Install vsce globally via npm
