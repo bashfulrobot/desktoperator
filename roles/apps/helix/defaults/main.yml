@@ -1,0 +1,33 @@
+---
+# Helix editor default variables
+
+# Installation state (present/absent)
+helix_state: present
+
+# Theme selection (cosmic-term16 uses terminal colors with better menu contrast)
+helix_theme: "cosmic-term16"
+
+# Editor configuration
+helix_editor:
+  line_number: "relative"
+  lsp_display_messages: true
+  cursor_shape:
+    normal: "block"
+    insert: "bar"
+    select: "underline"
+
+# Language server packages to install
+helix_language_servers:
+  - marksman
+  - gopls
+  - golangci-lint-langserver
+  - delve
+  - yaml-language-server
+
+# Language configurations
+helix_languages:
+  - name: "toml"
+    auto_format: true
+  - name: "yaml"
+    language_servers:
+      - "yaml-language-server"

@@ -1,11 +1,12 @@
 ---
-# Helix editor installation
+# Helix editor installation and configuration
 
 - name: Install software-properties-common for add-apt-repository
   apt:
     name: software-properties-common
     state: present
   become: yes
+  when: app_states.helix | default('present') == 'present'
 
 - name: Add Helix PPA
   apt_repository:
@@ -20,9 +21,102 @@
     update_cache: yes
   become: yes
 
+# Install language servers and tools
+# Note: gopls requires Go to be installed (system/go role)
+- name: Install Go language server (gopls)
+  shell: |
+    /usr/local/go/bin/go install golang.org/x/tools/gopls@latest
+  become: yes
+  when: app_states.helix | default('present') == 'present'
+  ignore_errors: yes
+  environment:
+    GOBIN: "/usr/local/bin"
+
+- name: Install YAML language server via npm
+  shell: |
+    npm install -g yaml-language-server
+  become: yes
+  when: app_states.helix | default('present') == 'present'
+  ignore_errors: yes
+
+- name: Install Marksman (Markdown LSP)
+  get_url:
+    url: "https://github.com/artempyanykh/marksman/releases/latest/download/marksman-linux-x64"
+    dest: "/usr/local/bin/marksman"
+    mode: '0755'
+  become: yes
+  when: app_states.helix | default('present') == 'present'
+  ignore_errors: yes
+
+# Create Helix configuration directory
+- name: Create Helix config directory
+  file:
+    path: "{{ user.home }}/.config/helix"
+    state: directory
+    owner: "{{ user.name }}"
+    mode: '0755'
+  when: app_states.helix | default('present') == 'present'
+
+- name: Create Helix themes directory
+  file:
+    path: "{{ user.home }}/.config/helix/themes"
+    state: directory
+    owner: "{{ user.name }}"
+    mode: '0755'
+  when: app_states.helix | default('present') == 'present'
+
+# Deploy Helix configuration files
+- name: Deploy Helix config.toml
+  template:
+    src: config.toml.j2
+    dest: "{{ user.home }}/.config/helix/config.toml"
+    owner: "{{ user.name }}"
+    mode: '0644'
+  when: app_states.helix | default('present') == 'present'
+
+- name: Deploy Helix languages.toml
+  template:
+    src: languages.toml.j2
+    dest: "{{ user.home }}/.config/helix/languages.toml"
+    owner: "{{ user.name }}"
+    mode: '0644'
+  when: app_states.helix | default('present') == 'present'
+
+- name: Deploy custom COSMIC theme
+  template:
+    src: cosmic-term16.toml.j2
+    dest: "{{ user.home }}/.config/helix/themes/cosmic-term16.toml"
+    owner: "{{ user.name }}"
+    mode: '0644'
+  when: app_states.helix | default('present') == 'present'
+
+# Set Helix as default editor
+- name: Set EDITOR environment variable for Helix
+  lineinfile:
+    path: "{{ user.home }}/.profile"
+    line: 'export EDITOR=hx'
+    create: yes
+    owner: "{{ user.name }}"
+    mode: '0644'
+  when: app_states.helix | default('present') == 'present'
+
+# Cleanup when absent
+- name: Remove Helix configuration when absent
+  file:
+    path: "{{ user.home }}/.config/helix"
+    state: absent
+  when: app_states.helix | default('present') == 'absent'
+
 - name: Remove Helix PPA when absent
   apt_repository:
     repo: ppa:maveonair/helix-editor
     state: absent
   become: yes
+  when: app_states.helix | default('present') == 'absent'
+
+- name: Remove EDITOR variable when absent
+  lineinfile:
+    path: "{{ user.home }}/.profile"
+    line: 'export EDITOR=hx'
+    state: absent
   when: app_states.helix | default('present') == 'absent'

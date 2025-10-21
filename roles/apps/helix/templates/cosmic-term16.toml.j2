@@ -1,0 +1,17 @@
+# Custom Helix theme - term16_dark with improved menu contrast
+# Inherits from term16_dark but overrides menu colors for visibility
+
+# Inherit base theme
+inherits = "term16_dark"
+
+# Override menu colors for better visibility
+"ui.menu" = { fg = "white", bg = "black" }
+"ui.menu.selected" = { fg = "black", bg = "blue" }
+"ui.menu.scroll" = { fg = "white", bg = "gray" }
+
+# Ensure popup menus are also visible
+"ui.popup" = { fg = "white", bg = "black" }
+"ui.popup.info" = { fg = "white", bg = "black" }
+
+# Make help text more visible
+"ui.help" = { fg = "white", bg = "black" }
