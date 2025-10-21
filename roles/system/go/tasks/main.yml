@@ -1,0 +1,78 @@
+---
+# Go language installation
+# Following official installation guide: https://go.dev/doc/install
+
+- name: Check if Go is already installed
+  stat:
+    path: "{{ go_install_dir }}/go/bin/go"
+  register: go_binary
+
+- name: Get installed Go version
+  shell: "{{ go_install_dir }}/go/bin/go version | awk '{print $3}' | sed 's/go//'"
+  register: installed_go_version
+  changed_when: false
+  failed_when: false
+  when: go_binary.stat.exists
+
+- name: Determine if Go needs update
+  set_fact:
+    go_needs_update: "{{ not go_binary.stat.exists or installed_go_version.stdout != go_version }}"
+
+- name: Remove old Go installation
+  file:
+    path: "{{ go_install_dir }}/go"
+    state: absent
+  become: yes
+  when: go_needs_update | bool
+
+- name: Download Go tarball
+  get_url:
+    url: "{{ go_download_url }}"
+    dest: "/tmp/go{{ go_version }}.linux-amd64.tar.gz"
+    mode: '0644'
+  when: go_needs_update | bool
+
+- name: Extract Go tarball to {{ go_install_dir }}
+  unarchive:
+    src: "/tmp/go{{ go_version }}.linux-amd64.tar.gz"
+    dest: "{{ go_install_dir }}"
+    remote_src: yes
+    creates: "{{ go_install_dir }}/go/bin/go"
+  become: yes
+  when: go_needs_update | bool
+
+- name: Clean up Go tarball
+  file:
+    path: "/tmp/go{{ go_version }}.linux-amd64.tar.gz"
+    state: absent
+  when: go_needs_update | bool
+
+- name: Create GOPATH directory
+  file:
+    path: "{{ go_path }}"
+    state: directory
+    owner: "{{ user.name }}"
+    mode: '0755'
+  become: yes
+
+- name: Add Go to PATH in user profile
+  lineinfile:
+    path: "{{ user.home }}/.profile"
+    line: 'export PATH=$PATH:{{ go_install_dir }}/go/bin:{{ go_path }}/bin'
+    create: yes
+    owner: "{{ user.name }}"
+    mode: '0644'
+
+- name: Set GOPATH in user profile
+  lineinfile:
+    path: "{{ user.home }}/.profile"
+    line: 'export GOPATH={{ go_path }}'
+    create: yes
+    owner: "{{ user.name }}"
+    mode: '0644'
+
+- name: Verify Go installation
+  shell: "{{ go_install_dir }}/go/bin/go version"
+  register: go_version_output
+  changed_when: false
+  failed_when: go_version_output.rc != 0

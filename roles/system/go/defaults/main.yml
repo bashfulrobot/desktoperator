@@ -1,0 +1,14 @@
+---
+# Go language default variables
+
+# Go version to install (check https://go.dev/VERSION?m=text for latest)
+go_version: "1.25.3"
+
+# Go installation directory
+go_install_dir: "/usr/local"
+
+# Go download URL
+go_download_url: "https://go.dev/dl/go{{ go_version }}.linux-amd64.tar.gz"
+
+# GOPATH for user
+go_path: "{{ user.home }}/go"

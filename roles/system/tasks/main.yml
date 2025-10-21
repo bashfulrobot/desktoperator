@@ -26,6 +26,11 @@
   import_tasks: python.yml
   tags: [python, dev]
 
+- name: Include Go language installation
+  include_role:
+    name: system/go
+  tags: [go, dev, golang]
+
 - name: Import flatpak configuration
   import_tasks: flatpak.yml
   tags: [flatpak]
@@ -55,3 +60,8 @@
 - name: Import Tailscale VPN configuration
   import_tasks: tailscale.yml
   tags: [tailscale, vpn]
+
+- name: Include justfile system management
+  include_role:
+    name: system/justfile
+  tags: [justfile, system-admin]
