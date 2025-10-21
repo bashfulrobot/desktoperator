@@ -1,0 +1,5 @@
+---
+# Gemini CLI default variables
+
+# Installation state (present/absent)
+gemini_cli_state: present

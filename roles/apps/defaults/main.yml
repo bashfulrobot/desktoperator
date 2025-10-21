@@ -16,6 +16,7 @@ common_apps:
   - vscode
   - zoom
   - insync
+  - gemini-cli
 
 # Application states (present/absent)
 # Override in host_vars for host-specific control
@@ -33,3 +34,4 @@ app_states:
   vscode: present
   zoom: present
   insync: present
+  gemini-cli: present
