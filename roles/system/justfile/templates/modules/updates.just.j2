@@ -14,7 +14,7 @@ update-all: update-apt update-flatpak update-npm update-go update-ansible
     @{{ success_msg }}
     @success "System is up to date!"
 
-# Update APT packages and clean up
+# Update APT packages and clean up using nala
 [group('updates')]
 update-apt:
     #!/usr/bin/env bash
@@ -26,13 +26,13 @@ update-apt:
     header "Updating APT Packages"
 
     echo "→ Updating package lists..."
-    sudo apt update || { error "Failed to update package lists"; exit 1; }
+    sudo nala update || { error "Failed to update package lists"; exit 1; }
 
     echo "→ Upgrading packages..."
-    sudo apt upgrade -y || { error "Failed to upgrade packages"; exit 1; }
+    sudo nala upgrade -y || { error "Failed to upgrade packages"; exit 1; }
 
     echo "→ Removing unused packages..."
-    sudo apt autoremove -y || { error "Failed to autoremove"; exit 1; }
+    sudo nala autoremove -y || { error "Failed to autoremove"; exit 1; }
 
     success "APT packages updated"
 
@@ -40,7 +40,7 @@ update-apt:
 [group('updates')]
 update-apt-check:
     @echo "Packages that can be upgraded:"
-    @apt list --upgradable 2>/dev/null | grep -v "Listing..."
+    @nala list --upgradable 2>/dev/null | grep -v "Listing..."
 
 # Update Flatpak applications
 [group('updates')]
