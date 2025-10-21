@@ -23,7 +23,14 @@ generate_theme_yaml() {
     fi
 
     # Extract colors from theme files
-    local accent=$(extract_rgba_floats "$theme_dir/accent")
+    # NOTE: For light theme, we use the dark theme's accent to maintain consistency
+    # across light/dark modes (matching the window border accent color)
+    if [[ "$mode" == "Light" ]]; then
+        local dark_accent_path="${COSMIC_CONFIG}/com.system76.CosmicTheme.Dark/v1/accent"
+        local accent=$(extract_rgba_floats "$dark_accent_path")
+    else
+        local accent=$(extract_rgba_floats "$theme_dir/accent")
+    fi
     local success=$(extract_rgba_floats "$theme_dir/success")
     local warning=$(extract_rgba_floats "$theme_dir/warning")
     local destructive=$(extract_rgba_floats "$theme_dir/destructive")

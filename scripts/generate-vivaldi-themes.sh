@@ -34,7 +34,7 @@ ansible-playbook -i localhost, -c local /dev/stdin <<EOF
     # Copy theme assets for Dark theme
     - name: Copy theme assets for Dark theme
       copy:
-        src: "{{ repo_root }}/roles/apps/vivaldi/files/{{ item }}"
+        src: "{{ repo_root }}/roles/apps/vivaldi/files/dark-icons/{{ item }}"
         dest: "{{ repo_root }}/extras/themes/vivaldi/cosmic-dark-build/{{ item }}"
         mode: '0644'
       loop:
@@ -84,7 +84,7 @@ ansible-playbook -i localhost, -c local /dev/stdin <<EOF
     # Copy theme assets for Light theme
     - name: Copy theme assets for Light theme
       copy:
-        src: "{{ repo_root }}/roles/apps/vivaldi/files/{{ item }}"
+        src: "{{ repo_root }}/roles/apps/vivaldi/files/light-icons/{{ item }}"
         dest: "{{ repo_root }}/extras/themes/vivaldi/cosmic-light-build/{{ item }}"
         mode: '0644'
       loop:

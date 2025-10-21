@@ -1,6 +1,6 @@
 ---
 # Auto-generated COSMIC theme color variables
-# Generated: 2025-10-21 10:00:17
+# Generated: 2025-10-21 11:29:14
 # DO NOT EDIT MANUALLY - Run 'just generate-cosmic-colors' to regenerate
 
 theme_colors_dark:
@@ -59,10 +59,10 @@ theme_colors_dark:
 theme_colors_light:
   colors:
     accent:
-      hex: "#00525a"
-      r: 0
-      g: 82
-      b: 90
+      hex: "#63d0df"
+      r: 99
+      g: 208
+      b: 223
     success:
       hex: "#185529"
       r: 24
