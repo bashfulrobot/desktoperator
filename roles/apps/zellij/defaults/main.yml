@@ -1,0 +1,27 @@
+---
+# Zellij terminal multiplexer default variables
+
+# Installation state (present/absent)
+zellij_state: present
+
+# Theme (ansi uses terminal colors, adapts to COSMIC theme)
+zellij_theme: "ansi"
+
+# Editor configuration
+zellij_scrollback_editor: "hx"
+
+# Clipboard settings
+zellij_copy_on_select: true
+zellij_copy_command: "wl-copy"
+zellij_copy_clipboard: "system"
+
+# Buffer and display settings
+zellij_scroll_buffer_size: 50000
+zellij_mouse_mode: false
+zellij_default_mode: "normal"
+zellij_show_startup_tips: false
+zellij_default_layout: "compact"
+zellij_pane_frames: false
+
+# UI settings
+zellij_ui_pane_frames_hide_session_name: true
