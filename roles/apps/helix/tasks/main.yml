@@ -3,16 +3,64 @@
 
 - name: Install software-properties-common for add-apt-repository
   apt:
-    name: software-properties-common
+    name:
+      - software-properties-common
+      - gpg
     state: present
   become: yes
   when: app_states.helix | default('present') == 'present'
 
-- name: Add Helix PPA
-  apt_repository:
-    repo: ppa:maveonair/helix-editor
-    state: "{{ 'present' if app_states.helix | default('present') == 'present' else 'absent' }}"
+- name: Remove deprecated Helix PPA key from trusted.gpg
+  shell: |
+    apt-key list | grep -A 1 "helix" | grep -oP '(?<=/).*(?=\s)' | xargs -r apt-key del
   become: yes
+  when: app_states.helix | default('present') == 'present'
+  ignore_errors: yes
+  changed_when: false
+
+- name: Remove conflicting Helix PPA repository files
+  file:
+    path: "{{ item }}"
+    state: absent
+  loop:
+    - /etc/apt/sources.list.d/helix-ppa.list
+    - /etc/apt/sources.list.d/helix-ppa.sources
+    - /etc/apt/sources.list.d/ppa_maveonair_helix_editor_noble.list
+    - /etc/apt/sources.list.d/maveonair-ubuntu-helix-editor-noble.list
+  become: yes
+  when: app_states.helix | default('present') == 'present'
+
+- name: Download Helix PPA GPG key
+  get_url:
+    url: https://keyserver.ubuntu.com/pks/lookup?op=get&search=0x27642B9FD7F1A161FC2524E3355A4FA515D7C855
+    dest: /tmp/helix-ppa.asc
+    mode: '0644'
+  become: yes
+  when: app_states.helix | default('present') == 'present'
+
+- name: Add Helix PPA GPG key to keyrings
+  shell: |
+    gpg --dearmor < /tmp/helix-ppa.asc > /usr/share/keyrings/helix-ppa.gpg
+    chmod 644 /usr/share/keyrings/helix-ppa.gpg
+  args:
+    creates: /usr/share/keyrings/helix-ppa.gpg
+  become: yes
+  when: app_states.helix | default('present') == 'present'
+
+- name: Clean up temporary Helix GPG key file
+  file:
+    path: /tmp/helix-ppa.asc
+    state: absent
+  become: yes
+  when: app_states.helix | default('present') == 'present'
+
+- name: Add Helix PPA with modern signed-by keyring
+  apt_repository:
+    repo: "deb [signed-by=/usr/share/keyrings/helix-ppa.gpg] https://ppa.launchpadcontent.net/maveonair/helix-editor/ubuntu {{ ansible_distribution_release }} main"
+    filename: helix-ppa
+    state: present
+  become: yes
+  when: app_states.helix | default('present') == 'present'
 
 - name: Install Helix editor
   apt:
@@ -28,10 +76,9 @@
   shell: |
     /usr/local/go/bin/go install golang.org/x/tools/gopls@latest
   become: yes
+  become_user: "{{ user.name }}"
   when: app_states.helix | default('present') == 'present'
   ignore_errors: yes
-  environment:
-    GOBIN: "/usr/local/bin"
 
 - name: Check if npm is available
   command: which npm
@@ -119,7 +166,15 @@
 
 - name: Remove Helix PPA when absent
   apt_repository:
-    repo: ppa:maveonair/helix-editor
+    repo: "deb [signed-by=/usr/share/keyrings/helix-ppa.gpg] https://ppa.launchpadcontent.net/maveonair/helix-editor/ubuntu {{ ansible_distribution_release }} main"
+    filename: helix-ppa
+    state: absent
+  become: yes
+  when: app_states.helix | default('present') == 'absent'
+
+- name: Remove Helix GPG key when absent
+  file:
+    path: /usr/share/keyrings/helix-ppa.gpg
     state: absent
   become: yes
   when: app_states.helix | default('present') == 'absent'
