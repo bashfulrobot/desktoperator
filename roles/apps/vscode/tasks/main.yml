@@ -160,7 +160,7 @@
 # COSMIC Theme Integration - Dark Mode
 - name: Create COSMIC Dark theme extension directory
   file:
-    path: "{{ user.home }}/.vscode/extensions/cosmic-theme-dark"
+    path: "{{ user.home }}/.vscode/extensions/cosmic.cosmic-theme-dark-1.0.0"
     state: directory
     owner: "{{ user.name }}"
     group: "{{ user.name }}"
@@ -204,7 +204,7 @@
 # COSMIC Theme Integration - Light Mode
 - name: Create COSMIC Light theme extension directory
   file:
-    path: "{{ user.home }}/.vscode/extensions/cosmic-theme-light"
+    path: "{{ user.home }}/.vscode/extensions/cosmic.cosmic-theme-light-1.0.0"
     state: directory
     owner: "{{ user.name }}"
     group: "{{ user.name }}"
