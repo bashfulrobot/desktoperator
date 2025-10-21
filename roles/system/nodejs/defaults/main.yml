@@ -1,0 +1,10 @@
+---
+# Node.js default variables
+
+# Installation state (present/absent)
+nodejs_state: present
+
+# Node.js major version (LTS recommended)
+# See https://github.com/nodesource/distributions#table-of-contents
+# Current LTS versions: 18, 20, 22
+nodejs_version: 22
