@@ -9,10 +9,13 @@
 # Update everything (all package managers + Ansible configuration)
 [group('updates')]
 update-all: update-apt update-flatpak update-npm update-go update-ansible
-    @{{ header_msg }}
-    @header "All Updates Complete"
-    @{{ success_msg }}
-    @success "System is up to date!"
+    #!/usr/bin/env bash
+    set -euo pipefail
+    {{ header_msg }}
+    {{ success_msg }}
+
+    header "All Updates Complete"
+    success "System is up to date!"
 
 # Update APT packages and clean up using nala
 [group('updates')]
