@@ -1,0 +1,15 @@
+---
+# Firefox role defaults
+
+# Firefox installation state (present/absent)
+firefox_state: present
+
+# Enable custom CSS (GNOME-style rounded corners)
+firefox_custom_css_enabled: true
+
+# Enable vertical tabs (required when using custom CSS that hides tab bar)
+firefox_vertical_tabs_enabled: true
+
+# Firefox profile directory
+# If not set, will find the default profile automatically
+firefox_profile_dir: ""

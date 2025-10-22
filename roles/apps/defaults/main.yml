@@ -12,6 +12,8 @@ common_apps:
   - claude-code
   - starship
   - todoist
+  - firefox
+  - zen-browser
   - vivaldi
   - vscode
   - zoom
@@ -26,11 +28,12 @@ app_states:
   restic: present
   zellij: present
   helix: present
-  zen-browser: absent
+  zen-browser: present
   slack: present
   claude-code: present
   starship: present
   todoist: present
+  firefox: present
   vivaldi: present
   vscode: present
   zoom: present

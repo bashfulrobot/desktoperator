@@ -1,0 +1,124 @@
+---
+# Firefox Browser configuration
+# Note: Firefox comes pre-installed with Pop!_OS, this role only manages configuration
+
+# Firefox profile configuration
+- name: Find Firefox default profile directory
+  shell: |
+    profile_dir=$(find {{ user.home }}/.mozilla/firefox -maxdepth 1 -type d -name "*.default-release" | head -1)
+    if [ -z "$profile_dir" ]; then
+      profile_dir=$(find {{ user.home }}/.mozilla/firefox -maxdepth 1 -type d -name "*.default" | head -1)
+    fi
+    echo "$profile_dir"
+  register: firefox_profile_result
+  changed_when: false
+  failed_when: false
+  when:
+    - app_states['firefox'] | default('present') == 'present'
+    - firefox_custom_css_enabled | default(true)
+
+- name: Set Firefox profile directory fact
+  set_fact:
+    firefox_profile_path: "{{ firefox_profile_dir if firefox_profile_dir != '' else firefox_profile_result.stdout }}"
+  when:
+    - app_states['firefox'] | default('present') == 'present'
+    - firefox_custom_css_enabled | default(true)
+    - firefox_profile_result.stdout is defined
+    - firefox_profile_result.stdout != ''
+
+# Custom CSS configuration
+- name: Create Firefox chrome directory
+  file:
+    path: "{{ firefox_profile_path }}/chrome"
+    state: directory
+    owner: "{{ user.name }}"
+    group: "{{ user.name }}"
+    mode: '0755'
+  when:
+    - app_states['firefox'] | default('present') == 'present'
+    - firefox_custom_css_enabled | default(true)
+    - firefox_profile_path is defined
+    - firefox_profile_path != ''
+
+- name: Deploy userChrome.css (GNOME-style rounded corners)
+  copy:
+    src: userChrome.css
+    dest: "{{ firefox_profile_path }}/chrome/userChrome.css"
+    owner: "{{ user.name }}"
+    group: "{{ user.name }}"
+    mode: '0644'
+  when:
+    - app_states['firefox'] | default('present') == 'present'
+    - firefox_custom_css_enabled | default(true)
+    - firefox_profile_path is defined
+    - firefox_profile_path != ''
+
+- name: Deploy userContent.css (New tab page customization)
+  copy:
+    src: userContent.css
+    dest: "{{ firefox_profile_path }}/chrome/userContent.css"
+    owner: "{{ user.name }}"
+    group: "{{ user.name }}"
+    mode: '0644'
+  when:
+    - app_states['firefox'] | default('present') == 'present'
+    - firefox_custom_css_enabled | default(true)
+    - firefox_profile_path is defined
+    - firefox_profile_path != ''
+
+# Firefox preferences configuration
+- name: Check if Firefox user.js exists
+  stat:
+    path: "{{ firefox_profile_path }}/user.js"
+  register: firefox_user_js
+  when:
+    - app_states['firefox'] | default('present') == 'present'
+    - firefox_profile_path is defined
+    - firefox_profile_path != ''
+
+- name: Enable custom CSS in Firefox preferences
+  lineinfile:
+    path: "{{ firefox_profile_path }}/user.js"
+    line: 'user_pref("toolkit.legacyUserProfileCustomizations.stylesheets", true);'
+    create: yes
+    owner: "{{ user.name }}"
+    group: "{{ user.name }}"
+    mode: '0644'
+  when:
+    - app_states['firefox'] | default('present') == 'present'
+    - firefox_custom_css_enabled | default(true)
+    - firefox_profile_path is defined
+    - firefox_profile_path != ''
+
+- name: Enable vertical tabs in Firefox preferences
+  lineinfile:
+    path: "{{ firefox_profile_path }}/user.js"
+    line: 'user_pref("sidebar.verticalTabs", true);'
+    create: yes
+    owner: "{{ user.name }}"
+    group: "{{ user.name }}"
+    mode: '0644'
+  when:
+    - app_states['firefox'] | default('present') == 'present'
+    - firefox_vertical_tabs_enabled | default(true)
+    - firefox_profile_path is defined
+    - firefox_profile_path != ''
+
+# Cleanup when absent
+- name: Remove Firefox custom CSS when absent
+  file:
+    path: "{{ firefox_profile_path }}/chrome"
+    state: absent
+  when:
+    - app_states['firefox'] | default('present') == 'absent'
+    - firefox_profile_path is defined
+    - firefox_profile_path != ''
+
+- name: Remove Firefox preferences when absent
+  file:
+    path: "{{ firefox_profile_path }}/user.js"
+    state: absent
+  when:
+    - app_states['firefox'] | default('present') == 'absent'
+    - firefox_profile_path is defined
+    - firefox_profile_path != ''

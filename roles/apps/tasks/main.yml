@@ -55,6 +55,12 @@
   tags: [todoist, productivity]
   when: "'todoist' in common_apps or app_states['todoist'] is defined"
 
+- name: Include Firefox browser
+  include_role:
+    name: apps/firefox
+  tags: [firefox, browser]
+  when: "'firefox' in common_apps or app_states['firefox'] is defined"
+
 - name: Include Vivaldi browser
   include_role:
     name: apps/vivaldi
