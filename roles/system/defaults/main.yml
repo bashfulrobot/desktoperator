@@ -34,6 +34,8 @@ core_packages:
   - fd-find
   - jq
   - libsecret-tools  # Required for apps to access gnome-keyring (VSCode, etc.)
+  - tree
+  - bat
 
 # Development packages
 dev_packages:
