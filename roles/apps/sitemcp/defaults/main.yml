@@ -1,0 +1,5 @@
+---
+# SiteMCP default variables
+
+# Installation state (present/absent)
+sitemcp_state: present

@@ -1,0 +1,101 @@
+---
+# Glow installation via APT repository
+# Terminal-based markdown reader
+
+- name: Create APT keyrings directory
+  file:
+    path: /etc/apt/keyrings
+    state: directory
+    mode: '0755'
+  become: yes
+  when: app_states['glow'] | default('present') == 'present'
+
+- name: Download Charm GPG key
+  get_url:
+    url: https://repo.charm.sh/apt/gpg.key
+    dest: /tmp/charm.gpg
+    mode: '0644'
+  when: app_states['glow'] | default('present') == 'present'
+
+- name: Import Charm GPG key to modern keyring location
+  shell: |
+    gpg --dearmor < /tmp/charm.gpg > /etc/apt/keyrings/charm.gpg
+    chmod 644 /etc/apt/keyrings/charm.gpg
+  args:
+    creates: /etc/apt/keyrings/charm.gpg
+  become: yes
+  when: app_states['glow'] | default('present') == 'present'
+
+- name: Add Charm APT repository
+  apt_repository:
+    repo: "deb [signed-by=/etc/apt/keyrings/charm.gpg] https://repo.charm.sh/apt/ * *"
+    filename: charm
+    state: present
+  become: yes
+  when: app_states['glow'] | default('present') == 'present'
+
+- name: Update APT cache
+  apt:
+    update_cache: yes
+  become: yes
+  when: app_states['glow'] | default('present') == 'present'
+
+- name: Install Glow
+  apt:
+    name: glow
+    state: present
+  become: yes
+  when: app_states['glow'] | default('present') == 'present'
+
+- name: Clean up GPG key file
+  file:
+    path: /tmp/charm.gpg
+    state: absent
+  when: app_states['glow'] | default('present') == 'present'
+
+# Deploy configuration
+- name: Create glow config directory
+  file:
+    path: "{{ user.home }}/.config/glow"
+    state: directory
+    owner: "{{ user.name }}"
+    mode: '0755'
+  when: app_states['glow'] | default('present') == 'present'
+
+- name: Deploy glow configuration
+  template:
+    src: glow.yml.j2
+    dest: "{{ user.home }}/.config/glow/glow.yml"
+    owner: "{{ user.name }}"
+    mode: '0644'
+  when: app_states['glow'] | default('present') == 'present'
+
+# Cleanup when absent
+- name: Remove Glow when absent
+  apt:
+    name: glow
+    state: absent
+    purge: yes
+  become: yes
+  when: app_states['glow'] | default('present') == 'absent'
+
+- name: Remove Charm repository when absent
+  apt_repository:
+    repo: "deb [signed-by=/etc/apt/keyrings/charm.gpg] https://repo.charm.sh/apt/ * *"
+    filename: charm
+    state: absent
+  become: yes
+  when: app_states['glow'] | default('present') == 'absent'
+
+- name: Remove Charm GPG key when absent
+  file:
+    path: /etc/apt/keyrings/charm.gpg
+    state: absent
+  become: yes
+  when: app_states['glow'] | default('present') == 'absent'
+
+- name: Remove glow configuration when absent
+  file:
+    path: "{{ user.home }}/.config/glow"
+    state: absent
+  when: app_states['glow'] | default('present') == 'absent'

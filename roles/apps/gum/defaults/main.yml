@@ -1,0 +1,5 @@
+---
+# Gum default variables
+
+# Installation state (present/absent)
+gum_state: present

@@ -1,0 +1,78 @@
+---
+# Gum installation via APT repository
+# Tool for glamorous shell scripts
+
+- name: Create APT keyrings directory
+  file:
+    path: /etc/apt/keyrings
+    state: directory
+    mode: '0755'
+  become: yes
+  when: app_states['gum'] | default('present') == 'present'
+
+- name: Download Charm GPG key
+  get_url:
+    url: https://repo.charm.sh/apt/gpg.key
+    dest: /tmp/charm.gpg
+    mode: '0644'
+  when: app_states['gum'] | default('present') == 'present'
+
+- name: Import Charm GPG key to modern keyring location
+  shell: |
+    gpg --dearmor < /tmp/charm.gpg > /etc/apt/keyrings/charm.gpg
+    chmod 644 /etc/apt/keyrings/charm.gpg
+  args:
+    creates: /etc/apt/keyrings/charm.gpg
+  become: yes
+  when: app_states['gum'] | default('present') == 'present'
+
+- name: Add Charm APT repository
+  apt_repository:
+    repo: "deb [signed-by=/etc/apt/keyrings/charm.gpg] https://repo.charm.sh/apt/ * *"
+    filename: charm
+    state: present
+  become: yes
+  when: app_states['gum'] | default('present') == 'present'
+
+- name: Update APT cache
+  apt:
+    update_cache: yes
+  become: yes
+  when: app_states['gum'] | default('present') == 'present'
+
+- name: Install Gum
+  apt:
+    name: gum
+    state: present
+  become: yes
+  when: app_states['gum'] | default('present') == 'present'
+
+- name: Clean up GPG key file
+  file:
+    path: /tmp/charm.gpg
+    state: absent
+  when: app_states['gum'] | default('present') == 'present'
+
+# Cleanup when absent
+- name: Remove Gum when absent
+  apt:
+    name: gum
+    state: absent
+    purge: yes
+  become: yes
+  when: app_states['gum'] | default('present') == 'absent'
+
+- name: Remove Charm repository when absent
+  apt_repository:
+    repo: "deb [signed-by=/etc/apt/keyrings/charm.gpg] https://repo.charm.sh/apt/ * *"
+    filename: charm
+    state: absent
+  become: yes
+  when: app_states['gum'] | default('present') == 'absent'
+
+- name: Remove Charm GPG key when absent
+  file:
+    path: /etc/apt/keyrings/charm.gpg
+    state: absent
+  become: yes
+  when: app_states['gum'] | default('present') == 'absent'

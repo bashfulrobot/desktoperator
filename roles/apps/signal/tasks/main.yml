@@ -1,0 +1,75 @@
+---
+# Signal Desktop installation via APT repository
+# Private messaging application
+
+- name: Download Signal GPG key
+  get_url:
+    url: https://updates.signal.org/desktop/apt/keys.asc
+    dest: /tmp/signal-desktop-keyring.asc
+    mode: '0644'
+  when: app_states['signal'] | default('present') == 'present'
+
+- name: Import Signal GPG key to modern keyring location
+  shell: |
+    gpg --dearmor < /tmp/signal-desktop-keyring.asc > /usr/share/keyrings/signal-desktop-keyring.gpg
+    chmod 644 /usr/share/keyrings/signal-desktop-keyring.gpg
+  args:
+    creates: /usr/share/keyrings/signal-desktop-keyring.gpg
+  become: yes
+  when: app_states['signal'] | default('present') == 'present'
+
+- name: Add Signal APT repository
+  copy:
+    content: |
+      # Signal Desktop APT repository
+      Types: deb
+      URIs: https://updates.signal.org/desktop/apt
+      Suites: xenial
+      Components: main
+      Signed-By: /usr/share/keyrings/signal-desktop-keyring.gpg
+    dest: /etc/apt/sources.list.d/signal-desktop.sources
+    mode: '0644'
+  become: yes
+  when: app_states['signal'] | default('present') == 'present'
+
+- name: Update APT cache
+  apt:
+    update_cache: yes
+  become: yes
+  when: app_states['signal'] | default('present') == 'present'
+
+- name: Install Signal Desktop
+  apt:
+    name: signal-desktop
+    state: present
+  become: yes
+  when: app_states['signal'] | default('present') == 'present'
+
+- name: Clean up GPG key file
+  file:
+    path: /tmp/signal-desktop-keyring.asc
+    state: absent
+  when: app_states['signal'] | default('present') == 'present'
+
+# Cleanup when absent
+- name: Remove Signal Desktop when absent
+  apt:
+    name: signal-desktop
+    state: absent
+    purge: yes
+  become: yes
+  when: app_states['signal'] | default('present') == 'absent'
+
+- name: Remove Signal repository when absent
+  file:
+    path: /etc/apt/sources.list.d/signal-desktop.sources
+    state: absent
+  become: yes
+  when: app_states['signal'] | default('present') == 'absent'
+
+- name: Remove Signal GPG key when absent
+  file:
+    path: /usr/share/keyrings/signal-desktop-keyring.gpg
+    state: absent
+  become: yes
+  when: app_states['signal'] | default('present') == 'absent'

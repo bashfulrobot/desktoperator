@@ -1,0 +1,5 @@
+---
+# Glow default variables
+
+# Installation state (present/absent)
+glow_state: present
