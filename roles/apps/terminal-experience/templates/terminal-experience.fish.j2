@@ -1,0 +1,20 @@
+# Terminal Experience - Enhanced CLI tools configuration
+# Managed by Ansible - Do not edit manually
+
+# bat configuration
+# Use bat for colorized man pages
+set -x MANPAGER "sh -c 'col -bx | bat -l man -p'"
+
+# bathelp function - colorize help output
+function bathelp
+    "$argv" --help 2>&1 | bat --plain --language=help
+end
+
+# fzf + bat integration - file preview
+set -x FZF_DEFAULT_OPTS "--preview 'bat --color=always --style=numbers --line-range=:500 {}'"
+
+# fzf + fd integration - use fd for file search
+if type -q fd
+    set -x FZF_DEFAULT_COMMAND 'fd --type f --hidden --follow --exclude .git'
+    set -x FZF_CTRL_T_COMMAND "$FZF_DEFAULT_COMMAND"
+end
