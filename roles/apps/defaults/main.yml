@@ -34,7 +34,7 @@ app_states:
   starship: present
   todoist: present
   firefox: present
-  vivaldi: present
+  vivaldi: absent
   vscode: present
   zoom: present
   insync: present
