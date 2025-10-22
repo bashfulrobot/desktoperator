@@ -29,7 +29,7 @@ update-apt:
     sudo nala update || { error "Failed to update package lists"; exit 1; }
 
     echo "→ Upgrading packages..."
-    sudo nala upgrade -y || { error "Failed to upgrade packages"; exit 1; }
+    sudo nala upgrade --full -y || { error "Failed to upgrade packages"; exit 1; }
 
     echo "→ Removing unused packages..."
     sudo nala autoremove -y || { error "Failed to autoremove"; exit 1; }
