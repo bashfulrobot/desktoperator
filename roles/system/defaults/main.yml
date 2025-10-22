@@ -72,3 +72,12 @@ packages:
 
 # Version pinning strategy (use 'latest' or specific version)
 version_strategy: latest
+
+# Flatpak applications
+# Each entry can be a string (app ID) or dict with {name, state}
+# State is controlled by app_states in roles/apps/defaults/main.yml
+flatpak_apps:
+  - name: com.todoist.Todoist
+    app_state_key: todoist
+  - name: io.github.seadve.Kooha
+    app_state_key: kooha

@@ -34,6 +34,7 @@
     - modules/maintenance.just.j2
     - modules/generators.just.j2
     - modules/info.just.j2
+    - modules/dev.just.j2
   tags: [always]
 
 - name: Deploy main system justfile
@@ -55,11 +56,30 @@
     mode: '0755'
   become: yes
 
+- name: Create jdev wrapper command
+  copy:
+    content: |
+      #!/usr/bin/env bash
+      # jdev - Development workflow command wrapper
+      # Runs dev recipes from the system justfile
+      just --justfile {{ justfile_system_path }} --group dev "$@"
+    dest: "/usr/local/bin/jdev"
+    mode: '0755'
+  become: yes
+
 - name: Verify just installation
   command: just --version
   register: just_version_output
   changed_when: false
   failed_when: just_version_output.rc != 0
+
+# Install developer scripts
+- name: Install git-commit-gum script
+  copy:
+    src: ../../../../scripts/git-commit-gum.sh
+    dest: /usr/local/bin/git-commit-gum
+    mode: '0755'
+  become: yes
 
 # Fish shell completion for jsys
 - name: Create fish completions directory
@@ -88,6 +108,30 @@
       complete -c jsys -l summary -d 'List recipe names'
       complete -c jsys -l help -d 'Print help information'
     dest: "{{ user.home }}/.config/fish/completions/jsys.fish"
+    owner: "{{ user.name }}"
+    mode: '0644'
+  become: yes
+  tags: [always]
+
+- name: Create fish completion for jdev
+  copy:
+    content: |
+      # jdev completion - wraps dev recipes from system justfile
+      function __fish_jdev_complete_recipes
+          printf "%s\n" (string split " " (jdev --summary 2>/dev/null))
+      end
+
+      # don't suggest files right off
+      complete -c jdev -n "__fish_is_first_arg" --no-files
+
+      # complete recipes
+      complete -c jdev -a '(__fish_jdev_complete_recipes)'
+
+      # common options
+      complete -c jdev -l list -d 'List available recipes'
+      complete -c jdev -l summary -d 'List recipe names'
+      complete -c jdev -l help -d 'Print help information'
+    dest: "{{ user.home }}/.config/fish/completions/jdev.fish"
     owner: "{{ user.name }}"
     mode: '0644'
   become: yes
