@@ -46,9 +46,9 @@
 - name: Create bat symlink to batcat
   ansible.builtin.file:
     src: /usr/bin/batcat
-    dest: "{{ user.home }}/.local/bin/bat"
+    dest: /usr/local/bin/bat
     state: link
-    owner: "{{ user.name }}"
+  become: true
   when: terminal_experience_state == 'present'
 
 # tree - directory listing utility
@@ -75,20 +75,12 @@
   become: true
   when: terminal_experience_state == 'present'
 
-- name: Create .local/bin directory for fd symlink
-  ansible.builtin.file:
-    path: "{{ user.home }}/.local/bin"
-    state: directory
-    owner: "{{ user.name }}"
-    mode: '0755'
-  when: terminal_experience_state == 'present'
-
 - name: Create fd symlink to fdfind
   ansible.builtin.file:
     src: /usr/bin/fdfind
-    dest: "{{ user.home }}/.local/bin/fd"
+    dest: /usr/local/bin/fd
     state: link
-    owner: "{{ user.name }}"
+  become: true
   when: terminal_experience_state == 'present'
 
 # bat-extras - additional bat utilities (batgrep, batman, etc.)
@@ -102,8 +94,9 @@
 
 - name: Build and install bat-extras
   ansible.builtin.command:
-    cmd: ./build.sh --install --prefix={{ user.home }}/.local
+    cmd: ./build.sh --install --prefix=/usr/local
     chdir: /tmp/bat-extras
+  become: true
   when: terminal_experience_state == 'present'
 
 - name: Clean up bat-extras repository
@@ -161,20 +154,23 @@
 
 - name: Remove fd symlink when absent
   ansible.builtin.file:
-    path: "{{ user.home }}/.local/bin/fd"
+    path: /usr/local/bin/fd
     state: absent
+  become: true
   when: terminal_experience_state == 'absent'
 
 - name: Remove bat symlink when absent
   ansible.builtin.file:
-    path: "{{ user.home }}/.local/bin/bat"
+    path: /usr/local/bin/bat
     state: absent
+  become: true
   when: terminal_experience_state == 'absent'
 
 - name: Remove bat-extras scripts when absent
   ansible.builtin.file:
-    path: "{{ user.home }}/.local/bin/{{ item }}"
+    path: /usr/local/bin/{{ item }}
     state: absent
+  become: true
   loop:
     - batgrep
     - batman

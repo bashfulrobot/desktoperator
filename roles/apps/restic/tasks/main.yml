@@ -89,9 +89,9 @@
 - name: Deploy restic convenience scripts
   copy:
     src: "{{ item }}"
-    dest: "{{ user.home }}/.local/bin/{{ item }}"
-    owner: "{{ user.name }}"
+    dest: /usr/local/bin/{{ item }}
     mode: '0755'
+  become: yes
   loop:
     - restic-backup
     - restic-restore
@@ -201,8 +201,9 @@
 
 - name: Remove restic scripts when state is absent
   file:
-    path: "{{ user.home }}/.local/bin/{{ item }}"
+    path: /usr/local/bin/{{ item }}
     state: absent
+  become: yes
   loop:
     - restic-backup
     - restic-restore
