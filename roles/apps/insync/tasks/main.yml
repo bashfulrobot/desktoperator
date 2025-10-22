@@ -31,6 +31,14 @@
   changed_when: false
   when: app_states['insync'] | default('present') == 'present'
 
+- name: Remove old Insync repository entries without signed-by
+  apt_repository:
+    repo: "deb http://apt.insync.io/ubuntu {{ ubuntu_codename.stdout }} non-free contrib"
+    filename: insync
+    state: absent
+  become: yes
+  when: app_states['insync'] | default('present') == 'present'
+
 - name: Add Insync APT repository
   apt_repository:
     repo: "deb [signed-by=/usr/share/keyrings/insynchq.gpg] http://apt.insync.io/ubuntu {{ ubuntu_codename.stdout }} non-free contrib"
