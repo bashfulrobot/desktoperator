@@ -1,0 +1,29 @@
+---
+- name: Ensure desktop applications directory exists
+  ansible.builtin.file:
+    path: /usr/share/applications
+    state: directory
+    mode: '0755'
+    owner: root
+    group: root
+
+- name: Install reboot-windows desktop file
+  ansible.builtin.template:
+    src: reboot-windows.desktop.j2
+    dest: /usr/share/applications/reboot-windows.desktop
+    mode: '0644'
+    owner: root
+    group: root
+
+- name: Install reboot-firmware desktop file
+  ansible.builtin.template:
+    src: reboot-firmware.desktop.j2
+    dest: /usr/share/applications/reboot-firmware.desktop
+    mode: '0644'
+    owner: root
+    group: root
+
+- name: Update desktop database
+  ansible.builtin.command:
+    cmd: update-desktop-database /usr/share/applications
+  changed_when: true

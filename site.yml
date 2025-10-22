@@ -20,3 +20,8 @@
     # User applications
     - role: apps
       tags: [apps]
+
+    # Custom desktop launchers
+    - role: custom-launchers
+      when: inventory_hostname == 'qbert'
+      tags: [custom-launchers, apps]
