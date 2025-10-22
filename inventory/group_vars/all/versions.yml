@@ -26,7 +26,6 @@ app_versions:
   slack-desktop: "latest"
 
 # Flatpak apps (usually always latest)
-flatpak_apps: {}
 
 # Snap apps (usually always latest)
 snap_apps: {}
