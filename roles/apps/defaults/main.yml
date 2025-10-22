@@ -17,6 +17,7 @@ common_apps:
   - zoom
   - insync
   - gemini-cli
+  - terminal-experience
 
 # Application states (present/absent)
 # Override in host_vars for host-specific control
@@ -35,3 +36,4 @@ app_states:
   zoom: present
   insync: present
   gemini-cli: present
+  terminal-experience: present

@@ -78,3 +78,9 @@
     name: apps/insync
   tags: [insync, sync, cloud]
   when: "'insync' in common_apps or app_states['insync'] is defined"
+
+- name: Include Terminal Experience
+  include_role:
+    name: apps/terminal-experience
+  tags: [terminal-experience, terminal, cli]
+  when: "'terminal-experience' in common_apps or app_states['terminal-experience'] is defined"

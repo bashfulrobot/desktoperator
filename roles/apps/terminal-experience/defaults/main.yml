@@ -1,0 +1,5 @@
+---
+# Terminal Experience role defaults
+
+# Default state for terminal experience components
+terminal_experience_state: "{{ app_states['terminal-experience'] | default('present') }}"

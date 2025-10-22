@@ -1,0 +1,95 @@
+---
+# Terminal Experience role - Enhanced terminal tooling
+# Installs and configures modern terminal utilities for an improved CLI experience
+
+# ripgrep - fast search tool (better grep)
+- name: Get latest ripgrep release info from GitHub API
+  ansible.builtin.uri:
+    url: "https://api.github.com/repos/BurntSushi/ripgrep/releases/latest"
+    return_content: true
+  register: ripgrep_release_data
+  when: terminal_experience_state == 'present'
+
+- name: Filter ripgrep amd64 .deb asset
+  ansible.builtin.set_fact:
+    ripgrep_deb_asset: "{{ ripgrep_release_data.json.assets | selectattr('name', 'search', 'amd64\\.deb$') | list | first }}"
+  when: terminal_experience_state == 'present'
+
+- name: Download ripgrep .deb package
+  ansible.builtin.get_url:
+    url: "{{ ripgrep_deb_asset.browser_download_url }}"
+    dest: "/tmp/ripgrep.deb"
+    mode: '0644'
+  when: terminal_experience_state == 'present'
+
+- name: Install ripgrep from .deb
+  ansible.builtin.apt:
+    deb: "/tmp/ripgrep.deb"
+    state: present
+  become: true
+  when: terminal_experience_state == 'present'
+
+- name: Clean up ripgrep .deb file
+  ansible.builtin.file:
+    path: "/tmp/ripgrep.deb"
+    state: absent
+  when: terminal_experience_state == 'present'
+
+# bat - better cat with syntax highlighting
+- name: Install bat
+  ansible.builtin.apt:
+    name: bat
+    state: present
+  become: true
+  when: terminal_experience_state == 'present'
+
+# tree - directory listing utility
+- name: Install tree
+  ansible.builtin.apt:
+    name: tree
+    state: present
+  become: true
+  when: terminal_experience_state == 'present'
+
+# fd-find - better find command
+- name: Install fd-find
+  ansible.builtin.apt:
+    name: fd-find
+    state: present
+  become: true
+  when: terminal_experience_state == 'present'
+
+- name: Create .local/bin directory for fd symlink
+  ansible.builtin.file:
+    path: "{{ user.home }}/.local/bin"
+    state: directory
+    owner: "{{ user.name }}"
+    mode: '0755'
+  when: terminal_experience_state == 'present'
+
+- name: Create fd symlink to fdfind
+  ansible.builtin.file:
+    src: /usr/bin/fdfind
+    dest: "{{ user.home }}/.local/bin/fd"
+    state: link
+    owner: "{{ user.name }}"
+  when: terminal_experience_state == 'present'
+
+# Cleanup when absent
+- name: Remove terminal utilities when absent
+  ansible.builtin.apt:
+    name:
+      - ripgrep
+      - bat
+      - tree
+      - fd-find
+    state: absent
+    purge: true
+  become: true
+  when: terminal_experience_state == 'absent'
+
+- name: Remove fd symlink when absent
+  ansible.builtin.file:
+    path: "{{ user.home }}/.local/bin/fd"
+    state: absent
+  when: terminal_experience_state == 'absent'
