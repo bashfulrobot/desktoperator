@@ -106,13 +106,16 @@
   when: app_states['zen-browser'] | default('present') == 'present'
 
 - name: Add Zen Browser to 1Password allowed browsers
-  lineinfile:
+  blockinfile:
     path: /etc/1password/custom_allowed_browsers
-    line: zen
+    block: |
+      zen
+      zen-bin
     create: yes
     owner: root
     group: root
     mode: '0755'
+    marker: "# {mark} ANSIBLE MANAGED BLOCK - Zen Browser"
   become: yes
   when: app_states['zen-browser'] | default('present') == 'present'
 
@@ -139,10 +142,11 @@
   when: app_states['zen-browser'] | default('present') == 'absent'
 
 - name: Remove Zen Browser from 1Password allowed browsers when absent
-  lineinfile:
+  blockinfile:
     path: /etc/1password/custom_allowed_browsers
-    line: zen
+    block: ""
     state: absent
+    marker: "# {mark} ANSIBLE MANAGED BLOCK - Zen Browser"
   become: yes
   when: app_states['zen-browser'] | default('present') == 'absent'
   failed_when: false
