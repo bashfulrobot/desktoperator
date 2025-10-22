@@ -49,12 +49,6 @@
   tags: [starship, shell, prompt]
   when: "'starship' in common_apps or app_states['starship'] is defined"
 
-- name: Include Todoist
-  include_role:
-    name: apps/todoist
-  tags: [todoist, productivity]
-  when: "'todoist' in common_apps or app_states['todoist'] is defined"
-
 - name: Include Firefox browser
   include_role:
     name: apps/firefox
@@ -84,6 +78,30 @@
     name: apps/insync
   tags: [insync, sync, cloud]
   when: "'insync' in common_apps or app_states['insync'] is defined"
+
+- name: Include Gemini CLI
+  include_role:
+    name: apps/gemini-cli
+  tags: [gemini-cli, ai, cli]
+  when: "'gemini-cli' in common_apps or app_states['gemini-cli'] is defined"
+
+- name: Include SiteMCP
+  include_role:
+    name: apps/sitemcp
+  tags: [sitemcp, mcp, cli]
+  when: "'sitemcp' in common_apps or app_states['sitemcp'] is defined"
+
+- name: Include Glow markdown reader
+  include_role:
+    name: apps/glow
+  tags: [glow, markdown, cli, terminal]
+  when: "'glow' in common_apps or app_states['glow'] is defined"
+
+- name: Include Gum shell scripts
+  include_role:
+    name: apps/gum
+  tags: [gum, shell, cli, terminal]
+  when: "'gum' in common_apps or app_states['gum'] is defined"
 
 - name: Include Terminal Experience
   include_role:

@@ -11,7 +11,6 @@ common_apps:
   - slack
   - claude-code
   - starship
-  - todoist
   - firefox
   - zen-browser
   - vivaldi
@@ -19,6 +18,10 @@ common_apps:
   - zoom
   - insync
   - gemini-cli
+  - sitemcp
+  - glow
+  - gum
+  - signal
   - terminal-experience
 
 # Application states (present/absent)
@@ -39,4 +42,9 @@ app_states:
   zoom: present
   insync: present
   gemini-cli: present
+  sitemcp: present
+  glow: present
+  gum: present
+  kooha: present
+  signal: present
   terminal-experience: present
