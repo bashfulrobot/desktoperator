@@ -1,0 +1,17 @@
+version: '3.8'
+
+services:
+  booter:
+    image: ghcr.io/siderolabs/booter:{{ k8s_booter_version }}
+    container_name: talos-booter
+    network_mode: host
+    restart: unless-stopped
+{% if k8s_booter_kernel_params is defined and k8s_booter_kernel_params | length > 0 %}
+    command: {{ k8s_booter_kernel_params }}
+{% else %}
+    # Add your kernel parameters here or set k8s_booter_kernel_params variable
+    # Example for Omni: Get parameters from Omni Overview page -> Copy Kernel Parameters
+    command: []
+{% endif %}
+    environment:
+      - BOOTER_LOG_LEVEL={{ k8s_booter_log_level }}

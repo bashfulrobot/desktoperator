@@ -1,0 +1,62 @@
+#!/bin/bash
+# Booter wrapper script for managing Talos PXE boot service
+# Manages docker-compose in {{ k8s_booter_dir }}
+
+BOOTER_DIR="{{ k8s_booter_dir }}"
+
+usage() {
+    cat <<EOF
+Booter - Talos PXE Boot Manager
+
+Usage: booter <command> [options]
+
+Commands:
+    start       Start the booter service
+    stop        Stop the booter service
+    restart     Restart the booter service
+    status      Show booter service status
+    logs        Show booter logs (follow mode)
+    pull        Pull latest booter image
+    help        Show this help message
+
+Examples:
+    booter start
+    booter logs
+    booter status
+
+Configuration:
+    Edit docker-compose.yml in $BOOTER_DIR to set kernel parameters
+    For Omni users: Copy kernel parameters from Omni Overview page
+
+EOF
+}
+
+case "$1" in
+    start)
+        cd "$BOOTER_DIR" && docker-compose up -d
+        ;;
+    stop)
+        cd "$BOOTER_DIR" && docker-compose down
+        ;;
+    restart)
+        cd "$BOOTER_DIR" && docker-compose restart
+        ;;
+    status)
+        cd "$BOOTER_DIR" && docker-compose ps
+        ;;
+    logs)
+        cd "$BOOTER_DIR" && docker-compose logs -f
+        ;;
+    pull)
+        cd "$BOOTER_DIR" && docker-compose pull
+        ;;
+    help|--help|-h)
+        usage
+        ;;
+    *)
+        echo "Error: Unknown command '$1'"
+        echo ""
+        usage
+        exit 1
+        ;;
+esac

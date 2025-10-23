@@ -1,0 +1,195 @@
+---
+# K8s role - Kubernetes-related tools and services
+# Requires: Docker to be installed (see docker role)
+
+# Talosctl installation
+- name: Check if talosctl is already installed
+  stat:
+    path: /usr/local/bin/talosctl
+  register: talosctl_binary
+  when: k8s_talosctl_enabled | default(true)
+
+- name: Get installed talosctl version
+  command: /usr/local/bin/talosctl version --client --short
+  register: talosctl_current_version
+  failed_when: false
+  changed_when: false
+  when:
+    - k8s_talosctl_enabled | default(true)
+    - talosctl_binary.stat.exists
+
+- name: Download talosctl binary
+  get_url:
+    url: "https://github.com/siderolabs/talos/releases/download/{{ k8s_talosctl_version }}/talosctl-linux-amd64"
+    dest: /usr/local/bin/talosctl
+    mode: '0755'
+    owner: root
+    group: root
+  become: yes
+  when:
+    - k8s_talosctl_enabled | default(true)
+    - not talosctl_binary.stat.exists or (k8s_talosctl_version not in talosctl_current_version.stdout | default(''))
+
+- name: Verify talosctl installation
+  command: /usr/local/bin/talosctl version --client --short
+  register: talosctl_verify
+  changed_when: false
+  when: k8s_talosctl_enabled | default(true)
+
+- name: Display talosctl version
+  debug:
+    msg: "talosctl installed: {{ talosctl_verify.stdout }}"
+  when:
+    - k8s_talosctl_enabled | default(true)
+    - talosctl_verify is defined
+
+# Kubectl installation
+- name: Install kubectl prerequisites
+  apt:
+    name:
+      - apt-transport-https
+      - ca-certificates
+      - curl
+      - gnupg
+    state: present
+  become: yes
+  when: k8s_kubectl_enabled | default(true)
+
+- name: Create keyrings directory for kubectl
+  file:
+    path: /etc/apt/keyrings
+    state: directory
+    mode: '0755'
+  become: yes
+  when: k8s_kubectl_enabled | default(true)
+
+- name: Download Kubernetes GPG key
+  get_url:
+    url: "https://pkgs.k8s.io/core:/stable:/{{ k8s_kubectl_repo_version }}/deb/Release.key"
+    dest: /tmp/kubernetes-release.key
+    mode: '0644'
+  become: yes
+  when: k8s_kubectl_enabled | default(true)
+
+- name: Add Kubernetes GPG key to keyrings
+  shell: |
+    gpg --dearmor < /tmp/kubernetes-release.key > /etc/apt/keyrings/kubernetes-apt-keyring.gpg
+    chmod 644 /etc/apt/keyrings/kubernetes-apt-keyring.gpg
+  args:
+    creates: /etc/apt/keyrings/kubernetes-apt-keyring.gpg
+  become: yes
+  when: k8s_kubectl_enabled | default(true)
+
+- name: Clean up temporary Kubernetes GPG key file
+  file:
+    path: /tmp/kubernetes-release.key
+    state: absent
+  become: yes
+  when: k8s_kubectl_enabled | default(true)
+
+- name: Add Kubernetes APT repository
+  apt_repository:
+    repo: "deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/{{ k8s_kubectl_repo_version }}/deb/ /"
+    filename: kubernetes
+    state: present
+  become: yes
+  when: k8s_kubectl_enabled | default(true)
+
+- name: Install kubectl
+  apt:
+    name: kubectl
+    state: present
+    update_cache: yes
+  become: yes
+  when: k8s_kubectl_enabled | default(true)
+
+- name: Verify kubectl installation
+  command: kubectl version --client --output=yaml
+  register: kubectl_verify
+  changed_when: false
+  when: k8s_kubectl_enabled | default(true)
+
+- name: Display kubectl version
+  debug:
+    msg: "kubectl installed: {{ kubectl_verify.stdout_lines[0] }}"
+  when:
+    - k8s_kubectl_enabled | default(true)
+    - kubectl_verify is defined
+
+# Booter installation
+- name: Create booter directory
+  file:
+    path: "{{ k8s_booter_dir }}"
+    state: directory
+    owner: "{{ user.name }}"
+    group: "{{ user.name }}"
+    mode: '0755'
+  when: k8s_booter_enabled | default(true)
+
+- name: Deploy booter docker-compose.yml
+  template:
+    src: booter-compose.yml.j2
+    dest: "{{ k8s_booter_dir }}/docker-compose.yml"
+    owner: "{{ user.name }}"
+    group: "{{ user.name }}"
+    mode: '0644'
+  when: k8s_booter_enabled | default(true)
+
+- name: Create booter wrapper script
+  template:
+    src: booter.sh.j2
+    dest: /usr/local/bin/booter
+    mode: '0755'
+  become: yes
+  when: k8s_booter_enabled | default(true)
+
+- name: Pull booter Docker image
+  community.docker.docker_image:
+    name: "ghcr.io/siderolabs/booter:{{ k8s_booter_version }}"
+    source: pull
+  become: yes
+  when: k8s_booter_enabled | default(true)
+  ignore_errors: yes
+
+# Cleanup when disabled
+- name: Remove talosctl when disabled
+  file:
+    path: /usr/local/bin/talosctl
+    state: absent
+  become: yes
+  when: not (k8s_talosctl_enabled | default(true))
+
+- name: Remove kubectl when disabled
+  apt:
+    name: kubectl
+    state: absent
+  become: yes
+  when: not (k8s_kubectl_enabled | default(true))
+
+- name: Remove Kubernetes APT repository when disabled
+  apt_repository:
+    repo: "deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/{{ k8s_kubectl_repo_version }}/deb/ /"
+    filename: kubernetes
+    state: absent
+  become: yes
+  when: not (k8s_kubectl_enabled | default(true))
+
+- name: Remove Kubernetes GPG key when disabled
+  file:
+    path: /etc/apt/keyrings/kubernetes-apt-keyring.gpg
+    state: absent
+  become: yes
+  when: not (k8s_kubectl_enabled | default(true))
+
+- name: Remove booter directory when disabled
+  file:
+    path: "{{ k8s_booter_dir }}"
+    state: absent
+  when: not (k8s_booter_enabled | default(true))
+
+- name: Remove booter wrapper script when disabled
+  file:
+    path: /usr/local/bin/booter
+    state: absent
+  become: yes
+  when: not (k8s_booter_enabled | default(true))

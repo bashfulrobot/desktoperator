@@ -21,6 +21,10 @@
     - role: apps
       tags: [apps]
 
+    # Kubernetes tools and services
+    - role: k8s
+      tags: [k8s, kubernetes, infrastructure]
+
     # Custom desktop launchers
     - role: custom-launchers
       when: inventory_hostname == 'qbert'
