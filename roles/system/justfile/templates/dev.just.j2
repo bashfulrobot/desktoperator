@@ -5,7 +5,7 @@
 {% raw %}
 # Default recipe - show available commands
 default:
-    @just --justfile {{ justfile_dev_path }} --list
+    @just --justfile /usr/local/share/just/dev.just --list
 
 # ============================================================================
 # GIT OPERATIONS
@@ -21,42 +21,43 @@ commit:
         exit 1
     fi
 
+    cd "{{ invocation_directory() }}"
     git-commit-gum
 
 # Show git status in a clean format
 status:
-    @git status --short --branch
+    @git -C "{{ invocation_directory() }}" status --short --branch
 
 # Show git log with a clean format
 log LIMIT="10":
-    @git log --oneline --decorate --graph -n {{ LIMIT }}
+    @git -C "{{ invocation_directory() }}" log --oneline --decorate --graph -n {{ LIMIT }}
 
 # Show changes not yet staged
 diff:
-    @git diff
+    @git -C "{{ invocation_directory() }}" diff
 
 # Show staged changes
 diff-staged:
-    @git diff --staged
+    @git -C "{{ invocation_directory() }}" diff --staged
 
 # Stage all changes
 stage-all:
-    @git add -A
+    @git -C "{{ invocation_directory() }}" add -A
     @echo "✓ All changes staged"
 
 # Unstage all changes
 unstage-all:
-    @git reset HEAD
+    @git -C "{{ invocation_directory() }}" reset HEAD
     @echo "✓ All changes unstaged"
 
 # Amend the last commit
 amend:
-    @git commit --amend --no-edit
+    @git -C "{{ invocation_directory() }}" commit --amend --no-edit
     @echo "✓ Last commit amended"
 
 # Interactive rebase for last N commits
 rebase-interactive N="10":
-    @git rebase -i HEAD~{{ N }}
+    @git -C "{{ invocation_directory() }}" rebase -i HEAD~{{ N }}
 
 # ============================================================================
 # PROJECT HELPERS
@@ -73,5 +74,5 @@ search TEXT:
 # Count lines of code in current directory
 loc:
     @echo "Lines of code by language:"
-    @tokei . 2>/dev/null || echo "Install tokei for detailed stats: cargo install tokei"
+    @tokei "{{ invocation_directory() }}" 2>/dev/null || echo "Install tokei for detailed stats: cargo install tokei"
 {% endraw %}
