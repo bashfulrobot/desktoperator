@@ -28,4 +28,4 @@ Before proposing changes, run `just lint` and `just syntax`; both should pass. U
 Follow the established Conventional Commit pattern with emoji prefixes (`✨ feat(scope): …`, `🐛 fix(scope): …`). Group related Ansible edits together and reference affected roles or hosts. Pull requests should summarise intent, link issues when available, list validation commands (`just lint`, `just check`), and flag related docs or inventory updates. Add screenshots or terminal snippets when COSMIC state changes are visible.
 
 ## Security & Configuration Tips
-Review `docs/SECURITY.md` and `docs/1PASSWORD_SETUP.md` before touching secrets. Store new credentials in 1Password, rotate vault material per `docs/VAULT_KEY_MANAGEMENT.md`, and confirm `ansible.cfg` keeps `ansible_connection: local` to avoid remote drift.
+Review `docs/security.md` and `docs/1password-setup.md` before touching secrets. Store new credentials in 1Password, rotate vault material per `docs/vault-key-management.md`, and confirm `ansible.cfg` keeps `ansible_connection: local` to avoid remote drift.
