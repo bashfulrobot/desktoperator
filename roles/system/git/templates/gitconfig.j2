@@ -8,15 +8,21 @@
 
 [merge]
 	ff = {{ git_config.merge.ff }}
+{% if git_delta.enable %}
+	conflictstyle = zdiff3
+{% endif %}
 
 [push]
 	default = {{ git_config.push.default }}
 
 [pull]
 	ff = {{ git_config.pull.ff }}
+	rebase = {{ git_config.pull.rebase | lower }}
 
 [rebase]
 	autoSquash = {{ git_config.rebase.autoSquash | lower }}
+	autoStash = {{ git_config.rebase.autoStash | lower }}
+	updateRefs = {{ git_config.rebase.updateRefs | lower }}
 
 [commit]
 	gpgsign = {{ git_config.commit.gpgsign | lower }}
@@ -33,13 +39,16 @@
 [core]
 	fsmonitor = {{ git_config.core.fsmonitor | lower }}
 	editor = hx
+{% if git_delta.enable %}
+	pager = delta
+{% endif %}
 
 [credential]
 	helper = {{ git_config.credential.helper }}
 
 {% for url_rewrite in git_url_rewrites %}
-[url "{{ url_rewrite.pushInsteadOf }}"]
-	pushInsteadOf = {{ url_rewrite.insteadOf }}
+[url "{{ url_rewrite.replace }}"]
+	pushInsteadOf = {{ url_rewrite.match }}
 {% endfor %}
 
 [alias]
@@ -48,9 +57,6 @@
 {% endfor %}
 
 {% if git_delta.enable %}
-[core]
-	pager = delta
-
 [interactive]
 	diffFilter = delta --color-only
 
@@ -61,9 +67,6 @@
 	side-by-side = {{ git_delta.side_by_side | lower }}
 	features = {{ git_delta.features }}
 	hyperlinks = true
-
-[merge]
-	conflictstyle = zdiff3
 
 [diff]
 	colorMoved = default

@@ -12,8 +12,11 @@ git_config:
     default: "simple"
   pull:
     ff: "only"
+    rebase: true
   rebase:
     autoSquash: true
+    autoStash: true
+    updateRefs: true
   commit:
     gpgsign: true
   tag:
@@ -25,10 +28,10 @@ git_config:
   credential:
     helper: "store"
 
-# URL rewrites
+# URL rewrites - Force SSH for pushes to GitHub
 git_url_rewrites:
-  - insteadOf: "https://github.com"
-    pushInsteadOf: "git@github.com:"
+  - match: "https://github.com/"
+    replace: "git@github.com:"
 
 # Aliases
 git_aliases:
