@@ -1,0 +1,213 @@
+---
+# Libvirt installation tasks for Ubuntu 24.04
+
+# Installation tasks (when state is present)
+- name: Enable IP forwarding for routed networks
+  ansible.posix.sysctl:
+    name: net.ipv4.ip_forward
+    value: '1'
+    sysctl_set: true
+    state: present
+    reload: true
+  become: true
+  when: app_states['libvirt'] | default('present') == 'present'
+
+- name: Install libvirt packages
+  ansible.builtin.apt:
+    name: "{{ libvirt_packages }}"
+    state: present
+    update_cache: true
+  become: true
+  when: app_states['libvirt'] | default('present') == 'present'
+
+- name: Install GUI tools for libvirt
+  ansible.builtin.apt:
+    name: "{{ libvirt_gui_packages }}"
+    state: present
+  become: true
+  when:
+    - app_states['libvirt'] | default('present') == 'present'
+    - libvirt_install_gui_tools | bool
+
+- name: Ensure libvirtd service is enabled and started
+  ansible.builtin.systemd:
+    name: "{{ libvirt_service }}"
+    enabled: true
+    state: started
+  become: true
+  when: app_states['libvirt'] | default('present') == 'present'
+
+- name: Add user to libvirt group
+  ansible.builtin.user:
+    name: "{{ user.name }}"
+    groups: libvirt
+    append: true
+  become: true
+  when:
+    - app_states['libvirt'] | default('present') == 'present'
+    - libvirt_add_user_to_group | bool
+
+- name: Disable default network autostart
+  ansible.builtin.command:
+    cmd: virsh net-autostart default --disable
+  become: true
+  failed_when: false
+  when:
+    - app_states['libvirt'] | default('present') == 'present'
+    - not libvirt_default_network_autostart | bool
+
+- name: Create routed network XML configurations
+  ansible.builtin.template:
+    src: routed-network.xml.j2
+    dest: "/tmp/{{ item.name }}.xml"
+    mode: '0644'
+  become: true
+  loop: "{{ libvirt_routed_networks }}"
+  when:
+    - app_states['libvirt'] | default('present') == 'present'
+    - libvirt_routed_networks | length > 0
+
+- name: Check if routed networks exist
+  ansible.builtin.command:
+    cmd: "virsh net-info {{ item.name }}"
+  become: true
+  register: routed_networks_exist
+  failed_when: false
+  changed_when: false
+  loop: "{{ libvirt_routed_networks }}"
+  when:
+    - app_states['libvirt'] | default('present') == 'present'
+    - libvirt_routed_networks | length > 0
+
+- name: Define routed networks
+  ansible.builtin.command:
+    cmd: "virsh net-define /tmp/{{ item.item.name }}.xml"
+  become: true
+  loop: "{{ routed_networks_exist.results }}"
+  when:
+    - app_states['libvirt'] | default('present') == 'present'
+    - libvirt_routed_networks | length > 0
+    - item.rc != 0
+
+- name: Start routed networks
+  ansible.builtin.command:
+    cmd: "virsh net-start {{ item.name }}"
+  become: true
+  failed_when: false
+  loop: "{{ libvirt_routed_networks }}"
+  when:
+    - app_states['libvirt'] | default('present') == 'present'
+    - libvirt_routed_networks | length > 0
+
+- name: Configure routed network autostart
+  ansible.builtin.command:
+    cmd: "virsh net-autostart {{ item.name }} {{ '--disable' if not item.autostart else '' }}"
+  become: true
+  loop: "{{ libvirt_routed_networks }}"
+  when:
+    - app_states['libvirt'] | default('present') == 'present'
+    - libvirt_routed_networks | length > 0
+
+- name: Clean up temporary network XML files
+  ansible.builtin.file:
+    path: "/tmp/{{ item.name }}.xml"
+    state: absent
+  become: true
+  loop: "{{ libvirt_routed_networks }}"
+  when:
+    - app_states['libvirt'] | default('present') == 'present'
+    - libvirt_routed_networks | length > 0
+
+- name: Get host primary IP address
+  ansible.builtin.set_fact:
+    host_primary_ip: "{{ ansible_default_ipv4.address }}"
+  when:
+    - app_states['libvirt'] | default('present') == 'present'
+    - libvirt_routed_networks | length > 0
+
+- name: Display routing information for upstream router configuration
+  ansible.builtin.debug:
+    msg: |
+      ================================================================================
+      LIBVIRT ROUTED NETWORK CONFIGURATION - {{ inventory_hostname | upper }}
+      ================================================================================
+
+      Host: {{ inventory_hostname }}
+      Host IP: {{ host_primary_ip }}
+
+      Add these static routes to your upstream router:
+
+      {% for network in libvirt_routed_networks %}
+      Network: {{ network.name }}
+        Destination: {{ network.subnet }}
+        Gateway: {{ host_primary_ip }}
+        Description: Route to {{ inventory_hostname }} {{ network.name }}
+
+      {% endfor %}
+      ================================================================================
+      EXAMPLE ROUTER CONFIGURATION (adjust syntax for your router):
+      {% for network in libvirt_routed_networks %}
+      ip route {{ network.subnet }} via {{ host_primary_ip }}
+      {% endfor %}
+      ================================================================================
+  when:
+    - app_states['libvirt'] | default('present') == 'present'
+    - libvirt_routed_networks | length > 0
+
+# Cleanup tasks (when state is absent)
+- name: List all libvirt networks
+  ansible.builtin.command:
+    cmd: virsh net-list --all --name
+  become: true
+  register: all_libvirt_networks
+  failed_when: false
+  changed_when: false
+  when: app_states['libvirt'] | default('present') == 'absent'
+
+- name: Destroy all non-default networks
+  ansible.builtin.command:
+    cmd: "virsh net-destroy {{ item }}"
+  become: true
+  failed_when: false
+  loop: "{{ all_libvirt_networks.stdout_lines | default([]) }}"
+  when:
+    - app_states['libvirt'] | default('present') == 'absent'
+    - item != 'default'
+    - item != ''
+
+- name: Undefine all non-default networks
+  ansible.builtin.command:
+    cmd: "virsh net-undefine {{ item }}"
+  become: true
+  failed_when: false
+  loop: "{{ all_libvirt_networks.stdout_lines | default([]) }}"
+  when:
+    - app_states['libvirt'] | default('present') == 'absent'
+    - item != 'default'
+    - item != ''
+
+- name: Stop libvirtd service
+  ansible.builtin.systemd:
+    name: "{{ libvirt_service }}"
+    state: stopped
+    enabled: false
+  become: true
+  failed_when: false
+  when: app_states['libvirt'] | default('present') == 'absent'
+
+- name: Remove libvirt packages
+  ansible.builtin.apt:
+    name: "{{ libvirt_packages + libvirt_gui_packages }}"
+    state: absent
+    purge: true
+  become: true
+  when: app_states['libvirt'] | default('present') == 'absent'
+
+- name: Remove user from libvirt group
+  ansible.builtin.user:
+    name: "{{ user.name }}"
+    groups: libvirt
+    state: absent
+  become: true
+  failed_when: false
+  when: app_states['libvirt'] | default('present') == 'absent'

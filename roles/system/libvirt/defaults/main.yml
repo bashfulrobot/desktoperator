@@ -1,0 +1,42 @@
+---
+# Libvirt installation state (present or absent)
+libvirt_state: present
+
+# Libvirt packages to install
+libvirt_packages:
+  - qemu-kvm
+  - libvirt-daemon-system
+  - libvirt-clients
+  - bridge-utils
+
+# Optional GUI tools (set to true to install)
+libvirt_install_gui_tools: false
+
+# Additional GUI packages
+libvirt_gui_packages:
+  - virt-manager
+  - virt-viewer
+
+# Add user to libvirt group (allows managing VMs without sudo)
+libvirt_add_user_to_group: true
+
+# Libvirt service name
+libvirt_service: libvirtd
+
+# Connection URI (system-wide daemon)
+libvirt_connection_uri: "qemu:///system"
+
+# Network configuration
+# Define multiple routed networks as a list
+# Each network can have its own name, bridge, subnet, and DHCP range
+libvirt_routed_networks:
+  - name: "routed-network"
+    bridge: "virbr1"
+    subnet: "172.29.173.0/24"
+    gateway: "172.29.173.1"
+    dhcp_start: "172.29.173.100"
+    dhcp_end: "172.29.173.200"
+    autostart: true
+
+# Enable/disable default NAT network
+libvirt_default_network_autostart: false

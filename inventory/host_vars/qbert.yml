@@ -5,3 +5,46 @@ hostname: qbert
 
 # Host-specific apps (in addition to common apps)
 host_specific_apps: []
+
+# Libvirt configuration
+libvirt_install_gui_tools: true
+
+# Libvirt routed networks for qbert (5 networks)
+# Using obscure subnets in 172.29.x.x range to avoid common conflicts
+# qbert uses 172.29.10.0 - 172.29.14.0 range
+libvirt_routed_networks:
+  - name: "routed-net-1"
+    bridge: "virbr1"
+    subnet: "172.29.10.0/24"
+    gateway: "172.29.10.1"
+    dhcp_start: "172.29.10.100"
+    dhcp_end: "172.29.10.200"
+    autostart: true
+  - name: "routed-net-2"
+    bridge: "virbr2"
+    subnet: "172.29.11.0/24"
+    gateway: "172.29.11.1"
+    dhcp_start: "172.29.11.100"
+    dhcp_end: "172.29.11.200"
+    autostart: true
+  - name: "routed-net-3"
+    bridge: "virbr3"
+    subnet: "172.29.12.0/24"
+    gateway: "172.29.12.1"
+    dhcp_start: "172.29.12.100"
+    dhcp_end: "172.29.12.200"
+    autostart: true
+  - name: "routed-net-4"
+    bridge: "virbr4"
+    subnet: "172.29.13.0/24"
+    gateway: "172.29.13.1"
+    dhcp_start: "172.29.13.100"
+    dhcp_end: "172.29.13.200"
+    autostart: true
+  - name: "routed-net-5"
+    bridge: "virbr5"
+    subnet: "172.29.14.0/24"
+    gateway: "172.29.14.1"
+    dhcp_start: "172.29.14.100"
+    dhcp_end: "172.29.14.200"
+    autostart: true

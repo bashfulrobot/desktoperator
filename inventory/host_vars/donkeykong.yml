@@ -5,3 +5,25 @@ hostname: donkeykong
 
 # Host-specific apps (in addition to common apps)
 host_specific_apps: []
+
+# Libvirt configuration
+libvirt_install_gui_tools: true
+
+# Libvirt routed networks for donkeykong (2 networks)
+# Using obscure subnets in 172.29.x.x range to avoid common conflicts
+# donkeykong uses 172.29.20.0 - 172.29.21.0 range
+libvirt_routed_networks:
+  - name: "routed-net-1"
+    bridge: "virbr1"
+    subnet: "172.29.20.0/24"
+    gateway: "172.29.20.1"
+    dhcp_start: "172.29.20.100"
+    dhcp_end: "172.29.20.200"
+    autostart: true
+  - name: "routed-net-2"
+    bridge: "virbr2"
+    subnet: "172.29.21.0/24"
+    gateway: "172.29.21.1"
+    dhcp_start: "172.29.21.100"
+    dhcp_end: "172.29.21.200"
+    autostart: true
