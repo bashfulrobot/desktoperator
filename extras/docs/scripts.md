@@ -671,7 +671,6 @@ chmod 600 group_vars/all/vault.yml
 
 ## See Also
 
-- [Theme Generation Documentation](THEME_GENERATION.md)
-- [COSMIC Desktop Documentation](COSMIC_DESKTOP.md)
-- [Justfile Architecture](justfile-architecture.md)
-- [Getting Started Guide](GETTING_STARTED.md)
+- [Theme Generation Documentation](theme-generation.md)
+- [COSMIC Desktop Documentation](cosmic-desktop.md)
+- [Getting Started Guide](getting-started.md)

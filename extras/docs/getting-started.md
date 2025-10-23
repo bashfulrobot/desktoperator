@@ -197,8 +197,8 @@ After setup:
    - Run `just app myapp`
 
 3. **Read the docs**:
-   - `docs/SECURITY.md` - Security best practices
-   - `docs/PASSWORD_HANDLING.md` - Password management
+   - `docs/security.md` - Security best practices
+   - `docs/password-handling.md` - Password management
    - `README.md` - Complete feature documentation
 
 ## Common First Tasks

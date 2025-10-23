@@ -380,7 +380,7 @@ desktoperator/
 │   └── capture-cosmic-config.sh     # Capture script
 │
 └── docs/
-    └── COSMIC_DESKTOP.md            # This file
+    └── cosmic-desktop.md            # This file
 ```
 
 ## Integration with Theme Management
@@ -405,11 +405,11 @@ jsys app vivaldi
 ```
 
 For detailed information about theme generation, see:
-- [Theme Generation Documentation](THEME_GENERATION.md) - Complete theme system guide
-- [Scripts Reference](SCRIPTS.md) - All script documentation
+- [Theme Generation Documentation](theme-generation.md) - Complete theme system guide
+- [Scripts Reference](scripts.md) - All script documentation
 
 ## See Also
 
 - [COSMIC Desktop Official Docs](https://github.com/pop-os/cosmic-epoch)
 - [Ansible synchronize module](https://docs.ansible.com/ansible/latest/collections/ansible/posix/synchronize_module.html)
-- [Desktop Operator Getting Started](GETTING_STARTED.md)
+- [Desktop Operator Getting Started](getting-started.md)

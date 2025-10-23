@@ -340,4 +340,4 @@ enable_special_feature: true
 - [Ansible Best Practices](https://docs.ansible.com/ansible/latest/user_guide/playbooks_best_practices.html)
 - [Understanding Variable Precedence](https://docs.ansible.com/ansible/latest/playbook_guide/playbooks_variables.html#variable-precedence-where-should-i-put-a-variable)
 - [Repository STRUCTURE.md](../STRUCTURE.md) - Detailed file listing
-- [Getting Started Guide](GETTING_STARTED.md) - How to use this repository
+- [Getting Started Guide](getting-started.md) - How to use this repository

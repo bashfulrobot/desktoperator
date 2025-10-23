@@ -425,6 +425,5 @@ This prevents dynamic/system-managed settings from being captured.
 
 ## See Also
 
-- [COSMIC Desktop Configuration](COSMIC_DESKTOP.md)
-- [Scripts Documentation](SCRIPTS.md)
-- [Justfile Architecture](justfile-architecture.md)
+- [COSMIC Desktop Configuration](cosmic-desktop.md)
+- [Scripts Documentation](scripts.md)

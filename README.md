@@ -31,7 +31,7 @@ cd ~/dev/iac/desktoperator
 just run
 ```
 
-**→ See [Getting Started Guide](docs/GETTING_STARTED.md) for complete instructions**
+**→ See [Getting Started Guide](extras/docs/getting-started.md) for complete instructions**
 
 ### Daily Operations
 
@@ -53,8 +53,6 @@ jsys generate-cosmic-colors  # Extract COSMIC colors
 jsys generate-theme-files    # Generate VSCode/Vivaldi themes
 jsys app vscode              # Deploy theme to VSCode
 ```
-
-**→ See [Justfile Architecture](docs/justfile-architecture.md) for the three-tier command system**
 
 ### Making Changes
 
@@ -89,33 +87,23 @@ just -f justfiles/maintenance --list
 
 ## Documentation
 
-**Getting Started:**
-- [Getting Started Guide](docs/GETTING_STARTED.md) - Complete setup walkthrough
-- [Scripts Reference](docs/SCRIPTS.md) - All utility scripts explained
-- [Justfile Architecture](docs/justfile-architecture.md) - Command system structure
+**Getting Started & Architecture:**
+- [Getting Started Guide](extras/docs/getting-started.md) - Complete setup walkthrough
+- [Ansible Architecture](extras/docs/ansible-architecture.md) - Role and inventory layout
+- [Scripts Reference](extras/docs/scripts.md) - All utility scripts explained
 
 **Desktop & Themes:**
-- [COSMIC Desktop Management](docs/COSMIC_DESKTOP.md) - Managing COSMIC configuration
-- [Theme Generation](docs/THEME_GENERATION.md) - Auto-generate app themes from COSMIC
+- [COSMIC Desktop Management](extras/docs/cosmic-desktop.md) - Managing COSMIC configuration
+- [Theme Generation](extras/docs/theme-generation.md) - Auto-generate app themes from COSMIC
 
-**Security:**
-- [Security Best Practices](docs/SECURITY.md) - Security guidelines
-- [1Password Setup](docs/1PASSWORD_SETUP.md) - 1Password integration
-- [Password Handling](docs/PASSWORD_HANDLING.md) - Credential management
-- [Vault Key Management](docs/VAULT_KEY_MANAGEMENT.md) - Ansible Vault encryption
-- [Key Management](docs/KEY_MANAGEMENT.md) - SSH and GPG keys
-- [Key Restore Strategy](docs/KEY_RESTORE_STRATEGY.md) - Disaster recovery
+**Security & Secrets:**
+- [Security Best Practices](extras/docs/security.md) - Security guidelines
+- [1Password Setup](extras/docs/1password-setup.md) - 1Password integration
+- [Password Handling](extras/docs/password-handling.md) - Credential management
+- [Vault Key Management](extras/docs/vault-key-management.md) - Ansible Vault encryption
 
-**System Architecture:**
-- [Tagging](docs/tagging.md) - Selective execution with tags
-- [Version Management](docs/version-management.md) - Application versions
-- [Secrets Comparison](docs/SECRETS_COMPARISON.md) - Secret management approaches
-
-**Other:**
-- [TODO](TODO.md) - Planned enhancements
-- [Directory Structure](STRUCTURE.md) - Project layout
-- [Nix to Ansible Mapping](docs/NIX_TO_ANSIBLE_MAPPING.md) - For Nix users
-- [Zen Browser Integration](docs/ZEN_BROWSER_COSMIC_INTEGRATION.md) - Zen Browser config
+**Operations & Reference:**
+- [Version Management](extras/docs/version-management.md) - Application versions
 
 ## Contributing
 
