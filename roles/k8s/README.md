@@ -67,6 +67,40 @@ kubectl apply -f manifest.yaml        # Apply configuration
 
 See the [kubectl reference](https://kubernetes.io/docs/reference/kubectl/) for complete documentation.
 
+### Helm - Kubernetes Package Manager
+
+Installs [Helm](https://helm.sh/), the package manager for Kubernetes.
+
+#### Features
+
+- APT repository-based installation (Buildkite Helm repository)
+- Automatic updates via system package manager
+- GPG key verification for package authenticity
+- Latest stable version from official repository
+
+#### Configuration
+
+```yaml
+k8s_helm_enabled: true
+```
+
+#### Usage
+
+Once installed, use `helm` to manage Kubernetes applications:
+
+```bash
+helm version                          # Check version
+helm repo add bitnami https://charts.bitnami.com/bitnami
+helm repo update                      # Update chart repositories
+helm search repo wordpress            # Search for charts
+helm install my-app bitnami/wordpress # Install a chart
+helm list                             # List installed releases
+helm upgrade my-app bitnami/wordpress # Upgrade a release
+helm uninstall my-app                 # Uninstall a release
+```
+
+See the [Helm documentation](https://helm.sh/docs/) for complete guide.
+
 ### Booter - Talos PXE Boot Service
 
 Installs and configures [siderolabs/booter](https://github.com/siderolabs/booter) for PXE booting Talos machines.

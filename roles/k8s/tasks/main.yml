@@ -116,6 +116,70 @@
     - k8s_kubectl_enabled | default(true)
     - kubectl_verify is defined
 
+# Helm installation
+- name: Install Helm prerequisites
+  apt:
+    name:
+      - curl
+      - gpg
+      - apt-transport-https
+    state: present
+  become: yes
+  when: k8s_helm_enabled | default(true)
+
+- name: Download Helm GPG key
+  get_url:
+    url: https://packages.buildkite.com/helm-linux/helm-debian/gpgkey
+    dest: /tmp/helm-gpgkey.asc
+    mode: '0644'
+  become: yes
+  when: k8s_helm_enabled | default(true)
+
+- name: Add Helm GPG key to keyrings
+  shell: |
+    gpg --dearmor < /tmp/helm-gpgkey.asc > /usr/share/keyrings/helm.gpg
+    chmod 644 /usr/share/keyrings/helm.gpg
+  args:
+    creates: /usr/share/keyrings/helm.gpg
+  become: yes
+  when: k8s_helm_enabled | default(true)
+
+- name: Clean up temporary Helm GPG key file
+  file:
+    path: /tmp/helm-gpgkey.asc
+    state: absent
+  become: yes
+  when: k8s_helm_enabled | default(true)
+
+- name: Add Helm APT repository
+  apt_repository:
+    repo: "deb [signed-by=/usr/share/keyrings/helm.gpg] https://packages.buildkite.com/helm-linux/helm-debian/any/ any main"
+    filename: helm-stable-debian
+    state: present
+  become: yes
+  when: k8s_helm_enabled | default(true)
+
+- name: Install Helm
+  apt:
+    name: helm
+    state: present
+    update_cache: yes
+  become: yes
+  when: k8s_helm_enabled | default(true)
+
+- name: Verify Helm installation
+  command: helm version --short
+  register: helm_verify
+  changed_when: false
+  when: k8s_helm_enabled | default(true)
+
+- name: Display Helm version
+  debug:
+    msg: "Helm installed: {{ helm_verify.stdout }}"
+  when:
+    - k8s_helm_enabled | default(true)
+    - helm_verify is defined
+
 # Booter installation
 - name: Create booter directory
   file:
@@ -180,6 +244,28 @@
     state: absent
   become: yes
   when: not (k8s_kubectl_enabled | default(true))
+
+- name: Remove Helm when disabled
+  apt:
+    name: helm
+    state: absent
+  become: yes
+  when: not (k8s_helm_enabled | default(true))
+
+- name: Remove Helm APT repository when disabled
+  apt_repository:
+    repo: "deb [signed-by=/usr/share/keyrings/helm.gpg] https://packages.buildkite.com/helm-linux/helm-debian/any/ any main"
+    filename: helm-stable-debian
+    state: absent
+  become: yes
+  when: not (k8s_helm_enabled | default(true))
+
+- name: Remove Helm GPG key when disabled
+  file:
+    path: /usr/share/keyrings/helm.gpg
+    state: absent
+  become: yes
+  when: not (k8s_helm_enabled | default(true))
 
 - name: Remove booter directory when disabled
   file:

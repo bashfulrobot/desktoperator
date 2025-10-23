@@ -9,6 +9,9 @@ k8s_talosctl_version: "v1.11.0"  # See https://github.com/siderolabs/talos/relea
 k8s_kubectl_enabled: true
 k8s_kubectl_repo_version: "v1.32"  # Repository version (v1.32, v1.31, etc)
 
+# Helm configuration
+k8s_helm_enabled: true
+
 # Booter configuration
 k8s_booter_enabled: true
 k8s_booter_version: "v0.2.0"
