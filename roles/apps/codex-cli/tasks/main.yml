@@ -1,0 +1,18 @@
+---
+# Codex CLI installation tasks
+
+- name: Install Codex CLI globally via npm
+  shell: npm install -g @openai/codex
+  become: yes
+  when: app_states['codex-cli'] | default('present') == 'present'
+  register: codex_cli_install
+  failed_when: false
+  changed_when: codex_cli_install.rc == 0
+
+- name: Uninstall Codex CLI globally via npm
+  shell: npm uninstall -g @openai/codex
+  become: yes
+  when: app_states['codex-cli'] | default('present') == 'absent'
+  register: codex_cli_uninstall
+  failed_when: false
+  changed_when: codex_cli_uninstall.rc == 0

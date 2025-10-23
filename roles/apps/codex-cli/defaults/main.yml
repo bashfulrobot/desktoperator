@@ -1,0 +1,5 @@
+---
+# Codex CLI default variables
+
+# Installation state (present/absent)
+codex_cli_state: present

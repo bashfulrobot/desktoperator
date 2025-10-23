@@ -85,6 +85,12 @@
   tags: [gemini-cli, ai, cli]
   when: "'gemini-cli' in common_apps or app_states['gemini-cli'] is defined"
 
+- name: Include Codex CLI
+  include_role:
+    name: apps/codex-cli
+  tags: [codex-cli, ai, cli]
+  when: "'codex-cli' in common_apps or app_states['codex-cli'] is defined"
+
 - name: Include SiteMCP
   include_role:
     name: apps/sitemcp

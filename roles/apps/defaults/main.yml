@@ -10,6 +10,7 @@ common_apps:
   - helix
   - slack
   - claude-code
+  - codex-cli
   - starship
   - firefox
   - zen-browser
@@ -34,6 +35,7 @@ app_states:
   zen-browser: present
   slack: present
   claude-code: present
+  codex-cli: present
   starship: present
   todoist: present
   firefox: present
