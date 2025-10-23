@@ -1,0 +1,118 @@
+---
+# Docker installation tasks for Ubuntu 24.04
+
+# Installation tasks (when state is present)
+- name: Remove conflicting Docker packages
+  ansible.builtin.apt:
+    name: "{{ docker_conflicting_packages }}"
+    state: absent
+    purge: true
+  become: true
+  when: docker_state == 'present'
+
+- name: Install required packages for Docker repository setup
+  ansible.builtin.apt:
+    name:
+      - ca-certificates
+      - curl
+    state: present
+    update_cache: true
+  become: true
+  when: docker_state == 'present'
+
+- name: Create directory for apt keyrings
+  ansible.builtin.file:
+    path: /etc/apt/keyrings
+    state: directory
+    mode: '0755'
+  become: true
+  when: docker_state == 'present'
+
+- name: Download Docker GPG key
+  ansible.builtin.get_url:
+    url: "{{ docker_gpg_key_url }}"
+    dest: "{{ docker_gpg_key_path }}"
+    mode: '0644'
+  become: true
+  when: docker_state == 'present'
+
+- name: Add Docker repository
+  ansible.builtin.apt_repository:
+    repo: "{{ docker_apt_repository }}"
+    state: present
+    filename: docker
+  become: true
+  when: docker_state == 'present'
+
+- name: Update apt cache after adding Docker repository
+  ansible.builtin.apt:
+    update_cache: true
+  become: true
+  when: docker_state == 'present'
+
+- name: Install Docker packages
+  ansible.builtin.apt:
+    name: "{{ docker_packages }}"
+    state: present
+  become: true
+  when: docker_state == 'present'
+
+- name: Ensure Docker service is enabled and started
+  ansible.builtin.systemd:
+    name: docker
+    enabled: true
+    state: started
+  become: true
+  when: docker_state == 'present'
+
+- name: Add user to docker group
+  ansible.builtin.user:
+    name: "{{ user.name }}"
+    groups: docker
+    append: true
+  become: true
+  when:
+    - docker_state == 'present'
+    - docker_add_user_to_group | bool
+
+# Cleanup tasks (when state is absent)
+- name: Stop Docker service
+  ansible.builtin.systemd:
+    name: docker
+    state: stopped
+    enabled: false
+  become: true
+  failed_when: false
+  when: docker_state == 'absent'
+
+- name: Remove Docker packages
+  ansible.builtin.apt:
+    name: "{{ docker_packages }}"
+    state: absent
+    purge: true
+  become: true
+  when: docker_state == 'absent'
+
+- name: Remove Docker repository
+  ansible.builtin.apt_repository:
+    repo: "{{ docker_apt_repository }}"
+    state: absent
+    filename: docker
+  become: true
+  when: docker_state == 'absent'
+
+- name: Remove Docker GPG key
+  ansible.builtin.file:
+    path: "{{ docker_gpg_key_path }}"
+    state: absent
+  become: true
+  when: docker_state == 'absent'
+
+- name: Remove user from docker group
+  ansible.builtin.user:
+    name: "{{ user.name }}"
+    groups: docker
+    append: false
+  become: true
+  failed_when: false
+  when: docker_state == 'absent'

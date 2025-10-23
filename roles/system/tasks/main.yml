@@ -40,6 +40,16 @@
     name: system/nodejs
   tags: [nodejs, node, npm, dev]
 
+- name: Include Docker installation
+  include_role:
+    name: system/docker
+  tags: [docker, containers, dev]
+
+- name: Include libvirt virtualization
+  include_role:
+    name: system/libvirt
+  tags: [libvirt, virtualization, virt]
+
 - name: Import flatpak configuration
   import_tasks: flatpak.yml
   tags: [flatpak]
