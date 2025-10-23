@@ -24,6 +24,7 @@ common_apps:
   - gum
   - signal
   - terminal-experience
+  - tokei
 
 # Application states (present/absent)
 # Override in host_vars for host-specific control
@@ -50,3 +51,4 @@ app_states:
   kooha: present
   signal: present
   terminal-experience: present
+  tokei: present

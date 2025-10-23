@@ -1,0 +1,19 @@
+---
+# Tokei code statistics tool installation
+
+- name: Install tokei from GitHub
+  ansible.builtin.include_tasks: ../../system/tasks/includes/github_release.yml
+  vars:
+    org: XAMPPRocky
+    repo: tokei
+    binary_name: tokei
+    version: tags/v12.1.2
+    filename_substring: tokei-x86_64-unknown-linux-gnu.tar.gz
+  when: app_states.tokei | default('present') == 'present'
+
+- name: Remove tokei binary when absent
+  file:
+    path: /usr/local/bin/tokei
+    state: absent
+  when: app_states.tokei | default('present') == 'absent'
+  become: yes
