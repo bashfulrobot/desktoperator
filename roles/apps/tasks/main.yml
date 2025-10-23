@@ -109,6 +109,12 @@
   tags: [gum, shell, cli, terminal]
   when: "'gum' in common_apps or app_states['gum'] is defined"
 
+- name: Include Signal messenger
+  include_role:
+    name: apps/signal
+  tags: [signal, communication]
+  when: "'signal' in common_apps or app_states['signal'] is defined"
+
 - name: Include Terminal Experience
   include_role:
     name: apps/terminal-experience

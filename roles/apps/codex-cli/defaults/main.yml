@@ -3,3 +3,19 @@
 
 # Installation state (present/absent)
 codex_cli_state: present
+
+# Configuration paths
+codex_cli_config_dir: "{{ user.home }}/.codex"
+codex_cli_config_file: "{{ codex_cli_config_dir }}/config.toml"
+
+# SiteMCP integration defaults
+codex_cli_mcp_command: sitemcp
+codex_cli_mcp_concurrency: 10
+codex_cli_mcp_tool_strategy: pathname
+codex_cli_mcp_extra_args: []
+# codex_cli_mcp_sites defined via roles/apps/codex-cli/vars/main.yml from files/mcp-sites.json
+
+# Cache update automation
+codex_cli_cache_script: "{{ playbook_dir }}/scripts/mcp-cache-update.sh"
+codex_cli_cache_update_enabled: true
+codex_cli_cache_timer_wake_system: false  # Set to true to wake from suspend

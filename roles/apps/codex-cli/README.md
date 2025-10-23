@@ -16,6 +16,7 @@ This role installs the `@openai/codex` package globally using npm so that the Co
 - Installs from the official npm registry
 - Supports both installation and removal
 - Mirrors existing npm CLI patterns in this repository
+- Configures Codex MCP servers pointing at SiteMCP-backed Kong documentation caches
 
 ## Variables
 
@@ -55,6 +56,54 @@ just apps
 just app codex-cli
 # or
 ansible-playbook site.yml --tags codex-cli
+```
+
+## MCP Servers
+
+The role provisions `~/.codex/config.toml` so Codex automatically connects to a fleet
+of SiteMCP servers that mirror critical Kong documentation sets. The server list
+is sourced from `roles/apps/codex-cli/files/mcp-sites.json`, which is referenced by
+both the Ansible template and `scripts/mcp-cache-update.sh` to keep cached content
+and Codex launch configuration synchronized. Update that JSON file to add or remove
+targets, then rerun the role after refreshing caches with the script.
+
+### Automated Cache Updates
+
+The role deploys a systemd user timer that automatically refreshes MCP site caches
+daily at 9:00 AM. This ensures documentation remains current without manual intervention.
+
+#### Configuration
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `codex_cli_cache_update_enabled` | `true` | Enable/disable automated cache updates |
+| `codex_cli_cache_timer_wake_system` | `false` | Wake system from suspend for updates (requires hardware support) |
+
+#### Manual Cache Updates
+
+Update caches manually using the helper script:
+
+```bash
+# Interactive mode (select specific sites)
+./scripts/mcp-cache-update.sh
+
+# Update all configured sites non-interactively
+./scripts/mcp-cache-update.sh --all
+
+# Update specific sites
+./scripts/mcp-cache-update.sh "https://example.com/docs" "https://other.com/api"
+```
+
+#### Monitoring
+
+Cache update logs are written to:
+- **Journal**: `journalctl --user -u mcp-cache-update.service`
+- **File**: `/var/log/mcp-cache/mcp-cache.log`
+
+Check timer status:
+```bash
+systemctl --user status mcp-cache-update.timer
+systemctl --user list-timers mcp-cache-update.timer
 ```
 
 ### Remove Codex CLI

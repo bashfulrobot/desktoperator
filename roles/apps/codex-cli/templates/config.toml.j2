@@ -1,0 +1,38 @@
+# Managed by Ansible (roles/apps/codex-cli). Update the site list in
+# files/mcp-sites.json (loaded via vars/main.yml) to keep this config
+# synchronized with scripts/mcp-cache-update.sh.
+
+[mcp]
+
+{% for site in codex_cli_mcp_sites %}
+{% set slug = site.slug | default(site.url | regex_replace('^https?://', '') | regex_replace('^//', '') | regex_replace('[^0-9A-Za-z]+', '-') | regex_replace('^-+', '') | regex_replace('-+$', '')) %}
+{% if slug == '' %}
+{% set slug = 'mcp-server-' ~ loop.index %}
+{% endif %}
+[[mcp.servers]]
+name = "{{ slug | lower }}"
+type = "{{ site.type | default('stdio') }}"
+command = "{{ site.command | default(codex_cli_mcp_command) }}"
+args = [
+  "{{ site.url }}",
+  "--stdio",
+  "--concurrency",
+  "{{ site.concurrency | default(codex_cli_mcp_concurrency) }}",
+  "-t",
+  "{{ site.tool_strategy | default(codex_cli_mcp_tool_strategy) }}"
+{% for arg in codex_cli_mcp_extra_args %}
+  , "{{ arg }}"
+{% endfor %}
+{% for arg in site.extra_args | default([]) %}
+  , "{{ arg }}"
+{% endfor %}
+]
+description = "{{ site.description | default('SiteMCP server for ' ~ site.url) }}"
+{% if site.env is defined %}
+  [mcp.servers.env]
+{% for key, value in site.env.items() %}
+  {{ key }} = "{{ value }}"
+{% endfor %}
+{% endif %}
+
+{% endfor %}

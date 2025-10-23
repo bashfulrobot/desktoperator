@@ -1,0 +1,23 @@
+[
+  {"url": "https://developer.konghq.com/index/mesh/"},
+  {"url": "https://developer.konghq.com/index/dev-portal/"},
+  {"url": "https://developer.konghq.com/index/advanced-analytics/"},
+  {"url": "https://developer.konghq.com/index/catalog/"},
+  {"url": "https://developer.konghq.com/index/gateway/#gateway-manager"},
+  {"url": "https://developer.konghq.com/index/insomnia"},
+  {"url": "https://developer.konghq.com/index/gateway/"},
+  {"url": "https://developer.konghq.com/index/ai-gateway/"},
+  {"url": "https://developer.konghq.com/index/kubernetes-ingress-controller/"},
+  {"url": "https://developer.konghq.com/index/operator/"},
+  {"url": "https://developer.konghq.com/index/event-gateway/"},
+  {"url": "https://developer.konghq.com/konnect-platform/authentication/"},
+  {"url": "https://developer.konghq.com/konnect-platform/sso/"},
+  {"url": "https://developer.konghq.com/konnect-platform/teams-and-roles/"},
+  {"url": "https://developer.konghq.com/konnect-platform/account/"},
+  {"url": "https://developer.konghq.com/konnect-platform/geos/"},
+  {"url": "https://developer.konghq.com/index/konnect-platform/#org-management"},
+  {"url": "https://developer.konghq.com/how-to/collect-audit-logs/"},
+  {"url": "https://developer.konghq.com/how-to/collect-dev-portal-audit-logs/"},
+  {"url": "https://developer.konghq.com/konnect-platform/audit-logs/"},
+  {"url": "https://developer.konghq.com/how-to/"}
+]
