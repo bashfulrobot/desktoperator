@@ -7,6 +7,9 @@ justfile_ansible_project_dir: "/home/{{ user.name }}/dev/iac/desktoperator"
 # System justfile installation path
 justfile_system_path: "/usr/local/share/just/system.just"
 
+# Development justfile installation path
+justfile_dev_path: "/usr/local/share/just/dev.just"
+
 # Wrapper command name
 justfile_wrapper_command: "jsys"
 

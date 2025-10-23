@@ -1,67 +1,60 @@
-# Development Workflow Module
-# Provides tools and shortcuts for development activities
+# Development Workflow Justfile
+# Standalone justfile for development activities
+# Use via 'jdev' command from anywhere
 
 {% raw %}
+# Default recipe - show available commands
+default:
+    @just --justfile {{ justfile_dev_path }} --list
+
 # ============================================================================
 # GIT OPERATIONS
 # ============================================================================
 
 # Create an interactive git commit with emoji using gum
-[group('dev')]
 commit:
     #!/usr/bin/env bash
     set -euo pipefail
-    {{ header_msg }}
-    {{ success_msg }}
-    {{ error_msg }}
 
     if ! command -v git-commit-gum &> /dev/null; then
-        error "git-commit-gum is not installed"
+        echo "❌ Error: git-commit-gum is not installed"
         exit 1
     fi
 
     git-commit-gum
 
 # Show git status in a clean format
-[group('dev')]
 status:
     @git status --short --branch
 
 # Show git log with a clean format
-[group('dev')]
 log LIMIT="10":
     @git log --oneline --decorate --graph -n {{ LIMIT }}
 
 # Show changes not yet staged
-[group('dev')]
 diff:
     @git diff
 
 # Show staged changes
-[group('dev')]
 diff-staged:
     @git diff --staged
 
 # Stage all changes
-[group('dev')]
 stage-all:
     @git add -A
     @echo "✓ All changes staged"
 
 # Unstage all changes
-[group('dev')]
 unstage-all:
     @git reset HEAD
     @echo "✓ All changes unstaged"
 
 # Amend the last commit
-[group('dev')]
 amend:
     @git commit --amend --no-edit
     @echo "✓ Last commit amended"
 
 # Interactive rebase for last N commits
-[group('dev')]
 rebase-interactive N="10":
     @git rebase -i HEAD~{{ N }}
 
@@ -70,17 +63,14 @@ rebase-interactive N="10":
 # ============================================================================
 
 # Find files by name pattern
-[group('dev')]
 find PATTERN:
     @find . -type f -name "{{ PATTERN }}" | grep -v node_modules | grep -v .git
 
 # Search for text in files
-[group('dev')]
 search TEXT:
     @rg --pretty "{{ TEXT }}" || echo "No matches found"
 
 # Count lines of code in current directory
-[group('dev')]
 loc:
     @echo "Lines of code by language:"
     @tokei . 2>/dev/null || echo "Install tokei for detailed stats: cargo install tokei"

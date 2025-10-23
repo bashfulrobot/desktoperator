@@ -34,13 +34,20 @@
     - modules/maintenance.just.j2
     - modules/generators.just.j2
     - modules/info.just.j2
-    - modules/dev.just.j2
   tags: [always]
 
 - name: Deploy main system justfile
   template:
     src: system.just.j2
     dest: "{{ justfile_system_path }}"
+    mode: '0644'
+  become: yes
+  tags: [always]
+
+- name: Deploy development justfile
+  template:
+    src: dev.just.j2
+    dest: "{{ justfile_dev_path }}"
     mode: '0644'
   become: yes
   tags: [always]
@@ -61,8 +68,8 @@
     content: |
       #!/usr/bin/env bash
       # jdev - Development workflow command wrapper
-      # Runs dev recipes from the system justfile
-      just --justfile {{ justfile_system_path }} --group dev "$@"
+      # Runs development justfile
+      just --justfile {{ justfile_dev_path }} "$@"
     dest: "/usr/local/bin/jdev"
     mode: '0755'
   become: yes
@@ -116,7 +123,7 @@
 - name: Create fish completion for jdev
   copy:
     content: |
-      # jdev completion - wraps dev recipes from system justfile
+      # jdev completion - wraps development justfile
       function __fish_jdev_complete_recipes
           printf "%s\n" (string split " " (jdev --summary 2>/dev/null))
       end
@@ -128,7 +135,7 @@
       complete -c jdev -a '(__fish_jdev_complete_recipes)'
 
       # common options
-      complete -c jdev -l list -d 'List available recipes'
+      complete -c jdev -l list -d 'List available development recipes'
       complete -c jdev -l summary -d 'List recipe names'
       complete -c jdev -l help -d 'Print help information'
     dest: "{{ user.home }}/.config/fish/completions/jdev.fish"
