@@ -40,3 +40,12 @@ git_difftastic:
   enable: true
   background: "dark"
   color: "always"
+
+# Delta configuration
+git_delta:
+  enable: true
+  features: "side-by-side line-numbers decorations"
+  navigate: true
+  light: false
+  line_numbers: true
+  side_by_side: true

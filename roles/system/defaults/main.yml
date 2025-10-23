@@ -45,6 +45,7 @@ dev_packages:
   - python3-venv
   - ansible
   - ansible-lint
+  - shellcheck
 
 # Python packages (installed via pip)
 # Note: Due to PEP 668, use pipx for development tools instead

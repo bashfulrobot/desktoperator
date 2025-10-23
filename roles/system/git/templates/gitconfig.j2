@@ -47,7 +47,30 @@
 	{{ alias }} = {{ command }}
 {% endfor %}
 
-{% if git_difftastic.enable %}
+{% if git_delta.enable %}
+[core]
+	pager = delta
+
+[interactive]
+	diffFilter = delta --color-only
+
+[delta]
+	navigate = {{ git_delta.navigate | lower }}
+	light = {{ git_delta.light | lower }}
+	line-numbers = {{ git_delta.line_numbers | lower }}
+	side-by-side = {{ git_delta.side_by_side | lower }}
+	features = {{ git_delta.features }}
+	hyperlinks = true
+
+[merge]
+	conflictstyle = zdiff3
+
+[diff]
+	colorMoved = default
+
+[pager]
+	blame = delta
+{% elif git_difftastic.enable %}
 [diff]
 	tool = difftastic
 
