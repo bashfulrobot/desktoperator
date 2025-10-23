@@ -68,3 +68,5 @@ id_ed25519
 *.bak
 *.tmp
 tmp
+
+# COSMIC config is now version controlled in roles/desktop/cosmic/config/

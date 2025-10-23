@@ -8,16 +8,15 @@
     owner: "{{ user.name }}"
     mode: '0755'
 
-- name: Backup existing COSMIC config
-  command: cp -r {{ cosmic_config_path }} {{ cosmic_backup_dir }}
-  args:
-    creates: "{{ cosmic_backup_dir }}"
-  when: cosmic_backup_existing | default(true)
-  failed_when: false
+- name: Check if cosmic config files exist in role
+  stat:
+    path: "{{ role_path }}/config"
+  register: cosmic_config_repo_dir
+  delegate_to: localhost
 
-- name: Sync COSMIC configurations from repository
+- name: Sync COSMIC configurations from role
   synchronize:
-    src: "{{ playbook_dir }}/cosmic-config/"
+    src: "{{ role_path }}/config/"
     dest: "{{ cosmic_config_path }}/"
     delete: yes
     rsync_opts:
@@ -25,4 +24,6 @@
       - "--chmod=D0755,F0644"
       - "--exclude=com.system76.CosmicTheme.Mode/v1/is_dark"
       - "--exclude=com.system76.CosmicTheme.Mode/v1/is_light"
+      - "--exclude=.gitkeep"
   delegate_to: "{{ inventory_hostname }}"
+  when: cosmic_config_repo_dir.stat.exists and cosmic_config_repo_dir.stat.isdir

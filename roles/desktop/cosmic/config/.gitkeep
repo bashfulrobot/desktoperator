@@ -1,0 +1,3 @@
+# COSMIC Desktop Configuration Files
+# This directory contains COSMIC desktop configuration files that are synced across systems.
+# Use 'jsys cosmic-capture' to capture your current COSMIC configuration here.

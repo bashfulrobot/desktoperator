@@ -6,7 +6,7 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 COSMIC_CONFIG_DIR="$HOME/.config/cosmic"
-DEST_DIR="$REPO_ROOT/cosmic-config"
+DEST_DIR="$REPO_ROOT/roles/desktop/cosmic/config"
 
 if [[ ! -d "$COSMIC_CONFIG_DIR" ]]; then
     echo "Error: COSMIC config directory not found at $COSMIC_CONFIG_DIR"
@@ -16,11 +16,10 @@ fi
 echo "Capturing COSMIC configuration from $COSMIC_CONFIG_DIR"
 echo "Destination: $DEST_DIR"
 
-# Create backup if cosmic-config already exists
+# Clear existing config files (keep directory and .gitkeep)
 if [[ -d "$DEST_DIR" ]]; then
-    backup_dir="${DEST_DIR}.backup.$(date +%s)"
-    echo "Backing up existing cosmic-config to $backup_dir"
-    mv "$DEST_DIR" "$backup_dir"
+    echo "Clearing existing config files"
+    find "$DEST_DIR" -mindepth 1 ! -name '.gitkeep' -delete
 fi
 
 # Copy the cosmic config directory, excluding theme mode settings
@@ -34,11 +33,11 @@ echo ""
 echo "✓ COSMIC configuration captured successfully!"
 echo ""
 echo "Next steps:"
-echo "  1. Review the captured configuration in cosmic-config/"
+echo "  1. Review the captured configuration in roles/desktop/cosmic/config/"
 echo "  2. Remove any sensitive or machine-specific settings"
 echo "  3. Commit the changes:"
-echo "     git add cosmic-config/"
-echo "     git commit -m 'feat(desktop): Add COSMIC configuration'"
+echo "     git add roles/desktop/cosmic/config/"
+echo "     git commit -m 'feat(desktop): Update COSMIC configuration'"
 echo ""
-echo "To use this configuration, set in your inventory/vars:"
-echo "  cosmic_sync_from_repo: true"
+echo "To apply this configuration to a system:"
+echo "  jsys cosmic-apply"
