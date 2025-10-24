@@ -1,0 +1,7 @@
+---
+# Handlers for libvirt role
+
+- name: reload udev rules
+  ansible.builtin.command:
+    cmd: udevadm control --reload-rules && udevadm trigger --subsystem-match=misc
+  become: true

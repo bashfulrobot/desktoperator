@@ -33,12 +33,33 @@
   failed_when: false
   when: app_states['libvirt'] | default('present') == 'present'
 
+- name: Configure udev rule for KVM device permissions
+  ansible.builtin.copy:
+    dest: /etc/udev/rules.d/99-kvm.rules
+    content: |
+      KERNEL=="kvm", GROUP="kvm", MODE="0660"
+    mode: '0644'
+  become: true
+  notify: reload udev rules
+  when: app_states['libvirt'] | default('present') == 'present'
+
 - name: Verify KVM device exists
   ansible.builtin.stat:
     path: /dev/kvm
   register: kvm_device
   become: true
   when: app_states['libvirt'] | default('present') == 'present'
+
+- name: Fix KVM device permissions if incorrect
+  ansible.builtin.file:
+    path: /dev/kvm
+    owner: root
+    group: kvm
+    mode: '0660'
+  become: true
+  when:
+    - app_states['libvirt'] | default('present') == 'present'
+    - kvm_device.stat.exists
 
 - name: Display KVM availability warning
   ansible.builtin.debug:
