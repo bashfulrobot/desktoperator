@@ -2,73 +2,80 @@
 # Slack Desktop installation via .deb package
 
 - name: Check if Slack is installed
-  command: dpkg-query -W -f='${Version}' slack-desktop
+  ansible.builtin.command: dpkg-query -W -f='${Version}' slack-desktop
   register: slack_installed_version
   changed_when: false
   failed_when: false
   when: app_states['slack'] | default('present') == 'present'
 
 - name: Get latest Slack version from release notes
-  shell: |
-    curl -sL "https://slack.com/release-notes/linux" 2>/dev/null | grep -oP '<h2[^>]*>Slack \K[\d.]+' | head -1
-  register: slack_latest_version
+  ansible.builtin.uri:
+    url: https://slack.com/release-notes/linux
+    return_content: true
+  register: slack_release_page
   changed_when: false
   when: app_states['slack'] | default('present') == 'present'
 
+- name: Extract Slack version from HTML
+  ansible.builtin.set_fact:
+    slack_latest_version: "{{ slack_release_page.content | regex_search('<h2[^>]*>Slack ([\\d.]+)', '\\1') | first }}"
+  when: app_states['slack'] | default('present') == 'present'
+
 - name: Determine if Slack needs update
-  set_fact:
-    slack_needs_update: "{{ slack_installed_version.rc != 0 or slack_installed_version.stdout != slack_latest_version.stdout }}"
+  ansible.builtin.set_fact:
+    slack_needs_update: "{{ slack_installed_version.rc != 0 or slack_installed_version.stdout != slack_latest_version }}"
   when: app_states['slack'] | default('present') == 'present'
 
 - name: Download Slack .deb package
-  get_url:
-    url: "https://downloads.slack-edge.com/desktop-releases/linux/x64/{{ slack_latest_version.stdout }}/slack-desktop-{{ slack_latest_version.stdout }}-amd64.deb"
-    dest: "/tmp/slack-desktop-{{ slack_latest_version.stdout }}.deb"
+  ansible.builtin.get_url:
+    url: "https://downloads.slack-edge.com/desktop-releases/linux/x64/{{ slack_latest_version }}/slack-desktop-{{ slack_latest_version }}-amd64.deb"
+    dest: "/tmp/slack-desktop-{{ slack_latest_version }}.deb"
     mode: '0644'
   when:
     - app_states['slack'] | default('present') == 'present'
     - slack_needs_update | bool
-  become: yes
+  become: true
 
 - name: Install Slack .deb package
-  apt:
-    deb: "/tmp/slack-desktop-{{ slack_latest_version.stdout }}.deb"
+  ansible.builtin.apt:
+    deb: "/tmp/slack-desktop-{{ slack_latest_version }}.deb"
     state: present
-  become: yes
+  become: true
   when:
     - app_states['slack'] | default('present') == 'present'
     - slack_needs_update | bool
 
 - name: Clean up downloaded .deb package
-  file:
-    path: "/tmp/slack-desktop-{{ slack_latest_version.stdout }}.deb"
+  ansible.builtin.file:
+    path: "/tmp/slack-desktop-{{ slack_latest_version }}.deb"
     state: absent
   when:
     - app_states['slack'] | default('present') == 'present'
     - slack_needs_update | bool
-  become: yes
+  become: true
 
 # Install high-resolution icon for better display in dock
 - name: Download Slack SVG icon
-  get_url:
+  ansible.builtin.get_url:
     url: "https://raw.githubusercontent.com/simple-icons/simple-icons/develop/icons/slack.svg"
     dest: "/usr/share/icons/hicolor/scalable/apps/slack.svg"
     mode: '0644'
-  become: yes
+  become: true
   when: app_states['slack'] | default('present') == 'present'
-  ignore_errors: yes
+  ignore_errors: true
 
 - name: Update icon cache for Slack
-  command: gtk-update-icon-cache -f -t /usr/share/icons/hicolor
-  become: yes
+  ansible.builtin.command: gtk-update-icon-cache -f -t /usr/share/icons/hicolor
+  become: true
   when: app_states['slack'] | default('present') == 'present'
-  ignore_errors: yes
+  ignore_errors: true
+  changed_when: false
 
 # Cleanup when absent
 - name: Remove Slack when absent
-  apt:
+  ansible.builtin.apt:
     name: slack-desktop
     state: absent
-    purge: yes
-  become: yes
+    purge: true
+  become: true
   when: app_states['slack'] | default('present') == 'absent'
