@@ -34,26 +34,32 @@
     binary_name: lazygit
     filename_substring: linux_x86_64.tar.gz
 
-- name: Check if gh (GitHub CLI) is installed
-  ansible.builtin.stat:
-    path: /usr/bin/gh
-  register: system_gh_installed
-
-- name: Add GitHub CLI repository key
-  ansible.builtin.apt_key:
-    url: https://cli.github.com/packages/githubcli-archive-keyring.gpg
-    keyring: /usr/share/keyrings/githubcli-archive-keyring.gpg
+- name: Ensure wget is installed for gh installation
+  ansible.builtin.apt:
+    name: wget
     state: present
   become: true
-  when: not system_gh_installed.stat.exists
+
+- name: Create keyrings directory for GitHub CLI
+  ansible.builtin.file:
+    path: /etc/apt/keyrings
+    state: directory
+    mode: '0755'
+  become: true
+
+- name: Download GitHub CLI GPG key
+  ansible.builtin.get_url:
+    url: https://cli.github.com/packages/githubcli-archive-keyring.gpg
+    dest: /etc/apt/keyrings/githubcli-archive-keyring.gpg
+    mode: '0644'
+  become: true
 
 - name: Add GitHub CLI repository
   ansible.builtin.apt_repository:
-    repo: "deb [arch=amd64 signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main"
+    repo: "deb [arch={{ gh_arch_mapping[ansible_architecture] | default(ansible_architecture) }} signed-by=/etc/apt/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main"
     state: present
     filename: github-cli
   become: true
-  when: not system_gh_installed.stat.exists
 
 - name: Install GitHub CLI
   ansible.builtin.apt:
@@ -61,7 +67,6 @@
     state: present
     update_cache: true
   become: true
-  when: not system_gh_installed.stat.exists
 
 - name: Create git config directory
   ansible.builtin.file:
