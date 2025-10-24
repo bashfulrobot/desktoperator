@@ -2,57 +2,63 @@
 # Zoom Desktop installation via .deb package
 
 - name: Check if Zoom is installed
-  command: dpkg-query -W -f='${Version}' zoom
+  ansible.builtin.command: dpkg-query -W -f='${Version}' zoom
   register: zoom_installed_version
   changed_when: false
   failed_when: false
   when: app_states['zoom'] | default('present') == 'present'
 
 - name: Get latest Zoom version from API
-  shell: |
-    curl -sL "https://zoom.us/rest/download?os=linux" 2>/dev/null | grep -oP '"version"\s*:\s*"\K[^"]+' | head -1
-  register: zoom_latest_version
+  ansible.builtin.uri:
+    url: https://zoom.us/rest/download?os=linux
+    return_content: true
+  register: zoom_api_response
   changed_when: false
   when: app_states['zoom'] | default('present') == 'present'
 
+- name: Extract Zoom version from JSON
+  ansible.builtin.set_fact:
+    zoom_latest_version: "{{ (zoom_api_response.content | from_json).version }}"
+  when: app_states['zoom'] | default('present') == 'present'
+
 - name: Determine if Zoom needs update
-  set_fact:
-    zoom_needs_update: "{{ zoom_installed_version.rc != 0 or zoom_installed_version.stdout != zoom_latest_version.stdout }}"
+  ansible.builtin.set_fact:
+    zoom_needs_update: "{{ zoom_installed_version.rc != 0 or zoom_installed_version.stdout != zoom_latest_version }}"
   when: app_states['zoom'] | default('present') == 'present'
 
 - name: Download Zoom .deb package
-  get_url:
-    url: "https://cdn.zoom.us/prod/{{ zoom_latest_version.stdout }}/zoom_amd64.deb"
-    dest: "/tmp/zoom-{{ zoom_latest_version.stdout }}.deb"
+  ansible.builtin.get_url:
+    url: "https://cdn.zoom.us/prod/{{ zoom_latest_version }}/zoom_amd64.deb"
+    dest: "/tmp/zoom-{{ zoom_latest_version }}.deb"
     mode: '0644'
   when:
     - app_states['zoom'] | default('present') == 'present'
     - zoom_needs_update | bool
-  become: yes
+  become: true
 
 - name: Install Zoom .deb package
-  apt:
-    deb: "/tmp/zoom-{{ zoom_latest_version.stdout }}.deb"
+  ansible.builtin.apt:
+    deb: "/tmp/zoom-{{ zoom_latest_version }}.deb"
     state: present
-  become: yes
+  become: true
   when:
     - app_states['zoom'] | default('present') == 'present'
     - zoom_needs_update | bool
 
 - name: Clean up downloaded .deb package
-  file:
-    path: "/tmp/zoom-{{ zoom_latest_version.stdout }}.deb"
+  ansible.builtin.file:
+    path: "/tmp/zoom-{{ zoom_latest_version }}.deb"
     state: absent
   when:
     - app_states['zoom'] | default('present') == 'present'
     - zoom_needs_update | bool
-  become: yes
+  become: true
 
 # Cleanup when absent
 - name: Remove Zoom when absent
-  apt:
+  ansible.builtin.apt:
     name: zoom
     state: absent
-    purge: yes
-  become: yes
+    purge: true
+  become: true
   when: app_states['zoom'] | default('present') == 'absent'
