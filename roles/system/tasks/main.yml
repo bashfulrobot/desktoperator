@@ -50,6 +50,11 @@
     name: system/libvirt
   tags: [libvirt, virtualization, virt]
 
+- name: Include Terraform installation
+  include_role:
+    name: system/terraform
+  tags: [terraform, iac, dev]
+
 - name: Import flatpak configuration
   import_tasks: flatpak.yml
   tags: [flatpak]
