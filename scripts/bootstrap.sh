@@ -25,7 +25,7 @@ echo ""
 echo "The hostname must match an entry in inventory/hosts.yml"
 echo "for Ansible to work correctly (e.g., qbert, donkeykong)."
 echo ""
-read -p "Enter hostname for this system: " NEW_HOSTNAME
+read -r -p "Enter hostname for this system: " NEW_HOSTNAME
 
 if [ -z "$NEW_HOSTNAME" ]; then
     echo "ERROR: Hostname cannot be empty."
@@ -111,12 +111,12 @@ if [ ! -d "$HOME/.config/vivaldi/Default" ]; then
     echo "from the encrypted backup stored on your internal server."
     echo ""
 
-    read -p "Would you like to restore the Vivaldi profile now? [Y/n]: " RESTORE_VIVALDI
+    read -r -p "Would you like to restore the Vivaldi profile now? [Y/n]: " RESTORE_VIVALDI
 
     if [[ ! "$RESTORE_VIVALDI" =~ ^[Nn]$ ]]; then
         echo ""
         echo "Default SSH location: dustin@192.168.168.1:~/bootstrap/vivaldi-default-profile.tar.gz.vault"
-        read -p "Press Enter to use default, or enter alternate SSH location: " SSH_LOCATION
+        read -r -p "Press Enter to use default, or enter alternate SSH location: " SSH_LOCATION
 
         if [ -z "$SSH_LOCATION" ]; then
             SSH_LOCATION="dustin@192.168.168.1:~/bootstrap/vivaldi-default-profile.tar.gz.vault"
@@ -126,9 +126,7 @@ if [ ! -d "$HOME/.config/vivaldi/Default" ]; then
         echo "Downloading encrypted Vivaldi profile from $SSH_LOCATION..."
 
         # Download from SSH server
-        scp "$SSH_LOCATION" /tmp/vivaldi-default-profile.tar.gz.vault
-
-        if [ $? -eq 0 ]; then
+        if scp "$SSH_LOCATION" /tmp/vivaldi-default-profile.tar.gz.vault; then
             echo ""
             echo "Decrypting and restoring Vivaldi profile..."
             echo "You will be prompted for the vault password."
@@ -168,8 +166,7 @@ echo "Launching 1Password desktop application..."
 echo ""
 
 # Launch 1Password in the background
-1password &
-ONEPASSWORD_PID=$!
+1password & 
 
 echo "Please complete the following steps:"
 echo ""
@@ -180,7 +177,7 @@ echo "   • Enable 'Connect with 1Password CLI'"
 echo "   • Authorize CLI access when prompted"
 echo ""
 echo "Once you've signed in and enabled CLI integration,"
-read -p "press Enter to continue..."
+read -r -p "press Enter to continue..."
 
 # Wait a moment for CLI integration to be ready
 sleep 2
@@ -202,7 +199,7 @@ echo "Would you like to configure restic backup now?"
 echo "This will create the autorestic configuration file."
 echo "You can also do this later with Ansible."
 echo ""
-read -p "Configure restic now? [y/N]: " CONFIGURE_RESTIC
+read -r -p "Configure restic now? [y/N]: " CONFIGURE_RESTIC
 
 if [[ "$CONFIGURE_RESTIC" =~ ^[Yy]$ ]]; then
     echo ""
@@ -311,7 +308,7 @@ else
     if [ -f "group_vars/all/vault.yml.example" ]; then
         cp group_vars/all/vault.yml.example group_vars/all/vault.yml
         echo "Please edit group_vars/all/vault.yml with your actual secrets, then we'll encrypt it."
-        read -p "Press Enter when you've added your secrets to vault.yml..."
+        read -r -p "Press Enter when you've added your secrets to vault.yml..."
 
         # Encrypt the vault file
         ansible-vault encrypt group_vars/all/vault.yml
@@ -331,13 +328,13 @@ STAGED_SENSITIVE=$(git status --porcelain | grep -E '(\.vault_pass|password|secr
 
 # Check for unencrypted vault.yml (should start with $ANSIBLE_VAULT if encrypted)
 if git status --porcelain | grep -q 'vault\.yml$'; then
-    for vault_file in $(find . -name "vault.yml" 2>/dev/null); do
+    while IFS= read -r -d '' vault_file; do
         if [ -f "$vault_file" ]; then
-            if ! head -1 "$vault_file" | grep -q '\$ANSIBLE_VAULT'; then
+            if ! head -1 "$vault_file" | grep -q "\$ANSIBLE_VAULT"; then
                 STAGED_SENSITIVE="${STAGED_SENSITIVE}\nUnencrypted: $vault_file"
             fi
         fi
-    done
+    done < <(find . -name "vault.yml" -print0 2>/dev/null)
 fi
 
 if [ -n "$STAGED_SENSITIVE" ]; then

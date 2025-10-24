@@ -4,9 +4,9 @@ set -euo pipefail
 
 # Color codes for output
 RED='\033[0;31m'
-GREEN='\033[0;32m'
+# GREEN='\033[0;32m'  # Currently unused
 YELLOW='\033[1;33m'
-BLUE='\033[0;34m'
+# BLUE='\033[0;34m'  # Currently unused
 NC='\033[0m' # No Color
 
 # Dependency check function
@@ -397,7 +397,8 @@ process_directory() {
 # Process a single file
 process_single_file() {
     local file_path="$1"
-    local basename=$(basename "$file_path")
+    local basename
+    basename=$(basename "$file_path")
     local new_path
 
     # Skip files without extensions (likely code/scripts)
