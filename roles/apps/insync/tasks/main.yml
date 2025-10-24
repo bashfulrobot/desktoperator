@@ -2,13 +2,6 @@
 # Insync installation via APT repository
 # Cloud storage sync client for Google Drive, OneDrive, and Dropbox
 
-- name: Remove deprecated Insync GPG key from trusted.gpg.d
-  file:
-    path: /etc/apt/trusted.gpg.d/insynchq.gpg
-    state: absent
-  become: yes
-  when: app_states['insync'] | default('present') == 'present'
-
 - name: Download Insync GPG key
   get_url:
     url: https://apt.insync.io/insynchq.gpg
@@ -29,14 +22,6 @@
   command: lsb_release -cs
   register: ubuntu_codename
   changed_when: false
-  when: app_states['insync'] | default('present') == 'present'
-
-- name: Remove old Insync repository entries without signed-by
-  apt_repository:
-    repo: "deb http://apt.insync.io/ubuntu {{ ubuntu_codename.stdout }} non-free contrib"
-    filename: insync
-    state: absent
-  become: yes
   when: app_states['insync'] | default('present') == 'present'
 
 - name: Add Insync APT repository
@@ -136,10 +121,7 @@
 
 - name: Remove Insync GPG key when absent
   file:
-    path: "{{ item }}"
+    path: /usr/share/keyrings/insynchq.gpg
     state: absent
-  loop:
-    - /usr/share/keyrings/insynchq.gpg
-    - /etc/apt/trusted.gpg.d/insynchq.gpg
   become: yes
   when: app_states['insync'] | default('present') == 'absent'

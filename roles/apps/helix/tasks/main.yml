@@ -10,26 +10,6 @@
   become: yes
   when: app_states.helix | default('present') == 'present'
 
-- name: Remove deprecated Helix PPA key from trusted.gpg
-  shell: |
-    apt-key list | grep -A 1 "helix" | grep -oP '(?<=/).*(?=\s)' | xargs -r apt-key del
-  become: yes
-  when: app_states.helix | default('present') == 'present'
-  ignore_errors: yes
-  changed_when: false
-
-- name: Remove conflicting Helix PPA repository files
-  file:
-    path: "{{ item }}"
-    state: absent
-  loop:
-    - /etc/apt/sources.list.d/helix-ppa.list
-    - /etc/apt/sources.list.d/helix-ppa.sources
-    - /etc/apt/sources.list.d/ppa_maveonair_helix_editor_noble.list
-    - /etc/apt/sources.list.d/maveonair-ubuntu-helix-editor-noble.list
-  become: yes
-  when: app_states.helix | default('present') == 'present'
-
 - name: Download Helix PPA GPG key
   get_url:
     url: https://keyserver.ubuntu.com/pks/lookup?op=get&search=0x27642B9FD7F1A161FC2524E3355A4FA515D7C855
