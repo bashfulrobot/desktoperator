@@ -20,6 +20,39 @@
   become: true
   when: app_states['libvirt'] | default('present') == 'present'
 
+- name: Load KVM kernel modules
+  community.general.modprobe:
+    name: "{{ item }}"
+    state: present
+    persistent: present
+  become: true
+  loop:
+    - kvm
+    - kvm_intel
+    - kvm_amd
+  failed_when: false
+  when: app_states['libvirt'] | default('present') == 'present'
+
+- name: Verify KVM device exists
+  ansible.builtin.stat:
+    path: /dev/kvm
+  register: kvm_device
+  become: true
+  when: app_states['libvirt'] | default('present') == 'present'
+
+- name: Display KVM availability warning
+  ansible.builtin.debug:
+    msg: |
+      WARNING: /dev/kvm not found. Hardware virtualization may not be available.
+      Possible causes:
+      - Virtualization not enabled in BIOS/UEFI
+      - Running inside a VM without nested virtualization
+      - KVM modules failed to load
+      Check: grep -E 'vmx|svm' /proc/cpuinfo
+  when:
+    - app_states['libvirt'] | default('present') == 'present'
+    - not kvm_device.stat.exists
+
 - name: Install GUI tools for libvirt
   ansible.builtin.apt:
     name: "{{ libvirt_gui_packages }}"
@@ -37,15 +70,48 @@
   become: true
   when: app_states['libvirt'] | default('present') == 'present'
 
-- name: Add user to libvirt group
+- name: Ensure libvirt supporting services are enabled and started
+  ansible.builtin.systemd:
+    name: "{{ item }}"
+    enabled: true
+    state: started
+  become: true
+  loop:
+    - virtlogd.socket
+    - virtlockd.socket
+  when: app_states['libvirt'] | default('present') == 'present'
+
+- name: Add user to libvirt and kvm groups
   ansible.builtin.user:
     name: "{{ user.name }}"
-    groups: libvirt
+    groups:
+      - libvirt
+      - kvm
     append: true
   become: true
+  register: user_groups_changed
   when:
     - app_states['libvirt'] | default('present') == 'present'
     - libvirt_add_user_to_group | bool
+
+- name: Display group membership notice
+  ansible.builtin.debug:
+    msg: |
+      ================================================================================
+      USER GROUP MEMBERSHIP UPDATED
+      ================================================================================
+      User '{{ user.name }}' has been added to libvirt and kvm groups.
+
+      IMPORTANT: For group changes to take effect, you must either:
+      - Log out and log back in, OR
+      - Run: newgrp libvirt
+
+      Without this, you won't be able to manage VMs or access /dev/kvm.
+      ================================================================================
+  when:
+    - app_states['libvirt'] | default('present') == 'present'
+    - libvirt_add_user_to_group | bool
+    - user_groups_changed.changed | default(false)
 
 - name: Disable default network autostart
   ansible.builtin.command:
@@ -186,6 +252,20 @@
     - item != 'default'
     - item != ''
 
+- name: Stop libvirt supporting services
+  ansible.builtin.systemd:
+    name: "{{ item }}"
+    state: stopped
+    enabled: false
+  become: true
+  failed_when: false
+  loop:
+    - virtlogd.socket
+    - virtlockd.socket
+    - virtlogd.service
+    - virtlockd.service
+  when: app_states['libvirt'] | default('present') == 'absent'
+
 - name: Stop libvirtd service
   ansible.builtin.systemd:
     name: "{{ libvirt_service }}"
@@ -203,11 +283,12 @@
   become: true
   when: app_states['libvirt'] | default('present') == 'absent'
 
-- name: Remove user from libvirt group
-  ansible.builtin.user:
-    name: "{{ user.name }}"
-    groups: libvirt
-    state: absent
+- name: Remove user from libvirt and kvm groups
+  ansible.builtin.command:
+    cmd: "gpasswd -d {{ user.name }} {{ item }}"
   become: true
   failed_when: false
+  loop:
+    - libvirt
+    - kvm
   when: app_states['libvirt'] | default('present') == 'absent'
