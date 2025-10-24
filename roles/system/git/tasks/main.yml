@@ -34,38 +34,27 @@
     binary_name: lazygit
     filename_substring: linux_x86_64.tar.gz
 
-- name: Ensure wget is installed for gh installation
+- name: Add GitHub CLI repository with GPG key
+  ansible.builtin.deb822_repository:
+    name: github-cli
+    types: [deb]
+    uris: https://cli.github.com/packages
+    suites: stable
+    components: [main]
+    architectures: "{{ gh_arch_mapping[ansible_architecture] | default(ansible_architecture) }}"
+    signed_by: https://cli.github.com/packages/githubcli-archive-keyring.gpg
+    state: present
+  become: true
+
+- name: Update APT cache after repository changes
   ansible.builtin.apt:
-    name: wget
-    state: present
-  become: true
-
-- name: Create keyrings directory for GitHub CLI
-  ansible.builtin.file:
-    path: /etc/apt/keyrings
-    state: directory
-    mode: '0755'
-  become: true
-
-- name: Download GitHub CLI GPG key
-  ansible.builtin.get_url:
-    url: https://cli.github.com/packages/githubcli-archive-keyring.gpg
-    dest: /etc/apt/keyrings/githubcli-archive-keyring.gpg
-    mode: '0644'
-  become: true
-
-- name: Add GitHub CLI repository
-  ansible.builtin.apt_repository:
-    repo: "deb [arch={{ gh_arch_mapping[ansible_architecture] | default(ansible_architecture) }} signed-by=/etc/apt/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main"
-    state: present
-    filename: github-cli
+    update_cache: true
   become: true
 
 - name: Install GitHub CLI
   ansible.builtin.apt:
     name: gh
     state: present
-    update_cache: true
   become: true
 
 - name: Create git config directory
