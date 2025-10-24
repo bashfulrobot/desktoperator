@@ -2,16 +2,12 @@
 # files/mcp-sites.json (loaded via vars/main.yml) to keep this config
 # synchronized with scripts/mcp-cache-update.sh.
 
-[mcp]
-
 {% for site in codex_cli_mcp_sites %}
 {% set slug = site.slug | default(site.url | regex_replace('^https?://', '') | regex_replace('^//', '') | regex_replace('[^0-9A-Za-z]+', '-') | regex_replace('^-+', '') | regex_replace('-+$', '')) %}
 {% if slug == '' %}
 {% set slug = 'mcp-server-' ~ loop.index %}
 {% endif %}
-[[mcp.servers]]
-name = "{{ slug | lower }}"
-type = "{{ site.type | default('stdio') }}"
+[mcp_servers.{{ slug | lower }}]
 command = "{{ site.command | default(codex_cli_mcp_command) }}"
 args = [
   "{{ site.url }}",
@@ -27,11 +23,11 @@ args = [
   , "{{ arg }}"
 {% endfor %}
 ]
-description = "{{ site.description | default('SiteMCP server for ' ~ site.url) }}"
 {% if site.env is defined %}
-  [mcp.servers.env]
+
+[mcp_servers.{{ slug | lower }}.env]
 {% for key, value in site.env.items() %}
-  {{ key }} = "{{ value }}"
+{{ key }} = "{{ value }}"
 {% endfor %}
 {% endif %}
 

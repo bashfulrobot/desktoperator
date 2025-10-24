@@ -10,9 +10,9 @@ codex_cli_config_file: "{{ codex_cli_config_dir }}/config.toml"
 
 # SiteMCP integration defaults
 codex_cli_mcp_command: sitemcp
-codex_cli_mcp_concurrency: 10
+codex_cli_mcp_concurrency: 5
 codex_cli_mcp_tool_strategy: pathname
-codex_cli_mcp_extra_args: []
+codex_cli_mcp_extra_args: ["--cache"]
 # codex_cli_mcp_sites defined via roles/apps/codex-cli/vars/main.yml from files/mcp-sites.json
 
 # Cache update automation
