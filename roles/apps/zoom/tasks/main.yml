@@ -18,7 +18,7 @@
 
 - name: Extract Zoom version from JSON
   ansible.builtin.set_fact:
-    zoom_latest_version: "{{ (zoom_api_response.content | from_json).version }}"
+    zoom_latest_version: "{{ (zoom_api_response.content | from_json).result.downloadVO.zoom.version }}"
   when: app_states['zoom'] | default('present') == 'present'
 
 - name: Determine if Zoom needs update
