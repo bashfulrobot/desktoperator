@@ -1,0 +1,98 @@
+---
+# Meetsum - Meeting summary generator CLI tool
+# GitHub: https://github.com/bashfulrobot/meetsum
+
+- name: Create meetsum state directory
+  ansible.builtin.file:
+    path: /var/lib/ansible/github_releases/bashfulrobot/meetsum
+    state: directory
+    mode: '0755'
+  become: true
+  when: app_states.meetsum | default('present') == 'present'
+
+- name: Check if meetsum binary exists
+  ansible.builtin.stat:
+    path: /usr/local/bin/meetsum
+  register: meetsum_binary_exists
+  when: app_states.meetsum | default('present') == 'present'
+
+- name: Read installed meetsum version metadata
+  ansible.builtin.slurp:
+    src: /var/lib/ansible/github_releases/bashfulrobot/meetsum/version.json
+  register: meetsum_installed_version
+  when:
+    - app_states.meetsum | default('present') == 'present'
+    - meetsum_binary_exists.stat.exists
+  failed_when: false
+
+- name: Get latest meetsum release info from GitHub API
+  ansible.builtin.uri:
+    url: "https://api.github.com/repos/bashfulrobot/meetsum/releases/latest"
+    return_content: true
+  register: meetsum_release_data
+  when: app_states.meetsum | default('present') == 'present'
+
+- name: Parse installed version metadata
+  ansible.builtin.set_fact:
+    meetsum_installed_published_at: "{{ (meetsum_installed_version.content | b64decode | from_json).published_at | default('') }}"
+  when:
+    - app_states.meetsum | default('present') == 'present'
+    - meetsum_installed_version.content is defined
+
+- name: Determine if meetsum update is needed
+  ansible.builtin.set_fact:
+    meetsum_needs_update: "{{ not meetsum_binary_exists.stat.exists or (meetsum_installed_published_at | default('')) != meetsum_release_data.json.published_at }}"
+  when: app_states.meetsum | default('present') == 'present'
+
+- name: Filter meetsum linux-amd64 binary asset
+  ansible.builtin.set_fact:
+    meetsum_binary_asset: "{{ meetsum_release_data.json.assets | selectattr('name', 'equalto', 'meetsum-linux-amd64') | list | first }}"
+  when:
+    - app_states.meetsum | default('present') == 'present'
+    - meetsum_needs_update | bool
+
+- name: Download and install meetsum binary
+  ansible.builtin.get_url:
+    url: "{{ meetsum_binary_asset.browser_download_url }}"
+    dest: /usr/local/bin/meetsum
+    mode: '0755'
+    owner: root
+    group: root
+  become: true
+  when:
+    - app_states.meetsum | default('present') == 'present'
+    - meetsum_needs_update | bool
+
+- name: Save meetsum version metadata
+  ansible.builtin.copy:
+    content: |
+      {
+        "tag_name": "{{ meetsum_release_data.json.tag_name }}",
+        "published_at": "{{ meetsum_release_data.json.published_at }}",
+        "html_url": "{{ meetsum_release_data.json.html_url }}"
+      }
+    dest: /var/lib/ansible/github_releases/bashfulrobot/meetsum/version.json
+    mode: '0644'
+  become: true
+  when:
+    - app_states.meetsum | default('present') == 'present'
+    - meetsum_needs_update | bool
+
+- name: Show meetsum installation status
+  ansible.builtin.debug:
+    msg: "meetsum {{ meetsum_release_data.json.tag_name }} is {{ 'now installed' if meetsum_needs_update else 'already up to date' }}"
+  when: app_states.meetsum | default('present') == 'present'
+
+- name: Remove meetsum binary when absent
+  ansible.builtin.file:
+    path: /usr/local/bin/meetsum
+    state: absent
+  become: true
+  when: app_states.meetsum | default('present') == 'absent'
+
+- name: Remove meetsum state directory when absent
+  ansible.builtin.file:
+    path: /var/lib/ansible/github_releases/bashfulrobot/meetsum
+    state: absent
+  become: true
+  when: app_states.meetsum | default('present') == 'absent'

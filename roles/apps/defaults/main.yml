@@ -22,6 +22,7 @@ common_apps:
   - sitemcp
   - glow
   - gum
+  - meetsum
   - signal
   - terminal-experience
   - tokei
@@ -49,6 +50,7 @@ app_states:
   glow: present
   gum: present
   kooha: present
+  meetsum: present
   signal: present
   terminal-experience: present
   tokei: present

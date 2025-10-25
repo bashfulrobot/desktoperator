@@ -109,6 +109,12 @@
   tags: [gum, shell, cli, terminal]
   when: "'gum' in common_apps or app_states['gum'] is defined"
 
+- name: Include Meetsum meeting summary generator
+  include_role:
+    name: apps/meetsum
+  tags: [meetsum, cli, ai, meetings]
+  when: "'meetsum' in common_apps or app_states['meetsum'] is defined"
+
 - name: Include Signal messenger
   include_role:
     name: apps/signal
