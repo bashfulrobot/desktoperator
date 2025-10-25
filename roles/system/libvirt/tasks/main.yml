@@ -102,6 +102,16 @@
     - virtlockd.socket
   when: app_states['libvirt'] | default('present') == 'present'
 
+- name: Configure libvirt images directory with proper permissions
+  ansible.builtin.file:
+    path: /var/lib/libvirt/images
+    state: directory
+    owner: root
+    group: kvm
+    mode: '2711'
+  become: true
+  when: app_states['libvirt'] | default('present') == 'present'
+
 - name: Add user to libvirt and kvm groups
   ansible.builtin.user:
     name: "{{ user.name }}"
