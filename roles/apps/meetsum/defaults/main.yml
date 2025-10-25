@@ -1,0 +1,16 @@
+---
+# Meetsum default variables
+
+# Installation state (present/absent)
+meetsum_state: present
+
+# Configuration paths
+meetsum_config_dir: "{{ user.home }}/.config/meetsum"
+meetsum_config_file: "{{ meetsum_config_dir }}/settings.yaml"
+
+# Meetsum paths configuration
+meetsum_customers_dir: "{{ user.home }}/Documents/Kong/My-drive/Customers"
+meetsum_automation_dir: "{{ meetsum_config_dir }}/automation"
+
+# AI configuration
+meetsum_ai_command: gemini

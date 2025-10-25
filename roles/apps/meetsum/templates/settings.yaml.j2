@@ -1,0 +1,15 @@
+# Meetsum Configuration
+# Managed by Ansible - changes may be overwritten
+
+paths:
+  customers_dir: "{{ meetsum_customers_dir }}"
+  automation_dir: "{{ meetsum_automation_dir }}"
+  instructions_file: "Meeting-summary-llm-instructions.md"
+
+ai:
+  command: "{{ meetsum_ai_command }}"
+
+features:
+  trace_mode: false
+  file_browser: true
+  markdown_preview: true

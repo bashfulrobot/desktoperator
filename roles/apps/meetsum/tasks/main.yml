@@ -83,6 +83,47 @@
     msg: "meetsum {{ meetsum_release_data.json.tag_name }} is {{ 'now installed' if meetsum_needs_update else 'already up to date' }}"
   when: app_states.meetsum | default('present') == 'present'
 
+- name: Ensure meetsum config directory exists
+  ansible.builtin.file:
+    path: "{{ meetsum_config_dir }}"
+    state: directory
+    owner: "{{ user.name }}"
+    mode: '0755'
+  when: app_states.meetsum | default('present') == 'present'
+
+- name: Deploy meetsum settings configuration
+  ansible.builtin.template:
+    src: settings.yaml.j2
+    dest: "{{ meetsum_config_file }}"
+    owner: "{{ user.name }}"
+    mode: '0644'
+  when: app_states.meetsum | default('present') == 'present'
+
+- name: Ensure meetsum automation directory exists
+  ansible.builtin.file:
+    path: "{{ meetsum_automation_dir }}"
+    state: directory
+    owner: "{{ user.name }}"
+    mode: '0755'
+  when: app_states.meetsum | default('present') == 'present'
+
+- name: Deploy meetsum LLM instructions template
+  ansible.builtin.template:
+    src: Meeting-summary-llm-instructions.md.j2
+    dest: "{{ meetsum_automation_dir }}/Meeting-summary-llm-instructions.md"
+    owner: "{{ user.name }}"
+    mode: '0644'
+    force: false
+  when: app_states.meetsum | default('present') == 'present'
+
+- name: Ensure customers directory exists
+  ansible.builtin.file:
+    path: "{{ meetsum_customers_dir }}"
+    state: directory
+    owner: "{{ user.name }}"
+    mode: '0755'
+  when: app_states.meetsum | default('present') == 'present'
+
 - name: Remove meetsum binary when absent
   ansible.builtin.file:
     path: /usr/local/bin/meetsum
@@ -95,4 +136,22 @@
     path: /var/lib/ansible/github_releases/bashfulrobot/meetsum
     state: absent
   become: true
+  when: app_states.meetsum | default('present') == 'absent'
+
+- name: Remove meetsum config file when absent
+  ansible.builtin.file:
+    path: "{{ meetsum_config_file }}"
+    state: absent
+  when: app_states.meetsum | default('present') == 'absent'
+
+- name: Remove meetsum automation directory when absent
+  ansible.builtin.file:
+    path: "{{ meetsum_automation_dir }}"
+    state: absent
+  when: app_states.meetsum | default('present') == 'absent'
+
+- name: Remove meetsum config directory when absent
+  ansible.builtin.file:
+    path: "{{ meetsum_config_dir }}"
+    state: absent
   when: app_states.meetsum | default('present') == 'absent'
