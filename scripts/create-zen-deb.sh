@@ -125,6 +125,58 @@ gum style \
 $(gum style --foreground 11 --bold "Tarball:") $(gum style --foreground 15 "$TARBALL")
 $(gum style --foreground 11 --bold "URL:") $(gum style --foreground 8 "$TARBALL_URL")"
 
+# === CHECK PPA VERSION ===
+section "Checking PPA Version"
+
+PPA_API="https://api.launchpad.net/1.0/~bashfulrobot/+archive/ubuntu/zen-browser"
+PPA_JSON=$(gum spin --spinner dot --title "Querying Launchpad PPA API..." -- \
+    curl -sL "$PPA_API")
+
+# Get the latest published version from PPA
+# Note: We check the first distribution (noble) as a reference
+PPA_VERSION=$(echo "$PPA_JSON" | jq -r '.published_sources_collection_link' | xargs curl -sL | \
+    jq -r --arg pkg "$PACKAGE_NAME" '.entries[] | select(.source_package_name == $pkg) | .source_package_version' | \
+    head -1 | sed 's/-[0-9]~.*$//')
+
+if [ -z "$PPA_VERSION" ] || [ "$PPA_VERSION" = "null" ]; then
+    info "No existing version found in PPA (first build)"
+    PPA_VERSION="none"
+else
+    success "Current PPA version: $PPA_VERSION"
+fi
+
+# Compare versions
+if [ "$PPA_VERSION" = "$VERSION" ]; then
+    gum style \
+        --border rounded \
+        --border-foreground 3 \
+        --padding "1 2" \
+        --margin "1 0" \
+        "$(gum style --foreground 3 --bold "⏭  No update needed")
+
+$(gum style --foreground 11 "GitHub version:") $(gum style --foreground 15 "$VERSION")
+$(gum style --foreground 11 "PPA version:") $(gum style --foreground 15 "$PPA_VERSION")
+
+$(gum style --foreground 8 "The PPA already has the latest version.")"
+
+    echo ""
+    info "Cleaning up work directory: $WORK_DIR"
+    rm -rf "$WORK_DIR"
+    exit 0
+elif [ "$PPA_VERSION" != "none" ]; then
+    gum style \
+        --border rounded \
+        --border-foreground 10 \
+        --padding "1 2" \
+        --margin "1 0" \
+        "$(gum style --foreground 10 --bold "🆕 New version available!")
+
+$(gum style --foreground 11 "Current PPA:") $(gum style --foreground 8 "$PPA_VERSION")
+$(gum style --foreground 11 "New GitHub:") $(gum style --foreground 10 "$VERSION")"
+fi
+
+echo ""
+
 # Change to working directory
 cd "$WORK_DIR"
 
