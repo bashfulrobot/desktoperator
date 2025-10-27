@@ -10,6 +10,34 @@ MAINTAINER="Dustin Krysak <dustin@bashfulrobot.com>"
 PPA="ppa:bashfulrobot/zen-browser"
 GITHUB_REPO="zen-browser/desktop"
 
+# === PARSE ARGUMENTS ===
+FORCE_BUILD=false
+
+while [[ $# -gt 0 ]]; do
+    case $1 in
+        --force|-f)
+            FORCE_BUILD=true
+            shift
+            ;;
+        --help|-h)
+            echo "Usage: $0 [OPTIONS]"
+            echo ""
+            echo "Build and upload Zen Browser packages to PPA"
+            echo ""
+            echo "Options:"
+            echo "  --force, -f    Force rebuild even if PPA has latest version"
+            echo "  --help, -h     Show this help message"
+            echo ""
+            exit 0
+            ;;
+        *)
+            echo "Unknown option: $1"
+            echo "Run '$0 --help' for usage information"
+            exit 1
+            ;;
+    esac
+done
+
 # === HELPER FUNCTIONS ===
 header() {
     gum style \
@@ -147,22 +175,37 @@ fi
 
 # Compare versions
 if [ "$PPA_VERSION" = "$VERSION" ]; then
-    gum style \
-        --border rounded \
-        --border-foreground 3 \
-        --padding "1 2" \
-        --margin "1 0" \
-        "$(gum style --foreground 3 --bold "⏭  No update needed")
+    if [ "$FORCE_BUILD" = true ]; then
+        gum style \
+            --border rounded \
+            --border-foreground 11 \
+            --padding "1 2" \
+            --margin "1 0" \
+            "$(gum style --foreground 11 --bold "🔨 Force build enabled")
 
 $(gum style --foreground 11 "GitHub version:") $(gum style --foreground 15 "$VERSION")
 $(gum style --foreground 11 "PPA version:") $(gum style --foreground 15 "$PPA_VERSION")
 
-$(gum style --foreground 8 "The PPA already has the latest version.")"
+$(gum style --foreground 8 "Proceeding with rebuild despite matching versions...")"
+    else
+        gum style \
+            --border rounded \
+            --border-foreground 3 \
+            --padding "1 2" \
+            --margin "1 0" \
+            "$(gum style --foreground 3 --bold "⏭  No update needed")
 
-    echo ""
-    info "Cleaning up work directory: $WORK_DIR"
-    rm -rf "$WORK_DIR"
-    exit 0
+$(gum style --foreground 11 "GitHub version:") $(gum style --foreground 15 "$VERSION")
+$(gum style --foreground 11 "PPA version:") $(gum style --foreground 15 "$PPA_VERSION")
+
+$(gum style --foreground 8 "The PPA already has the latest version.")
+$(gum style --foreground 8 "Use --force to rebuild anyway.")"
+
+        echo ""
+        info "Cleaning up work directory: $WORK_DIR"
+        rm -rf "$WORK_DIR"
+        exit 0
+    fi
 elif [ "$PPA_VERSION" != "none" ]; then
     gum style \
         --border rounded \
