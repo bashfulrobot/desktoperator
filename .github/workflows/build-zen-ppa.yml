@@ -1,0 +1,105 @@
+name: Build Zen Browser PPA
+
+on:
+  # Run nightly at 2 AM UTC - only builds if new version available
+  schedule:
+    - cron: '0 2 * * *'
+
+  # Allow manual triggers for testing or forced rebuilds
+  workflow_dispatch:
+    inputs:
+      force:
+        description: 'Force rebuild even if no new version (for packaging fixes)'
+        required: false
+        type: boolean
+        default: false
+
+jobs:
+  build-ppa:
+    runs-on: ubuntu-24.04
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            debhelper \
+            devscripts \
+            dput \
+            jq \
+            gnupg
+
+          # Install gum for pretty output
+          echo 'deb [trusted=yes] https://repo.charm.sh/apt/ /' | sudo tee /etc/apt/sources.list.d/charm.list
+          sudo apt-get update
+          sudo apt-get install -y gum
+
+      - name: Import GPG key
+        env:
+          GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
+          GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
+        run: |
+          echo "$GPG_PRIVATE_KEY" | gpg --batch --import
+          echo "allow-loopback-pinentry" >> ~/.gnupg/gpg-agent.conf
+          gpg-connect-agent reloadagent /bye
+
+      - name: Configure dput for Launchpad
+        run: |
+          mkdir -p ~/.dput.cf
+          cat > ~/.dput.cf <<EOF
+          [DEFAULT]
+          login = anonymous
+          method = ftp
+          hash = md5
+          allow_unsigned_uploads = 0
+          run_lintian = 0
+          run_dput = 1
+          progress_indicator = 2
+
+          [ppa]
+          fqdn = ppa.launchpad.net
+          method = ftp
+          incoming = ~bashfulrobot/ubuntu/zen-browser/
+          login = anonymous
+          allow_unsigned_uploads = 0
+          EOF
+
+      - name: Check versions and build if needed
+        id: build
+        env:
+          DEBFULLNAME: "Dustin Krysak"
+          DEBEMAIL: "dustin@bashfulrobot.com"
+          GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
+        run: |
+          cd scripts
+          if [ "${{ inputs.force }}" = "true" ]; then
+            echo "🔨 Force build requested"
+            ./create-zen-deb.sh --force --non-interactive
+          else
+            echo "📦 Checking for new version..."
+            ./create-zen-deb.sh --non-interactive
+          fi
+
+      - name: Summary
+        if: always()
+        run: |
+          echo "### Build Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          if [ "${{ steps.build.outcome }}" = "success" ]; then
+            echo "✅ Build completed successfully" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "Monitor builds: https://launchpad.net/~bashfulrobot/+archive/ubuntu/zen-browser/+builds" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "❌ Build failed - check logs for details" >> $GITHUB_STEP_SUMMARY
+          fi
+
+      - name: Upload build artifacts on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-logs
+          path: /tmp/zen-build-*/build-*.log
+          retention-days: 7

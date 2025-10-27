@@ -25,11 +25,21 @@ GITHUB_REPO="zen-browser/desktop"
 
 # === PARSE ARGUMENTS ===
 FORCE_BUILD=false
+NON_INTERACTIVE=false
+
+# Detect if running in CI/non-interactive environment
+if [ "${CI:-false}" = "true" ] || [ ! -t 0 ]; then
+    NON_INTERACTIVE=true
+fi
 
 while [[ $# -gt 0 ]]; do
     case $1 in
         --force|-f)
             FORCE_BUILD=true
+            shift
+            ;;
+        --non-interactive|--ci)
+            NON_INTERACTIVE=true
             shift
             ;;
         --help|-h)
@@ -38,8 +48,9 @@ while [[ $# -gt 0 ]]; do
             echo "Build and upload Zen Browser packages to PPA"
             echo ""
             echo "Options:"
-            echo "  --force, -f    Force rebuild even if PPA has latest version"
-            echo "  --help, -h     Show this help message"
+            echo "  --force, -f           Force rebuild even if PPA has latest version"
+            echo "  --non-interactive     Run without interactive prompts (auto-detected in CI)"
+            echo "  --help, -h            Show this help message"
             echo ""
             exit 0
             ;;
@@ -592,7 +603,12 @@ info "Monitor build progress at the URLs above (builds take 5-15 minutes per dis
 echo ""
 
 # === CLEANUP PROMPT ===
-if gum confirm "Clean up the temporary build directory?"; then
+if [ "$NON_INTERACTIVE" = true ]; then
+    # Auto-cleanup in CI/non-interactive mode
+    info "Cleaning up build directory (non-interactive mode)..."
+    rm -rf "$WORK_DIR"
+    success "Cleanup complete"
+elif gum confirm "Clean up the temporary build directory?"; then
     gum spin --spinner dot --title "Cleaning up..." -- \
         rm -rf "$WORK_DIR"
     success "Cleanup complete"

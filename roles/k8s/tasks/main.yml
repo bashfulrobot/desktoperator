@@ -180,6 +180,71 @@
     - k8s_helm_enabled | default(true)
     - helm_verify is defined
 
+# GKE gcloud auth plugin installation
+- name: Install GKE auth plugin prerequisites
+  apt:
+    name:
+      - apt-transport-https
+      - ca-certificates
+      - curl
+      - gnupg
+    state: present
+  become: yes
+  when: k8s_gke_auth_plugin_enabled | default(true)
+
+- name: Download Google Cloud SDK GPG key
+  get_url:
+    url: https://packages.cloud.google.com/apt/doc/apt-key.gpg
+    dest: /tmp/google-cloud-sdk-gpg.key
+    mode: '0644'
+  become: yes
+  when: k8s_gke_auth_plugin_enabled | default(true)
+
+- name: Add Google Cloud SDK GPG key to keyrings
+  shell: |
+    gpg --dearmor < /tmp/google-cloud-sdk-gpg.key > /usr/share/keyrings/cloud.google.gpg
+    chmod 644 /usr/share/keyrings/cloud.google.gpg
+  args:
+    creates: /usr/share/keyrings/cloud.google.gpg
+  become: yes
+  when: k8s_gke_auth_plugin_enabled | default(true)
+
+- name: Clean up temporary Google Cloud SDK GPG key file
+  file:
+    path: /tmp/google-cloud-sdk-gpg.key
+    state: absent
+  become: yes
+  when: k8s_gke_auth_plugin_enabled | default(true)
+
+- name: Add Google Cloud SDK APT repository
+  apt_repository:
+    repo: "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] https://packages.cloud.google.com/apt cloud-sdk main"
+    filename: google-cloud-sdk
+    state: present
+  become: yes
+  when: k8s_gke_auth_plugin_enabled | default(true)
+
+- name: Install gke-gcloud-auth-plugin
+  apt:
+    name: google-cloud-sdk-gke-gcloud-auth-plugin
+    state: present
+    update_cache: yes
+  become: yes
+  when: k8s_gke_auth_plugin_enabled | default(true)
+
+- name: Verify gke-gcloud-auth-plugin installation
+  command: gke-gcloud-auth-plugin --version
+  register: gke_plugin_verify
+  changed_when: false
+  when: k8s_gke_auth_plugin_enabled | default(true)
+
+- name: Display gke-gcloud-auth-plugin version
+  debug:
+    msg: "gke-gcloud-auth-plugin installed: {{ gke_plugin_verify.stdout }}"
+  when:
+    - k8s_gke_auth_plugin_enabled | default(true)
+    - gke_plugin_verify is defined
+
 # Booter installation
 - name: Create booter directory
   file:

@@ -1,6 +1,14 @@
 # Terminal Experience - Enhanced CLI tools configuration
 # Managed by Ansible - Do not edit manually
 
+# COSMIC theme state - expose system dark/light mode
+set -l cosmic_is_dark_file ~/.config/cosmic/com.system76.CosmicTheme.Mode/v1/is_dark
+if test -f $cosmic_is_dark_file
+    set -gx COSMIC_IS_DARK (cat $cosmic_is_dark_file)
+else
+    set -gx COSMIC_IS_DARK false
+end
+
 # bat configuration
 # Use bat for colorized man pages
 set -x MANPAGER "sh -c 'col -bx | bat -l man -p'"

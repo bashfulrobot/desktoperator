@@ -1,0 +1,11 @@
+# Glow theme configuration
+# Uses COSMIC_IS_DARK env var set by terminal-experience role
+
+if test "$COSMIC_IS_DARK" = "true"
+    set -gx GLOW_THEME dark
+else
+    set -gx GLOW_THEME light
+end
+
+# Alias glow to use the dynamic theme
+alias glow="glow -s \$GLOW_THEME"

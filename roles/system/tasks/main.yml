@@ -50,10 +50,10 @@
     name: system/libvirt
   tags: [libvirt, virtualization, virt]
 
-- name: Include Terraform installation
+- name: Include IAC tools (Terraform, gcloud CLI)
   include_role:
-    name: system/terraform
-  tags: [terraform, iac, dev]
+    name: system/iac
+  tags: [iac, terraform, gcloud, dev]
 
 - name: Import flatpak configuration
   import_tasks: flatpak.yml

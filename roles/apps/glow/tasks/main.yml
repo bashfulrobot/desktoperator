@@ -70,6 +70,22 @@
     mode: '0644'
   when: app_states['glow'] | default('present') == 'present'
 
+- name: Create fish config.d directory
+  file:
+    path: "{{ user.home }}/.config/fish/conf.d"
+    state: directory
+    owner: "{{ user.name }}"
+    mode: '0755'
+  when: app_states['glow'] | default('present') == 'present'
+
+- name: Deploy fish glow theme configuration
+  template:
+    src: glow.fish.j2
+    dest: "{{ user.home }}/.config/fish/conf.d/glow.fish"
+    owner: "{{ user.name }}"
+    mode: '0644'
+  when: app_states['glow'] | default('present') == 'present'
+
 # Cleanup when absent
 - name: Remove Glow when absent
   apt:
@@ -97,5 +113,11 @@
 - name: Remove glow configuration when absent
   file:
     path: "{{ user.home }}/.config/glow"
+    state: absent
+  when: app_states['glow'] | default('present') == 'absent'
+
+- name: Remove fish glow configuration when absent
+  file:
+    path: "{{ user.home }}/.config/fish/conf.d/glow.fish"
     state: absent
   when: app_states['glow'] | default('present') == 'absent'

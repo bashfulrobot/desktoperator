@@ -1,0 +1,104 @@
+---
+# IAC tools installation tasks
+# Includes Terraform and Google Cloud CLI
+
+# Terraform installation
+- name: Add HashiCorp repository with GPG key
+  ansible.builtin.deb822_repository:
+    name: hashicorp
+    types: [deb]
+    uris: https://apt.releases.hashicorp.com
+    suites: "{{ ansible_distribution_release }}"
+    components: [main]
+    architectures: "{{ terraform_arch_mapping[ansible_architecture] | default(ansible_architecture) }}"
+    signed_by: "{{ terraform_gpg_key_url }}"
+    state: "{{ iac_state }}"
+  become: true
+  when: iac_state == 'present'
+
+- name: Update apt cache after HashiCorp repository changes
+  ansible.builtin.apt:
+    update_cache: true
+  become: true
+  when: iac_state == 'present'
+
+- name: Install Terraform package
+  ansible.builtin.apt:
+    name: "{{ terraform_packages }}"
+    state: "{{ iac_state }}"
+    purge: "{{ iac_state == 'absent' }}"
+  become: true
+
+# Google Cloud CLI installation
+- name: Create APT keyrings directory
+  ansible.builtin.file:
+    path: /etc/apt/keyrings
+    state: directory
+    mode: '0755'
+  become: true
+  when: iac_state == 'present'
+
+- name: Download Google Cloud GPG key
+  ansible.builtin.get_url:
+    url: "{{ gcloud_gpg_key_url }}"
+    dest: /tmp/google-cloud.gpg
+    mode: '0644'
+  when: iac_state == 'present'
+
+- name: Import Google Cloud GPG key to keyring location
+  ansible.builtin.shell: |
+    gpg --dearmor < /tmp/google-cloud.gpg > /etc/apt/keyrings/cloud.google.gpg
+    chmod 644 /etc/apt/keyrings/cloud.google.gpg
+  args:
+    creates: /etc/apt/keyrings/cloud.google.gpg
+  become: true
+  when: iac_state == 'present'
+
+- name: Add Google Cloud APT repository
+  ansible.builtin.apt_repository:
+    repo: "deb [signed-by=/etc/apt/keyrings/cloud.google.gpg] {{ gcloud_repo_url }} cloud-sdk main"
+    filename: google-cloud-sdk
+    state: "{{ iac_state }}"
+  become: true
+
+- name: Update apt cache after Google Cloud repository changes
+  ansible.builtin.apt:
+    update_cache: true
+  become: true
+  when: iac_state == 'present'
+
+- name: Install Google Cloud CLI
+  ansible.builtin.apt:
+    name: "{{ gcloud_packages }}"
+    state: "{{ iac_state }}"
+    purge: "{{ iac_state == 'absent' }}"
+  become: true
+
+- name: Clean up Google Cloud GPG key file
+  ansible.builtin.file:
+    path: /tmp/google-cloud.gpg
+    state: absent
+  when: iac_state == 'present'
+
+# Cleanup when absent
+- name: Remove HashiCorp repository when absent
+  ansible.builtin.deb822_repository:
+    name: hashicorp
+    state: absent
+  become: true
+  when: iac_state == 'absent'
+
+- name: Remove Google Cloud repository when absent
+  ansible.builtin.apt_repository:
+    repo: "deb [signed-by=/etc/apt/keyrings/cloud.google.gpg] {{ gcloud_repo_url }} cloud-sdk main"
+    filename: google-cloud-sdk
+    state: absent
+  become: true
+  when: iac_state == 'absent'
+
+- name: Remove Google Cloud GPG key when absent
+  ansible.builtin.file:
+    path: /etc/apt/keyrings/cloud.google.gpg
+    state: absent
+  become: true
+  when: iac_state == 'absent'
