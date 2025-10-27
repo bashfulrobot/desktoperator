@@ -4,11 +4,12 @@ set -euo pipefail
 # === CONFIG ===
 PACKAGE_NAME="zen-browser"
 ARCH="amd64"
-DEBIAN_REVISION="1"
 DISTRIBUTIONS=("noble" "jammy")
 MAINTAINER="Dustin Krysak <dustin@bashfulrobot.com>"
 PPA="ppa:bashfulrobot/zen-browser"
 GITHUB_REPO="zen-browser/desktop"
+
+# Note: DEBIAN_REVISION is calculated dynamically by querying Launchpad
 
 # === PARSE ARGUMENTS ===
 FORCE_BUILD=false
@@ -153,46 +154,72 @@ gum style \
 $(gum style --foreground 11 --bold "Tarball:") $(gum style --foreground 15 "$TARBALL")
 $(gum style --foreground 11 --bold "URL:") $(gum style --foreground 8 "$TARBALL_URL")"
 
-# === CHECK PPA VERSION ===
+# === CHECK PPA VERSION AND DETERMINE DEBIAN REVISION ===
 section "Checking PPA Version"
 
 PPA_API="https://api.launchpad.net/1.0/~bashfulrobot/+archive/ubuntu/zen-browser"
 PPA_JSON=$(gum spin --spinner dot --title "Querying Launchpad PPA API..." -- \
     curl -sL "$PPA_API" || echo '{}')
 
-# Get the latest published version from PPA
-# Note: We check the first distribution (noble) as a reference
-PPA_VERSION=""
+# Get all published versions from PPA
 PUBLISHED_SOURCES_LINK=$(echo "$PPA_JSON" | jq -r '.published_sources_collection_link // empty' || echo "")
 
+PPA_UPSTREAM_VERSION=""
+PPA_DEBIAN_REVISION=""
+PPA_FULL_VERSION=""
+
 if [ -n "$PUBLISHED_SOURCES_LINK" ]; then
-    PPA_VERSION=$(curl -sL "$PUBLISHED_SOURCES_LINK" | \
+    # Get the latest full version string for our package
+    PPA_FULL_VERSION=$(curl -sL "$PUBLISHED_SOURCES_LINK" | \
         jq -r --arg pkg "$PACKAGE_NAME" '.entries[]? | select(.source_package_name == $pkg) | .source_package_version' | \
-        head -1 | sed 's/-[0-9]~.*$//' || echo "")
+        head -1 || echo "")
+
+    if [ -n "$PPA_FULL_VERSION" ] && [ "$PPA_FULL_VERSION" != "null" ]; then
+        # Extract upstream version (everything before first dash)
+        PPA_UPSTREAM_VERSION=$(echo "$PPA_FULL_VERSION" | sed 's/-[0-9]*~.*$//')
+        # Extract debian revision (number between dash and tilde)
+        PPA_DEBIAN_REVISION=$(echo "$PPA_FULL_VERSION" | grep -oP '(?<=-)[0-9]+(?=~)' || echo "")
+
+        success "Latest PPA version: $PPA_FULL_VERSION"
+        info "  Upstream: $PPA_UPSTREAM_VERSION"
+        info "  Debian revision: $PPA_DEBIAN_REVISION"
+    fi
 fi
 
-if [ -z "$PPA_VERSION" ] || [ "$PPA_VERSION" = "null" ]; then
-    info "No existing version found in PPA (first build)"
-    PPA_VERSION="none"
-else
-    success "Current PPA version: $PPA_VERSION"
-fi
+# Compare versions and decide whether to proceed
+echo ""
+if [ -z "$PPA_UPSTREAM_VERSION" ]; then
+    # First build ever - use revision 1
+    DEBIAN_REVISION="1"
+    gum style \
+        --border rounded \
+        --border-foreground 10 \
+        --padding "1 2" \
+        --margin "1 0" \
+        "$(gum style --foreground 10 --bold "🆕 First build for this PPA")
 
-# Compare versions
-if [ "$PPA_VERSION" = "$VERSION" ]; then
+$(gum style --foreground 11 "GitHub version:") $(gum style --foreground 15 "$VERSION")
+$(gum style --foreground 11 "Package version:") $(gum style --foreground 15 "$VERSION-$DEBIAN_REVISION")"
+
+elif [ "$PPA_UPSTREAM_VERSION" = "$VERSION" ]; then
+    # Same upstream version exists
     if [ "$FORCE_BUILD" = true ]; then
+        # Forced rebuild - increment Debian revision
+        DEBIAN_REVISION=$((PPA_DEBIAN_REVISION + 1))
         gum style \
             --border rounded \
             --border-foreground 11 \
             --padding "1 2" \
             --margin "1 0" \
-            "$(gum style --foreground 11 --bold "🔨 Force build enabled")
+            "$(gum style --foreground 11 --bold "🔨 Force rebuild with new packaging")
 
-$(gum style --foreground 11 "GitHub version:") $(gum style --foreground 15 "$VERSION")
-$(gum style --foreground 11 "PPA version:") $(gum style --foreground 15 "$PPA_VERSION")
+$(gum style --foreground 11 "Upstream version:") $(gum style --foreground 15 "$VERSION")
+$(gum style --foreground 11 "Previous package:") $(gum style --foreground 8 "$VERSION-$PPA_DEBIAN_REVISION")
+$(gum style --foreground 11 "New package:") $(gum style --foreground 10 "$VERSION-$DEBIAN_REVISION")
 
-$(gum style --foreground 8 "Proceeding with rebuild despite matching versions...")"
+$(gum style --foreground 8 "Rebuilding with incremented Debian revision...")"
     else
+        # Same version, not forced - skip build
         gum style \
             --border rounded \
             --border-foreground 3 \
@@ -201,26 +228,29 @@ $(gum style --foreground 8 "Proceeding with rebuild despite matching versions...
             "$(gum style --foreground 3 --bold "⏭  No update needed")
 
 $(gum style --foreground 11 "GitHub version:") $(gum style --foreground 15 "$VERSION")
-$(gum style --foreground 11 "PPA version:") $(gum style --foreground 15 "$PPA_VERSION")
+$(gum style --foreground 11 "PPA version:") $(gum style --foreground 15 "$PPA_FULL_VERSION")
 
-$(gum style --foreground 8 "The PPA already has the latest version.")
-$(gum style --foreground 8 "Use --force to rebuild anyway.")"
+$(gum style --foreground 8 "The PPA already has this upstream version.")
+$(gum style --foreground 8 "Use --force to rebuild with new packaging revision.")"
 
         echo ""
         info "Cleaning up work directory: $WORK_DIR"
         rm -rf "$WORK_DIR"
         exit 0
     fi
-elif [ "$PPA_VERSION" != "none" ]; then
+else
+    # New upstream version - always use revision 1
+    DEBIAN_REVISION="1"
     gum style \
         --border rounded \
         --border-foreground 10 \
         --padding "1 2" \
         --margin "1 0" \
-        "$(gum style --foreground 10 --bold "🆕 New version available!")
+        "$(gum style --foreground 10 --bold "🆕 New upstream version available!")
 
-$(gum style --foreground 11 "Current PPA:") $(gum style --foreground 8 "$PPA_VERSION")
-$(gum style --foreground 11 "New GitHub:") $(gum style --foreground 10 "$VERSION")"
+$(gum style --foreground 11 "Current PPA:") $(gum style --foreground 8 "$PPA_UPSTREAM_VERSION")
+$(gum style --foreground 11 "New GitHub:") $(gum style --foreground 10 "$VERSION")
+$(gum style --foreground 11 "Package version:") $(gum style --foreground 15 "$VERSION-$DEBIAN_REVISION")"
 fi
 
 echo ""
