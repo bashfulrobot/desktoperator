@@ -230,8 +230,8 @@ cd "$WORK_DIR"
 
 BUILD_DIR="${PACKAGE_NAME}_${VERSION}"
 INSTALL_DIR="./$BUILD_DIR/opt/zen"
-BIN_DIR="./$BUILD_DIR/usr/local/bin"
-DESKTOP_DIR="./$BUILD_DIR/usr/local/share/applications"
+BIN_DIR="./$BUILD_DIR/usr/bin"
+DESKTOP_DIR="./$BUILD_DIR/usr/share/applications"
 ICON_BASE="./$BUILD_DIR/usr/share/icons/hicolor"
 
 # === CLEAN UP OLD BUILDS ===
@@ -354,8 +354,8 @@ override_dh_auto_build:
 override_dh_auto_install:
 	# Manual installation of files
 	mkdir -p debian/zen-browser/opt/zen
-	mkdir -p debian/zen-browser/usr/local/bin
-	mkdir -p debian/zen-browser/usr/local/share/applications
+	mkdir -p debian/zen-browser/usr/bin
+	mkdir -p debian/zen-browser/usr/share/applications
 	mkdir -p debian/zen-browser/usr/share/icons/hicolor/16x16/apps
 	mkdir -p debian/zen-browser/usr/share/icons/hicolor/32x32/apps
 	mkdir -p debian/zen-browser/usr/share/icons/hicolor/48x48/apps
@@ -363,8 +363,8 @@ override_dh_auto_install:
 	mkdir -p debian/zen-browser/usr/share/icons/hicolor/128x128/apps
 
 	cp -r opt/zen/* debian/zen-browser/opt/zen/
-	cp usr/local/bin/zen debian/zen-browser/usr/local/bin/
-	cp usr/local/share/applications/zen.desktop debian/zen-browser/usr/local/share/applications/
+	cp usr/bin/zen debian/zen-browser/usr/bin/
+	cp usr/share/applications/zen.desktop debian/zen-browser/usr/share/applications/
 	cp usr/share/icons/hicolor/16x16/apps/zen.png debian/zen-browser/usr/share/icons/hicolor/16x16/apps/
 	cp usr/share/icons/hicolor/32x32/apps/zen.png debian/zen-browser/usr/share/icons/hicolor/32x32/apps/
 	cp usr/share/icons/hicolor/48x48/apps/zen.png debian/zen-browser/usr/share/icons/hicolor/48x48/apps/
