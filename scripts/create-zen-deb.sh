@@ -169,33 +169,28 @@ $(gum style --foreground 11 --bold "URL:") $(gum style --foreground 8 "$TARBALL_
 # === CHECK PPA VERSION AND DETERMINE DEBIAN REVISION ===
 section "Checking PPA Version"
 
-PPA_API="https://api.launchpad.net/1.0/~bashfulrobot/+archive/ubuntu/zen-browser"
+PPA_API="https://api.launchpad.net/1.0/~bashfulrobot/+archive/ubuntu/zen-browser?ws.op=getPublishedSources"
 PPA_JSON=$(gum spin --spinner dot --title "Querying Launchpad PPA API..." -- \
     curl -sL "$PPA_API" || echo '{}')
-
-# Get all published versions from PPA
-PUBLISHED_SOURCES_LINK=$(echo "$PPA_JSON" | jq -r '.published_sources_collection_link // empty' || echo "")
 
 PPA_UPSTREAM_VERSION=""
 PPA_DEBIAN_REVISION=""
 PPA_FULL_VERSION=""
 
-if [ -n "$PUBLISHED_SOURCES_LINK" ]; then
-    # Get the latest full version string for our package
-    PPA_FULL_VERSION=$(curl -sL "$PUBLISHED_SOURCES_LINK" | \
-        jq -r --arg pkg "$PACKAGE_NAME" '.entries[]? | select(.source_package_name == $pkg) | .source_package_version' | \
-        head -1 || echo "")
+# Get the latest published version for our package
+PPA_FULL_VERSION=$(echo "$PPA_JSON" | \
+    jq -r --arg pkg "$PACKAGE_NAME" '.entries[]? | select(.source_package_name == $pkg and .status == "Published") | .source_package_version' | \
+    head -1 || echo "")
 
-    if [ -n "$PPA_FULL_VERSION" ] && [ "$PPA_FULL_VERSION" != "null" ]; then
-        # Extract upstream version (everything before first dash)
-        PPA_UPSTREAM_VERSION=$(echo "$PPA_FULL_VERSION" | sed 's/-[0-9]*~.*$//')
-        # Extract debian revision (number between dash and tilde)
-        PPA_DEBIAN_REVISION=$(echo "$PPA_FULL_VERSION" | grep -oP '(?<=-)[0-9]+(?=~)' || echo "")
+if [ -n "$PPA_FULL_VERSION" ] && [ "$PPA_FULL_VERSION" != "null" ]; then
+    # Extract upstream version (everything before first dash)
+    PPA_UPSTREAM_VERSION=$(echo "$PPA_FULL_VERSION" | sed 's/-[0-9]*~.*$//')
+    # Extract debian revision (number between dash and tilde)
+    PPA_DEBIAN_REVISION=$(echo "$PPA_FULL_VERSION" | grep -oP '(?<=-)[0-9]+(?=~)' || echo "")
 
-        success "Latest PPA version: $PPA_FULL_VERSION"
-        info "  Upstream: $PPA_UPSTREAM_VERSION"
-        info "  Debian revision: $PPA_DEBIAN_REVISION"
-    fi
+    success "Latest PPA version: $PPA_FULL_VERSION"
+    info "  Upstream: $PPA_UPSTREAM_VERSION"
+    info "  Debian revision: $PPA_DEBIAN_REVISION"
 fi
 
 # Compare versions and decide whether to proceed
