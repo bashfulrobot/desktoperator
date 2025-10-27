@@ -9,7 +9,19 @@ MAINTAINER="Dustin Krysak <dustin@bashfulrobot.com>"
 PPA="ppa:bashfulrobot/zen-browser"
 GITHUB_REPO="zen-browser/desktop"
 
-# Note: DEBIAN_REVISION is calculated dynamically by querying Launchpad
+# PPA Version Format: <upstream>-<debian>~<distro><distro-rev>
+# Example: 1.17.3b-2~noble1
+#   - upstream: 1.17.3b (from GitHub release tag)
+#   - debian: 2 (packaging revision, auto-incremented for rebuilds)
+#   - distro: noble (Ubuntu release codename)
+#   - distro-rev: 1 (always 1, allows per-distro builds)
+#
+# The tilde (~) ensures PPA packages sort BEFORE official Ubuntu packages,
+# so if Ubuntu ships zen-browser-1.17.3b-2ubuntu1, it supersedes our PPA.
+#
+# DEBIAN_REVISION is calculated dynamically by querying Launchpad:
+#   - New upstream version → revision 1
+#   - Forced rebuild of same version → increment revision
 
 # === PARSE ARGUMENTS ===
 FORCE_BUILD=false
