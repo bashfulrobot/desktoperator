@@ -249,6 +249,17 @@ Name=Open the Profile Manager
 Exec=/opt/zen/zen --ProfileManager
 EOF
 
+success "Application files created"
+
+# === CREATE ORIGINAL TARBALL ===
+section "Creating Source Package"
+ORIG_TARBALL="${PACKAGE_NAME}_${VERSION}.orig.tar.xz"
+info "Creating original tarball (upstream source only)..."
+# Create tarball from BUILD_DIR but exclude debian/ directory (doesn't exist yet)
+gum spin --spinner dot --title "Creating original tarball..." -- \
+    tar -cJf "../$ORIG_TARBALL" -C "$BUILD_DIR" .
+success "Original tarball created: $ORIG_TARBALL"
+
 # === CREATE DEBIAN PACKAGE FILES ===
 info "Creating debian package files..."
 mkdir -p "$BUILD_DIR/debian"
@@ -259,8 +270,8 @@ Source: $PACKAGE_NAME
 Section: web
 Priority: optional
 Maintainer: $MAINTAINER
-Build-Depends: debhelper (>= 11), debhelper-compat (= 11)
-Standards-Version: 4.1.3
+Build-Depends: debhelper-compat (= 13)
+Standards-Version: 4.6.0
 Homepage: https://zen-browser.app
 Vcs-Git: https://github.com/zen-browser/desktop.git
 Vcs-Browser: https://github.com/zen-browser/desktop
@@ -412,17 +423,10 @@ exit 0
 EOF
 chmod +x "$BUILD_DIR/debian/postrm"
 
-success "Package files created"
-
-# === CREATE ORIGINAL TARBALL ===
-section "Creating Source Package"
-ORIG_TARBALL="${PACKAGE_NAME}_${VERSION}.orig.tar.xz"
-gum spin --spinner dot --title "Creating original tarball..." -- \
-    tar -cJf "../$ORIG_TARBALL" -C "$BUILD_DIR" .
-success "Original tarball created"
+success "Debian packaging files created"
 
 # === BUILD AND UPLOAD FOR EACH DISTRIBUTION ===
-section "Building Packages"
+section "Building and Uploading Packages"
 
 for DISTRO in "${DISTRIBUTIONS[@]}"; do
   gum style \
