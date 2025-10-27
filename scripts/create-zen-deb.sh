@@ -158,13 +158,18 @@ section "Checking PPA Version"
 
 PPA_API="https://api.launchpad.net/1.0/~bashfulrobot/+archive/ubuntu/zen-browser"
 PPA_JSON=$(gum spin --spinner dot --title "Querying Launchpad PPA API..." -- \
-    curl -sL "$PPA_API")
+    curl -sL "$PPA_API" || echo '{}')
 
 # Get the latest published version from PPA
 # Note: We check the first distribution (noble) as a reference
-PPA_VERSION=$(echo "$PPA_JSON" | jq -r '.published_sources_collection_link' | xargs curl -sL | \
-    jq -r --arg pkg "$PACKAGE_NAME" '.entries[] | select(.source_package_name == $pkg) | .source_package_version' | \
-    head -1 | sed 's/-[0-9]~.*$//')
+PPA_VERSION=""
+PUBLISHED_SOURCES_LINK=$(echo "$PPA_JSON" | jq -r '.published_sources_collection_link // empty' || echo "")
+
+if [ -n "$PUBLISHED_SOURCES_LINK" ]; then
+    PPA_VERSION=$(curl -sL "$PUBLISHED_SOURCES_LINK" | \
+        jq -r --arg pkg "$PACKAGE_NAME" '.entries[]? | select(.source_package_name == $pkg) | .source_package_version' | \
+        head -1 | sed 's/-[0-9]~.*$//' || echo "")
+fi
 
 if [ -z "$PPA_VERSION" ] || [ "$PPA_VERSION" = "null" ]; then
     info "No existing version found in PPA (first build)"
