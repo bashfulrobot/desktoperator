@@ -544,11 +544,14 @@ gum style \
 $(gum style --foreground 11 --bold "PPA:") $(gum style --foreground 14 "https://launchpad.net/~bashfulrobot/+archive/ubuntu/zen-browser")
 $(gum style --foreground 11 --bold "Version:") $(gum style --foreground 15 "$VERSION")
 $(gum style --foreground 11 --bold "Distributions:") $(gum style --foreground 15 "${DISTRIBUTIONS[*]}")
-$(gum style --foreground 11 --bold "Build Logs:") $(gum style --foreground 14 "https://launchpad.net/~bashfulrobot/+archive/ubuntu/zen-browser/+builds?build_text=&build_state=all")"
+
+$(gum style --foreground 8 --bold "Build Monitoring:")
+$(gum style --foreground 11 "  • All builds:") $(gum style --foreground 14 "https://launchpad.net/~bashfulrobot/+archive/ubuntu/zen-browser/+builds?build_text=&build_state=all")
+$(gum style --foreground 11 "  • Failed builds:") $(gum style --foreground 14 "https://launchpad.net/~bashfulrobot/+archive/ubuntu/zen-browser/+builds?build_text=&build_state=failed")"
 
 echo ""
 info "Build artifacts: $WORK_DIR"
-info "Monitor build progress at the Build Logs URL above (builds take 5-15 minutes)"
+info "Monitor build progress at the URLs above (builds take 5-15 minutes per distribution)"
 echo ""
 
 # === CLEANUP PROMPT ===
