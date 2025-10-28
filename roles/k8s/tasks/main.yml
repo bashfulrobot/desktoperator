@@ -192,6 +192,21 @@
   become: yes
   when: k8s_gke_auth_plugin_enabled | default(true)
 
+- name: Create APT keyrings directory
+  file:
+    path: /etc/apt/keyrings
+    state: directory
+    mode: '0755'
+  become: yes
+  when: k8s_gke_auth_plugin_enabled | default(true)
+
+- name: Remove conflicting Google Cloud SDK repository entries
+  file:
+    path: /etc/apt/sources.list.d/google-cloud-sdk.list
+    state: absent
+  become: yes
+  when: k8s_gke_auth_plugin_enabled | default(true)
+
 - name: Download Google Cloud SDK GPG key
   get_url:
     url: https://packages.cloud.google.com/apt/doc/apt-key.gpg
@@ -202,10 +217,10 @@
 
 - name: Add Google Cloud SDK GPG key to keyrings
   shell: |
-    gpg --dearmor < /tmp/google-cloud-sdk-gpg.key > /usr/share/keyrings/cloud.google.gpg
-    chmod 644 /usr/share/keyrings/cloud.google.gpg
+    gpg --dearmor < /tmp/google-cloud-sdk-gpg.key > /etc/apt/keyrings/cloud.google.gpg
+    chmod 644 /etc/apt/keyrings/cloud.google.gpg
   args:
-    creates: /usr/share/keyrings/cloud.google.gpg
+    creates: /etc/apt/keyrings/cloud.google.gpg
   become: yes
   when: k8s_gke_auth_plugin_enabled | default(true)
 
@@ -216,9 +231,16 @@
   become: yes
   when: k8s_gke_auth_plugin_enabled | default(true)
 
+- name: Remove old Google Cloud SDK GPG key from /usr/share/keyrings
+  file:
+    path: /usr/share/keyrings/cloud.google.gpg
+    state: absent
+  become: yes
+  when: k8s_gke_auth_plugin_enabled | default(true)
+
 - name: Add Google Cloud SDK APT repository
   apt_repository:
-    repo: "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] https://packages.cloud.google.com/apt cloud-sdk main"
+    repo: "deb [signed-by=/etc/apt/keyrings/cloud.google.gpg] https://packages.cloud.google.com/apt cloud-sdk main"
     filename: google-cloud-sdk
     state: present
   become: yes
