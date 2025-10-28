@@ -161,6 +161,32 @@ update-ansible-tags TAGS:
     success "Ansible playbook completed"
 {% endraw %}
 
+# Run Ansible with skipped tags
+[group('updates')]
+update-ansible-skip-tags TAGS:
+    #!/usr/bin/env bash
+    set -euo pipefail
+{% raw %}
+    {{ header_msg }}
+    {{ success_msg }}
+    {{ error_msg }}
+
+    header "Running Ansible skipping tags: {{ TAGS }}"
+{% endraw %}
+
+    if [[ ! -d "{{ justfile_ansible_project_dir }}" ]]; then
+        error "Ansible directory not found: {{ justfile_ansible_project_dir }}"
+        exit 1
+    fi
+
+    cd {{ justfile_ansible_project_dir }}
+{% raw %}
+    echo "→ Running ansible-playbook site.yml --skip-tags {{ TAGS }}..."
+    ansible-playbook site.yml --limit $(hostname) --skip-tags {{ TAGS }} || { error "Ansible playbook failed"; exit 1; }
+
+    success "Ansible playbook completed"
+{% endraw %}
+
 # Dry-run Ansible (see what would change)
 [group('updates')]
 update-ansible-check:
