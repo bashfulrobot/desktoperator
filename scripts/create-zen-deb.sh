@@ -351,9 +351,10 @@ success "Application files created"
 section "Creating Source Package"
 ORIG_TARBALL="${PACKAGE_NAME}_${VERSION}.orig.tar.xz"
 info "Creating original tarball (upstream source only)..."
-# Create tarball from BUILD_DIR but exclude debian/ directory (doesn't exist yet)
+# Create tarball from BUILD_DIR excluding debian/ directory
+# CRITICAL: orig.tar.xz must NOT contain debian/ - this breaks Debian packaging
 gum spin --spinner dot --title "Creating original tarball..." -- \
-    tar -cJf "../$ORIG_TARBALL" -C "$BUILD_DIR" .
+    tar -cJf "../$ORIG_TARBALL" -C "$BUILD_DIR" --exclude=debian .
 success "Original tarball created: $ORIG_TARBALL"
 
 # === CREATE DEBIAN PACKAGE FILES ===
