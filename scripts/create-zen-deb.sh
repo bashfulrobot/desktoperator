@@ -1,6 +1,13 @@
 #!/bin/bash
 set -euo pipefail
 
+# === WORK IN PROGRESS ===
+# This script is currently under development and not yet functional.
+# TODO: Remove this temporary check once development is complete.
+echo "⚠️  This script is a work in progress and is not yet working."
+echo "Please check back later when development is complete."
+exit 1
+
 # === CONFIG ===
 PACKAGE_NAME="zen-browser"
 ARCH="amd64"
