@@ -38,6 +38,7 @@
     update_cache: yes
   become: yes
   when: app_states['zen-browser'] | default('present') == 'present'
+  tags: zen-browser
 
 # 1Password Integration for Zen Browser
 - name: Create 1Password config directory
