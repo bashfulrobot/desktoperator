@@ -34,6 +34,12 @@
     binary_name: lazygit
     filename_substring: linux_x86_64.tar.gz
 
+- name: Remove old GitHub CLI repository configuration (if exists)
+  ansible.builtin.file:
+    path: /etc/apt/sources.list.d/github-cli.list
+    state: absent
+  become: true
+
 - name: Add GitHub CLI repository with GPG key
   ansible.builtin.deb822_repository:
     name: github-cli
