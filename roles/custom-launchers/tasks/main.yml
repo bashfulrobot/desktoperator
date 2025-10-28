@@ -15,13 +15,14 @@
     owner: root
     group: root
 
-- name: Install reboot-firmware desktop file
-  ansible.builtin.template:
-    src: reboot-firmware.desktop.j2
-    dest: /usr/share/applications/reboot-firmware.desktop
-    mode: '0644'
-    owner: root
-    group: root
+# Disabled: Using system-provided firmware launcher instead
+# - name: Install reboot-firmware desktop file
+#   ansible.builtin.template:
+#     src: reboot-firmware.desktop.j2
+#     dest: /usr/share/applications/reboot-firmware.desktop
+#     mode: '0644'
+#     owner: root
+#     group: root
 
 - name: Update desktop database
   ansible.builtin.command:
