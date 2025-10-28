@@ -1,44 +1,99 @@
 ---
-# Zen Browser installation via PPA (native, for 1Password integration)
+# Zen Browser installation via GitHub releases (native, for 1Password integration)
 
-- name: Add Zen Browser PPA GPG key
-  apt_key:
-    keyserver: keyserver.ubuntu.com
-    id: A465A356660456511E9825F26495C5D30FF72029
-    state: present
-  become: yes
+- name: Check current Zen Browser version
+  shell: |
+    if [ -f /opt/zen/zen ]; then
+      /opt/zen/zen --version | grep -oP 'Zen Browser \K[0-9]+\.[0-9]+\.[0-9]+[a-z]?' || echo "unknown"
+    else
+      echo "not_installed"
+    fi
+  register: zen_current_version
+  changed_when: false
+  failed_when: false
   when: app_states['zen-browser'] | default('present') == 'present'
 
-- name: Add Zen Browser PPA repository
-  apt_repository:
-    repo: 'ppa:bashfulrobot/zen-browser'
-    state: present
-    update_cache: yes
-  become: yes
+- name: Get latest Zen Browser release info
+  uri:
+    url: https://api.github.com/repos/zen-browser/desktop/releases/latest
+    return_content: yes
+  register: zen_release_info
   when: app_states['zen-browser'] | default('present') == 'present'
 
-- name: Remove old manual Zen Browser installation
+- name: Set Zen Browser version facts
+  set_fact:
+    zen_latest_version: "{{ zen_release_info.json.tag_name }}"
+    zen_needs_update: "{{ zen_current_version.stdout == 'not_installed' or zen_current_version.stdout != zen_release_info.json.tag_name }}"
+  when: app_states['zen-browser'] | default('present') == 'present'
+
+- name: Download Zen Browser tarball
+  get_url:
+    url: "https://github.com/zen-browser/desktop/releases/download/{{ zen_latest_version }}/zen.linux-x86_64.tar.xz"
+    dest: "/tmp/zen-{{ zen_latest_version }}.tar.xz"
+    mode: '0644'
+  when:
+    - app_states['zen-browser'] | default('present') == 'present'
+    - zen_needs_update | bool
+  become: yes
+
+- name: Remove old Zen Browser installation
   file:
     path: /opt/zen
     state: absent
   become: yes
-  when: app_states['zen-browser'] | default('present') == 'present'
+  when:
+    - app_states['zen-browser'] | default('present') == 'present'
+    - zen_needs_update | bool
 
-- name: Remove old Zen Browser symlink
-  file:
-    path: /usr/local/bin/zen
-    state: absent
+- name: Extract Zen Browser tarball
+  unarchive:
+    src: "/tmp/zen-{{ zen_latest_version }}.tar.xz"
+    dest: /opt
+    remote_src: yes
+    owner: root
+    group: root
   become: yes
-  when: app_states['zen-browser'] | default('present') == 'present'
-
-- name: Install Zen Browser from PPA
-  apt:
-    name: zen-browser
-    state: latest
-    update_cache: yes
-  become: yes
-  when: app_states['zen-browser'] | default('present') == 'present'
+  when:
+    - app_states['zen-browser'] | default('present') == 'present'
+    - zen_needs_update | bool
   tags: zen-browser
+
+- name: Create Zen Browser desktop entry
+  copy:
+    dest: /usr/share/applications/zen-browser.desktop
+    mode: '0644'
+    content: |
+      [Desktop Entry]
+      Version=1.0
+      Name=Zen Browser
+      Comment=Experience tranquillity while browsing the web
+      Exec=/opt/zen/zen %u
+      Icon=/opt/zen/browser/chrome/icons/default/default128.png
+      Terminal=false
+      Type=Application
+      Categories=Network;WebBrowser;
+      MimeType=text/html;text/xml;application/xhtml+xml;application/xml;application/vnd.mozilla.xul+xml;application/rss+xml;application/rdf+xml;x-scheme-handler/http;x-scheme-handler/https;
+      StartupNotify=true
+      StartupWMClass=zen
+  become: yes
+  when: app_states['zen-browser'] | default('present') == 'present'
+
+- name: Create Zen Browser symlink
+  file:
+    src: /opt/zen/zen
+    dest: /usr/local/bin/zen
+    state: link
+  become: yes
+  when: app_states['zen-browser'] | default('present') == 'present'
+
+- name: Clean up downloaded tarball
+  file:
+    path: "/tmp/zen-{{ zen_latest_version }}.tar.xz"
+    state: absent
+  when:
+    - app_states['zen-browser'] | default('present') == 'present'
+    - zen_needs_update | bool
+  become: yes
 
 # 1Password Integration for Zen Browser
 - name: Create 1Password config directory
@@ -66,39 +121,23 @@
   when: app_states['zen-browser'] | default('present') == 'present'
 
 # Cleanup when absent
-- name: Remove Zen Browser package when absent
-  apt:
-    name: zen-browser
-    state: absent
-    purge: yes
-  become: yes
-  when: app_states['zen-browser'] | default('present') == 'absent'
-
-- name: Remove Zen Browser PPA repository when absent
-  apt_repository:
-    repo: 'ppa:bashfulrobot/zen-browser'
-    state: absent
-    update_cache: yes
-  become: yes
-  when: app_states['zen-browser'] | default('present') == 'absent'
-
-- name: Remove Zen Browser PPA GPG key when absent
-  apt_key:
-    id: A465A356660456511E9825F26495C5D30FF72029
-    state: absent
-  become: yes
-  when: app_states['zen-browser'] | default('present') == 'absent'
-
-- name: Remove old manual installation when absent
-  file:
-    path: /opt/zen
-    state: absent
-  become: yes
-  when: app_states['zen-browser'] | default('present') == 'absent'
-
-- name: Remove old Zen Browser symlink when absent
+- name: Remove Zen Browser symlink when absent
   file:
     path: /usr/local/bin/zen
+    state: absent
+  become: yes
+  when: app_states['zen-browser'] | default('present') == 'absent'
+
+- name: Remove Zen Browser desktop entry when absent
+  file:
+    path: /usr/share/applications/zen-browser.desktop
+    state: absent
+  become: yes
+  when: app_states['zen-browser'] | default('present') == 'absent'
+
+- name: Remove Zen Browser installation when absent
+  file:
+    path: /opt/zen
     state: absent
   become: yes
   when: app_states['zen-browser'] | default('present') == 'absent'
