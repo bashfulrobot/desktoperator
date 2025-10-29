@@ -82,6 +82,23 @@
   become: yes
   when: app_states['insync'] | default('present') == 'present'
 
+# Create Insync folder structure
+- name: Create parent Insync folders
+  file:
+    path: "{{ insync_base_dir }}/{{ item.name }}"
+    state: directory
+    mode: '0755'
+  loop: "{{ insync_folders }}"
+  when: app_states['insync'] | default('present') == 'present'
+
+- name: Create Insync subdirectories
+  file:
+    path: "{{ insync_base_dir }}/{{ item.0.name }}/{{ item.1 }}"
+    state: directory
+    mode: '0755'
+  loop: "{{ insync_folders | subelements('subdirs') }}"
+  when: app_states['insync'] | default('present') == 'present'
+
 # Cleanup when absent
 - name: Remove insync symlink when absent
   file:

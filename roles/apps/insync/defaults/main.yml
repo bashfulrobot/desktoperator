@@ -3,3 +3,21 @@
 
 # Installation state (present/absent)
 insync_state: present
+
+# Base directory for Insync folders
+insync_base_dir: "{{ ansible_env.HOME }}/Documents"
+
+# Insync folder configurations
+insync_folders:
+  - name: Bashfulrobot
+    subdirs:
+      - My-drive
+      - Shared-drive
+  - name: Kong
+    subdirs:
+      - My-drive
+      - Shared-drive
+  - name: Google-data
+    subdirs:
+      - My-drive
+      - Shared-drive
