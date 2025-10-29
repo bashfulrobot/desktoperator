@@ -1,0 +1,94 @@
+# Kubernetes kubectl fish functions
+# Managed by Ansible - changes may be overwritten
+# File: ~/.config/fish/conf.d/kubectl-functions.fish
+
+# k - kubectl alias
+alias k='kubectl'
+
+# kns - Select and switch to kubernetes namespace (requires fzf)
+function kns --description "Select and switch kubernetes namespace with fzf"
+    if not type -q fzf
+        echo "Error: fzf is not installed" >&2
+        return 1
+    end
+
+    if not type -q kubectl
+        echo "Error: kubectl is not installed" >&2
+        return 1
+    end
+
+    # Get current namespace
+    set current_ns (kubectl config view --minify --output 'jsonpath={..namespace}' 2>/dev/null)
+    if test -z "$current_ns"
+        set current_ns "default"
+    end
+
+    # List namespaces and select with fzf
+    set selected_ns (kubectl get namespaces -o jsonpath='{.items[*].metadata.name}' | tr ' ' '\n' | fzf --height=40% --reverse --header="Current: $current_ns" --preview='kubectl get pods -n {} 2>/dev/null | head -20')
+
+    if test -n "$selected_ns"
+        kubectl config set-context --current --namespace="$selected_ns"
+        echo "✓ Switched to namespace: $selected_ns"
+    else
+        echo "No namespace selected"
+    end
+end
+
+# kcfg - Select and switch kubeconfig file (requires fzf)
+function kcfg --description "Select and activate kubeconfig from ~/.kube/clusters/ with fzf"
+    if not type -q fzf
+        echo "Error: fzf is not installed" >&2
+        return 1
+    end
+
+    set clusters_dir "$HOME/.kube/clusters"
+
+    if not test -d "$clusters_dir"
+        echo "Error: Directory $clusters_dir does not exist" >&2
+        return 1
+    end
+
+    # Get current kubeconfig
+    set current_config (basename "$KUBECONFIG" 2>/dev/null)
+    if test -z "$current_config"
+        set current_config "default (~/.kube/config)"
+    end
+
+    # List kubeconfig files and select with fzf
+    set selected_config (find "$clusters_dir" -maxdepth 1 -type f \( -name "*.yaml" -o -name "*.yml" -o -name "*config*" \) -printf "%f\n" | fzf --height=40% --reverse --header="Current: $current_config" --preview="kubectl --kubeconfig=$clusters_dir/{} config get-contexts 2>/dev/null")
+
+    if test -n "$selected_config"
+        set -gx KUBECONFIG "$clusters_dir/$selected_config"
+        echo "✓ Activated kubeconfig: $selected_config"
+        echo "  Contexts available:"
+        kubectl config get-contexts
+    else
+        echo "No kubeconfig selected"
+    end
+end
+
+# kctx - Quick context switcher (bonus: switch context within current kubeconfig)
+function kctx --description "Select and switch kubernetes context with fzf"
+    if not type -q fzf
+        echo "Error: fzf is not installed" >&2
+        return 1
+    end
+
+    if not type -q kubectl
+        echo "Error: kubectl is not installed" >&2
+        return 1
+    end
+
+    # Get current context
+    set current_ctx (kubectl config current-context 2>/dev/null)
+
+    # List contexts and select with fzf
+    set selected_ctx (kubectl config get-contexts -o name | fzf --height=40% --reverse --header="Current: $current_ctx")
+
+    if test -n "$selected_ctx"
+        kubectl config use-context "$selected_ctx"
+        echo "✓ Switched to context: $selected_ctx"
+    else
+        echo "No context selected"
+    end
+end
