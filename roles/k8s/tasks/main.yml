@@ -87,9 +87,11 @@
   become: yes
   when: k8s_kubectl_enabled | default(true)
 
+# Explicitly specify arch=amd64 to prevent i386 package lookup warnings
+# For ARM support, change arch=amd64 to arch=amd64,arm64
 - name: Add Kubernetes APT repository
   apt_repository:
-    repo: "deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/{{ k8s_kubectl_repo_version }}/deb/ /"
+    repo: "deb [arch=amd64 signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/{{ k8s_kubectl_repo_version }}/deb/ /"
     filename: kubernetes
     state: present
   become: yes
@@ -151,9 +153,11 @@
   become: yes
   when: k8s_helm_enabled | default(true)
 
+# Explicitly specify arch=amd64 to prevent i386 package lookup warnings
+# For ARM support, change arch=amd64 to arch=amd64,arm64
 - name: Add Helm APT repository
   apt_repository:
-    repo: "deb [signed-by=/usr/share/keyrings/helm.gpg] https://packages.buildkite.com/helm-linux/helm-debian/any/ any main"
+    repo: "deb [arch=amd64 signed-by=/usr/share/keyrings/helm.gpg] https://packages.buildkite.com/helm-linux/helm-debian/any/ any main"
     filename: helm-stable-debian
     state: present
   become: yes
@@ -238,9 +242,11 @@
   become: yes
   when: k8s_gke_auth_plugin_enabled | default(true)
 
+# Explicitly specify arch=amd64 to prevent i386 package lookup warnings
+# For ARM support, change arch=amd64 to arch=amd64,arm64
 - name: Add Google Cloud SDK APT repository
   apt_repository:
-    repo: "deb [signed-by=/etc/apt/keyrings/cloud.google.gpg] https://packages.cloud.google.com/apt cloud-sdk main"
+    repo: "deb [arch=amd64 signed-by=/etc/apt/keyrings/cloud.google.gpg] https://packages.cloud.google.com/apt cloud-sdk main"
     filename: google-cloud-sdk
     state: present
   become: yes
@@ -302,6 +308,25 @@
   when: k8s_booter_enabled | default(true)
   ignore_errors: yes
 
+# Fish shell integration - kubectl functions
+- name: Create fish conf.d directory
+  file:
+    path: "{{ user.home }}/.config/fish/conf.d"
+    state: directory
+    owner: "{{ user.name }}"
+    group: "{{ user.name }}"
+    mode: '0755'
+  when: k8s_kubectl_enabled | default(true)
+
+- name: Deploy kubectl fish functions
+  template:
+    src: fish-kubectl-functions.fish.j2
+    dest: "{{ user.home }}/.config/fish/conf.d/kubectl-functions.fish"
+    owner: "{{ user.name }}"
+    group: "{{ user.name }}"
+    mode: '0644'
+  when: k8s_kubectl_enabled | default(true)
+
 # Cleanup when disabled
 - name: Remove talosctl when disabled
   file:
@@ -319,7 +344,7 @@
 
 - name: Remove Kubernetes APT repository when disabled
   apt_repository:
-    repo: "deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/{{ k8s_kubectl_repo_version }}/deb/ /"
+    repo: "deb [arch=amd64 signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/{{ k8s_kubectl_repo_version }}/deb/ /"
     filename: kubernetes
     state: absent
   become: yes
@@ -341,7 +366,7 @@
 
 - name: Remove Helm APT repository when disabled
   apt_repository:
-    repo: "deb [signed-by=/usr/share/keyrings/helm.gpg] https://packages.buildkite.com/helm-linux/helm-debian/any/ any main"
+    repo: "deb [arch=amd64 signed-by=/usr/share/keyrings/helm.gpg] https://packages.buildkite.com/helm-linux/helm-debian/any/ any main"
     filename: helm-stable-debian
     state: absent
   become: yes

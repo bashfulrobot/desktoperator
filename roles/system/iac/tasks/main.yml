@@ -54,9 +54,11 @@
   become: true
   when: iac_state == 'present'
 
+# Explicitly specify arch=amd64 to prevent i386 package lookup warnings
+# For ARM support, change arch=amd64 to arch=amd64,arm64
 - name: Add Google Cloud APT repository
   ansible.builtin.apt_repository:
-    repo: "deb [signed-by=/etc/apt/keyrings/cloud.google.gpg] {{ gcloud_repo_url }} cloud-sdk main"
+    repo: "deb [arch=amd64 signed-by=/etc/apt/keyrings/cloud.google.gpg] {{ gcloud_repo_url }} cloud-sdk main"
     filename: google-cloud-sdk
     state: "{{ iac_state }}"
   become: true
@@ -90,7 +92,7 @@
 
 - name: Remove Google Cloud repository when absent
   ansible.builtin.apt_repository:
-    repo: "deb [signed-by=/etc/apt/keyrings/cloud.google.gpg] {{ gcloud_repo_url }} cloud-sdk main"
+    repo: "deb [arch=amd64 signed-by=/etc/apt/keyrings/cloud.google.gpg] {{ gcloud_repo_url }} cloud-sdk main"
     filename: google-cloud-sdk
     state: absent
   become: true

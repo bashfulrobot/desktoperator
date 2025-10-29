@@ -26,9 +26,11 @@
   become: yes
   when: app_states['glow'] | default('present') == 'present'
 
+# Explicitly specify arch=amd64 to prevent i386 package lookup warnings
+# For ARM support, change arch=amd64 to arch=amd64,arm64
 - name: Add Charm APT repository
   apt_repository:
-    repo: "deb [signed-by=/etc/apt/keyrings/charm.gpg] https://repo.charm.sh/apt/ * *"
+    repo: "deb [arch=amd64 signed-by=/etc/apt/keyrings/charm.gpg] https://repo.charm.sh/apt/ * *"
     filename: charm
     state: present
   become: yes
@@ -97,7 +99,7 @@
 
 - name: Remove Charm repository when absent
   apt_repository:
-    repo: "deb [signed-by=/etc/apt/keyrings/charm.gpg] https://repo.charm.sh/apt/ * *"
+    repo: "deb [arch=amd64 signed-by=/etc/apt/keyrings/charm.gpg] https://repo.charm.sh/apt/ * *"
     filename: charm
     state: absent
   become: yes

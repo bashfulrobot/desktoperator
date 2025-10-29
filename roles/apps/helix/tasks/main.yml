@@ -34,9 +34,11 @@
   become: yes
   when: app_states.helix | default('present') == 'present'
 
+# Explicitly specify arch=amd64 to prevent i386 package lookup warnings
+# For ARM support, change arch=amd64 to arch=amd64,arm64
 - name: Add Helix PPA with modern signed-by keyring
   apt_repository:
-    repo: "deb [signed-by=/usr/share/keyrings/helix-ppa.gpg] https://ppa.launchpadcontent.net/maveonair/helix-editor/ubuntu {{ ansible_distribution_release }} main"
+    repo: "deb [arch=amd64 signed-by=/usr/share/keyrings/helix-ppa.gpg] https://ppa.launchpadcontent.net/maveonair/helix-editor/ubuntu {{ ansible_distribution_release }} main"
     filename: helix-ppa
     state: present
   become: yes
@@ -146,7 +148,7 @@
 
 - name: Remove Helix PPA when absent
   apt_repository:
-    repo: "deb [signed-by=/usr/share/keyrings/helix-ppa.gpg] https://ppa.launchpadcontent.net/maveonair/helix-editor/ubuntu {{ ansible_distribution_release }} main"
+    repo: "deb [arch=amd64 signed-by=/usr/share/keyrings/helix-ppa.gpg] https://ppa.launchpadcontent.net/maveonair/helix-editor/ubuntu {{ ansible_distribution_release }} main"
     filename: helix-ppa
     state: absent
   become: yes

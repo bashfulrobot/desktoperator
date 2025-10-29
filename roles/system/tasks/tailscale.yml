@@ -9,9 +9,11 @@
   become: yes
   tags: [tailscale, vpn]
 
+# Explicitly specify arch=amd64 to prevent i386 package lookup warnings
+# For ARM support, change arch=amd64 to arch=amd64,arm64
 - name: Add Tailscale repository
   apt_repository:
-    repo: "deb [signed-by=/usr/share/keyrings/tailscale-archive-keyring.gpg] https://pkgs.tailscale.com/stable/ubuntu noble main"
+    repo: "deb [arch=amd64 signed-by=/usr/share/keyrings/tailscale-archive-keyring.gpg] https://pkgs.tailscale.com/stable/ubuntu noble main"
     filename: tailscale
     state: present
   become: yes

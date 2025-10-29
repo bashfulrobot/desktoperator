@@ -24,9 +24,11 @@
   changed_when: false
   when: app_states['insync'] | default('present') == 'present'
 
+# Explicitly specify arch=amd64 to prevent i386 package lookup warnings
+# For ARM support, change arch=amd64 to arch=amd64,arm64
 - name: Add Insync APT repository
   apt_repository:
-    repo: "deb [signed-by=/usr/share/keyrings/insynchq.gpg] http://apt.insync.io/ubuntu {{ ubuntu_codename.stdout }} non-free contrib"
+    repo: "deb [arch=amd64 signed-by=/usr/share/keyrings/insynchq.gpg] http://apt.insync.io/ubuntu {{ ubuntu_codename.stdout }} non-free contrib"
     filename: insync
     state: present
   become: yes
@@ -113,7 +115,7 @@
 
 - name: Remove Insync repository when absent
   apt_repository:
-    repo: "deb [signed-by=/usr/share/keyrings/insynchq.gpg] http://apt.insync.io/ubuntu {{ ubuntu_codename.stdout }} non-free contrib"
+    repo: "deb [arch=amd64 signed-by=/usr/share/keyrings/insynchq.gpg] http://apt.insync.io/ubuntu {{ ubuntu_codename.stdout }} non-free contrib"
     filename: insync
     state: absent
   become: yes

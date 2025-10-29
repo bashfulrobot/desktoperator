@@ -9,6 +9,9 @@
     uris: https://updates.signal.org/desktop/apt
     suites: xenial
     components: [main]
+    # Explicitly specify amd64 to prevent i386 package lookup warnings
+    # For ARM support, change to: architectures: [amd64, arm64]
+    architectures: [amd64]
     signed_by: https://updates.signal.org/desktop/apt/keys.asc
     state: "{{ app_states['signal'] | default('present') }}"
   become: true
