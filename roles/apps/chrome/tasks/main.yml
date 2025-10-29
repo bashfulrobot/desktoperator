@@ -25,6 +25,16 @@
   become: yes
   when: app_states['chrome'] | default('present') == 'present'
 
+# Clean up old repository entries to prevent duplicates
+- name: Remove old Google Chrome .list file entries without signed-by
+  lineinfile:
+    path: /etc/apt/sources.list.d/google-chrome.list
+    regexp: '^deb \[arch=amd64\] https://dl\.google\.com/linux/chrome/deb/'
+    state: absent
+  become: yes
+  when: app_states['chrome'] | default('present') == 'present'
+  failed_when: false
+
 # Explicitly specify arch=amd64 to prevent i386 package lookup warnings
 # For ARM support, change arch=amd64 to arch=amd64,arm64
 - name: Add Google Chrome APT repository
