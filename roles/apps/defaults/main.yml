@@ -12,6 +12,7 @@ common_apps:
   - claude-code
   - codex-cli
   - starship
+  - shadowenv
   - firefox
   - zen-browser
   - vivaldi
@@ -40,6 +41,7 @@ app_states:
   claude-code: present
   codex-cli: present
   starship: present
+  shadowenv: present
   todoist: present
   firefox: present
   vivaldi: absent

@@ -1,0 +1,7 @@
+# Shadowenv configuration
+# Managed by Ansible - shadowenv role
+
+# Initialize shadowenv hook
+if type -q shadowenv
+    shadowenv init fish | source
+end

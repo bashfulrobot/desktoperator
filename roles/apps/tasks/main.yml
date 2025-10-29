@@ -49,6 +49,12 @@
   tags: [starship, shell, prompt]
   when: "'starship' in common_apps or app_states['starship'] is defined"
 
+- name: Include Shadowenv directory-based env manager
+  include_role:
+    name: apps/shadowenv
+  tags: [shadowenv, shell, environment]
+  when: "'shadowenv' in common_apps or app_states['shadowenv'] is defined"
+
 - name: Include Firefox browser
   include_role:
     name: apps/firefox
