@@ -1,5 +1,7 @@
 ---
 # Zoom Desktop installation via .deb package
+# Supports both pinned versions and latest version from Zoom API
+# Configured via zoom_use_latest flag in defaults/main.yml
 
 - name: Check if Zoom is installed
   ansible.builtin.command: dpkg-query -W -f='${Version}' zoom
@@ -8,50 +10,84 @@
   failed_when: false
   when: app_states['zoom'] | default('present') == 'present'
 
+# Get latest version from Zoom API (only if zoom_use_latest is true)
 - name: Get latest Zoom version from API
   ansible.builtin.uri:
     url: https://zoom.us/rest/download?os=linux
     return_content: true
   register: zoom_api_response
   changed_when: false
+  when:
+    - app_states['zoom'] | default('present') == 'present'
+    - zoom_use_latest | default(false)
+
+- name: Extract latest Zoom version from JSON
+  ansible.builtin.set_fact:
+    zoom_target_version: "{{ (zoom_api_response.content | from_json).result.downloadVO.zoom.version }}"
+  when:
+    - app_states['zoom'] | default('present') == 'present'
+    - zoom_use_latest | default(false)
+
+# Use pinned version if zoom_use_latest is false
+- name: Set target version to pinned version
+  ansible.builtin.set_fact:
+    zoom_target_version: "{{ zoom_version }}"
+  when:
+    - app_states['zoom'] | default('present') == 'present'
+    - not (zoom_use_latest | default(false))
+
+- name: Determine if Zoom needs installation or version change
+  ansible.builtin.set_fact:
+    zoom_needs_change: "{{ zoom_installed_version.rc != 0 or zoom_installed_version.stdout != zoom_target_version }}"
   when: app_states['zoom'] | default('present') == 'present'
 
-- name: Extract Zoom version from JSON
-  ansible.builtin.set_fact:
-    zoom_latest_version: "{{ (zoom_api_response.content | from_json).result.downloadVO.zoom.version }}"
-  when: app_states['zoom'] | default('present') == 'present'
-
-- name: Determine if Zoom needs update
-  ansible.builtin.set_fact:
-    zoom_needs_update: "{{ zoom_installed_version.rc != 0 or zoom_installed_version.stdout != zoom_latest_version }}"
-  when: app_states['zoom'] | default('present') == 'present'
+# Remove current version if we need to change versions (for downgrades or upgrades)
+- name: Remove current Zoom version before installing different version
+  ansible.builtin.apt:
+    name: zoom
+    state: absent
+    purge: true
+  become: true
+  when:
+    - app_states['zoom'] | default('present') == 'present'
+    - zoom_needs_change | bool
+    - zoom_installed_version.rc == 0
 
 - name: Download Zoom .deb package
   ansible.builtin.get_url:
-    url: "https://cdn.zoom.us/prod/{{ zoom_latest_version }}/zoom_amd64.deb"
-    dest: "/tmp/zoom-{{ zoom_latest_version }}.deb"
+    url: "https://cdn.zoom.us/prod/{{ zoom_target_version }}/zoom_amd64.deb"
+    dest: "/tmp/zoom-{{ zoom_target_version }}.deb"
     mode: '0644'
   when:
     - app_states['zoom'] | default('present') == 'present'
-    - zoom_needs_update | bool
+    - zoom_needs_change | bool
   become: true
 
 - name: Install Zoom .deb package
   ansible.builtin.apt:
-    deb: "/tmp/zoom-{{ zoom_latest_version }}.deb"
+    deb: "/tmp/zoom-{{ zoom_target_version }}.deb"
     state: present
   become: true
   when:
     - app_states['zoom'] | default('present') == 'present'
-    - zoom_needs_update | bool
+    - zoom_needs_change | bool
+
+- name: Fix dependencies if needed
+  ansible.builtin.apt:
+    name: []
+    state: fixed
+  become: true
+  when:
+    - app_states['zoom'] | default('present') == 'present'
+    - zoom_needs_change | bool
 
 - name: Clean up downloaded .deb package
   ansible.builtin.file:
-    path: "/tmp/zoom-{{ zoom_latest_version }}.deb"
+    path: "/tmp/zoom-{{ zoom_target_version }}.deb"
     state: absent
   when:
     - app_states['zoom'] | default('present') == 'present'
-    - zoom_needs_update | bool
+    - zoom_needs_change | bool
   become: true
 
 # Cleanup when absent

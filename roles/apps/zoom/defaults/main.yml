@@ -3,3 +3,13 @@
 
 # Installation state (present/absent)
 zoom_state: present
+
+# Version control:
+# - Set zoom_use_latest: true to always install the latest version from Zoom API
+# - Set zoom_use_latest: false to pin to zoom_version below
+zoom_use_latest: false
+
+# Pinned Zoom version (only used when zoom_use_latest: false)
+# Format: major.minor.patch.build
+# To change versions (including downgrades), just update this value
+zoom_version: "6.6.5.5215"
