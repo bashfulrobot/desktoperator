@@ -13,3 +13,7 @@ zoom_use_latest: false
 # Format: major.minor.patch.build
 # To change versions (including downgrades), just update this value
 zoom_version: "6.6.5.5215"
+
+# APT pinning - prevents Zoom from auto-updating if a repository is added
+# This protects against buggy releases when using pinned versions
+zoom_apt_pin_enabled: true

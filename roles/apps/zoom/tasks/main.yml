@@ -90,11 +90,59 @@
     - zoom_needs_change | bool
   become: true
 
+# APT pinning - prevents auto-updates if Zoom repository is added
+- name: Create APT preferences directory
+  ansible.builtin.file:
+    path: /etc/apt/preferences.d
+    state: directory
+    owner: root
+    group: root
+    mode: '0755'
+  become: true
+  when:
+    - app_states['zoom'] | default('present') == 'present'
+    - not zoom_use_latest | default(false)
+    - zoom_apt_pin_enabled | default(true)
+
+- name: Pin Zoom package to specific version
+  ansible.builtin.copy:
+    content: |
+      # Managed by Ansible - prevents Zoom auto-updates from repository
+      # Update zoom_version in defaults/main.yml to change pinned version
+      Package: zoom
+      Pin: version {{ zoom_target_version }}
+      Pin-Priority: 1001
+    dest: /etc/apt/preferences.d/zoom-pin
+    owner: root
+    group: root
+    mode: '0644'
+  become: true
+  when:
+    - app_states['zoom'] | default('present') == 'present'
+    - not zoom_use_latest | default(false)
+    - zoom_apt_pin_enabled | default(true)
+
+- name: Remove Zoom APT pin when using latest version
+  ansible.builtin.file:
+    path: /etc/apt/preferences.d/zoom-pin
+    state: absent
+  become: true
+  when:
+    - app_states['zoom'] | default('present') == 'present'
+    - zoom_use_latest | default(false)
+
 # Cleanup when absent
 - name: Remove Zoom when absent
   ansible.builtin.apt:
     name: zoom
     state: absent
     purge: true
+  become: true
+  when: app_states['zoom'] | default('present') == 'absent'
+
+- name: Remove Zoom APT pin when absent
+  ansible.builtin.file:
+    path: /etc/apt/preferences.d/zoom-pin
+    state: absent
   become: true
   when: app_states['zoom'] | default('present') == 'absent'
