@@ -1,0 +1,5 @@
+---
+# Google Chrome default variables
+
+# Installation state (present/absent)
+chrome_state: present

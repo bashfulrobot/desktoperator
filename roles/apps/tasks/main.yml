@@ -67,6 +67,12 @@
   tags: [vscode, editor, development]
   when: "'vscode' in common_apps or app_states['vscode'] is defined"
 
+- name: Include Google Chrome
+  include_role:
+    name: apps/chrome
+  tags: [chrome, browser]
+  when: "'chrome' in common_apps or app_states['chrome'] is defined"
+
 - name: Include Zoom
   include_role:
     name: apps/zoom

@@ -1,0 +1,157 @@
+---
+# Google Chrome installation via APT repository
+
+- name: Add Google Chrome GPG key
+  get_url:
+    url: https://dl.google.com/linux/linux_signing_key.pub
+    dest: /tmp/google-chrome-signing-key.pub
+    mode: '0644'
+  when: app_states['chrome'] | default('present') == 'present'
+
+- name: Import Google Chrome GPG key
+  shell: |
+    gpg --dearmor < /tmp/google-chrome-signing-key.pub > /usr/share/keyrings/google-chrome.gpg
+    chmod 644 /usr/share/keyrings/google-chrome.gpg
+  args:
+    creates: /usr/share/keyrings/google-chrome.gpg
+  become: yes
+  when: app_states['chrome'] | default('present') == 'present'
+
+# Remove old GPG key location if it exists
+- name: Remove old Google Chrome GPG key from trusted.gpg.d
+  file:
+    path: /etc/apt/trusted.gpg.d/google-chrome.gpg
+    state: absent
+  become: yes
+  when: app_states['chrome'] | default('present') == 'present'
+
+# Explicitly specify arch=amd64 to prevent i386 package lookup warnings
+# For ARM support, change arch=amd64 to arch=amd64,arm64
+- name: Add Google Chrome APT repository
+  apt_repository:
+    repo: "deb [arch=amd64 signed-by=/usr/share/keyrings/google-chrome.gpg] https://dl.google.com/linux/chrome/deb/ stable main"
+    filename: google-chrome
+    state: present
+  become: yes
+  when: app_states['chrome'] | default('present') == 'present'
+
+- name: Update APT cache
+  apt:
+    update_cache: yes
+  become: yes
+  when: app_states['chrome'] | default('present') == 'present'
+
+- name: Install Google Chrome
+  apt:
+    name: google-chrome-stable
+    state: present
+  become: yes
+  when: app_states['chrome'] | default('present') == 'present'
+
+- name: Clean up GPG key file
+  file:
+    path: /tmp/google-chrome-signing-key.pub
+    state: absent
+  when: app_states['chrome'] | default('present') == 'present'
+
+# 1Password Integration for Chrome
+- name: Create 1Password config directory
+  file:
+    path: /etc/1password
+    state: directory
+    owner: root
+    group: root
+    mode: '0755'
+  become: yes
+  when: app_states['chrome'] | default('present') == 'present'
+
+- name: Add Chrome to 1Password allowed browsers
+  lineinfile:
+    path: /etc/1password/custom_allowed_browsers
+    line: chrome
+    create: yes
+    owner: root
+    group: root
+    mode: '0755'
+  become: yes
+  when: app_states['chrome'] | default('present') == 'present'
+
+- name: Add google-chrome to 1Password allowed browsers
+  lineinfile:
+    path: /etc/1password/custom_allowed_browsers
+    line: google-chrome
+    create: yes
+    owner: root
+    group: root
+    mode: '0755'
+  become: yes
+  when: app_states['chrome'] | default('present') == 'present'
+
+- name: Add google-chrome-stable to 1Password allowed browsers
+  lineinfile:
+    path: /etc/1password/custom_allowed_browsers
+    line: google-chrome-stable
+    create: yes
+    owner: root
+    group: root
+    mode: '0755'
+  become: yes
+  when: app_states['chrome'] | default('present') == 'present'
+
+# Cleanup when absent
+- name: Remove Google Chrome when absent
+  apt:
+    name: google-chrome-stable
+    state: absent
+    purge: yes
+  become: yes
+  when: app_states['chrome'] | default('present') == 'absent'
+
+- name: Remove Google Chrome repository when absent
+  apt_repository:
+    repo: "deb [arch=amd64 signed-by=/usr/share/keyrings/google-chrome.gpg] https://dl.google.com/linux/chrome/deb/ stable main"
+    filename: google-chrome
+    state: absent
+  become: yes
+  when: app_states['chrome'] | default('present') == 'absent'
+
+- name: Remove Google Chrome GPG key when absent
+  file:
+    path: /usr/share/keyrings/google-chrome.gpg
+    state: absent
+  become: yes
+  when: app_states['chrome'] | default('present') == 'absent'
+
+- name: Remove old Google Chrome GPG key when absent
+  file:
+    path: /etc/apt/trusted.gpg.d/google-chrome.gpg
+    state: absent
+  become: yes
+  when: app_states['chrome'] | default('present') == 'absent'
+
+- name: Remove Chrome from 1Password allowed browsers when absent
+  lineinfile:
+    path: /etc/1password/custom_allowed_browsers
+    line: chrome
+    state: absent
+  become: yes
+  when: app_states['chrome'] | default('present') == 'absent'
+  failed_when: false
+
+- name: Remove google-chrome from 1Password allowed browsers when absent
+  lineinfile:
+    path: /etc/1password/custom_allowed_browsers
+    line: google-chrome
+    state: absent
+  become: yes
+  when: app_states['chrome'] | default('present') == 'absent'
+  failed_when: false
+
+- name: Remove google-chrome-stable from 1Password allowed browsers when absent
+  lineinfile:
+    path: /etc/1password/custom_allowed_browsers
+    line: google-chrome-stable
+    state: absent
+  become: yes
+  when: app_states['chrome'] | default('present') == 'absent'
+  failed_when: false
