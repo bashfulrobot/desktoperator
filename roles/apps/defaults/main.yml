@@ -53,6 +53,7 @@ app_states:
   gum: present
   kooha: present
   meetsum: present
+  obsidian: present
   signal: present
   terminal-experience: present
   tokei: present

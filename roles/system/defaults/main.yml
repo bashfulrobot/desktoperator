@@ -82,3 +82,5 @@ flatpak_apps:
     app_state_key: todoist
   - name: io.github.seadve.Kooha
     app_state_key: kooha
+  - name: md.obsidian.Obsidian
+    app_state_key: obsidian
