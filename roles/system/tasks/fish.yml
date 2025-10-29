@@ -16,6 +16,15 @@
     mode: '0755'
   become: yes
 
+- name: Create fish conf.d directory for modular configuration
+  file:
+    path: "{{ user.home }}/.config/fish/conf.d"
+    state: directory
+    owner: "{{ user.name }}"
+    group: "{{ user.name }}"
+    mode: '0755'
+  become: yes
+
 - name: Deploy fish config
   template:
     src: config.fish.j2
@@ -25,6 +34,15 @@
     mode: '0644'
   become: yes
   when: fish_config_enabled | default(true)
+
+- name: Deploy general fish functions
+  template:
+    src: fish-general-functions.fish.j2
+    dest: "{{ user.home }}/.config/fish/conf.d/general-functions.fish"
+    owner: "{{ user.name }}"
+    group: "{{ user.name }}"
+    mode: '0644'
+  become: yes
 
 - name: Set fish as default shell
   user:

@@ -1,0 +1,27 @@
+# TEMPLATE: Role-specific fish functions
+# This is a template for other roles to add their own fish functions
+#
+# To add role-specific fish functions:
+# 1. Copy this template to your role's templates directory
+# 2. Rename to: fish-<rolename>-functions.fish.j2
+# 3. Add your functions below
+# 4. In your role's tasks, add:
+#
+#    - name: Deploy <rolename> fish functions
+#      template:
+#        src: fish-<rolename>-functions.fish.j2
+#        dest: "{{ user.home }}/.config/fish/conf.d/<rolename>-functions.fish"
+#        owner: "{{ user.name }}"
+#        group: "{{ user.name }}"
+#        mode: '0644'
+#      become: yes
+#
+# Fish automatically sources all *.fish files in conf.d/ directory
+
+# Example function
+function example_function --description "Example function description"
+    echo "Hello from example function"
+end
+
+# Example alias
+alias example_alias='echo "Hello from example alias"'

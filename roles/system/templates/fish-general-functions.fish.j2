@@ -1,0 +1,25 @@
+# General purpose fish functions and aliases
+# Managed by Ansible - changes may be overwritten
+# File: ~/.config/fish/conf.d/general-functions.fish
+
+# tmpcd - Create temporary directory and cd into it
+# Usage: tmpcd [prefix]
+# Example: tmpcd work    # Creates /tmp/tmp.XXXXXX with "work" prefix
+function tmpcd --description "Create temporary directory and cd into it"
+    if test (count $argv) -eq 0
+        set tmp_dir (mktemp -d)
+    else
+        set tmp_dir (mktemp -d -t "$argv[1].XXXXXX")
+    end
+
+    if test -d "$tmp_dir"
+        cd "$tmp_dir"
+        echo "Created and moved to: $tmp_dir"
+    else
+        echo "Failed to create temporary directory" >&2
+        return 1
+    end
+end
+
+# Additional general aliases can be added below
+# These are global and available in all fish sessions
