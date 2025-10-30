@@ -13,11 +13,6 @@
   import_tasks: cosmic-theme.yml
   tags: [cosmic, theme, colors]
 
-- name: Include fonts installation
-  include_role:
-    name: system/fonts
-  tags: [fonts]
-
 - name: Import hostname configuration
   import_tasks: hostname.yml
   tags: [hostname]

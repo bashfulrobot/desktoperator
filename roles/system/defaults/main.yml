@@ -46,6 +46,7 @@ dev_packages:
   - ansible
   - ansible-lint
   - shellcheck
+  - direnv
 
 # Python packages (installed via pip)
 # Note: Due to PEP 668, use pipx for development tools instead
@@ -84,3 +85,5 @@ flatpak_apps:
     app_state_key: kooha
   - name: md.obsidian.Obsidian
     app_state_key: obsidian
+  - name: org.kde.okular
+    app_state_key: okular
