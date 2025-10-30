@@ -1,0 +1,57 @@
+---
+# Install or update a Google Font from Google Fonts repository
+# Expects 'font' variable with: { name: "WorkSans", font_path: "ofl/worksans", files: ["WorkSans[wght].ttf"] }
+
+- name: "Create state directory for {{ font.name }}"
+  ansible.builtin.file:
+    path: "{{ google_fonts_state_dir }}/{{ font.name }}"
+    state: directory
+    mode: '0755'
+  become: true
+
+- name: "Read installed version metadata for {{ font.name }}"
+  ansible.builtin.slurp:
+    src: "{{ google_fonts_state_dir }}/{{ font.name }}/version.json"
+  register: google_font_installed_version
+  failed_when: false
+
+- name: "Parse installed version metadata for {{ font.name }}"
+  ansible.builtin.set_fact:
+    google_font_installed_files: "{{ (google_font_installed_version.content | b64decode | from_json).files | default([]) }}"
+  when: google_font_installed_version.content is defined
+
+- name: "Determine if update is needed for {{ font.name }}"
+  ansible.builtin.set_fact:
+    google_font_needs_update: "{{ google_font_installed_version.content is not defined or (google_font_installed_files | default([])) != font.files }}"
+
+- name: "Download and install {{ font.name }}"
+  when: google_font_needs_update | bool
+  block:
+    - name: "Download font files for {{ font.name }}"
+      ansible.builtin.get_url:
+        url: "{{ google_fonts_base_url }}/{{ font.font_path }}/{{ item }}"
+        dest: "{{ system_fonts_google_dir }}/{{ item }}"
+        mode: '0644'
+      loop: "{{ font.files }}"
+      become: true
+
+    - name: "Save version metadata for {{ font.name }}"
+      ansible.builtin.copy:
+        content: |
+          {
+            "name": "{{ font.name }}",
+            "font_path": "{{ font.font_path }}",
+            "files": {{ font.files | to_json }},
+            "source": "{{ google_fonts_base_url }}/{{ font.font_path }}"
+          }
+        dest: "{{ google_fonts_state_dir }}/{{ font.name }}/version.json"
+        mode: '0644'
+      become: true
+
+    - name: "Mark that fonts were updated"
+      ansible.builtin.set_fact:
+        fonts_were_updated: true
+
+- name: "Show installation status for {{ font.name }}"
+  ansible.builtin.debug:
+    msg: "{{ font.name }} ({{ font.files | length }} files) is {{ 'now installed' if google_font_needs_update else 'already up to date' }}"

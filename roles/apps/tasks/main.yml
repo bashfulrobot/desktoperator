@@ -133,14 +133,44 @@
   tags: [signal, communication]
   when: "'signal' in common_apps or app_states['signal'] is defined"
 
+- name: Include Spotify music clients
+  include_role:
+    name: apps/spotify
+  tags: [spotify, music, media]
+  when: "'spotify' in common_apps or app_states['spotify'] is defined"
+
 - name: Include Terminal Experience
   include_role:
     name: apps/terminal-experience
   tags: [terminal-experience, terminal, cli]
   when: "'terminal-experience' in common_apps or app_states['terminal-experience'] is defined"
 
+- name: Include eza modern ls replacement
+  include_role:
+    name: apps/eza
+  tags: [eza, cli, terminal]
+  when: "'eza' in common_apps or app_states['eza'] is defined"
+
+- name: Include Fonts installation
+  include_role:
+    name: apps/fonts
+  tags: [fonts]
+  when: "'fonts' in common_apps or app_states['fonts'] is defined"
+
 - name: Include Tokei code statistics
   include_role:
     name: apps/tokei
   tags: [tokei, cli, development]
   when: "'tokei' in common_apps or app_states['tokei'] is defined"
+
+- name: Include Instruqt CLI
+  include_role:
+    name: apps/instruqt-cli
+  tags: [instruqt-cli, cli, development]
+  when: "'instruqt-cli' in common_apps or app_states['instruqt-cli'] is defined"
+
+- name: Include oq performant jq alternative
+  include_role:
+    name: apps/oq
+  tags: [oq, cli, development, json]
+  when: "'oq' in common_apps or app_states['oq'] is defined"

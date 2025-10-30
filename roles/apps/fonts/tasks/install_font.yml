@@ -1,0 +1,83 @@
+---
+# Install or update a single Nerd Font from GitHub releases
+# Expects 'font' variable with: { name: "FontName", version: "latest" }
+
+- name: "Create state directory for {{ font.name }}"
+  ansible.builtin.file:
+    path: "{{ nerd_fonts_state_dir }}/{{ font.name }}"
+    state: directory
+    mode: '0755'
+  become: true
+
+- name: "Read installed version metadata for {{ font.name }}"
+  ansible.builtin.slurp:
+    src: "{{ nerd_fonts_state_dir }}/{{ font.name }}/version.json"
+  register: font_installed_version
+  failed_when: false
+
+- name: "Get latest release info from GitHub API for {{ font.name }}"
+  ansible.builtin.uri:
+    url: "https://api.github.com/repos/ryanoasis/nerd-fonts/releases/{{ font.version }}"
+    return_content: true
+  register: font_release_data
+
+- name: "Parse installed version metadata for {{ font.name }}"
+  ansible.builtin.set_fact:
+    font_installed_published_at: "{{ (font_installed_version.content | b64decode | from_json).published_at | default('') }}"
+  when: font_installed_version.content is defined
+
+- name: "Determine if update is needed for {{ font.name }}"
+  ansible.builtin.set_fact:
+    font_needs_update: "{{ font_installed_version.content is not defined or (font_installed_published_at | default('')) != font_release_data.json.published_at }}"
+
+- name: "Download and install {{ font.name }}"
+  when: font_needs_update | bool
+  block:
+    - name: "Create temporary extraction directory for {{ font.name }}"
+      ansible.builtin.tempfile:
+        state: directory
+        suffix: "_{{ font.name }}"
+      register: font_temp_dir
+
+    - name: "Download {{ font.name }} release"
+      ansible.builtin.get_url:
+        url: "https://github.com/ryanoasis/nerd-fonts/releases/download/{{ font_release_data.json.tag_name }}/{{ font.name }}.zip"
+        dest: "{{ font_temp_dir.path }}/{{ font.name }}.zip"
+        mode: '0644'
+
+    - name: "Extract {{ font.name }}"
+      ansible.builtin.unarchive:
+        src: "{{ font_temp_dir.path }}/{{ font.name }}.zip"
+        dest: "{{ font_temp_dir.path }}"
+        remote_src: true
+
+    - name: "Install font files for {{ font.name }}"
+      ansible.builtin.shell: |
+        find "{{ font_temp_dir.path }}" -type f \( -name "*.ttf" -o -name "*.otf" \) -exec cp {} "{{ system_fonts_dir }}/" \;
+      become: true
+      changed_when: true
+
+    - name: "Save version metadata for {{ font.name }}"
+      ansible.builtin.copy:
+        content: |
+          {
+            "tag_name": "{{ font_release_data.json.tag_name }}",
+            "published_at": "{{ font_release_data.json.published_at }}",
+            "html_url": "{{ font_release_data.json.html_url }}"
+          }
+        dest: "{{ nerd_fonts_state_dir }}/{{ font.name }}/version.json"
+        mode: '0644'
+      become: true
+
+    - name: "Clean up temporary directory for {{ font.name }}"
+      ansible.builtin.file:
+        path: "{{ font_temp_dir.path }}"
+        state: absent
+
+    - name: "Mark that fonts were updated"
+      ansible.builtin.set_fact:
+        fonts_were_updated: true
+
+- name: "Show installation status for {{ font.name }}"
+  ansible.builtin.debug:
+    msg: "{{ font.name }} {{ font_release_data.json.tag_name }} is {{ 'now installed' if font_needs_update else 'already up to date' }}"

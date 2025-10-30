@@ -1,0 +1,77 @@
+---
+# Install or update a font from direct URL
+# Expects 'font' variable with: { name: "Inter-4.1", url: "https://...", version: "4.1" }
+
+- name: "Create state directory for {{ font.name }}"
+  ansible.builtin.file:
+    path: "{{ direct_url_fonts_state_dir }}/{{ font.name }}"
+    state: directory
+    mode: '0755'
+  become: true
+
+- name: "Read installed version metadata for {{ font.name }}"
+  ansible.builtin.slurp:
+    src: "{{ direct_url_fonts_state_dir }}/{{ font.name }}/version.json"
+  register: direct_url_installed_version
+  failed_when: false
+
+- name: "Parse installed version metadata for {{ font.name }}"
+  ansible.builtin.set_fact:
+    direct_url_installed_version_string: "{{ (direct_url_installed_version.content | b64decode | from_json).version | default('') }}"
+  when: direct_url_installed_version.content is defined
+
+- name: "Determine if update is needed for {{ font.name }}"
+  ansible.builtin.set_fact:
+    direct_url_needs_update: "{{ direct_url_installed_version.content is not defined or (direct_url_installed_version_string | default('')) != font.version }}"
+
+- name: "Download and install {{ font.name }}"
+  when: direct_url_needs_update | bool
+  block:
+    - name: "Create temporary extraction directory for {{ font.name }}"
+      ansible.builtin.tempfile:
+        state: directory
+        suffix: "_{{ font.name }}"
+      register: direct_url_temp_dir
+
+    - name: "Download {{ font.name }}"
+      ansible.builtin.get_url:
+        url: "{{ font.url }}"
+        dest: "{{ direct_url_temp_dir.path }}/{{ font.name }}.zip"
+        mode: '0644'
+
+    - name: "Extract {{ font.name }}"
+      ansible.builtin.unarchive:
+        src: "{{ direct_url_temp_dir.path }}/{{ font.name }}.zip"
+        dest: "{{ direct_url_temp_dir.path }}"
+        remote_src: true
+
+    - name: "Install font files for {{ font.name }}"
+      ansible.builtin.shell: |
+        find "{{ direct_url_temp_dir.path }}" -type f \( -name "*.ttf" -o -name "*.otf" \) -exec cp {} "{{ system_fonts_direct_url_dir }}/" \;
+      become: true
+      changed_when: true
+
+    - name: "Save version metadata for {{ font.name }}"
+      ansible.builtin.copy:
+        content: |
+          {
+            "name": "{{ font.name }}",
+            "version": "{{ font.version }}",
+            "url": "{{ font.url }}"
+          }
+        dest: "{{ direct_url_fonts_state_dir }}/{{ font.name }}/version.json"
+        mode: '0644'
+      become: true
+
+    - name: "Clean up temporary directory for {{ font.name }}"
+      ansible.builtin.file:
+        path: "{{ direct_url_temp_dir.path }}"
+        state: absent
+
+    - name: "Mark that fonts were updated"
+      ansible.builtin.set_fact:
+        fonts_were_updated: true
+
+- name: "Show installation status for {{ font.name }}"
+  ansible.builtin.debug:
+    msg: "{{ font.name }} {{ font.version }} is {{ 'now installed' if direct_url_needs_update else 'already up to date' }}"

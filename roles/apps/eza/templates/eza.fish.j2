@@ -1,0 +1,18 @@
+# eza aliases - modern replacement for ls
+# Managed by Ansible - eza role
+
+# Check if eza is available
+if type -q eza
+    # Main ls replacement with comprehensive options
+    # Format: long listing with header and inode
+    # Sorting: directories first
+    # Visual: icons and colors
+    # Git: show git status and repo info
+    # Time: custom format YYYY-MM-DD HH:MM
+    alias ls="eza --long --header --inode --group-directories-first --icons=auto --color=auto --git --git-repos --time-style='+%Y-%m-%d %H:%M'"
+
+    # Common variants
+    alias la="eza --long --header --inode --group-directories-first --icons=auto --color=auto --git --git-repos --time-style='+%Y-%m-%d %H:%M' --all"
+    alias lt="eza --long --header --inode --group-directories-first --icons=auto --color=auto --git --git-repos --time-style='+%Y-%m-%d %H:%M' --tree"
+    alias lta="eza --long --header --inode --group-directories-first --icons=auto --color=auto --git --git-repos --time-style='+%Y-%m-%d %H:%M' --tree --all"
+end

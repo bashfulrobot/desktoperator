@@ -1,0 +1,58 @@
+---
+# Install or update a font from a GitHub repository
+# Expects 'font' variable with: { name: "SFPro", repo: "user/repo", branch: "master", files: ["SF-Pro.ttf"] }
+
+- name: "Create state directory for {{ font.name }}"
+  ansible.builtin.file:
+    path: "{{ github_fonts_state_dir }}/{{ font.name }}"
+    state: directory
+    mode: '0755'
+  become: true
+
+- name: "Read installed version metadata for {{ font.name }}"
+  ansible.builtin.slurp:
+    src: "{{ github_fonts_state_dir }}/{{ font.name }}/version.json"
+  register: github_font_installed_version
+  failed_when: false
+
+- name: "Parse installed version metadata for {{ font.name }}"
+  ansible.builtin.set_fact:
+    github_font_installed_files: "{{ (github_font_installed_version.content | b64decode | from_json).files | default([]) }}"
+  when: github_font_installed_version.content is defined
+
+- name: "Determine if update is needed for {{ font.name }}"
+  ansible.builtin.set_fact:
+    github_font_needs_update: "{{ github_font_installed_version.content is not defined or (github_font_installed_files | default([])) != font.files }}"
+
+- name: "Download and install {{ font.name }}"
+  when: github_font_needs_update | bool
+  block:
+    - name: "Download font files for {{ font.name }}"
+      ansible.builtin.get_url:
+        url: "{{ github_fonts_base_url }}/{{ font.repo }}/{{ font.branch }}/{{ item }}"
+        dest: "{{ system_fonts_github_dir }}/{{ item }}"
+        mode: '0644'
+      loop: "{{ font.files }}"
+      become: true
+
+    - name: "Save version metadata for {{ font.name }}"
+      ansible.builtin.copy:
+        content: |
+          {
+            "name": "{{ font.name }}",
+            "repo": "{{ font.repo }}",
+            "branch": "{{ font.branch }}",
+            "files": {{ font.files | to_json }},
+            "source": "{{ github_fonts_base_url }}/{{ font.repo }}/{{ font.branch }}"
+          }
+        dest: "{{ github_fonts_state_dir }}/{{ font.name }}/version.json"
+        mode: '0644'
+      become: true
+
+    - name: "Mark that fonts were updated"
+      ansible.builtin.set_fact:
+        fonts_were_updated: true
+
+- name: "Show installation status for {{ font.name }}"
+  ansible.builtin.debug:
+    msg: "{{ font.name }} ({{ font.files | length }} files) is {{ 'now installed' if github_font_needs_update else 'already up to date' }}"

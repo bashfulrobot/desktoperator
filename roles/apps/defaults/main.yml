@@ -26,8 +26,13 @@ common_apps:
   - gum
   - meetsum
   - signal
+  - spotify
   - terminal-experience
+  - eza
+  - fonts
   - tokei
+  - instruqt-cli
+  - oq
 
 # Application states (present/absent)
 # Override in host_vars for host-specific control
@@ -56,6 +61,12 @@ app_states:
   kooha: present
   meetsum: present
   obsidian: present
+  okular: present
   signal: present
+  spotify: present
   terminal-experience: present
+  eza: present
+  fonts: present
   tokei: present
+  instruqt-cli: present
+  oq: present

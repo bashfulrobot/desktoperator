@@ -1,0 +1,192 @@
+---
+# Fonts installation role
+# Manages Nerd Fonts and other fonts
+#
+# Version Management:
+#   - Uses GitHub API to fetch release information
+#   - Stores version metadata locally to avoid re-downloading
+#   - Only updates when published_at timestamp changes
+#   - Default: "latest" (automated, gets newest release)
+#   - Can pin to specific version (e.g., "v3.4.0") in defaults/main.yml
+
+- name: Install font management tools and system fonts
+  ansible.builtin.apt:
+    name:
+      # Font management tools
+      - fontconfig                  # Font configuration library
+      - unzip                       # For extracting font archives
+      - font-manager                # GUI font management tool
+      # System fonts
+      - fonts-noto                  # Google Noto fonts (fallback)
+      - fonts-noto-color-emoji      # Google Noto color emoji
+      - fonts-noto-mono             # Google Noto monospace
+      - fonts-liberation            # Liberation fonts (metric-compatible with proprietary fonts)
+      - fonts-cantarell             # GNOME default sans-serif font
+      - culmus                      # Hebrew fonts collection (includes Aharoni-like fonts)
+      - ttf-mscorefonts-installer   # Microsoft Core Fonts (Arial, Times New Roman, etc.)
+    state: present
+  become: true
+  when: app_states['fonts'] | default('present') == 'present'
+
+- name: Create system fonts directory for Nerd Fonts
+  ansible.builtin.file:
+    path: "{{ system_fonts_dir }}"
+    state: directory
+    mode: '0755'
+  become: true
+  when: app_states['fonts'] | default('present') == 'present'
+
+- name: Create system fonts directory for direct URL fonts
+  ansible.builtin.file:
+    path: "{{ system_fonts_direct_url_dir }}"
+    state: directory
+    mode: '0755'
+  become: true
+  when: app_states['fonts'] | default('present') == 'present'
+
+- name: Create system fonts directory for Google Fonts
+  ansible.builtin.file:
+    path: "{{ system_fonts_google_dir }}"
+    state: directory
+    mode: '0755'
+  become: true
+  when: app_states['fonts'] | default('present') == 'present'
+
+- name: Create system fonts directory for GitHub fonts
+  ansible.builtin.file:
+    path: "{{ system_fonts_github_dir }}"
+    state: directory
+    mode: '0755'
+  become: true
+  when: app_states['fonts'] | default('present') == 'present'
+
+- name: Create Nerd Fonts state directory
+  ansible.builtin.file:
+    path: "{{ nerd_fonts_state_dir }}"
+    state: directory
+    mode: '0755'
+  become: true
+  when: app_states['fonts'] | default('present') == 'present'
+
+- name: Create direct URL fonts state directory
+  ansible.builtin.file:
+    path: "{{ direct_url_fonts_state_dir }}"
+    state: directory
+    mode: '0755'
+  become: true
+  when: app_states['fonts'] | default('present') == 'present'
+
+- name: Create Google Fonts state directory
+  ansible.builtin.file:
+    path: "{{ google_fonts_state_dir }}"
+    state: directory
+    mode: '0755'
+  become: true
+  when: app_states['fonts'] | default('present') == 'present'
+
+- name: Create GitHub fonts state directory
+  ansible.builtin.file:
+    path: "{{ github_fonts_state_dir }}"
+    state: directory
+    mode: '0755'
+  become: true
+  when: app_states['fonts'] | default('present') == 'present'
+
+- name: Process each Nerd Font
+  ansible.builtin.include_tasks: install_font.yml
+  loop: "{{ nerd_fonts }}"
+  loop_control:
+    loop_var: font
+  when: app_states['fonts'] | default('present') == 'present'
+
+- name: Process each direct URL font
+  ansible.builtin.include_tasks: install_direct_url_font.yml
+  loop: "{{ direct_url_fonts }}"
+  loop_control:
+    loop_var: font
+  when: app_states['fonts'] | default('present') == 'present'
+
+- name: Process each Google Font
+  ansible.builtin.include_tasks: install_google_font.yml
+  loop: "{{ google_fonts }}"
+  loop_control:
+    loop_var: font
+  when: app_states['fonts'] | default('present') == 'present'
+
+- name: Process each GitHub font
+  ansible.builtin.include_tasks: install_github_font.yml
+  loop: "{{ github_fonts }}"
+  loop_control:
+    loop_var: font
+  when: app_states['fonts'] | default('present') == 'present'
+
+- name: Update font cache
+  ansible.builtin.command: fc-cache -f -v
+  become: true
+  changed_when: true
+  when:
+    - app_states['fonts'] | default('present') == 'present'
+    - fonts_were_updated | default(false)
+
+# Cleanup when absent
+- name: Remove Nerd Fonts directory when absent
+  ansible.builtin.file:
+    path: "{{ system_fonts_dir }}"
+    state: absent
+  become: true
+  when: app_states['fonts'] | default('present') == 'absent'
+
+- name: Remove direct URL fonts directory when absent
+  ansible.builtin.file:
+    path: "{{ system_fonts_direct_url_dir }}"
+    state: absent
+  become: true
+  when: app_states['fonts'] | default('present') == 'absent'
+
+- name: Remove Google Fonts directory when absent
+  ansible.builtin.file:
+    path: "{{ system_fonts_google_dir }}"
+    state: absent
+  become: true
+  when: app_states['fonts'] | default('present') == 'absent'
+
+- name: Remove GitHub fonts directory when absent
+  ansible.builtin.file:
+    path: "{{ system_fonts_github_dir }}"
+    state: absent
+  become: true
+  when: app_states['fonts'] | default('present') == 'absent'
+
+- name: Remove Nerd Fonts state directory when absent
+  ansible.builtin.file:
+    path: "{{ nerd_fonts_state_dir }}"
+    state: absent
+  become: true
+  when: app_states['fonts'] | default('present') == 'absent'
+
+- name: Remove direct URL fonts state directory when absent
+  ansible.builtin.file:
+    path: "{{ direct_url_fonts_state_dir }}"
+    state: absent
+  become: true
+  when: app_states['fonts'] | default('present') == 'absent'
+
+- name: Remove Google Fonts state directory when absent
+  ansible.builtin.file:
+    path: "{{ google_fonts_state_dir }}"
+    state: absent
+  become: true
+  when: app_states['fonts'] | default('present') == 'absent'
+
+- name: Remove GitHub fonts state directory when absent
+  ansible.builtin.file:
+    path: "{{ github_fonts_state_dir }}"
+    state: absent
+  become: true
+  when: app_states['fonts'] | default('present') == 'absent'
+
+- name: Update font cache after removal
+  ansible.builtin.command: fc-cache -f -v
+  become: true
+  changed_when: true
+  when: app_states['fonts'] | default('present') == 'absent'

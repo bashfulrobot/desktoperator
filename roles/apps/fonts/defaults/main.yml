@@ -1,0 +1,107 @@
+---
+# Nerd Fonts version strategy
+# Options:
+#   - "latest": Always fetch newest release (automated but may introduce breaking changes)
+#   - "v3.4.0": Pin to specific version (stable but requires manual updates)
+#
+# TODO: Consider implementing automated version update checks that:
+#   - Fetch latest version from GitHub API
+#   - Compare with pinned version
+#   - Generate notification/report of available updates
+#   - Potentially auto-update with approval workflow
+nerd_fonts_default_version: "latest"
+
+# Nerd Fonts to install from GitHub releases
+# Each font can override the default version if needed
+nerd_fonts:
+  - name: "JetBrainsMono"
+    version: "{{ nerd_fonts_default_version }}"
+  - name: "Ubuntu"
+    version: "{{ nerd_fonts_default_version }}"
+  - name: "UbuntuMono"
+    version: "{{ nerd_fonts_default_version }}"
+  - name: "UbuntuSans"
+    version: "{{ nerd_fonts_default_version }}"
+  - name: "VictorMono"
+    version: "{{ nerd_fonts_default_version }}"
+  - name: "NerdFontsSymbolsOnly"
+    version: "{{ nerd_fonts_default_version }}"
+  - name: "RobotoMono"
+    version: "{{ nerd_fonts_default_version }}"
+
+# Fonts to install from direct URLs
+# These fonts are not available in Nerd Fonts but have GitHub releases or CDN URLs
+direct_url_fonts:
+  - name: "FontAwesome-7.1.0"
+    url: "https://use.fontawesome.com/releases/v7.1.0/fontawesome-free-7.1.0-desktop.zip"
+    version: "7.1.0"
+  - name: "Inter-4.1"
+    url: "https://github.com/rsms/inter/releases/download/v4.1/Inter-4.1.zip"
+    version: "4.1"
+
+# Google Fonts to install from Google Fonts repository
+# Raw URLs point directly to font files in github.com/google/fonts
+# Format: { name: "FontName", files: ["file1.ttf", "file2.ttf"], font_path: "ofl/fontdir" }
+google_fonts:
+  - name: "WorkSans"
+    font_path: "ofl/worksans"
+    files:
+      - "WorkSans[wght].ttf"
+      - "WorkSans-Italic[wght].ttf"
+
+# GitHub-hosted fonts (from various repositories)
+# Raw URLs point directly to font files in repositories
+# Format: { name: "FontName", repo: "user/repo", branch: "master", files: ["file.ttf"] }
+github_fonts:
+  - name: "SFPro"
+    repo: "sahibjotsaggu/San-Francisco-Pro-Fonts"
+    branch: "master"
+    files:
+      - "SF-Pro.ttf"
+      - "SF-Pro-Italic.ttf"
+      - "SF-Pro-Display-Regular.otf"
+      - "SF-Pro-Display-Bold.otf"
+      - "SF-Pro-Display-Medium.otf"
+      - "SF-Pro-Display-Semibold.otf"
+  - name: "Helvetica"
+    repo: "helvetica-font/helvetica-font.github.io"
+    branch: "master"
+    files:
+      - "fonts/Helvetica.ttf"
+      - "fonts/Helvetica-Bold.ttf"
+      - "fonts/Helvetica-Light.ttf"
+
+# System font directories
+system_fonts_dir: "/usr/local/share/fonts/nerd-fonts"
+system_fonts_direct_url_dir: "/usr/local/share/fonts/direct-fonts"
+system_fonts_google_dir: "/usr/local/share/fonts/google-fonts"
+system_fonts_github_dir: "/usr/local/share/fonts/github-fonts"
+
+# Version metadata directories
+nerd_fonts_state_dir: "/var/lib/ansible/nerd-fonts"
+direct_url_fonts_state_dir: "/var/lib/ansible/direct-fonts"
+google_fonts_state_dir: "/var/lib/ansible/google-fonts"
+github_fonts_state_dir: "/var/lib/ansible/github-fonts"
+
+# Base URLs for font downloads
+google_fonts_base_url: "https://raw.githubusercontent.com/google/fonts/main"
+github_fonts_base_url: "https://raw.githubusercontent.com"
+
+# Fonts installed via APT (documented here for reference):
+# - fonts-noto, fonts-noto-color-emoji, fonts-noto-mono
+# - fonts-liberation (Helvetica alternative)
+# - fonts-cantarell (GNOME default)
+# - culmus (Hebrew fonts including Aharoni-like fonts)
+# - ttf-mscorefonts-installer (Microsoft Core Fonts: Arial, Times New Roman, Courier New, etc.)
+#
+# Fonts NOT available:
+# - noto-fonts-monochrome-emoji: Use fonts-noto-color-emoji instead
+#
+# Note on proprietary fonts (SF Pro, Helvetica): These fonts are from unofficial repositories.
+# The original fonts are proprietary and require licensing for commercial use.
+# Use at your own risk and ensure compliance with licensing terms.
+#
+# Adding more Google Fonts:
+# Browse available fonts at: https://github.com/google/fonts/tree/main/ofl
+# Variable fonts use [wght] notation for weight variations
+# Example: To add "Roboto", check github.com/google/fonts/tree/main/ofl/roboto for files

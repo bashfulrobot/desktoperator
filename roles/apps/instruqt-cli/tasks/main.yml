@@ -1,0 +1,21 @@
+---
+# Instruqt CLI installation
+# Interactive lab platform CLI tool
+# https://github.com/instruqt/cli
+
+- name: Install instruqt-cli from GitHub
+  ansible.builtin.include_tasks: ../../system/tasks/includes/github_release.yml
+  vars:
+    org: instruqt
+    repo: cli
+    binary_name: instruqt
+    version: latest
+    filename_substring: instruqt-linux.zip
+  when: app_states['instruqt-cli'] | default('present') == 'present'
+
+- name: Remove instruqt-cli binary when absent
+  file:
+    path: /usr/local/bin/instruqt
+    state: absent
+  when: app_states['instruqt-cli'] | default('present') == 'absent'
+  become: yes
