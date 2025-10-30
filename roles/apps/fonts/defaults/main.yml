@@ -66,10 +66,11 @@ github_fonts:
   - name: "Helvetica"
     repo: "helvetica-font/helvetica-font.github.io"
     branch: "master"
+    base_path: "fonts"
     files:
-      - "fonts/Helvetica.ttf"
-      - "fonts/Helvetica-Bold.ttf"
-      - "fonts/Helvetica-Light.ttf"
+      - "Helvetica.ttf"
+      - "Helvetica-Bold.ttf"
+      - "Helvetica-Light.ttf"
 
 # System font directories
 system_fonts_dir: "/usr/local/share/fonts/nerd-fonts"

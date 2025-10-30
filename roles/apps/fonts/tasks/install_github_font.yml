@@ -29,8 +29,8 @@
   block:
     - name: "Download font files for {{ font.name }}"
       ansible.builtin.get_url:
-        url: "{{ github_fonts_base_url }}/{{ font.repo }}/{{ font.branch }}/{{ item }}"
-        dest: "{{ system_fonts_github_dir }}/{{ item }}"
+        url: "{{ github_fonts_base_url }}/{{ font.repo }}/{{ font.branch }}/{{ font.base_path | default('') }}{{ '/' if font.base_path is defined else '' }}{{ item }}"
+        dest: "{{ system_fonts_github_dir }}/{{ item | basename }}"
         mode: '0644'
       loop: "{{ font.files }}"
       become: true
