@@ -1,0 +1,9 @@
+{
+    (
+        modifiers: [
+            Ctrl,
+            Alt,
+        ],
+        key: "p",
+    ): System(Screenshot),
+}
