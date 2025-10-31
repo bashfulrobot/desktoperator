@@ -48,6 +48,7 @@ app_states:
   starship: present
   shadowenv: present
   todoist: present
+  teams_for_linux: present
   firefox: present
   vivaldi: absent
   vscode: present

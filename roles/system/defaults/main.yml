@@ -81,6 +81,8 @@ version_strategy: latest
 flatpak_apps:
   - name: com.todoist.Todoist
     app_state_key: todoist
+  - name: com.github.IsmaelMartinez.teams_for_linux
+    app_state_key: teams_for_linux
   - name: io.github.seadve.Kooha
     app_state_key: kooha
   - name: md.obsidian.Obsidian
