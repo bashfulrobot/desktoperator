@@ -1,0 +1,88 @@
+---
+# zns installation - DNS lookup tool
+# https://github.com/znscli/zns
+
+- name: Check if zns is already installed
+  stat:
+    path: /usr/local/bin/zns
+  register: zns_binary
+  when: app_states['zns'] | default('present') == 'present'
+
+- name: Get installed zns version
+  command: /usr/local/bin/zns --version
+  register: zns_installed_version
+  changed_when: false
+  failed_when: false
+  when:
+    - app_states['zns'] | default('present') == 'present'
+    - zns_binary.stat.exists
+
+- name: Download and install zns
+  block:
+    - name: Download zns
+      get_url:
+        url: "https://github.com/znscli/zns/releases/download/v{{ zns_version }}/zns_{{ zns_version }}_linux_amd64.tar.gz"
+        dest: "/tmp/zns_{{ zns_version }}.tar.gz"
+        mode: '0644'
+
+    - name: Extract zns
+      unarchive:
+        src: "/tmp/zns_{{ zns_version }}.tar.gz"
+        dest: "/tmp"
+        remote_src: yes
+
+    - name: Install zns binary
+      copy:
+        src: /tmp/zns
+        dest: /usr/local/bin/zns
+        owner: root
+        group: root
+        mode: '0755'
+        remote_src: yes
+      become: yes
+
+    - name: Clean up temporary files
+      file:
+        path: "{{ item }}"
+        state: absent
+      loop:
+        - "/tmp/zns_{{ zns_version }}.tar.gz"
+        - /tmp/zns
+        - /tmp/LICENSE
+        - /tmp/README.md
+  when:
+    - app_states['zns'] | default('present') == 'present'
+    - not zns_binary.stat.exists or (zns_installed_version.stdout is defined and zns_version not in zns_installed_version.stdout)
+
+# Fish shell integration
+- name: Create fish conf.d directory
+  file:
+    path: "{{ user.home }}/.config/fish/conf.d"
+    state: directory
+    owner: "{{ user.name }}"
+    group: "{{ user.name }}"
+    mode: '0755'
+  when: app_states['zns'] | default('present') == 'present'
+
+- name: Deploy fish abbreviation for zns
+  template:
+    src: zns.fish.j2
+    dest: "{{ user.home }}/.config/fish/conf.d/zns.fish"
+    owner: "{{ user.name }}"
+    group: "{{ user.name }}"
+    mode: '0644'
+  when: app_states['zns'] | default('present') == 'present'
+
+# Cleanup when absent
+- name: Remove zns binary when absent
+  file:
+    path: /usr/local/bin/zns
+    state: absent
+  become: yes
+  when: app_states['zns'] | default('present') == 'absent'
+
+- name: Remove fish abbreviation for zns when absent
+  file:
+    path: "{{ user.home }}/.config/fish/conf.d/zns.fish"
+    state: absent
+  when: app_states['zns'] | default('present') == 'absent'

@@ -180,3 +180,9 @@
     name: apps/pake
   tags: [pake, cli, development, desktop]
   when: "'pake' in common_apps or app_states['pake'] is defined"
+
+- name: Include zns DNS lookup tool
+  include_role:
+    name: apps/zns
+  tags: [zns, cli, network, dns]
+  when: "'zns' in common_apps or app_states['zns'] is defined"

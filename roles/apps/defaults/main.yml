@@ -34,6 +34,7 @@ common_apps:
   - instruqt-cli
   - oq
   - pake
+  - zns
 
 # Application states (present/absent)
 # Override in host_vars for host-specific control
@@ -73,3 +74,4 @@ app_states:
   instruqt-cli: present
   oq: present
   pake: present
+  zns: present
