@@ -2,187 +2,187 @@
 # Apps role - application installations
 
 - name: Include 1Password installation
-  include_role:
+  import_role:
     name: apps/1password
   tags: [1password]
   when: "'1password' in common_apps or app_states['1password'] is defined"
 
 - name: Include restic/autorestic installation
-  include_role:
+  import_role:
     name: apps/restic
   tags: [restic, backup]
   when: "'restic' in common_apps or app_states['restic'] is defined"
 
 - name: Include Helix editor installation
-  include_role:
+  import_role:
     name: apps/helix
   tags: [helix, editor]
   when: "'helix' in common_apps or app_states['helix'] is defined"
 
 - name: Include Zellij terminal multiplexer
-  include_role:
+  import_role:
     name: apps/zellij
   tags: [zellij, terminal]
   when: "'zellij' in common_apps or app_states['zellij'] is defined"
 
 - name: Include Zen Browser
-  include_role:
+  import_role:
     name: apps/zen-browser
   tags: [zen-browser, browser]
   when: "'zen-browser' in common_apps or app_states['zen-browser'] is defined"
 
 - name: Include Slack
-  include_role:
+  import_role:
     name: apps/slack
   tags: [slack, communication]
   when: "'slack' in common_apps or app_states['slack'] is defined"
 
 - name: Include Claude Code
-  include_role:
+  import_role:
     name: apps/claude-code
   tags: [claude-code, ai, development]
   when: "'claude-code' in common_apps or app_states['claude-code'] is defined"
 
 - name: Include Starship prompt
-  include_role:
+  import_role:
     name: apps/starship
   tags: [starship, shell, prompt]
   when: "'starship' in common_apps or app_states['starship'] is defined"
 
 - name: Include Shadowenv directory-based env manager
-  include_role:
+  import_role:
     name: apps/shadowenv
   tags: [shadowenv, shell, environment]
   when: "'shadowenv' in common_apps or app_states['shadowenv'] is defined"
 
 - name: Include Firefox browser
-  include_role:
+  import_role:
     name: apps/firefox
   tags: [firefox, browser]
   when: "'firefox' in common_apps or app_states['firefox'] is defined"
 
 - name: Include Vivaldi browser
-  include_role:
+  import_role:
     name: apps/vivaldi
   tags: [vivaldi, browser]
   when: "'vivaldi' in common_apps or app_states['vivaldi'] is defined"
 
 - name: Include Visual Studio Code
-  include_role:
+  import_role:
     name: apps/vscode
   tags: [vscode, editor, development]
   when: "'vscode' in common_apps or app_states['vscode'] is defined"
 
 - name: Include Google Chrome
-  include_role:
+  import_role:
     name: apps/chrome
   tags: [chrome, browser]
   when: "'chrome' in common_apps or app_states['chrome'] is defined"
 
 - name: Include Zoom
-  include_role:
+  import_role:
     name: apps/zoom
   tags: [zoom, communication]
   when: "'zoom' in common_apps or app_states['zoom'] is defined"
 
 - name: Include Insync
-  include_role:
+  import_role:
     name: apps/insync
   tags: [insync, sync, cloud]
   when: "'insync' in common_apps or app_states['insync'] is defined"
 
 - name: Include Gemini CLI
-  include_role:
+  import_role:
     name: apps/gemini-cli
   tags: [gemini-cli, ai, cli]
   when: "'gemini-cli' in common_apps or app_states['gemini-cli'] is defined"
 
 - name: Include Codex CLI
-  include_role:
+  import_role:
     name: apps/codex-cli
   tags: [codex-cli, ai, cli]
   when: "'codex-cli' in common_apps or app_states['codex-cli'] is defined"
 
 - name: Include SiteMCP
-  include_role:
+  import_role:
     name: apps/sitemcp
   tags: [sitemcp, mcp, cli]
   when: "'sitemcp' in common_apps or app_states['sitemcp'] is defined"
 
 - name: Include Glow markdown reader
-  include_role:
+  import_role:
     name: apps/glow
   tags: [glow, markdown, cli, terminal]
   when: "'glow' in common_apps or app_states['glow'] is defined"
 
 - name: Include Gum shell scripts
-  include_role:
+  import_role:
     name: apps/gum
   tags: [gum, shell, cli, terminal]
   when: "'gum' in common_apps or app_states['gum'] is defined"
 
 - name: Include Meetsum meeting summary generator
-  include_role:
+  import_role:
     name: apps/meetsum
   tags: [meetsum, cli, ai, meetings]
   when: "'meetsum' in common_apps or app_states['meetsum'] is defined"
 
 - name: Include Signal messenger
-  include_role:
+  import_role:
     name: apps/signal
   tags: [signal, communication]
   when: "'signal' in common_apps or app_states['signal'] is defined"
 
 - name: Include Spotify music clients
-  include_role:
+  import_role:
     name: apps/spotify
   tags: [spotify, music, media]
   when: "'spotify' in common_apps or app_states['spotify'] is defined"
 
 - name: Include Terminal Experience
-  include_role:
+  import_role:
     name: apps/terminal-experience
   tags: [terminal-experience, terminal, cli]
   when: "'terminal-experience' in common_apps or app_states['terminal-experience'] is defined"
 
 - name: Include eza modern ls replacement
-  include_role:
+  import_role:
     name: apps/eza
   tags: [eza, cli, terminal]
   when: "'eza' in common_apps or app_states['eza'] is defined"
 
 - name: Include Fonts installation
-  include_role:
+  import_role:
     name: apps/fonts
   tags: [fonts]
   when: "'fonts' in common_apps or app_states['fonts'] is defined"
 
 - name: Include Tokei code statistics
-  include_role:
+  import_role:
     name: apps/tokei
   tags: [tokei, cli, development]
   when: "'tokei' in common_apps or app_states['tokei'] is defined"
 
 - name: Include Instruqt CLI
-  include_role:
+  import_role:
     name: apps/instruqt-cli
   tags: [instruqt-cli, cli, development]
   when: "'instruqt-cli' in common_apps or app_states['instruqt-cli'] is defined"
 
 - name: Include oq performant jq alternative
-  include_role:
+  import_role:
     name: apps/oq
   tags: [oq, cli, development, json]
   when: "'oq' in common_apps or app_states['oq'] is defined"
 
 - name: Include Pake CLI web-to-desktop app builder
-  include_role:
+  import_role:
     name: apps/pake
   tags: [pake, cli, development, desktop]
   when: "'pake' in common_apps or app_states['pake'] is defined"
 
 - name: Include zns DNS lookup tool
-  include_role:
+  import_role:
     name: apps/zns
   tags: [zns, cli, network, dns]
   when: "'zns' in common_apps or app_states['zns'] is defined"
