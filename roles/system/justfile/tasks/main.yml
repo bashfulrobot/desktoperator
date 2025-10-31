@@ -143,3 +143,27 @@
     mode: '0644'
   become: yes
   tags: [always]
+
+- name: Create fish conf.d directory for jsys aliases
+  file:
+    path: "{{ user.home }}/.config/fish/conf.d"
+    state: directory
+    owner: "{{ user.name }}"
+    mode: '0755'
+  become: yes
+  tags: [always]
+
+- name: Deploy jsys fish aliases
+  copy:
+    content: |
+      # jsys command aliases
+      # Managed by Ansible - changes may be overwritten
+      alias ua='jsys update-all'
+      alias au='jsys update-ansible'
+      alias uat='jsys update-ansible-tags'
+      alias uast='jsys update-ansible-skip-tags'
+    dest: "{{ user.home }}/.config/fish/conf.d/jsys-aliases.fish"
+    owner: "{{ user.name }}"
+    mode: '0644'
+  become: yes
+  tags: [always]
