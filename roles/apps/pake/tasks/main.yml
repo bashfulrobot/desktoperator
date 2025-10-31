@@ -2,18 +2,100 @@
 # Pake CLI installation tasks
 # Turns webpages into desktop apps using Rust and Tauri
 
-- name: Install pake-cli globally via npm
-  shell: npm install -g pake-cli
+- name: Check if rustup is installed
+  command: which rustup
+  register: rustup_installed
+  changed_when: false
+  failed_when: false
+  when: app_states['pake'] | default('present') == 'present'
+
+- name: Download rustup installer
+  get_url:
+    url: https://sh.rustup.rs
+    dest: /tmp/rustup-init.sh
+    mode: '0755'
+  when:
+    - app_states['pake'] | default('present') == 'present'
+    - rustup_installed.rc != 0
+
+- name: Install Rust via rustup
+  shell: bash /tmp/rustup-init.sh -y
+  environment:
+    HOME: "{{ user.home }}"
   become: yes
+  become_user: "{{ user.name }}"
+  when:
+    - app_states['pake'] | default('present') == 'present'
+    - rustup_installed.rc != 0
+
+- name: Clean up rustup installer
+  file:
+    path: /tmp/rustup-init.sh
+    state: absent
+  when:
+    - app_states['pake'] | default('present') == 'present'
+    - rustup_installed.rc != 0
+
+- name: Install Tauri system dependencies for Pake
+  apt:
+    name:
+      - libwebkit2gtk-4.1-dev
+      - build-essential
+      - curl
+      - wget
+      - libssl-dev
+      - libgtk-3-dev
+      - libayatana-appindicator3-dev
+      - librsvg2-dev
+      - pkg-config
+      - imagemagick
+    state: present
+    update_cache: yes
+  become: yes
+  when: app_states['pake'] | default('present') == 'present'
+
+- name: Install pake-cli globally as user (not root)
+  shell: npm install -g pake-cli
+  environment:
+    HOME: "{{ user.home }}"
+    npm_config_prefix: "{{ user.home }}/.local"
+  become: yes
+  become_user: "{{ user.name }}"
   when: app_states['pake'] | default('present') == 'present'
   register: pake_install
   failed_when: false
   changed_when: pake_install.rc == 0
 
-- name: Uninstall pake-cli globally via npm
+- name: Ensure Fish conf.d directory exists
+  file:
+    path: "{{ user.home }}/.config/fish/conf.d"
+    state: directory
+    owner: "{{ user.name }}"
+    mode: '0755'
+  when: app_states['pake'] | default('present') == 'present'
+
+- name: Deploy pake wrapper function to Fish
+  copy:
+    src: pake-wrapper.fish
+    dest: "{{ user.home }}/.config/fish/conf.d/pake-wrapper.fish"
+    owner: "{{ user.name }}"
+    mode: '0644'
+  when: app_states['pake'] | default('present') == 'present'
+
+- name: Uninstall pake-cli from user installation
   shell: npm uninstall -g pake-cli
+  environment:
+    HOME: "{{ user.home }}"
+    npm_config_prefix: "{{ user.home }}/.local"
   become: yes
+  become_user: "{{ user.name }}"
   when: app_states['pake'] | default('present') == 'absent'
   register: pake_uninstall
   failed_when: false
   changed_when: pake_uninstall.rc == 0
+
+- name: Remove pake wrapper function from Fish
+  file:
+    path: "{{ user.home }}/.config/fish/conf.d/pake-wrapper.fish"
+    state: absent
+  when: app_states['pake'] | default('present') == 'absent'
