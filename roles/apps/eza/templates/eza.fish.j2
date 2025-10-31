@@ -4,15 +4,16 @@
 # Check if eza is available
 if type -q eza
     # Main ls replacement with comprehensive options
-    # Format: long listing with header and inode
+    # Format: long listing with header
     # Sorting: directories first
     # Visual: icons and colors
     # Git: show git status and repo info
     # Time: custom format YYYY-MM-DD HH:MM
-    alias ls="eza --long --header --inode --group-directories-first --icons=auto --color=auto --git --git-repos --time-style='+%Y-%m-%d %H:%M'"
+    # Permissions: octal format (e.g., 755, 644)
+    alias ls="eza --long --header --octal-permissions --group-directories-first --icons=auto --color=auto --git --git-repos --time-style='+%Y-%m-%d %H:%M'"
 
     # Common variants
-    alias la="eza --long --header --inode --group-directories-first --icons=auto --color=auto --git --git-repos --time-style='+%Y-%m-%d %H:%M' --all"
-    alias lt="eza --long --header --inode --group-directories-first --icons=auto --color=auto --git --git-repos --time-style='+%Y-%m-%d %H:%M' --tree"
-    alias lta="eza --long --header --inode --group-directories-first --icons=auto --color=auto --git --git-repos --time-style='+%Y-%m-%d %H:%M' --tree --all"
+    alias la="eza --long --header --octal-permissions --group-directories-first --icons=auto --color=auto --git --git-repos --time-style='+%Y-%m-%d %H:%M' --all"
+    alias lt="eza --long --header --octal-permissions --group-directories-first --icons=auto --color=auto --git --git-repos --time-style='+%Y-%m-%d %H:%M' --tree"
+    alias lta="eza --long --header --octal-permissions --group-directories-first --icons=auto --color=auto --git --git-repos --time-style='+%Y-%m-%d %H:%M' --tree --all"
 end
