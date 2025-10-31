@@ -24,9 +24,9 @@ prompt_password() {
     local password_confirm
 
     while true; do
-        read -s -p "$prompt: " password
+        read -r -s -p "$prompt: " password
         echo ""
-        read -s -p "Confirm $prompt: " password_confirm
+        read -r -s -p "Confirm $prompt: " password_confirm
         echo ""
 
         if [ "$password" == "$password_confirm" ]; then
@@ -56,7 +56,7 @@ echo "-------------------------------"
 
 if [ -f ".vault_pass" ]; then
     echo "✓ .vault_pass already exists"
-    read -p "Recreate it? (y/N): " recreate
+    read -r -p "Recreate it? (y/N): " recreate
     if [[ ! "$recreate" =~ ^[Yy]$ ]]; then
         SKIP_VAULT_PASS=true
     fi
@@ -68,7 +68,7 @@ if [ "${SKIP_VAULT_PASS:-false}" != "true" ]; then
     echo "1) Enter manually"
     echo "2) Generate random (recommended)"
     echo "3) Retrieve from 1Password"
-    read -p "Choice [2]: " vault_choice
+    read -r -p "Choice [2]: " vault_choice
     vault_choice=${vault_choice:-2}
 
     case $vault_choice in
@@ -83,11 +83,11 @@ if [ "${SKIP_VAULT_PASS:-false}" != "true" ]; then
             echo "IMPORTANT: Save this vault password securely!"
             echo "Vault Password: $VAULT_PASSWORD"
             echo ""
-            read -p "Press Enter after you've saved this password..."
+            read -r -p "Press Enter after you've saved this password..."
             ;;
         3)
             if command -v op &> /dev/null; then
-                eval $(op signin)
+                eval "$(op signin)"
                 VAULT_PASSWORD=$(op read "op://Private/Ansible Vault/password")
                 create_secure_file ".vault_pass" "$VAULT_PASSWORD" "600"
             else
@@ -106,11 +106,11 @@ echo "-----------------------------"
 if [ -f "group_vars/all/vault.yml" ]; then
     echo "✓ vault.yml already exists"
     # Check if it's encrypted
-    if head -1 "group_vars/all/vault.yml" | grep -q '\$ANSIBLE_VAULT'; then
+    if head -1 "group_vars/all/vault.yml" | grep -q "\$ANSIBLE_VAULT"; then
         echo "✓ vault.yml is encrypted"
     else
         echo "⚠️  vault.yml exists but is NOT encrypted!"
-        read -p "Encrypt it now? (Y/n): " encrypt_now
+        read -r -p "Encrypt it now? (Y/n): " encrypt_now
         if [[ ! "$encrypt_now" =~ ^[Nn]$ ]]; then
             ansible-vault encrypt group_vars/all/vault.yml
             chmod 600 group_vars/all/vault.yml
@@ -126,12 +126,12 @@ else
     echo "1) Edit vault.yml with your actual secrets: vim group_vars/all/vault.yml"
     echo "2) Then run this script again to encrypt it"
     echo ""
-    read -p "Press Enter to open vault.yml in your editor..."
+    read -r -p "Press Enter to open vault.yml in your editor..."
 
     ${EDITOR:-vim} group_vars/all/vault.yml
 
     echo ""
-    read -p "Encrypt vault.yml now? (Y/n): " encrypt_now
+    read -r -p "Encrypt vault.yml now? (Y/n): " encrypt_now
     if [[ ! "$encrypt_now" =~ ^[Nn]$ ]]; then
         ansible-vault encrypt group_vars/all/vault.yml
         chmod 600 group_vars/all/vault.yml
@@ -144,7 +144,7 @@ echo ""
 echo "Step 3: Additional Sensitive Files (Optional)"
 echo "----------------------------------------------"
 
-read -p "Create SSH config with sensitive hosts? (y/N): " create_ssh_config
+read -r -p "Create SSH config with sensitive hosts? (y/N): " create_ssh_config
 if [[ "$create_ssh_config" =~ ^[Yy]$ ]]; then
     mkdir -p files/home/.ssh
     if [ ! -f "files/home/.ssh/config" ]; then
@@ -179,7 +179,7 @@ echo "Checking file permissions..."
 
 # Check if vault is encrypted
 if [ -f "group_vars/all/vault.yml" ]; then
-    if head -1 "group_vars/all/vault.yml" | grep -q '\$ANSIBLE_VAULT'; then
+    if head -1 "group_vars/all/vault.yml" | grep -q "\$ANSIBLE_VAULT"; then
         echo "✓ vault.yml is encrypted"
     else
         echo "⚠️  vault.yml is NOT encrypted!"
