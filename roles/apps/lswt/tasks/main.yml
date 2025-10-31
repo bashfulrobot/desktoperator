@@ -1,0 +1,65 @@
+---
+# lswt - List Wayland Toplevels
+# A tool to list Wayland windows with their app-id and other properties
+
+- name: Install lswt runtime dependencies
+  ansible.builtin.apt:
+    name:
+      - libwayland-client0
+    state: present
+  become: true
+  when: app_states['lswt'] | default('present') == 'present'
+
+- name: Copy lswt .deb package to /tmp
+  ansible.builtin.copy:
+    src: lswt_1.0.0.deb
+    dest: /tmp/lswt_1.0.0.deb
+    mode: '0644'
+  when: app_states['lswt'] | default('present') == 'present'
+  become: true
+
+- name: Install lswt .deb package
+  ansible.builtin.apt:
+    deb: /tmp/lswt_1.0.0.deb
+    state: present
+  become: true
+  when: app_states['lswt'] | default('present') == 'present'
+
+- name: Clean up lswt .deb package from /tmp
+  ansible.builtin.file:
+    path: /tmp/lswt_1.0.0.deb
+    state: absent
+  become: true
+  when: app_states['lswt'] | default('present') == 'present'
+
+- name: Ensure Fish conf.d directory exists
+  ansible.builtin.file:
+    path: "{{ user.home }}/.config/fish/conf.d"
+    state: directory
+    owner: "{{ user.name }}"
+    mode: '0755'
+  when: app_states['lswt'] | default('present') == 'present'
+
+- name: Deploy get-app-id alias to Fish
+  ansible.builtin.copy:
+    content: |
+      # Alias for lswt with JSON output
+      alias get-app-id='lswt -j'
+    dest: "{{ user.home }}/.config/fish/conf.d/lswt-aliases.fish"
+    owner: "{{ user.name }}"
+    mode: '0644'
+  when: app_states['lswt'] | default('present') == 'present'
+
+- name: Remove lswt when absent
+  ansible.builtin.apt:
+    name: lswt
+    state: absent
+    purge: true
+  become: true
+  when: app_states['lswt'] | default('present') == 'absent'
+
+- name: Remove lswt Fish aliases when absent
+  ansible.builtin.file:
+    path: "{{ user.home }}/.config/fish/conf.d/lswt-aliases.fish"
+    state: absent
+  when: app_states['lswt'] | default('present') == 'absent'
