@@ -1,0 +1,19 @@
+---
+# Pake CLI installation tasks
+# Turns webpages into desktop apps using Rust and Tauri
+
+- name: Install pake-cli globally via npm
+  shell: npm install -g pake-cli
+  become: yes
+  when: app_states['pake'] | default('present') == 'present'
+  register: pake_install
+  failed_when: false
+  changed_when: pake_install.rc == 0
+
+- name: Uninstall pake-cli globally via npm
+  shell: npm uninstall -g pake-cli
+  become: yes
+  when: app_states['pake'] | default('present') == 'absent'
+  register: pake_uninstall
+  failed_when: false
+  changed_when: pake_uninstall.rc == 0

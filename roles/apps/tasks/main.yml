@@ -174,3 +174,9 @@
     name: apps/oq
   tags: [oq, cli, development, json]
   when: "'oq' in common_apps or app_states['oq'] is defined"
+
+- name: Include Pake CLI web-to-desktop app builder
+  include_role:
+    name: apps/pake
+  tags: [pake, cli, development, desktop]
+  when: "'pake' in common_apps or app_states['pake'] is defined"

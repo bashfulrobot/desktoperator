@@ -33,6 +33,7 @@ common_apps:
   - tokei
   - instruqt-cli
   - oq
+  - pake
 
 # Application states (present/absent)
 # Override in host_vars for host-specific control
@@ -71,3 +72,4 @@ app_states:
   tokei: present
   instruqt-cli: present
   oq: present
+  pake: present
