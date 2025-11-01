@@ -54,7 +54,16 @@ cosmic-capture:
     echo "→ Running capture script..."
     ./scripts/capture-cosmic-config.sh
     echo ""
-    echo "Review changes with: git diff roles/desktop/cosmic/config/"
+
+    # Show what changed in cosmic config
+    if git diff --quiet roles/desktop/cosmic/config/; then
+        echo "No changes detected in cosmic config"
+    else
+        echo "Changed files in roles/desktop/cosmic/config/:"
+        git diff --name-status roles/desktop/cosmic/config/
+    fi
+
+    echo ""
     echo "Commit with: just -f {{ ansible_dir }}/justfiles/git commit"
     success "COSMIC configuration captured"
 
