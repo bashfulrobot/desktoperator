@@ -1,0 +1,708 @@
+# Pake Docker wrapper function
+# Builds desktop apps from websites using the Pake Docker container
+# Defaults: AppImage format, 1400x900 window, automatic window class detection,
+#           notifications enabled
+#
+# Requirements: Docker, lswt, jq
+#
+# Usage: create-web-app <url> <name> [options...]
+#
+# COMMON OPTIONS:
+#   Window Size & Behavior:
+#     --width <px>              Window width (default: 1400)
+#     --height <px>             Window height (default: 900)
+#     --maximize                Start maximized
+#     --fullscreen              Start in fullscreen
+#     --always-on-top           Keep window on top of others
+#
+#   System Integration:
+#     --show-system-tray        Add to system tray
+#     --hide-on-close           Minimize to tray instead of quit
+#     --multi-instance          Allow multiple windows
+#
+#   Privacy & Security:
+#     --incognito               Private browsing mode (no cache/cookies)
+#     --disabled-web-shortcuts  Disable web shortcuts in container
+#     --user-agent <string>     Custom browser user agent
+#
+#   Customization:
+#     --icon <path>             Custom icon file (auto-fetches if omitted)
+#     --inject <css|js>         Inject custom CSS or JavaScript
+#
+# NOTES:
+#   - Notifications are enabled by default (requests permission on first launch)
+#   - To disable, provide your own --inject without notification request
+#
+# USE CASE EXAMPLES:
+#
+#   Basic app:
+#     create-web-app https://github.com GitHub
+#
+#   Messaging app (runs in background):
+#     create-web-app https://web.whatsapp.com WhatsApp \
+#       --show-system-tray --hide-on-close --width 1200 --height 800
+#
+#   Productivity app (email, docs):
+#     create-web-app https://mail.google.com Gmail \
+#       --maximize --width 1600 --height 1000
+#
+#   Privacy-focused app:
+#     create-web-app https://facebook.com Facebook \
+#       --incognito --disabled-web-shortcuts
+#
+#   Utility tool (calculator, translator):
+#     create-web-app https://translate.google.com Translate \
+#       --always-on-top --width 800 --height 600
+#
+#   Custom icon and size:
+#     create-web-app https://example.com MyApp \
+#       --icon ~/my-icon.png --width 1280 --height 720
+#
+#   Multiple instances allowed:
+#     create-web-app https://notion.so Notion --multi-instance
+#
+# ADVANCED USAGE:
+#
+#   Block ads with custom CSS:
+#     echo '.ads-banner { display: none !important; }' > /tmp/block-ads.css
+#     create-web-app https://example.com MyApp --inject /tmp/block-ads.css
+#
+#   Force dark mode with CSS:
+#     echo 'body { background: #1a1a1a !important; color: #fff !important; }' > /tmp/dark.css
+#     create-web-app https://example.com MyApp --inject /tmp/dark.css
+#
+#   Add custom keyboard shortcuts:
+#     echo 'document.addEventListener("keydown", (e) => {
+#       if (e.ctrlKey && e.key === "k") {
+#         window.location.href = "/search";
+#       }
+#     });' > /tmp/shortcuts.js
+#     create-web-app https://example.com MyApp --inject /tmp/shortcuts.js
+#
+#   Package local HTML/CSS/JS as offline app:
+#     create-web-app ./my-app/index.html MyApp --use-local-file
+#
+# Full options: https://github.com/tw93/Pake/blob/main/docs/cli-usage.md
+# Advanced usage: https://github.com/tw93/Pake/blob/main/docs/advanced-usage.md
+
+function create-web-app --description 'Build desktop apps from websites using Pake via Docker (AppImage format)'
+    # Check for help flag
+    if test (count $argv) -eq 1; and test "$argv[1]" = "--help" -o "$argv[1]" = "-h"
+        echo "create-web-app - Build desktop apps from websites using Pake"
+        echo ""
+        echo "USAGE:"
+        echo "  create-web-app <url> <name> [options...]"
+        echo ""
+        echo "DEFAULTS:"
+        echo "  • AppImage format"
+        echo "  • 1400x900 window"
+        echo "  • Automatic window class detection (for Alt-Tab)"
+        echo "  • Notifications enabled"
+        echo ""
+        echo "COMMON OPTIONS:"
+        echo "  Window & Behavior:"
+        echo "    --width <px>, --height <px>   Window dimensions"
+        echo "    --maximize                     Start maximized"
+        echo "    --fullscreen                   Start in fullscreen"
+        echo "    --always-on-top                Keep window on top"
+        echo ""
+        echo "  System Integration:"
+        echo "    --show-system-tray             Add to system tray"
+        echo "    --hide-on-close                Minimize to tray instead of quit"
+        echo "    --multi-instance               Allow multiple windows"
+        echo ""
+        echo "  Privacy & Security:"
+        echo "    --incognito                    Private browsing mode"
+        echo "    --disabled-web-shortcuts       Disable web shortcuts"
+        echo "    --user-agent <string>          Custom user agent"
+        echo ""
+        echo "  Customization:"
+        echo "    --icon <path>                  Custom icon file"
+        echo "    --inject <css|js>              Inject custom CSS/JavaScript"
+        echo ""
+        echo "EXAMPLES:"
+        echo "  Basic app:"
+        echo "    create-web-app https://github.com GitHub"
+        echo ""
+        echo "  Messaging app (background):"
+        echo "    create-web-app https://web.whatsapp.com WhatsApp \\"
+        echo "      --show-system-tray --hide-on-close"
+        echo ""
+        echo "  Productivity app:"
+        echo "    create-web-app https://mail.google.com Gmail --maximize"
+        echo ""
+        echo "  Privacy mode:"
+        echo "    create-web-app https://facebook.com Facebook --incognito"
+        echo ""
+        echo "  Block ads with CSS:"
+        echo "    echo '.ads { display: none !important; }' > /tmp/block-ads.css"
+        echo "    create-web-app https://example.com MyApp --inject /tmp/block-ads.css"
+        echo ""
+        echo "  Local/offline app:"
+        echo "    create-web-app ./my-app/index.html MyApp --use-local-file"
+        echo ""
+        echo "DOCUMENTATION:"
+        echo "  Full options:    https://github.com/tw93/Pake/blob/main/docs/cli-usage.md"
+        echo "  Advanced usage:  https://github.com/tw93/Pake/blob/main/docs/advanced-usage.md"
+        return 0
+    end
+
+    # Validate required arguments
+    if test (count $argv) -lt 2
+        echo "Error: Missing required arguments"
+        echo ""
+        echo "Usage: create-web-app <url> <name> [options...]"
+        echo ""
+        echo "Examples:"
+        echo "  Basic:     create-web-app https://github.com GitHub"
+        echo "  Chat app:  create-web-app https://web.whatsapp.com WhatsApp --show-system-tray"
+        echo "  Private:   create-web-app https://example.com MyApp --incognito"
+        echo "  Utility:   create-web-app https://translate.google.com Translate --always-on-top"
+        echo ""
+        echo "Run 'create-web-app --help' for full documentation"
+        return 1
+    end
+
+    # Extract URL and name from arguments
+    set -l url $argv[1]
+    set -l name $argv[2]
+    set -l extra_args $argv[3..-1]
+
+    # Check for common mistake: using --name flag
+    if test "$name" = "--name"
+        echo "Error: Don't use --name as a flag"
+        echo ""
+        echo "Correct usage:"
+        echo "  create-web-app <url> <name>"
+        echo ""
+        echo "Example:"
+        echo "  create-web-app https://github.com/user Github"
+        echo ""
+        echo "NOT:"
+        echo "  create-web-app https://github.com/user --name Github"
+        echo ""
+        echo "The function handles --name internally. Just provide the name as the second argument."
+        return 1
+    end
+
+    # Check if Docker is available
+    if not command -v docker &>/dev/null
+        echo "Error: Docker is not installed or not in PATH"
+        echo "Please install Docker first"
+        return 1
+    end
+
+    # Check if lswt is available
+    if not command -v lswt &>/dev/null
+        echo "Error: lswt is not installed or not in PATH"
+        echo "Please install lswt first (required for window class detection)"
+        return 1
+    end
+
+    # Check if jq is available
+    if not command -v jq &>/dev/null
+        echo "Error: jq is not installed or not in PATH"
+        echo "Please install jq first (required for JSON parsing)"
+        return 1
+    end
+
+    # Create temporary output directory
+    set -l output_dir (mktemp -d)
+    echo "Building $name using Pake Docker container..."
+    echo "Output directory: $output_dir"
+
+    # Create notification permission JavaScript file (default behavior)
+    set -l notify_js "$output_dir/enable-notifications.js"
+    echo 'if (window.Notification && Notification.permission === "default") {
+  Notification.requestPermission();
+}' > "$notify_js"
+
+    # Check for custom icon and handle it for Docker
+    set -l has_targets 0
+    set -l has_inject 0
+    set -l custom_icon_path ""
+    set -l user_provided_icon 0
+    set -l modified_args
+
+    set -l i 1
+    while test $i -le (count $extra_args)
+        set -l arg $extra_args[$i]
+
+        # Check for --targets flag
+        if string match -q -- '--targets*' $arg
+            set has_targets 1
+        end
+
+        # Check for --inject flag (user is providing custom injection)
+        if string match -q -- '--inject*' $arg
+            set has_inject 1
+        end
+
+        # Check for --icon flag and next argument
+        if test "$arg" = "--icon"
+            set user_provided_icon 1
+            # Next argument should be the icon path
+            set i (math $i + 1)
+            if test $i -le (count $extra_args)
+                set custom_icon_path $extra_args[$i]
+
+                # Copy icon to temp directory and update path for Docker
+                if test -f "$custom_icon_path"
+                    set -l icon_filename (basename "$custom_icon_path")
+                    set -l icon_dest "$output_dir/$icon_filename"
+
+                    # Convert to RGBA format to avoid build errors
+                    if command -v convert &>/dev/null
+                        echo "Converting icon to RGBA format..."
+                        convert "$custom_icon_path" -alpha set "$icon_dest" 2>/dev/null
+                        if test $status -eq 0
+                            echo "✓ Converted and copied custom icon to temp directory"
+                        else
+                            echo "⚠ Icon conversion failed, copying as-is"
+                            cp "$custom_icon_path" "$icon_dest"
+                        end
+                    else
+                        echo "⚠ ImageMagick not installed, copying icon as-is (may cause RGBA errors)"
+                        cp "$custom_icon_path" "$icon_dest"
+                    end
+
+                    # Use the path inside the container
+                    set modified_args $modified_args --icon "/output/$icon_filename"
+                else
+                    echo "⚠ Warning: Icon file not found: $custom_icon_path"
+                    set modified_args $modified_args --icon $custom_icon_path
+                end
+            end
+        else if test "$custom_icon_path" != ""
+            # Skip this arg, it was the icon path we already handled
+            set custom_icon_path ""
+        else
+            # Keep other arguments as-is
+            set modified_args $modified_args $arg
+        end
+
+        set i (math $i + 1)
+    end
+
+    # If no custom icon was provided, try to fetch from Brandfetch
+    if test $user_provided_icon -eq 0
+        echo "No custom icon provided, attempting to fetch logo from Brandfetch..."
+
+        # Extract full domain from URL
+        set -l full_domain (echo "$url" | sed -E 's|^https?://||' | sed -E 's|/.*$||' | sed -E 's|^www\.||')
+
+        # Extract base domain (e.g., app.asana.com -> asana.com)
+        # Handle common two-part TLDs like .co.uk, .com.au, etc.
+        set -l domain (echo "$full_domain" | awk -F. '{
+            if (NF == 2) {
+                # Already base domain (e.g., github.com)
+                print $0
+            } else if (NF > 2 && ($(NF-1) == "co" || $(NF-1) == "com" || $(NF-1) == "gov" || $(NF-1) == "ac")) {
+                # Handle .co.uk, .com.au, etc. (keep last 3 parts)
+                print $(NF-2)"."$(NF-1)"."$NF
+            } else {
+                # Regular subdomain (keep last 2 parts)
+                print $(NF-1)"."$NF
+            }
+        }')
+
+        if test -n "$domain"
+            echo "Full domain: $full_domain"
+            echo "Base domain: $domain"
+
+            # Try Brandfetch Brand API to get logo URLs
+            echo "Querying Brandfetch API for brand data..."
+            set -l brand_json "$output_dir/brandfetch-brand.json"
+
+            # Call Brand API with Bearer authentication
+            if curl -L -f -s -H "Authorization: Bearer {{ brandfetch_api_key }}" "https://api.brandfetch.io/v2/brands/$domain" -o "$brand_json" 2>/dev/null
+                echo "✓ Brand data retrieved"
+
+                # Extract best PNG logo from JSON with smart selection
+                # Priority: icon type > logo type, light theme > dark theme, optimal size (400-1024px)
+                set -l logo_url (jq -r '.logos[] as $logo |
+                    $logo.formats[] |
+                    select(.format == "png") |
+                    {
+                        src,
+                        width: (.width // 0),
+                        height: (.height // 0),
+                        type: $logo.type,
+                        theme: (.theme // "none"),
+                        # Calculate scores
+                        type_score: (if $logo.type == "icon" then 1000 else 0 end),
+                        theme_score: (if .theme == "light" then 100 elif .theme == "dark" then 50 else 75 end),
+                        # Prefer sizes 400-1024px, penalize outside this range
+                        max_dim: ([.width // 0, .height // 0] | max),
+                        size_score: (
+                            if ([.width // 0, .height // 0] | max) >= 400 and ([.width // 0, .height // 0] | max) <= 1024 then 10
+                            elif ([.width // 0, .height // 0] | max) > 1024 then 5
+                            elif ([.width // 0, .height // 0] | max) >= 256 then 3
+                            else 1
+                            end
+                        ),
+                        area: ((.width // 0) * (.height // 0))
+                    } |
+                    select(.area > 0) |
+                    . + {total_score: (.type_score + .theme_score + .size_score)}' "$brand_json" 2>/dev/null | \
+                    jq -sr 'sort_by(-.total_score, -.area) | .[0].src' 2>/dev/null)
+
+                if test -z "$logo_url"; or test "$logo_url" = "null"
+                    # Fallback: Try any format (JPEG/WebP) from icon type, we'll convert to PNG
+                    set logo_url (jq -r '.logos[] | select(.type == "icon") | .formats[] | select(.format == "jpeg" or .format == "webp") | .src' "$brand_json" 2>/dev/null | head -n 1)
+                    if test -n "$logo_url"; and test "$logo_url" != "null"
+                        echo "  Note: Icon only available in JPEG/WebP, will convert to PNG"
+                    end
+                end
+
+                if test -z "$logo_url"; or test "$logo_url" = "null"
+                    # Final fallback: Any PNG without size info
+                    set logo_url (jq -r '.logos[].formats[] | select(.format == "png") | .src' "$brand_json" 2>/dev/null | head -n 1)
+                end
+
+                if test -n "$logo_url"
+                    echo "  Logo URL: $logo_url"
+
+                    # Determine file format from URL or Content-Type
+                    set -l temp_download "$output_dir/brandfetch-logo-download"
+                    set -l fetched_icon "$output_dir/brandfetch-logo.png"
+
+                    echo "Downloading logo from URL..."
+                    if curl -L -f -s -o "$temp_download" "$logo_url" 2>/dev/null
+                        # Check if file was actually downloaded and has content
+                        set -l file_size (stat -f%z "$temp_download" 2>/dev/null || stat -c%s "$temp_download" 2>/dev/null)
+
+                        if test "$file_size" -eq 0
+                            echo "✗ Logo download failed: Empty file received"
+                            echo "  Pake will use its default icon fetching mechanism"
+                        else
+                            echo "✓ Logo downloaded successfully ($file_size bytes)"
+
+                            # Verify file type and convert to PNG if needed
+                            set -l file_type (file -b --mime-type "$temp_download" 2>/dev/null)
+                            echo "  File type: $file_type"
+
+                            # Convert JPEG/WebP to PNG if needed
+                            if string match -q "image/jpeg" "$file_type"; or string match -q "image/webp" "$file_type"
+                                echo "  Converting to PNG format..."
+                                if command -v convert &>/dev/null
+                                    convert "$temp_download" "$fetched_icon" 2>/dev/null
+                                    if test $status -eq 0
+                                        echo "  ✓ Converted to PNG"
+                                    else
+                                        echo "  ✗ Conversion failed, using original"
+                                        mv "$temp_download" "$fetched_icon"
+                                    end
+                                else
+                                    echo "  ⚠ ImageMagick not available, using original format"
+                                    mv "$temp_download" "$fetched_icon"
+                                end
+                            else
+                                # Already PNG or other format, just rename
+                                mv "$temp_download" "$fetched_icon"
+                            end
+
+                            # Get image dimensions
+                            set -l width (identify -format "%w" "$fetched_icon" 2>/dev/null)
+                            set -l height (identify -format "%h" "$fetched_icon" 2>/dev/null)
+                            echo "  Dimensions: $width x $height"
+
+                            # Create app icon with brand color background for theme independence
+                            if command -v convert &>/dev/null
+                                set -l processed_icon "$output_dir/brandfetch-logo-processed.png"
+                                set -l convert_output "$output_dir/convert-error.log"
+
+                                echo "Creating themed app icon with neutral background..."
+
+                                # Use neutral gray from Cosmic theme (works with both light and dark logos)
+                                set -l bg_color "#6B7280"
+                                echo "  Background color: $bg_color"
+
+                                # Calculate icon size (80% of canvas, ensuring even number)
+                                set -l canvas_size 800
+                                set -l icon_size 640
+
+                                # Create components separately for reliability
+                                set -l bg_file "$output_dir/icon-background.png"
+                                set -l logo_resized "$output_dir/logo-resized.png"
+
+                                # Step 1: Create rounded square background
+                                echo "  Step 1: Creating rounded square background..."
+                                convert -size "$canvas_size"x"$canvas_size" xc:"$bg_color" \
+                                    \( +clone -alpha extract \
+                                       -draw "fill black polygon 0,0 0,80 80,0 fill white circle 80,80 80,0" \
+                                       -draw "fill black polygon $canvas_size,0 720,0 $canvas_size,80 fill white circle 720,80 720,0" \
+                                       -draw "fill black polygon $canvas_size,$canvas_size $canvas_size,720 720,$canvas_size fill white circle 720,720 720,$canvas_size" \
+                                       -draw "fill black polygon 0,$canvas_size 80,$canvas_size 0,720 fill white circle 80,720 80,$canvas_size" \) \
+                                    -alpha off -compose copy_opacity -composite \
+                                    PNG32:"$bg_file" 2>"$convert_output"
+
+                                if test $status -eq 0 -a -f "$bg_file"
+                                    # Step 2: Smart resize logo (don't upscale, force RGBA)
+                                    echo "  Step 2: Smart resizing logo (max $icon_size x $icon_size, no upscaling)..."
+                                    convert "$fetched_icon" -alpha on -resize "$icon_size"x"$icon_size"\> -define png:color-type=6 PNG32:"$logo_resized" 2>>"$convert_output"
+
+                                    if test $status -eq 0 -a -f "$logo_resized"
+                                        # Step 3: Composite logo on background (force RGBA output)
+                                        echo "  Step 3: Compositing logo on background..."
+                                        composite -gravity center "$logo_resized" "$bg_file" -define png:color-type=6 PNG32:"$processed_icon" 2>>"$convert_output"
+
+                                        if test $status -eq 0; and test -f "$processed_icon"; and test (stat -f%z "$processed_icon" 2>/dev/null || stat -c%s "$processed_icon" 2>/dev/null) -gt 0
+                                            echo "✓ Created themed app icon with brand background"
+                                            set modified_args $modified_args --icon "/output/brandfetch-logo-processed.png"
+                                        else
+                                            echo "  ✗ Failed to composite icon"
+                                            set modified_args $modified_args --icon "/output/brandfetch-logo.png"
+                                        end
+                                    else
+                                        echo "  ✗ Failed to resize logo"
+                                        set modified_args $modified_args --icon "/output/brandfetch-logo.png"
+                                    end
+                                else
+                                    echo "  ✗ Failed to create background"
+                                    set modified_args $modified_args --icon "/output/brandfetch-logo.png"
+                                end
+                            else
+                                echo "⚠ ImageMagick not installed, using logo as-is"
+                                set modified_args $modified_args --icon "/output/brandfetch-logo.png"
+                            end
+                        end
+                    else
+                        echo "✗ Failed to download logo from URL"
+                        echo "  Pake will use its default icon fetching mechanism"
+                    end
+                else
+                    echo "✗ No logo URL found in brand data"
+                    echo "  Pake will use its default icon fetching mechanism"
+                end
+            else
+                echo "✗ Failed to retrieve brand data from Brandfetch"
+                echo "  Pake will use its default icon fetching mechanism"
+            end
+        else
+            echo "⚠ Could not extract domain from URL, skipping Brandfetch"
+        end
+    end
+
+    # Build the pake arguments with better defaults
+    set -l pake_args $url --name $name
+    if test $has_targets -eq 0
+        set pake_args $pake_args --targets deb
+    end
+
+    # Apply sensible defaults unless overridden
+    set -l has_width 0
+    set -l has_height 0
+    for arg in $modified_args
+        if string match -q -- '--width*' $arg
+            set has_width 1
+        end
+        if string match -q -- '--height*' $arg
+            set has_height 1
+        end
+    end
+
+    # Better default window size (unless user specified)
+    if test $has_width -eq 0
+        set pake_args $pake_args --width 1400
+    end
+    if test $has_height -eq 0
+        set pake_args $pake_args --height 900
+    end
+
+    # Enable notifications by default (unless user provided custom --inject)
+    if test $has_inject -eq 0
+        set pake_args $pake_args --inject /output/enable-notifications.js
+    end
+
+    set pake_args $pake_args $modified_args
+
+    # Run pake via Docker
+    set -l docker_output "$output_dir/docker-build.log"
+    docker run --rm --privileged \
+        --device /dev/fuse \
+        --security-opt apparmor=unconfined \
+        -e NO_STRIP=1 \
+        -v "$output_dir":/output \
+        ghcr.io/tw93/pake \
+        $pake_args 2>&1 | tee "$docker_output"
+
+    set -l pake_result $status
+
+    # Check for RGBA icon errors
+    if test $pake_result -ne 0
+        if grep -q "is not RGBA" "$docker_output" 2>/dev/null
+            echo ""
+            echo "✗ Build failed: Icon is not in RGBA format"
+            echo ""
+            echo "This can happen when Pake auto-fetches an icon that isn't RGBA."
+            echo ""
+            echo "Solutions:"
+            echo "  1. Provide a custom icon: --icon ~/path/to/icon.png"
+            echo "  2. The icon will be auto-converted to RGBA on retry"
+            echo ""
+            echo "Note: Auto-fetched icons cannot be pre-converted. If this persists,"
+            echo "      download and convert the icon manually, then use --icon flag."
+        end
+    end
+
+    # If build was successful, copy assets to repo
+    if test $pake_result -eq 0
+        set -l repo_path ~/dev/iac/desktoperator
+        set -l role_name "$name-pake"
+        set -l role_path "$repo_path/roles/apps/$role_name"
+
+        echo "✓ Build successful! Setting up role structure..."
+
+        # Find the built .deb package in the output directory
+        set -l deb_file (find "$output_dir" -name "*.deb" -type f | head -n 1)
+        if test -z "$deb_file"
+            echo "Error: Could not find built .deb package in $output_dir"
+            rm -rf "$output_dir"
+            return 1
+        end
+
+        # Generate scaled icon versions from our 800x800 master (after successful build)
+        if test -f "$output_dir/brandfetch-logo-processed.png"
+            echo "Generating multi-size icons for deployment..."
+            set -l icon_sizes 16 32 48 64 128 256 512
+            for size in $icon_sizes
+                set -l scaled_icon "$output_dir/icon-$size.png"
+                convert "$output_dir/brandfetch-logo-processed.png" -resize "$size"x"$size" PNG32:"$scaled_icon" 2>/dev/null
+                if test $status -eq 0 -a -f "$scaled_icon"
+                    echo "  ✓ Created $size x $size icon"
+                else
+                    echo "  ✗ Failed to create $size x $size icon"
+                end
+            end
+        end
+
+        # Create role directory structure
+        mkdir -p "$role_path"/{files,tasks}
+
+        # Copy .deb package
+        cp "$deb_file" "$role_path/files/$name.deb"
+        echo "✓ Copied .deb package → $role_path/files/$name.deb"
+
+        # Copy themed icons (all sizes) if they were created
+        if test -f "$output_dir/brandfetch-logo-processed.png"
+            # Copy 800x800 master icon
+            cp "$output_dir/brandfetch-logo-processed.png" "$role_path/files/pake-$name-icon-800.png"
+            echo "✓ Copied 800x800 icon → $role_path/files/pake-$name-icon-800.png"
+
+            # Copy scaled versions
+            set -l icon_sizes 16 32 48 64 128 256 512
+            for size in $icon_sizes
+                if test -f "$output_dir/icon-$size.png"
+                    cp "$output_dir/icon-$size.png" "$role_path/files/pake-$name-icon-$size.png"
+                    echo "✓ Copied $size x $size icon → $role_path/files/pake-$name-icon-$size.png"
+                end
+            end
+        else
+            echo "⚠ No themed icons found to copy"
+        end
+
+        # Generate custom .desktop file
+        echo "[Desktop Entry]
+Categories=
+Comment=🤱🏻 Turn any webpage into a desktop app with Rust.
+Exec=pake-$name
+StartupWMClass=pake-$name
+Icon=pake-$name
+Name=$name
+Terminal=false
+Type=Application" > "$role_path/files/pake-$name.desktop"
+        echo "✓ Generated desktop file → $role_path/files/pake-$name.desktop"
+
+        # Create tasks/main.yml
+        echo "---
+# $name Pake App installation
+# Debian package deployment
+
+- name: Install $name .deb package
+  apt:
+    deb: \"{{ '{{' }} role_path {{ '}}' }}/files/$name.deb\"
+    state: present
+  become: yes
+  when: app_states['$role_name'] | default('present') == 'present'
+
+- name: Remove .deb desktop files
+  file:
+    path: \"{{ '{{' }} item {{ '}}' }}\"
+    state: absent
+  loop:
+    - /usr/share/applications/$name.desktop
+    - /usr/share/applications/com.pake.$name.desktop
+  become: yes
+  when: app_states['$role_name'] | default('present') == 'present'
+
+- name: Remove .deb icon files (all sizes)
+  shell: find /usr/share/icons/hicolor -name 'pake-$name.png' -delete
+  become: yes
+  when: app_states['$role_name'] | default('present') == 'present'
+  changed_when: false
+
+- name: Install custom desktop file
+  copy:
+    src: pake-$name.desktop
+    dest: /usr/share/applications/pake-$name.desktop
+    mode: '0644'
+  become: yes
+  when: app_states['$role_name'] | default('present') == 'present'
+
+- name: Install themed icons at all sizes
+  copy:
+    src: \"{{ '{{' }} item.src {{ '}}' }}\"
+    dest: \"{{ '{{' }} item.dest {{ '}}' }}\"
+    mode: '0644'
+  loop:
+    - { src: 'pake-$name-icon-16.png', dest: '/usr/share/icons/hicolor/16x16/apps/pake-$name.png' }
+    - { src: 'pake-$name-icon-32.png', dest: '/usr/share/icons/hicolor/32x32/apps/pake-$name.png' }
+    - { src: 'pake-$name-icon-48.png', dest: '/usr/share/icons/hicolor/48x48/apps/pake-$name.png' }
+    - { src: 'pake-$name-icon-64.png', dest: '/usr/share/icons/hicolor/64x64/apps/pake-$name.png' }
+    - { src: 'pake-$name-icon-128.png', dest: '/usr/share/icons/hicolor/128x128/apps/pake-$name.png' }
+    - { src: 'pake-$name-icon-256.png', dest: '/usr/share/icons/hicolor/256x256/apps/pake-$name.png' }
+    - { src: 'pake-$name-icon-512.png', dest: '/usr/share/icons/hicolor/512x512/apps/pake-$name.png' }
+    - { src: 'pake-$name-icon-800.png', dest: '/usr/share/icons/hicolor/800x800/apps/pake-$name.png' }
+  become: yes
+  when: app_states['$role_name'] | default('present') == 'present'
+
+- name: Update icon cache
+  command: gtk-update-icon-cache -f /usr/share/icons/hicolor
+  become: yes
+  when: app_states['$role_name'] | default('present') == 'present'
+  changed_when: false
+
+# Cleanup when absent
+- name: Remove $name Pake app
+  apt:
+    name: $name
+    state: absent
+  become: yes
+  when: app_states['$role_name'] | default('present') == 'absent'
+" > "$role_path/tasks/main.yml"
+        echo "✓ Created tasks/main.yml → $role_path/tasks/main.yml"
+
+        echo ""
+        echo "📦 Role created at: $role_path"
+        echo ""
+        echo "Next steps:"
+        echo "  1. Add '$role_name' to roles/apps/defaults/main.yml:"
+        echo "     - common_apps list"
+        echo "     - app_states dict"
+        echo "  2. Add role include to roles/apps/tasks/main.yml:"
+        echo "     - name: Include $name Pake App"
+        echo "       import_role:"
+        echo "         name: apps/$role_name"
+        echo "       tags: [$role_name, $name, desktop]"
+        echo "       when: \"'$role_name' in common_apps or app_states['$role_name'] is defined\""
+    else
+        echo "✗ Build failed with exit code $pake_result"
+    end
+
+    # Clean up temporary output directory
+    echo "Cleaning up temporary directory..."
+    rm -rf "$output_dir"
+
+    return $pake_result
+end

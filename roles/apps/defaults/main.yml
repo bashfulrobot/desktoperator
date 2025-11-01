@@ -32,8 +32,11 @@ common_apps:
   - fonts
   - tokei
   - instruqt-cli
+  - lswt
   - oq
   - pake
+  - github-pake
+  - asana-pake
   - zns
 
 # Application states (present/absent)
@@ -72,6 +75,9 @@ app_states:
   fonts: present
   tokei: present
   instruqt-cli: present
+  lswt: present
   oq: present
   pake: present
+  github-pake: present
+  asana-pake: present
   zns: present
