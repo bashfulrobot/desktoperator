@@ -193,6 +193,12 @@
   tags: [asana-pake, asana, desktop]
   when: "'asana-pake' in common_apps or app_states['asana-pake'] is defined"
 
+- name: Include Avanti Pake App
+  import_role:
+    name: apps/avanti-pake
+  tags: [avanti-pake, avanti, desktop]
+  when: "'avanti-pake' in common_apps or app_states['avanti-pake'] is defined"
+
 - name: Include zns DNS lookup tool
   import_role:
     name: apps/zns

@@ -37,6 +37,7 @@ common_apps:
   - pake
   - github-pake
   - asana-pake
+  - avanti-pake
   - zns
 
 # Application states (present/absent)
@@ -80,4 +81,5 @@ app_states:
   pake: present
   github-pake: present
   asana-pake: present
+  avanti-pake: present
   zns: present
