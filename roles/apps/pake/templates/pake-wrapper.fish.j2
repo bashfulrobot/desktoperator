@@ -721,10 +721,13 @@ function create-web-app --description 'Build desktop apps from websites using Pa
         end
 
         # Generate custom .desktop file
+        # Pake removes hyphens from binary names, so we need to sanitize for Exec
+        # But keep original name for StartupWMClass (matches app's actual window class)
+        set -l binary_name (echo "$name" | tr -d '-')
         echo "[Desktop Entry]
 Categories=
 Comment=🤱🏻 Turn any webpage into a desktop app with Rust.
-Exec=pake-$name
+Exec=pake-$binary_name
 StartupWMClass=pake-$name
 Icon=pake-$name
 Name=$name
