@@ -48,18 +48,20 @@ app_states:
   lswt: present
   oq: present
   pake: present
-  github-pake: present
-  asana-pake: present
-  avanti-pake: present
-  sfdc-pake: present
-  lucid-chart-pake: present
-  br-email-pake: present
-  kong-email-pake: present
-  kong-calendar-pake: present
-  br-calendar-pake: present
-  kong-drive-pake: present
-  br-drive-pake: present
-  aha-pake: present
-  workday-pake: present
-  konnect-pake: present
+  github: present
+  asana: present
+  avanti: present
+  sfdc: present
+  salesforce: present  # alias for sfdc
+  lucid-chart: present
+  lucidchart: present  # alias for lucid-chart
+  br-email: present
+  kong-email: present
+  kong-calendar: present
+  br-calendar: present
+  kong-drive: present
+  br-drive: present
+  aha: present
+  workday: present
+  konnect: present
   zns: present

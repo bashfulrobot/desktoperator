@@ -7,7 +7,7 @@
     deb: "{{ role_path }}/files/konnect.deb"
     state: present
   become: yes
-  when: app_states['konnect-pake'] | default('present') == 'present'
+  when: app_states['konnect'] | default('present') == 'present'
 
 - name: Remove .deb desktop files
   file:
@@ -17,12 +17,12 @@
     - /usr/share/applications/konnect.desktop
     - /usr/share/applications/com.pake.konnect.desktop
   become: yes
-  when: app_states['konnect-pake'] | default('present') == 'present'
+  when: app_states['konnect'] | default('present') == 'present'
 
 - name: Remove .deb icon files (all sizes)
   shell: find /usr/share/icons/hicolor -name 'pake-konnect.png' -delete
   become: yes
-  when: app_states['konnect-pake'] | default('present') == 'present'
+  when: app_states['konnect'] | default('present') == 'present'
   changed_when: false
 
 - name: Install custom desktop file
@@ -31,7 +31,7 @@
     dest: /usr/share/applications/pake-konnect.desktop
     mode: '0644'
   become: yes
-  when: app_states['konnect-pake'] | default('present') == 'present'
+  when: app_states['konnect'] | default('present') == 'present'
 
 - name: Install themed icons at all sizes
   copy:
@@ -48,12 +48,12 @@
     - { src: 'pake-konnect-icon-512.png', dest: '/usr/share/icons/hicolor/512x512/apps/pake-konnect.png' }
     - { src: 'pake-konnect-icon-800.png', dest: '/usr/share/icons/hicolor/800x800/apps/pake-konnect.png' }
   become: yes
-  when: app_states['konnect-pake'] | default('present') == 'present'
+  when: app_states['konnect'] | default('present') == 'present'
 
 - name: Update icon cache
   command: gtk-update-icon-cache -f /usr/share/icons/hicolor
   become: yes
-  when: app_states['konnect-pake'] | default('present') == 'present'
+  when: app_states['konnect'] | default('present') == 'present'
   changed_when: false
 
 # Cleanup when absent
@@ -62,5 +62,5 @@
     name: konnect
     state: absent
   become: yes
-  when: app_states['konnect-pake'] | default('present') == 'absent'
+  when: app_states['konnect'] | default('present') == 'absent'
 

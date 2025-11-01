@@ -154,72 +154,72 @@
 - name: Include GitHub Pake App
   import_role:
     name: apps/github-pake
-  tags: [github-pake, productivity]
+  tags: [github]
 
 - name: Include Asana Pake App
   import_role:
     name: apps/asana-pake
-  tags: [asana-pake, productivity]
+  tags: [asana]
 
 - name: Include Avanti Pake App
   import_role:
     name: apps/avanti-pake
-  tags: [avanti-pake, productivity]
+  tags: [avanti]
 
 - name: Include Salesforce Pake App
   import_role:
     name: apps/sfdc-pake
-  tags: [sfdc-pake, productivity]
+  tags: [sfdc, salesforce]
 
 - name: Include Lucidchart Pake App
   import_role:
     name: apps/lucid-chart-pake
-  tags: [lucid-chart-pake, productivity]
+  tags: [lucid-chart, lucidchart]
 
 - name: Include BR Email Pake App
   import_role:
     name: apps/br-email-pake
-  tags: [br-email-pake, productivity]
+  tags: [br-email]
 
 - name: Include Kong Email Pake App
   import_role:
     name: apps/kong-email-pake
-  tags: [kong-email-pake, productivity]
+  tags: [kong-email]
 
 - name: Include Kong Calendar Pake App
   import_role:
     name: apps/kong-calendar-pake
-  tags: [kong-calendar-pake, productivity]
+  tags: [kong-calendar]
 
 - name: Include BR Calendar Pake App
   import_role:
     name: apps/br-calendar-pake
-  tags: [br-calendar-pake, productivity]
+  tags: [br-calendar]
 
 - name: Include Kong Drive Pake App
   import_role:
     name: apps/kong-drive-pake
-  tags: [kong-drive-pake, productivity]
+  tags: [kong-drive]
 
 - name: Include BR Drive Pake App
   import_role:
     name: apps/br-drive-pake
-  tags: [br-drive-pake, productivity]
+  tags: [br-drive]
 
 - name: Include Aha Pake App
   import_role:
     name: apps/aha-pake
-  tags: [aha-pake, productivity]
+  tags: [aha]
 
 - name: Include Workday Pake App
   import_role:
     name: apps/workday-pake
-  tags: [workday-pake, productivity]
+  tags: [workday]
 
 - name: Include Konnect Pake App
   import_role:
     name: apps/konnect-pake
-  tags: [konnect-pake, productivity]
+  tags: [konnect]
 
 - name: Include zns DNS lookup tool
   import_role:

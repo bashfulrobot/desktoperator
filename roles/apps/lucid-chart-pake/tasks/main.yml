@@ -7,7 +7,7 @@
     deb: "{{ role_path }}/files/lucid-chart.deb"
     state: present
   become: yes
-  when: app_states['lucid-chart-pake'] | default('present') == 'present'
+  when: app_states['lucid-chart'] | default('present') == 'present'
 
 - name: Remove .deb desktop files
   file:
@@ -17,12 +17,12 @@
     - /usr/share/applications/lucid-chart.desktop
     - /usr/share/applications/com.pake.lucid-chart.desktop
   become: yes
-  when: app_states['lucid-chart-pake'] | default('present') == 'present'
+  when: app_states['lucid-chart'] | default('present') == 'present'
 
 - name: Remove .deb icon files (all sizes)
   shell: find /usr/share/icons/hicolor -name 'pake-lucid-chart.png' -delete
   become: yes
-  when: app_states['lucid-chart-pake'] | default('present') == 'present'
+  when: app_states['lucid-chart'] | default('present') == 'present'
   changed_when: false
 
 - name: Install custom desktop file
@@ -31,7 +31,7 @@
     dest: /usr/share/applications/pake-lucid-chart.desktop
     mode: '0644'
   become: yes
-  when: app_states['lucid-chart-pake'] | default('present') == 'present'
+  when: app_states['lucid-chart'] | default('present') == 'present'
 
 - name: Install themed icons at all sizes
   copy:
@@ -48,12 +48,12 @@
     - { src: 'pake-lucid-chart-icon-512.png', dest: '/usr/share/icons/hicolor/512x512/apps/pake-lucid-chart.png' }
     - { src: 'pake-lucid-chart-icon-800.png', dest: '/usr/share/icons/hicolor/800x800/apps/pake-lucid-chart.png' }
   become: yes
-  when: app_states['lucid-chart-pake'] | default('present') == 'present'
+  when: app_states['lucid-chart'] | default('present') == 'present'
 
 - name: Update icon cache
   command: gtk-update-icon-cache -f /usr/share/icons/hicolor
   become: yes
-  when: app_states['lucid-chart-pake'] | default('present') == 'present'
+  when: app_states['lucid-chart'] | default('present') == 'present'
   changed_when: false
 
 # Cleanup when absent
@@ -62,5 +62,5 @@
     name: lucid-chart
     state: absent
   become: yes
-  when: app_states['lucid-chart-pake'] | default('present') == 'absent'
+  when: app_states['lucid-chart'] | default('present') == 'absent'
 
