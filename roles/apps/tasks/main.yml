@@ -181,6 +181,18 @@
   tags: [pake, cli, development, desktop]
   when: "'pake' in common_apps or app_states['pake'] is defined"
 
+- name: Include GitHub Pake App
+  import_role:
+    name: apps/github-pake
+  tags: [github-pake, github, desktop]
+  when: "'github-pake' in common_apps or app_states['github-pake'] is defined"
+
+- name: Include Asana Pake App
+  import_role:
+    name: apps/asana-pake
+  tags: [asana-pake, asana, desktop]
+  when: "'asana-pake' in common_apps or app_states['asana-pake'] is defined"
+
 - name: Include zns DNS lookup tool
   import_role:
     name: apps/zns

@@ -1,0 +1,9 @@
+[Desktop Entry]
+Categories=
+Comment=🤱🏻 Turn any webpage into a desktop app with Rust.
+Exec=pake-github
+StartupWMClass=pake-github
+Icon=pake-github
+Name=github
+Terminal=false
+Type=Application

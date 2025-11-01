@@ -1,0 +1,66 @@
+---
+# github Pake App installation
+# Debian package deployment
+
+- name: Install github .deb package
+  apt:
+    deb: "{{ role_path }}/files/github.deb"
+    state: present
+  become: yes
+  when: app_states['github-pake'] | default('present') == 'present'
+
+- name: Remove .deb desktop files
+  file:
+    path: "{{ item }}"
+    state: absent
+  loop:
+    - /usr/share/applications/github.desktop
+    - /usr/share/applications/com.pake.github.desktop
+  become: yes
+  when: app_states['github-pake'] | default('present') == 'present'
+
+- name: Remove .deb icon files (all sizes)
+  shell: find /usr/share/icons/hicolor -name 'pake-github.png' -delete
+  become: yes
+  when: app_states['github-pake'] | default('present') == 'present'
+  changed_when: false
+
+- name: Install custom desktop file
+  copy:
+    src: pake-github.desktop
+    dest: /usr/share/applications/pake-github.desktop
+    mode: '0644'
+  become: yes
+  when: app_states['github-pake'] | default('present') == 'present'
+
+- name: Install themed icons at all sizes
+  copy:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+    mode: '0644'
+  loop:
+    - { src: 'pake-github-icon-16.png', dest: '/usr/share/icons/hicolor/16x16/apps/pake-github.png' }
+    - { src: 'pake-github-icon-32.png', dest: '/usr/share/icons/hicolor/32x32/apps/pake-github.png' }
+    - { src: 'pake-github-icon-48.png', dest: '/usr/share/icons/hicolor/48x48/apps/pake-github.png' }
+    - { src: 'pake-github-icon-64.png', dest: '/usr/share/icons/hicolor/64x64/apps/pake-github.png' }
+    - { src: 'pake-github-icon-128.png', dest: '/usr/share/icons/hicolor/128x128/apps/pake-github.png' }
+    - { src: 'pake-github-icon-256.png', dest: '/usr/share/icons/hicolor/256x256/apps/pake-github.png' }
+    - { src: 'pake-github-icon-512.png', dest: '/usr/share/icons/hicolor/512x512/apps/pake-github.png' }
+    - { src: 'pake-github-icon-800.png', dest: '/usr/share/icons/hicolor/800x800/apps/pake-github.png' }
+  become: yes
+  when: app_states['github-pake'] | default('present') == 'present'
+
+- name: Update icon cache
+  command: gtk-update-icon-cache -f /usr/share/icons/hicolor
+  become: yes
+  when: app_states['github-pake'] | default('present') == 'present'
+  changed_when: false
+
+# Cleanup when absent
+- name: Remove github Pake app
+  apt:
+    name: github
+    state: absent
+  become: yes
+  when: app_states['github-pake'] | default('present') == 'absent'
+
