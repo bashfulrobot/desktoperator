@@ -1,7 +1,7 @@
 [Desktop Entry]
 Categories=
 Comment=🤱🏻 Turn any webpage into a desktop app with Rust.
-Exec=pake-kong-email
+Exec=pake-kongemail
 StartupWMClass=pake-kong-email
 Icon=pake-kong-email
 Name=kong-email

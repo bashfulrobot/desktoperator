@@ -1,7 +1,7 @@
 [Desktop Entry]
 Categories=
 Comment=🤱🏻 Turn any webpage into a desktop app with Rust.
-Exec=pake-br-calendar
+Exec=pake-brcalendar
 StartupWMClass=pake-br-calendar
 Icon=pake-br-calendar
 Name=br-calendar
