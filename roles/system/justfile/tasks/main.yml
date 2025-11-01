@@ -156,12 +156,18 @@
 - name: Deploy jsys fish aliases
   copy:
     content: |
-      # jsys command aliases
+      # jsys command aliases with completions
       # Managed by Ansible - changes may be overwritten
-      alias ua='jsys update-all'
-      alias au='jsys update-ansible'
+      alias ual='jsys update-all'
+      alias uan='jsys update-ansible'
       alias uat='jsys update-ansible-tags'
       alias uast='jsys update-ansible-skip-tags'
+
+      # Completions for aliases
+      complete -c ual -d 'Update everything (all package managers + Ansible)'
+      complete -c uan -d 'Run full Ansible playbook'
+      complete -c uat -d 'Run Ansible with specific tags'
+      complete -c uast -d 'Run Ansible skipping specific tags'
     dest: "{{ user.home }}/.config/fish/conf.d/jsys-aliases.fish"
     owner: "{{ user.name }}"
     mode: '0644'
