@@ -9,12 +9,12 @@
 - name: Include restic/autorestic installation
   import_role:
     name: apps/restic
-  tags: [restic, backup]
+  tags: [restic]
 
 - name: Include Helix editor installation
   import_role:
     name: apps/helix
-  tags: [helix, editor]
+  tags: [helix]
 
 - name: Include Zellij terminal multiplexer
   import_role:
@@ -24,97 +24,97 @@
 - name: Include Zen Browser
   import_role:
     name: apps/zen-browser
-  tags: [zen-browser, browser]
+  tags: [zen-browser]
 
 - name: Include Slack
   import_role:
     name: apps/slack
-  tags: [slack, communication]
+  tags: [slack]
 
 - name: Include Claude Code
   import_role:
     name: apps/claude-code
-  tags: [claude-code, ai]
+  tags: [claude-code]
 
 - name: Include Starship prompt
   import_role:
     name: apps/starship
-  tags: [starship, shell]
+  tags: [starship]
 
 - name: Include Shadowenv directory-based env manager
   import_role:
     name: apps/shadowenv
-  tags: [shadowenv, shell]
+  tags: [shadowenv]
 
 - name: Include Firefox browser
   import_role:
     name: apps/firefox
-  tags: [firefox, browser]
+  tags: [firefox]
 
 - name: Include Vivaldi browser
   import_role:
     name: apps/vivaldi
-  tags: [vivaldi, browser]
+  tags: [vivaldi]
 
 - name: Include Visual Studio Code
   import_role:
     name: apps/vscode
-  tags: [vscode, editor]
+  tags: [vscode]
 
 - name: Include Google Chrome
   import_role:
     name: apps/chrome
-  tags: [chrome, browser]
+  tags: [chrome]
 
 - name: Include Zoom
   import_role:
     name: apps/zoom
-  tags: [zoom, communication]
+  tags: [zoom]
 
 - name: Include Insync
   import_role:
     name: apps/insync
-  tags: [insync, cloud]
+  tags: [insync]
 
 - name: Include Gemini CLI
   import_role:
     name: apps/gemini-cli
-  tags: [gemini-cli, ai]
+  tags: [gemini-cli]
 
 - name: Include Codex CLI
   import_role:
     name: apps/codex-cli
-  tags: [codex-cli, ai]
+  tags: [codex-cli]
 
 - name: Include SiteMCP
   import_role:
     name: apps/sitemcp
-  tags: [sitemcp, mcp]
+  tags: [sitemcp]
 
 - name: Include Glow markdown reader
   import_role:
     name: apps/glow
-  tags: [glow, markdown]
+  tags: [glow]
 
 - name: Include Gum shell scripts
   import_role:
     name: apps/gum
-  tags: [gum, shell]
+  tags: [gum]
 
 - name: Include Meetsum meeting summary generator
   import_role:
     name: apps/meetsum
-  tags: [meetsum, ai]
+  tags: [meetsum]
 
 - name: Include Signal messenger
   import_role:
     name: apps/signal
-  tags: [signal, communication]
+  tags: [signal]
 
 - name: Include Spotify music clients
   import_role:
     name: apps/spotify
-  tags: [spotify, media]
+  tags: [spotify]
 
 - name: Include Terminal Experience
   import_role:
@@ -134,22 +134,22 @@
 - name: Include Tokei code statistics
   import_role:
     name: apps/tokei
-  tags: [tokei, development]
+  tags: [tokei]
 
 - name: Include Instruqt CLI
   import_role:
     name: apps/instruqt-cli
-  tags: [instruqt-cli, development]
+  tags: [instruqt-cli]
 
 - name: Include oq performant jq alternative
   import_role:
     name: apps/oq
-  tags: [oq, development]
+  tags: [oq]
 
 - name: Include Pake CLI web-to-desktop app builder
   import_role:
     name: apps/pake
-  tags: [pake, development]
+  tags: [pake]
 
 - name: Include GitHub Pake App
   import_role:
@@ -224,29 +224,29 @@
 - name: Include zns DNS lookup tool
   import_role:
     name: apps/zns
-  tags: [zns, network]
+  tags: [zns]
 
 - name: Include Todoist
   import_role:
     name: apps/todoist
-  tags: [todoist, productivity]
+  tags: [todoist]
 
 - name: Include Teams for Linux
   import_role:
     name: apps/teams-for-linux
-  tags: [teams-for-linux, teams, communication]
+  tags: [teams-for-linux, teams]
 
 - name: Include Kooha screen recorder
   import_role:
     name: apps/kooha
-  tags: [kooha, screen-recorder, multimedia]
+  tags: [kooha]
 
 - name: Include Obsidian
   import_role:
     name: apps/obsidian
-  tags: [obsidian, productivity, notes]
+  tags: [obsidian]
 
 - name: Include Okular PDF viewer
   import_role:
     name: apps/okular
-  tags: [okular, pdf, productivity]
+  tags: [okular]
