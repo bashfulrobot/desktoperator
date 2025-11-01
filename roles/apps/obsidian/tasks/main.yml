@@ -1,0 +1,32 @@
+---
+# Obsidian note-taking app installation via Flatpak
+
+- name: Ensure Flatpak is available
+  ansible.builtin.package:
+    name: flatpak
+    state: present
+  become: yes
+  when: app_states['obsidian'] | default('present') == 'present'
+
+- name: Ensure Flathub repository exists
+  community.general.flatpak_remote:
+    name: flathub
+    state: present
+    flatpakrepo_url: https://dl.flathub.org/repo/flathub.flatpakrepo
+  become: yes
+  when: app_states['obsidian'] | default('present') == 'present'
+
+- name: Install Obsidian
+  community.general.flatpak:
+    name: md.obsidian.Obsidian
+    state: present
+    remote: flathub
+  become: yes
+  when: app_states['obsidian'] | default('present') == 'present'
+
+- name: Remove Obsidian
+  community.general.flatpak:
+    name: md.obsidian.Obsidian
+    state: absent
+  become: yes
+  when: app_states['obsidian'] | default('present') == 'absent'

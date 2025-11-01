@@ -1,0 +1,32 @@
+---
+# Todoist Desktop installation via Flatpak
+
+- name: Ensure Flatpak is available
+  ansible.builtin.package:
+    name: flatpak
+    state: present
+  become: yes
+  when: app_states['todoist'] | default('present') == 'present'
+
+- name: Ensure Flathub repository exists
+  community.general.flatpak_remote:
+    name: flathub
+    state: present
+    flatpakrepo_url: https://dl.flathub.org/repo/flathub.flatpakrepo
+  become: yes
+  when: app_states['todoist'] | default('present') == 'present'
+
+- name: Install Todoist
+  community.general.flatpak:
+    name: com.todoist.Todoist
+    state: present
+    remote: flathub
+  become: yes
+  when: app_states['todoist'] | default('present') == 'present'
+
+- name: Remove Todoist
+  community.general.flatpak:
+    name: com.todoist.Todoist
+    state: absent
+  become: yes
+  when: app_states['todoist'] | default('present') == 'absent'

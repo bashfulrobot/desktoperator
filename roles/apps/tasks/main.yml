@@ -5,268 +5,248 @@
   import_role:
     name: apps/1password
   tags: [1password]
-  when: "'1password' in common_apps or app_states['1password'] is defined"
 
 - name: Include restic/autorestic installation
   import_role:
     name: apps/restic
   tags: [restic, backup]
-  when: "'restic' in common_apps or app_states['restic'] is defined"
 
 - name: Include Helix editor installation
   import_role:
     name: apps/helix
   tags: [helix, editor]
-  when: "'helix' in common_apps or app_states['helix'] is defined"
 
 - name: Include Zellij terminal multiplexer
   import_role:
     name: apps/zellij
-  tags: [zellij, terminal]
-  when: "'zellij' in common_apps or app_states['zellij'] is defined"
+  tags: [zellij]
 
 - name: Include Zen Browser
   import_role:
     name: apps/zen-browser
   tags: [zen-browser, browser]
-  when: "'zen-browser' in common_apps or app_states['zen-browser'] is defined"
 
 - name: Include Slack
   import_role:
     name: apps/slack
   tags: [slack, communication]
-  when: "'slack' in common_apps or app_states['slack'] is defined"
 
 - name: Include Claude Code
   import_role:
     name: apps/claude-code
-  tags: [claude-code, ai, development]
-  when: "'claude-code' in common_apps or app_states['claude-code'] is defined"
+  tags: [claude-code, ai]
 
 - name: Include Starship prompt
   import_role:
     name: apps/starship
-  tags: [starship, shell, prompt]
-  when: "'starship' in common_apps or app_states['starship'] is defined"
+  tags: [starship, shell]
 
 - name: Include Shadowenv directory-based env manager
   import_role:
     name: apps/shadowenv
-  tags: [shadowenv, shell, environment]
-  when: "'shadowenv' in common_apps or app_states['shadowenv'] is defined"
+  tags: [shadowenv, shell]
 
 - name: Include Firefox browser
   import_role:
     name: apps/firefox
   tags: [firefox, browser]
-  when: "'firefox' in common_apps or app_states['firefox'] is defined"
 
 - name: Include Vivaldi browser
   import_role:
     name: apps/vivaldi
   tags: [vivaldi, browser]
-  when: "'vivaldi' in common_apps or app_states['vivaldi'] is defined"
 
 - name: Include Visual Studio Code
   import_role:
     name: apps/vscode
-  tags: [vscode, editor, development]
-  when: "'vscode' in common_apps or app_states['vscode'] is defined"
+  tags: [vscode, editor]
 
 - name: Include Google Chrome
   import_role:
     name: apps/chrome
   tags: [chrome, browser]
-  when: "'chrome' in common_apps or app_states['chrome'] is defined"
 
 - name: Include Zoom
   import_role:
     name: apps/zoom
   tags: [zoom, communication]
-  when: "'zoom' in common_apps or app_states['zoom'] is defined"
 
 - name: Include Insync
   import_role:
     name: apps/insync
-  tags: [insync, sync, cloud]
-  when: "'insync' in common_apps or app_states['insync'] is defined"
+  tags: [insync, cloud]
 
 - name: Include Gemini CLI
   import_role:
     name: apps/gemini-cli
-  tags: [gemini-cli, ai, cli]
-  when: "'gemini-cli' in common_apps or app_states['gemini-cli'] is defined"
+  tags: [gemini-cli, ai]
 
 - name: Include Codex CLI
   import_role:
     name: apps/codex-cli
-  tags: [codex-cli, ai, cli]
-  when: "'codex-cli' in common_apps or app_states['codex-cli'] is defined"
+  tags: [codex-cli, ai]
 
 - name: Include SiteMCP
   import_role:
     name: apps/sitemcp
-  tags: [sitemcp, mcp, cli]
-  when: "'sitemcp' in common_apps or app_states['sitemcp'] is defined"
+  tags: [sitemcp, mcp]
 
 - name: Include Glow markdown reader
   import_role:
     name: apps/glow
-  tags: [glow, markdown, cli, terminal]
-  when: "'glow' in common_apps or app_states['glow'] is defined"
+  tags: [glow, markdown]
 
 - name: Include Gum shell scripts
   import_role:
     name: apps/gum
-  tags: [gum, shell, cli, terminal]
-  when: "'gum' in common_apps or app_states['gum'] is defined"
+  tags: [gum, shell]
 
 - name: Include Meetsum meeting summary generator
   import_role:
     name: apps/meetsum
-  tags: [meetsum, cli, ai, meetings]
-  when: "'meetsum' in common_apps or app_states['meetsum'] is defined"
+  tags: [meetsum, ai]
 
 - name: Include Signal messenger
   import_role:
     name: apps/signal
   tags: [signal, communication]
-  when: "'signal' in common_apps or app_states['signal'] is defined"
 
 - name: Include Spotify music clients
   import_role:
     name: apps/spotify
-  tags: [spotify, music, media]
-  when: "'spotify' in common_apps or app_states['spotify'] is defined"
+  tags: [spotify, media]
 
 - name: Include Terminal Experience
   import_role:
     name: apps/terminal-experience
-  tags: [terminal-experience, terminal, cli]
-  when: "'terminal-experience' in common_apps or app_states['terminal-experience'] is defined"
+  tags: [terminal-experience]
 
 - name: Include eza modern ls replacement
   import_role:
     name: apps/eza
-  tags: [eza, cli, terminal]
-  when: "'eza' in common_apps or app_states['eza'] is defined"
+  tags: [eza]
 
 - name: Include Fonts installation
   import_role:
     name: apps/fonts
   tags: [fonts]
-  when: "'fonts' in common_apps or app_states['fonts'] is defined"
 
 - name: Include Tokei code statistics
   import_role:
     name: apps/tokei
-  tags: [tokei, cli, development]
-  when: "'tokei' in common_apps or app_states['tokei'] is defined"
+  tags: [tokei, development]
 
 - name: Include Instruqt CLI
   import_role:
     name: apps/instruqt-cli
-  tags: [instruqt-cli, cli, development]
-  when: "'instruqt-cli' in common_apps or app_states['instruqt-cli'] is defined"
+  tags: [instruqt-cli, development]
 
 - name: Include oq performant jq alternative
   import_role:
     name: apps/oq
-  tags: [oq, cli, development, json]
-  when: "'oq' in common_apps or app_states['oq'] is defined"
+  tags: [oq, development]
 
 - name: Include Pake CLI web-to-desktop app builder
   import_role:
     name: apps/pake
-  tags: [pake, cli, development, desktop]
-  when: "'pake' in common_apps or app_states['pake'] is defined"
+  tags: [pake, development]
 
 - name: Include GitHub Pake App
   import_role:
     name: apps/github-pake
-  tags: [github-pake, github, desktop]
-  when: "'github-pake' in common_apps or app_states['github-pake'] is defined"
+  tags: [github-pake, productivity]
 
 - name: Include Asana Pake App
   import_role:
     name: apps/asana-pake
-  tags: [asana-pake, asana, desktop]
-  when: "'asana-pake' in common_apps or app_states['asana-pake'] is defined"
+  tags: [asana-pake, productivity]
 
 - name: Include Avanti Pake App
   import_role:
     name: apps/avanti-pake
-  tags: [avanti-pake, avanti, desktop]
-  when: "'avanti-pake' in common_apps or app_states['avanti-pake'] is defined"
+  tags: [avanti-pake, productivity]
 
 - name: Include Salesforce Pake App
   import_role:
     name: apps/sfdc-pake
-  tags: [sfdc-pake, salesforce, desktop]
-  when: "'sfdc-pake' in common_apps or app_states['sfdc-pake'] is defined"
+  tags: [sfdc-pake, productivity]
 
 - name: Include Lucidchart Pake App
   import_role:
     name: apps/lucid-chart-pake
-  tags: [lucid-chart-pake, lucidchart, desktop]
-  when: "'lucid-chart-pake' in common_apps or app_states['lucid-chart-pake'] is defined"
+  tags: [lucid-chart-pake, productivity]
 
 - name: Include BR Email Pake App
   import_role:
     name: apps/br-email-pake
-  tags: [br-email-pake, email, desktop]
-  when: "'br-email-pake' in common_apps or app_states['br-email-pake'] is defined"
+  tags: [br-email-pake, productivity]
 
 - name: Include Kong Email Pake App
   import_role:
     name: apps/kong-email-pake
-  tags: [kong-email-pake, email, desktop]
-  when: "'kong-email-pake' in common_apps or app_states['kong-email-pake'] is defined"
+  tags: [kong-email-pake, productivity]
 
 - name: Include Kong Calendar Pake App
   import_role:
     name: apps/kong-calendar-pake
-  tags: [kong-calendar-pake, calendar, desktop]
-  when: "'kong-calendar-pake' in common_apps or app_states['kong-calendar-pake'] is defined"
+  tags: [kong-calendar-pake, productivity]
 
 - name: Include BR Calendar Pake App
   import_role:
     name: apps/br-calendar-pake
-  tags: [br-calendar-pake, calendar, desktop]
-  when: "'br-calendar-pake' in common_apps or app_states['br-calendar-pake'] is defined"
+  tags: [br-calendar-pake, productivity]
 
 - name: Include Kong Drive Pake App
   import_role:
     name: apps/kong-drive-pake
-  tags: [kong-drive-pake, drive, desktop]
-  when: "'kong-drive-pake' in common_apps or app_states['kong-drive-pake'] is defined"
+  tags: [kong-drive-pake, productivity]
 
 - name: Include BR Drive Pake App
   import_role:
     name: apps/br-drive-pake
-  tags: [br-drive-pake, drive, desktop]
-  when: "'br-drive-pake' in common_apps or app_states['br-drive-pake'] is defined"
+  tags: [br-drive-pake, productivity]
 
 - name: Include Aha Pake App
   import_role:
     name: apps/aha-pake
-  tags: [aha-pake, aha, desktop]
-  when: "'aha-pake' in common_apps or app_states['aha-pake'] is defined"
+  tags: [aha-pake, productivity]
 
 - name: Include Workday Pake App
   import_role:
     name: apps/workday-pake
-  tags: [workday-pake, workday, desktop]
-  when: "'workday-pake' in common_apps or app_states['workday-pake'] is defined"
+  tags: [workday-pake, productivity]
 
 - name: Include Konnect Pake App
   import_role:
     name: apps/konnect-pake
-  tags: [konnect-pake, konnect, desktop]
-  when: "'konnect-pake' in common_apps or app_states['konnect-pake'] is defined"
+  tags: [konnect-pake, productivity]
 
 - name: Include zns DNS lookup tool
   import_role:
     name: apps/zns
-  tags: [zns, cli, network, dns]
-  when: "'zns' in common_apps or app_states['zns'] is defined"
+  tags: [zns, network]
+
+- name: Include Todoist
+  import_role:
+    name: apps/todoist
+  tags: [todoist, productivity]
+
+- name: Include Teams for Linux
+  import_role:
+    name: apps/teams-for-linux
+  tags: [teams-for-linux, teams, communication]
+
+- name: Include Kooha screen recorder
+  import_role:
+    name: apps/kooha
+  tags: [kooha, screen-recorder, multimedia]
+
+- name: Include Obsidian
+  import_role:
+    name: apps/obsidian
+  tags: [obsidian, productivity, notes]
+
+- name: Include Okular PDF viewer
+  import_role:
+    name: apps/okular
+  tags: [okular, pdf, productivity]

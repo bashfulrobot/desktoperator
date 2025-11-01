@@ -75,17 +75,5 @@ packages:
 # Version pinning strategy (use 'latest' or specific version)
 version_strategy: latest
 
-# Flatpak applications
-# Each entry can be a string (app ID) or dict with {name, state}
-# State is controlled by app_states in roles/apps/defaults/main.yml
-flatpak_apps:
-  - name: com.todoist.Todoist
-    app_state_key: todoist
-  - name: com.github.IsmaelMartinez.teams_for_linux
-    app_state_key: teams_for_linux
-  - name: io.github.seadve.Kooha
-    app_state_key: kooha
-  - name: md.obsidian.Obsidian
-    app_state_key: obsidian
-  - name: org.kde.okular
-    app_state_key: okular
+# Flatpak applications are now managed as individual roles in roles/apps/
+# (todoist, teams-for-linux, kooha, obsidian, okular)

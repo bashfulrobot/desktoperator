@@ -1,0 +1,32 @@
+---
+# Okular PDF viewer installation via Flatpak
+
+- name: Ensure Flatpak is available
+  ansible.builtin.package:
+    name: flatpak
+    state: present
+  become: yes
+  when: app_states['okular'] | default('present') == 'present'
+
+- name: Ensure Flathub repository exists
+  community.general.flatpak_remote:
+    name: flathub
+    state: present
+    flatpakrepo_url: https://dl.flathub.org/repo/flathub.flatpakrepo
+  become: yes
+  when: app_states['okular'] | default('present') == 'present'
+
+- name: Install Okular
+  community.general.flatpak:
+    name: org.kde.okular
+    state: present
+    remote: flathub
+  become: yes
+  when: app_states['okular'] | default('present') == 'present'
+
+- name: Remove Okular
+  community.general.flatpak:
+    name: org.kde.okular
+    state: absent
+  become: yes
+  when: app_states['okular'] | default('present') == 'absent'

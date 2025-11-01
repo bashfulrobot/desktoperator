@@ -1,5 +1,6 @@
 ---
-# Flatpak configuration
+# Flatpak base configuration
+# Individual flatpak apps are now managed as individual roles in roles/apps/
 
 - name: Install flatpak
   apt:
@@ -13,24 +14,3 @@
     state: present
     flatpakrepo_url: https://dl.flathub.org/repo/flathub.flatpakrepo
   become: yes
-
-- name: Install Flatpak applications
-  community.general.flatpak:
-    name: "{{ item.name }}"
-    state: present
-    remote: flathub
-  become: yes
-  loop: "{{ flatpak_apps }}"
-  when:
-    - flatpak_apps is defined and flatpak_apps | length > 0
-    - app_states[item.app_state_key] | default('present') == 'present'
-
-- name: Remove Flatpak applications when absent
-  community.general.flatpak:
-    name: "{{ item.name }}"
-    state: absent
-  become: yes
-  loop: "{{ flatpak_apps }}"
-  when:
-    - flatpak_apps is defined and flatpak_apps | length > 0
-    - app_states[item.app_state_key] | default('present') == 'absent'

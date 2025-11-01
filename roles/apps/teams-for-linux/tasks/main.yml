@@ -1,0 +1,32 @@
+---
+# Teams for Linux installation via Flatpak
+
+- name: Ensure Flatpak is available
+  ansible.builtin.package:
+    name: flatpak
+    state: present
+  become: yes
+  when: app_states['teams-for-linux'] | default('present') == 'present'
+
+- name: Ensure Flathub repository exists
+  community.general.flatpak_remote:
+    name: flathub
+    state: present
+    flatpakrepo_url: https://dl.flathub.org/repo/flathub.flatpakrepo
+  become: yes
+  when: app_states['teams-for-linux'] | default('present') == 'present'
+
+- name: Install Teams for Linux
+  community.general.flatpak:
+    name: com.github.IsmaelMartinez.teams_for_linux
+    state: present
+    remote: flathub
+  become: yes
+  when: app_states['teams-for-linux'] | default('present') == 'present'
+
+- name: Remove Teams for Linux
+  community.general.flatpak:
+    name: com.github.IsmaelMartinez.teams_for_linux
+    state: absent
+  become: yes
+  when: app_states['teams-for-linux'] | default('present') == 'absent'

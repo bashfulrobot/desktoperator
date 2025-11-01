@@ -1,59 +1,18 @@
 ---
 # Apps role defaults
-# Application inventory and states
-
-# Common applications (installed on all systems)
-common_apps:
-  - 1password
-  - restic
-  - zellij
-  - helix
-  - slack
-  - claude-code
-  - codex-cli
-  - starship
-  - shadowenv
-  - firefox
-  - zen-browser
-  - vivaldi
-  - vscode
-  - chrome
-  - zoom
-  - insync
-  - gemini-cli
-  - sitemcp
-  - glow
-  - gum
-  - meetsum
-  - signal
-  - spotify
-  - terminal-experience
-  - eza
-  - fonts
-  - tokei
-  - instruqt-cli
-  - lswt
-  - oq
-  - pake
-  - github-pake
-  - asana-pake
-  - avanti-pake
-  - sfdc-pake
-  - lucid-chart-pake
-  - br-email-pake
-  - kong-email-pake
-  - kong-calendar-pake
-  - br-calendar-pake
-  - kong-drive-pake
-  - br-drive-pake
-  - aha-pake
-  - workday-pake
-  - konnect-pake
-  - zns
-
-# Application states (present/absent)
+# Application state management (present/absent)
+# Tags control WHAT runs, state variables control HOW it runs
+# All apps default to 'present' via | default('present') in role tasks
 # Override in host_vars for host-specific control
+
+# Application states
+# Only explicitly managed apps are listed here
+# Apps not listed default to 'present' in role tasks
 app_states:
+  # Explicitly absent apps
+  vivaldi: absent
+
+  # Explicitly present apps with specific requirements
   1password: present
   restic: present
   zellij: present
@@ -65,9 +24,8 @@ app_states:
   starship: present
   shadowenv: present
   todoist: present
-  teams_for_linux: present
+  teams-for-linux: present
   firefox: present
-  vivaldi: absent
   vscode: present
   chrome: present
   zoom: present
