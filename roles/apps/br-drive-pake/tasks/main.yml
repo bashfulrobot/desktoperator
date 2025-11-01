@@ -1,0 +1,66 @@
+---
+# br-drive Pake App installation
+# Debian package deployment
+
+- name: Install br-drive .deb package
+  apt:
+    deb: "{{ role_path }}/files/br-drive.deb"
+    state: present
+  become: yes
+  when: app_states['br-drive-pake'] | default('present') == 'present'
+
+- name: Remove .deb desktop files
+  file:
+    path: "{{ item }}"
+    state: absent
+  loop:
+    - /usr/share/applications/br-drive.desktop
+    - /usr/share/applications/com.pake.br-drive.desktop
+  become: yes
+  when: app_states['br-drive-pake'] | default('present') == 'present'
+
+- name: Remove .deb icon files (all sizes)
+  shell: find /usr/share/icons/hicolor -name 'pake-br-drive.png' -delete
+  become: yes
+  when: app_states['br-drive-pake'] | default('present') == 'present'
+  changed_when: false
+
+- name: Install custom desktop file
+  copy:
+    src: pake-br-drive.desktop
+    dest: /usr/share/applications/pake-br-drive.desktop
+    mode: '0644'
+  become: yes
+  when: app_states['br-drive-pake'] | default('present') == 'present'
+
+- name: Install themed icons at all sizes
+  copy:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+    mode: '0644'
+  loop:
+    - { src: 'pake-br-drive-icon-16.png', dest: '/usr/share/icons/hicolor/16x16/apps/pake-br-drive.png' }
+    - { src: 'pake-br-drive-icon-32.png', dest: '/usr/share/icons/hicolor/32x32/apps/pake-br-drive.png' }
+    - { src: 'pake-br-drive-icon-48.png', dest: '/usr/share/icons/hicolor/48x48/apps/pake-br-drive.png' }
+    - { src: 'pake-br-drive-icon-64.png', dest: '/usr/share/icons/hicolor/64x64/apps/pake-br-drive.png' }
+    - { src: 'pake-br-drive-icon-128.png', dest: '/usr/share/icons/hicolor/128x128/apps/pake-br-drive.png' }
+    - { src: 'pake-br-drive-icon-256.png', dest: '/usr/share/icons/hicolor/256x256/apps/pake-br-drive.png' }
+    - { src: 'pake-br-drive-icon-512.png', dest: '/usr/share/icons/hicolor/512x512/apps/pake-br-drive.png' }
+    - { src: 'pake-br-drive-icon-800.png', dest: '/usr/share/icons/hicolor/800x800/apps/pake-br-drive.png' }
+  become: yes
+  when: app_states['br-drive-pake'] | default('present') == 'present'
+
+- name: Update icon cache
+  command: gtk-update-icon-cache -f /usr/share/icons/hicolor
+  become: yes
+  when: app_states['br-drive-pake'] | default('present') == 'present'
+  changed_when: false
+
+# Cleanup when absent
+- name: Remove br-drive Pake app
+  apt:
+    name: br-drive
+    state: absent
+  become: yes
+  when: app_states['br-drive-pake'] | default('present') == 'absent'
+

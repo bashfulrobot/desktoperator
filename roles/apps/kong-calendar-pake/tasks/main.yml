@@ -1,0 +1,66 @@
+---
+# kong-calendar Pake App installation
+# Debian package deployment
+
+- name: Install kong-calendar .deb package
+  apt:
+    deb: "{{ role_path }}/files/kong-calendar.deb"
+    state: present
+  become: yes
+  when: app_states['kong-calendar-pake'] | default('present') == 'present'
+
+- name: Remove .deb desktop files
+  file:
+    path: "{{ item }}"
+    state: absent
+  loop:
+    - /usr/share/applications/kong-calendar.desktop
+    - /usr/share/applications/com.pake.kong-calendar.desktop
+  become: yes
+  when: app_states['kong-calendar-pake'] | default('present') == 'present'
+
+- name: Remove .deb icon files (all sizes)
+  shell: find /usr/share/icons/hicolor -name 'pake-kong-calendar.png' -delete
+  become: yes
+  when: app_states['kong-calendar-pake'] | default('present') == 'present'
+  changed_when: false
+
+- name: Install custom desktop file
+  copy:
+    src: pake-kong-calendar.desktop
+    dest: /usr/share/applications/pake-kong-calendar.desktop
+    mode: '0644'
+  become: yes
+  when: app_states['kong-calendar-pake'] | default('present') == 'present'
+
+- name: Install themed icons at all sizes
+  copy:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+    mode: '0644'
+  loop:
+    - { src: 'pake-kong-calendar-icon-16.png', dest: '/usr/share/icons/hicolor/16x16/apps/pake-kong-calendar.png' }
+    - { src: 'pake-kong-calendar-icon-32.png', dest: '/usr/share/icons/hicolor/32x32/apps/pake-kong-calendar.png' }
+    - { src: 'pake-kong-calendar-icon-48.png', dest: '/usr/share/icons/hicolor/48x48/apps/pake-kong-calendar.png' }
+    - { src: 'pake-kong-calendar-icon-64.png', dest: '/usr/share/icons/hicolor/64x64/apps/pake-kong-calendar.png' }
+    - { src: 'pake-kong-calendar-icon-128.png', dest: '/usr/share/icons/hicolor/128x128/apps/pake-kong-calendar.png' }
+    - { src: 'pake-kong-calendar-icon-256.png', dest: '/usr/share/icons/hicolor/256x256/apps/pake-kong-calendar.png' }
+    - { src: 'pake-kong-calendar-icon-512.png', dest: '/usr/share/icons/hicolor/512x512/apps/pake-kong-calendar.png' }
+    - { src: 'pake-kong-calendar-icon-800.png', dest: '/usr/share/icons/hicolor/800x800/apps/pake-kong-calendar.png' }
+  become: yes
+  when: app_states['kong-calendar-pake'] | default('present') == 'present'
+
+- name: Update icon cache
+  command: gtk-update-icon-cache -f /usr/share/icons/hicolor
+  become: yes
+  when: app_states['kong-calendar-pake'] | default('present') == 'present'
+  changed_when: false
+
+# Cleanup when absent
+- name: Remove kong-calendar Pake app
+  apt:
+    name: kong-calendar
+    state: absent
+  become: yes
+  when: app_states['kong-calendar-pake'] | default('present') == 'absent'
+

@@ -1,0 +1,66 @@
+---
+# br-calendar Pake App installation
+# Debian package deployment
+
+- name: Install br-calendar .deb package
+  apt:
+    deb: "{{ role_path }}/files/br-calendar.deb"
+    state: present
+  become: yes
+  when: app_states['br-calendar-pake'] | default('present') == 'present'
+
+- name: Remove .deb desktop files
+  file:
+    path: "{{ item }}"
+    state: absent
+  loop:
+    - /usr/share/applications/br-calendar.desktop
+    - /usr/share/applications/com.pake.br-calendar.desktop
+  become: yes
+  when: app_states['br-calendar-pake'] | default('present') == 'present'
+
+- name: Remove .deb icon files (all sizes)
+  shell: find /usr/share/icons/hicolor -name 'pake-br-calendar.png' -delete
+  become: yes
+  when: app_states['br-calendar-pake'] | default('present') == 'present'
+  changed_when: false
+
+- name: Install custom desktop file
+  copy:
+    src: pake-br-calendar.desktop
+    dest: /usr/share/applications/pake-br-calendar.desktop
+    mode: '0644'
+  become: yes
+  when: app_states['br-calendar-pake'] | default('present') == 'present'
+
+- name: Install themed icons at all sizes
+  copy:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+    mode: '0644'
+  loop:
+    - { src: 'pake-br-calendar-icon-16.png', dest: '/usr/share/icons/hicolor/16x16/apps/pake-br-calendar.png' }
+    - { src: 'pake-br-calendar-icon-32.png', dest: '/usr/share/icons/hicolor/32x32/apps/pake-br-calendar.png' }
+    - { src: 'pake-br-calendar-icon-48.png', dest: '/usr/share/icons/hicolor/48x48/apps/pake-br-calendar.png' }
+    - { src: 'pake-br-calendar-icon-64.png', dest: '/usr/share/icons/hicolor/64x64/apps/pake-br-calendar.png' }
+    - { src: 'pake-br-calendar-icon-128.png', dest: '/usr/share/icons/hicolor/128x128/apps/pake-br-calendar.png' }
+    - { src: 'pake-br-calendar-icon-256.png', dest: '/usr/share/icons/hicolor/256x256/apps/pake-br-calendar.png' }
+    - { src: 'pake-br-calendar-icon-512.png', dest: '/usr/share/icons/hicolor/512x512/apps/pake-br-calendar.png' }
+    - { src: 'pake-br-calendar-icon-800.png', dest: '/usr/share/icons/hicolor/800x800/apps/pake-br-calendar.png' }
+  become: yes
+  when: app_states['br-calendar-pake'] | default('present') == 'present'
+
+- name: Update icon cache
+  command: gtk-update-icon-cache -f /usr/share/icons/hicolor
+  become: yes
+  when: app_states['br-calendar-pake'] | default('present') == 'present'
+  changed_when: false
+
+# Cleanup when absent
+- name: Remove br-calendar Pake app
+  apt:
+    name: br-calendar
+    state: absent
+  become: yes
+  when: app_states['br-calendar-pake'] | default('present') == 'absent'
+

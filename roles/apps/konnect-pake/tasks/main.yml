@@ -1,0 +1,66 @@
+---
+# konnect Pake App installation
+# Debian package deployment
+
+- name: Install konnect .deb package
+  apt:
+    deb: "{{ role_path }}/files/konnect.deb"
+    state: present
+  become: yes
+  when: app_states['konnect-pake'] | default('present') == 'present'
+
+- name: Remove .deb desktop files
+  file:
+    path: "{{ item }}"
+    state: absent
+  loop:
+    - /usr/share/applications/konnect.desktop
+    - /usr/share/applications/com.pake.konnect.desktop
+  become: yes
+  when: app_states['konnect-pake'] | default('present') == 'present'
+
+- name: Remove .deb icon files (all sizes)
+  shell: find /usr/share/icons/hicolor -name 'pake-konnect.png' -delete
+  become: yes
+  when: app_states['konnect-pake'] | default('present') == 'present'
+  changed_when: false
+
+- name: Install custom desktop file
+  copy:
+    src: pake-konnect.desktop
+    dest: /usr/share/applications/pake-konnect.desktop
+    mode: '0644'
+  become: yes
+  when: app_states['konnect-pake'] | default('present') == 'present'
+
+- name: Install themed icons at all sizes
+  copy:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+    mode: '0644'
+  loop:
+    - { src: 'pake-konnect-icon-16.png', dest: '/usr/share/icons/hicolor/16x16/apps/pake-konnect.png' }
+    - { src: 'pake-konnect-icon-32.png', dest: '/usr/share/icons/hicolor/32x32/apps/pake-konnect.png' }
+    - { src: 'pake-konnect-icon-48.png', dest: '/usr/share/icons/hicolor/48x48/apps/pake-konnect.png' }
+    - { src: 'pake-konnect-icon-64.png', dest: '/usr/share/icons/hicolor/64x64/apps/pake-konnect.png' }
+    - { src: 'pake-konnect-icon-128.png', dest: '/usr/share/icons/hicolor/128x128/apps/pake-konnect.png' }
+    - { src: 'pake-konnect-icon-256.png', dest: '/usr/share/icons/hicolor/256x256/apps/pake-konnect.png' }
+    - { src: 'pake-konnect-icon-512.png', dest: '/usr/share/icons/hicolor/512x512/apps/pake-konnect.png' }
+    - { src: 'pake-konnect-icon-800.png', dest: '/usr/share/icons/hicolor/800x800/apps/pake-konnect.png' }
+  become: yes
+  when: app_states['konnect-pake'] | default('present') == 'present'
+
+- name: Update icon cache
+  command: gtk-update-icon-cache -f /usr/share/icons/hicolor
+  become: yes
+  when: app_states['konnect-pake'] | default('present') == 'present'
+  changed_when: false
+
+# Cleanup when absent
+- name: Remove konnect Pake app
+  apt:
+    name: konnect
+    state: absent
+  become: yes
+  when: app_states['konnect-pake'] | default('present') == 'absent'
+

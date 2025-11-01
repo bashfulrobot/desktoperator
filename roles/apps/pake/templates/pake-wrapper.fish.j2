@@ -5,7 +5,7 @@
 #
 # Requirements: Docker, lswt, jq
 #
-# Usage: create-web-app <url> <name> [options...]
+# Usage: create-web-app <url> <name> [domain] [options...]
 #
 # COMMON OPTIONS:
 #   Window Size & Behavior:
@@ -91,7 +91,13 @@ function create-web-app --description 'Build desktop apps from websites using Pa
         echo "create-web-app - Build desktop apps from websites using Pake"
         echo ""
         echo "USAGE:"
-        echo "  create-web-app <url> <name> [options...]"
+        echo "  create-web-app <url> <name> [domain] [options...]"
+        echo ""
+        echo "ARGUMENTS:"
+        echo "  <url>      The URL of the website to convert"
+        echo "  <name>     The name of the application"
+        echo "  [domain]   Optional: Custom domain for logo search (e.g., 'github.com')"
+        echo "             If not provided, domain is extracted from <url>"
         echo ""
         echo "DEFAULTS:"
         echo "  • AppImage format"
@@ -124,6 +130,9 @@ function create-web-app --description 'Build desktop apps from websites using Pa
         echo "  Basic app:"
         echo "    create-web-app https://github.com GitHub"
         echo ""
+        echo "  Custom domain for logo search:"
+        echo "    create-web-app https://app.asana.com Asana asana.com"
+        echo ""
         echo "  Messaging app (background):"
         echo "    create-web-app https://web.whatsapp.com WhatsApp \\"
         echo "      --show-system-tray --hide-on-close"
@@ -151,13 +160,13 @@ function create-web-app --description 'Build desktop apps from websites using Pa
     if test (count $argv) -lt 2
         echo "Error: Missing required arguments"
         echo ""
-        echo "Usage: create-web-app <url> <name> [options...]"
+        echo "Usage: create-web-app <url> <name> [domain] [options...]"
         echo ""
         echo "Examples:"
-        echo "  Basic:     create-web-app https://github.com GitHub"
-        echo "  Chat app:  create-web-app https://web.whatsapp.com WhatsApp --show-system-tray"
-        echo "  Private:   create-web-app https://example.com MyApp --incognito"
-        echo "  Utility:   create-web-app https://translate.google.com Translate --always-on-top"
+        echo "  Basic:         create-web-app https://github.com GitHub"
+        echo "  Custom domain: create-web-app https://app.asana.com Asana asana.com"
+        echo "  Chat app:      create-web-app https://web.whatsapp.com WhatsApp --show-system-tray"
+        echo "  Private:       create-web-app https://example.com MyApp --incognito"
         echo ""
         echo "Run 'create-web-app --help' for full documentation"
         return 1
@@ -166,7 +175,20 @@ function create-web-app --description 'Build desktop apps from websites using Pa
     # Extract URL and name from arguments
     set -l url $argv[1]
     set -l name $argv[2]
-    set -l extra_args $argv[3..-1]
+
+    # Check if third argument is a custom domain or an option flag
+    set -l custom_domain ""
+    set -l extra_args_start 3
+
+    if test (count $argv) -ge 3
+        # If third argument doesn't start with --, treat it as custom domain
+        if not string match -q -- '--*' $argv[3]
+            set custom_domain $argv[3]
+            set extra_args_start 4
+        end
+    end
+
+    set -l extra_args $argv[$extra_args_start..-1]
 
     # Check for common mistake: using --name flag
     if test "$name" = "--name"
@@ -288,27 +310,36 @@ function create-web-app --description 'Build desktop apps from websites using Pa
     if test $user_provided_icon -eq 0
         echo "No custom icon provided, attempting to fetch logo from Brandfetch..."
 
-        # Extract full domain from URL
-        set -l full_domain (echo "$url" | sed -E 's|^https?://||' | sed -E 's|/.*$||' | sed -E 's|^www\.||')
+        # Use custom domain if provided, otherwise extract from URL
+        set -l domain ""
+        if test -n "$custom_domain"
+            # Strip protocol and path if user provided a full URL
+            set domain (echo "$custom_domain" | sed -E 's|^https?://||' | sed -E 's|/.*$||' | sed -E 's|^www\.||')
+            echo "Using custom domain: $domain"
+        else
+            # Extract full domain from URL
+            set -l full_domain (echo "$url" | sed -E 's|^https?://||' | sed -E 's|/.*$||' | sed -E 's|^www\.||')
 
-        # Extract base domain (e.g., app.asana.com -> asana.com)
-        # Handle common two-part TLDs like .co.uk, .com.au, etc.
-        set -l domain (echo "$full_domain" | awk -F. '{
-            if (NF == 2) {
-                # Already base domain (e.g., github.com)
-                print $0
-            } else if (NF > 2 && ($(NF-1) == "co" || $(NF-1) == "com" || $(NF-1) == "gov" || $(NF-1) == "ac")) {
-                # Handle .co.uk, .com.au, etc. (keep last 3 parts)
-                print $(NF-2)"."$(NF-1)"."$NF
-            } else {
-                # Regular subdomain (keep last 2 parts)
-                print $(NF-1)"."$NF
-            }
-        }')
+            # Extract base domain (e.g., app.asana.com -> asana.com)
+            # Handle common two-part TLDs like .co.uk, .com.au, etc.
+            set domain (echo "$full_domain" | awk -F. '{
+                if (NF == 2) {
+                    # Already base domain (e.g., github.com)
+                    print $0
+                } else if (NF > 2 && ($(NF-1) == "co" || $(NF-1) == "com" || $(NF-1) == "gov" || $(NF-1) == "ac")) {
+                    # Handle .co.uk, .com.au, etc. (keep last 3 parts)
+                    print $(NF-2)"."$(NF-1)"."$NF
+                } else {
+                    # Regular subdomain (keep last 2 parts)
+                    print $(NF-1)"."$NF
+                }
+            }')
 
-        if test -n "$domain"
             echo "Full domain: $full_domain"
             echo "Base domain: $domain"
+        end
+
+        if test -n "$domain"
 
             # Try Brandfetch Brand API to get logo URLs
             echo "Querying Brandfetch API for brand data..."
@@ -318,9 +349,30 @@ function create-web-app --description 'Build desktop apps from websites using Pa
             if curl -L -f -s -H "Authorization: Bearer {{ brandfetch_api_key }}" "https://api.brandfetch.io/v2/brands/$domain" -o "$brand_json" 2>/dev/null
                 echo "✓ Brand data retrieved"
 
-                # Extract best PNG logo from JSON with smart selection
-                # Priority: icon type > logo type, light theme > dark theme, optimal size (400-1024px)
-                set -l logo_url (jq -r '.logos[] as $logo |
+                # Priority order based on what survives resizing/manipulation best:
+                # 1. SVG (vector - scales perfectly)
+                # 2. Large PNG (lossless - enough pixels to resize down)
+                # 3. Small PNG (lossless - may lack detail for larger sizes)
+                # 4. JPEG/WebP (lossy - artifacts amplified by manipulation)
+
+                # Try SVG icon first (best: vector + icon type)
+                set -l logo_url (jq -r '.logos[] | select(.type == "icon") | .formats[] | select(.format == "svg") | .src' "$brand_json" 2>/dev/null | head -n 1)
+                if test -n "$logo_url"; and test "$logo_url" != "null"
+                    echo "  Found SVG icon (optimal for multi-size scaling)"
+                end
+
+                # Try SVG logo (vector, but may be wider/different shape than icon)
+                if test -z "$logo_url"; or test "$logo_url" = "null"
+                    set logo_url (jq -r '.logos[] | select(.type == "logo") | .formats[] | select(.format == "svg") | .src' "$brand_json" 2>/dev/null | head -n 1)
+                    if test -n "$logo_url"; and test "$logo_url" != "null"
+                        echo "  Found SVG logo (vector - good for scaling)"
+                    end
+                end
+
+                # Try best PNG with smart selection (lossless raster)
+                # Priority: icon type > logo type, light theme > dark theme, larger sizes preferred
+                if test -z "$logo_url"; or test "$logo_url" = "null"
+                    set logo_url (jq -r '.logos[] as $logo |
                     $logo.formats[] |
                     select(.format == "png") |
                     {
@@ -332,12 +384,12 @@ function create-web-app --description 'Build desktop apps from websites using Pa
                         # Calculate scores
                         type_score: (if $logo.type == "icon" then 1000 else 0 end),
                         theme_score: (if .theme == "light" then 100 elif .theme == "dark" then 50 else 75 end),
-                        # Prefer sizes 400-1024px, penalize outside this range
+                        # Prefer larger sizes (better source for downscaling)
                         max_dim: ([.width // 0, .height // 0] | max),
                         size_score: (
-                            if ([.width // 0, .height // 0] | max) >= 400 and ([.width // 0, .height // 0] | max) <= 1024 then 10
-                            elif ([.width // 0, .height // 0] | max) > 1024 then 5
-                            elif ([.width // 0, .height // 0] | max) >= 256 then 3
+                            if ([.width // 0, .height // 0] | max) >= 800 then 10
+                            elif ([.width // 0, .height // 0] | max) >= 512 then 8
+                            elif ([.width // 0, .height // 0] | max) >= 256 then 5
                             else 1
                             end
                         ),
@@ -346,18 +398,17 @@ function create-web-app --description 'Build desktop apps from websites using Pa
                     select(.area > 0) |
                     . + {total_score: (.type_score + .theme_score + .size_score)}' "$brand_json" 2>/dev/null | \
                     jq -sr 'sort_by(-.total_score, -.area) | .[0].src' 2>/dev/null)
-
-                if test -z "$logo_url"; or test "$logo_url" = "null"
-                    # Fallback: Try any format (JPEG/WebP) from icon type, we'll convert to PNG
-                    set logo_url (jq -r '.logos[] | select(.type == "icon") | .formats[] | select(.format == "jpeg" or .format == "webp") | .src' "$brand_json" 2>/dev/null | head -n 1)
                     if test -n "$logo_url"; and test "$logo_url" != "null"
-                        echo "  Note: Icon only available in JPEG/WebP, will convert to PNG"
+                        echo "  Found PNG (lossless format)"
                     end
                 end
 
+                # Final fallback: JPEG/WebP (lossy formats - worst for manipulation)
                 if test -z "$logo_url"; or test "$logo_url" = "null"
-                    # Final fallback: Any PNG without size info
-                    set logo_url (jq -r '.logos[].formats[] | select(.format == "png") | .src' "$brand_json" 2>/dev/null | head -n 1)
+                    set logo_url (jq -r '.logos[].formats[] | select(.format == "jpeg" or .format == "jpg" or .format == "webp") | .src' "$brand_json" 2>/dev/null | head -n 1)
+                    if test -n "$logo_url"; and test "$logo_url" != "null"
+                        echo "  Found JPEG/WebP (lossy format - will convert to PNG)"
+                    end
                 end
 
                 if test -n "$logo_url"
@@ -378,20 +429,27 @@ function create-web-app --description 'Build desktop apps from websites using Pa
                         else
                             echo "✓ Logo downloaded successfully ($file_size bytes)"
 
-                            # Verify file type and convert to PNG if needed
+                            # Verify file type and convert to PNG RGBA if needed
                             set -l file_type (file -b --mime-type "$temp_download" 2>/dev/null)
                             echo "  File type: $file_type"
 
-                            # Convert JPEG/WebP to PNG if needed
-                            if string match -q "image/jpeg" "$file_type"; or string match -q "image/webp" "$file_type"
-                                echo "  Converting to PNG format..."
+                            # Convert JPEG/WebP/SVG to PNG RGBA if needed
+                            if string match -q "image/jpeg" "$file_type"; or string match -q "image/webp" "$file_type"; or string match -q "image/svg+xml" "$file_type"
+                                echo "  Converting to PNG RGBA format..."
                                 if command -v convert &>/dev/null
-                                    convert "$temp_download" "$fetched_icon" 2>/dev/null
+                                    # Convert to PNG with RGBA color type
+                                    convert "$temp_download" -alpha on -define png:color-type=6 PNG32:"$fetched_icon" 2>/dev/null
                                     if test $status -eq 0
-                                        echo "  ✓ Converted to PNG"
+                                        echo "  ✓ Converted to PNG RGBA"
                                     else
-                                        echo "  ✗ Conversion failed, using original"
-                                        mv "$temp_download" "$fetched_icon"
+                                        echo "  ✗ Conversion failed, trying basic conversion..."
+                                        convert "$temp_download" "$fetched_icon" 2>/dev/null
+                                        if test $status -eq 0
+                                            echo "  ✓ Converted to PNG (may not be RGBA)"
+                                        else
+                                            echo "  ✗ Conversion failed, using original"
+                                            mv "$temp_download" "$fetched_icon"
+                                        end
                                     end
                                 else
                                     echo "  ⚠ ImageMagick not available, using original format"

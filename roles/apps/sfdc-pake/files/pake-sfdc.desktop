@@ -1,0 +1,9 @@
+[Desktop Entry]
+Categories=
+Comment=🤱🏻 Turn any webpage into a desktop app with Rust.
+Exec=pake-sfdc
+StartupWMClass=pake-sfdc
+Icon=pake-sfdc
+Name=sfdc
+Terminal=false
+Type=Application

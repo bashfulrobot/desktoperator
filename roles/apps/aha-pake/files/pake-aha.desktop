@@ -1,0 +1,9 @@
+[Desktop Entry]
+Categories=
+Comment=🤱🏻 Turn any webpage into a desktop app with Rust.
+Exec=pake-aha
+StartupWMClass=pake-aha
+Icon=pake-aha
+Name=aha
+Terminal=false
+Type=Application

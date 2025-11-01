@@ -199,6 +199,72 @@
   tags: [avanti-pake, avanti, desktop]
   when: "'avanti-pake' in common_apps or app_states['avanti-pake'] is defined"
 
+- name: Include Salesforce Pake App
+  import_role:
+    name: apps/sfdc-pake
+  tags: [sfdc-pake, salesforce, desktop]
+  when: "'sfdc-pake' in common_apps or app_states['sfdc-pake'] is defined"
+
+- name: Include Lucidchart Pake App
+  import_role:
+    name: apps/lucid-chart-pake
+  tags: [lucid-chart-pake, lucidchart, desktop]
+  when: "'lucid-chart-pake' in common_apps or app_states['lucid-chart-pake'] is defined"
+
+- name: Include BR Email Pake App
+  import_role:
+    name: apps/br-email-pake
+  tags: [br-email-pake, email, desktop]
+  when: "'br-email-pake' in common_apps or app_states['br-email-pake'] is defined"
+
+- name: Include Kong Email Pake App
+  import_role:
+    name: apps/kong-email-pake
+  tags: [kong-email-pake, email, desktop]
+  when: "'kong-email-pake' in common_apps or app_states['kong-email-pake'] is defined"
+
+- name: Include Kong Calendar Pake App
+  import_role:
+    name: apps/kong-calendar-pake
+  tags: [kong-calendar-pake, calendar, desktop]
+  when: "'kong-calendar-pake' in common_apps or app_states['kong-calendar-pake'] is defined"
+
+- name: Include BR Calendar Pake App
+  import_role:
+    name: apps/br-calendar-pake
+  tags: [br-calendar-pake, calendar, desktop]
+  when: "'br-calendar-pake' in common_apps or app_states['br-calendar-pake'] is defined"
+
+- name: Include Kong Drive Pake App
+  import_role:
+    name: apps/kong-drive-pake
+  tags: [kong-drive-pake, drive, desktop]
+  when: "'kong-drive-pake' in common_apps or app_states['kong-drive-pake'] is defined"
+
+- name: Include BR Drive Pake App
+  import_role:
+    name: apps/br-drive-pake
+  tags: [br-drive-pake, drive, desktop]
+  when: "'br-drive-pake' in common_apps or app_states['br-drive-pake'] is defined"
+
+- name: Include Aha Pake App
+  import_role:
+    name: apps/aha-pake
+  tags: [aha-pake, aha, desktop]
+  when: "'aha-pake' in common_apps or app_states['aha-pake'] is defined"
+
+- name: Include Workday Pake App
+  import_role:
+    name: apps/workday-pake
+  tags: [workday-pake, workday, desktop]
+  when: "'workday-pake' in common_apps or app_states['workday-pake'] is defined"
+
+- name: Include Konnect Pake App
+  import_role:
+    name: apps/konnect-pake
+  tags: [konnect-pake, konnect, desktop]
+  when: "'konnect-pake' in common_apps or app_states['konnect-pake'] is defined"
+
 - name: Include zns DNS lookup tool
   import_role:
     name: apps/zns

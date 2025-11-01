@@ -38,6 +38,17 @@ common_apps:
   - github-pake
   - asana-pake
   - avanti-pake
+  - sfdc-pake
+  - lucid-chart-pake
+  - br-email-pake
+  - kong-email-pake
+  - kong-calendar-pake
+  - br-calendar-pake
+  - kong-drive-pake
+  - br-drive-pake
+  - aha-pake
+  - workday-pake
+  - konnect-pake
   - zns
 
 # Application states (present/absent)
@@ -82,4 +93,15 @@ app_states:
   github-pake: present
   asana-pake: present
   avanti-pake: present
+  sfdc-pake: present
+  lucid-chart-pake: present
+  br-email-pake: present
+  kong-email-pake: present
+  kong-calendar-pake: present
+  br-calendar-pake: present
+  kong-drive-pake: present
+  br-drive-pake: present
+  aha-pake: present
+  workday-pake: present
+  konnect-pake: present
   zns: present

@@ -1,0 +1,9 @@
+[Desktop Entry]
+Categories=
+Comment=🤱🏻 Turn any webpage into a desktop app with Rust.
+Exec=pake-konnect
+StartupWMClass=pake-konnect
+Icon=pake-konnect
+Name=konnect
+Terminal=false
+Type=Application
