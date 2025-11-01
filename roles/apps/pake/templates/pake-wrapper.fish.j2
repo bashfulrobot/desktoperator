@@ -28,6 +28,8 @@
 #   Customization:
 #     --icon <path>             Custom icon file (auto-fetches if omitted)
 #     --inject <css|js>         Inject custom CSS or JavaScript
+#     --add-background          Add gray rounded square background to icon
+#                               (useful for logos with theme conflicts)
 #
 # NOTES:
 #   - Notifications are enabled by default (requests permission on first launch)
@@ -57,6 +59,9 @@
 #   Custom icon and size:
 #     create-web-app https://example.com MyApp \
 #       --icon ~/my-icon.png --width 1280 --height 720
+#
+#   Logo with themed background (for theme conflicts):
+#     create-web-app https://example.com MyApp --add-background
 #
 #   Multiple instances allowed:
 #     create-web-app https://notion.so Notion --multi-instance
@@ -125,6 +130,8 @@ function create-web-app --description 'Build desktop apps from websites using Pa
         echo "  Customization:"
         echo "    --icon <path>                  Custom icon file"
         echo "    --inject <css|js>              Inject custom CSS/JavaScript"
+        echo "    --add-background               Add gray rounded square background"
+        echo "                                   (useful for logos with theme conflicts)"
         echo ""
         echo "EXAMPLES:"
         echo "  Basic app:"
@@ -132,6 +139,9 @@ function create-web-app --description 'Build desktop apps from websites using Pa
         echo ""
         echo "  Custom domain for logo search:"
         echo "    create-web-app https://app.asana.com Asana asana.com"
+        echo ""
+        echo "  Logo with themed background (for theme conflicts):"
+        echo "    create-web-app https://example.com MyApp --add-background"
         echo ""
         echo "  Messaging app (background):"
         echo "    create-web-app https://web.whatsapp.com WhatsApp \\"
@@ -242,6 +252,7 @@ function create-web-app --description 'Build desktop apps from websites using Pa
     # Check for custom icon and handle it for Docker
     set -l has_targets 0
     set -l has_inject 0
+    set -l add_background 0
     set -l custom_icon_path ""
     set -l user_provided_icon 0
     set -l modified_args
@@ -258,6 +269,14 @@ function create-web-app --description 'Build desktop apps from websites using Pa
         # Check for --inject flag (user is providing custom injection)
         if string match -q -- '--inject*' $arg
             set has_inject 1
+        end
+
+        # Check for --add-background flag
+        if test "$arg" = "--add-background"
+            set add_background 1
+            # Don't pass this to pake, it's for our icon processing
+            set i (math $i + 1)
+            continue
         end
 
         # Check for --icon flag and next argument
@@ -465,8 +484,9 @@ function create-web-app --description 'Build desktop apps from websites using Pa
                             set -l height (identify -format "%h" "$fetched_icon" 2>/dev/null)
                             echo "  Dimensions: $width x $height"
 
-                            # Create app icon with brand color background for theme independence
-                            if command -v convert &>/dev/null
+                            # Optionally create app icon with brand color background for theme independence
+                            if test $add_background -eq 1
+                                if command -v convert &>/dev/null
                                 set -l processed_icon "$output_dir/brandfetch-logo-processed.png"
                                 set -l convert_output "$output_dir/convert-error.log"
 
@@ -522,6 +542,11 @@ function create-web-app --description 'Build desktop apps from websites using Pa
                                 end
                             else
                                 echo "⚠ ImageMagick not installed, using logo as-is"
+                                set modified_args $modified_args --icon "/output/brandfetch-logo.png"
+                            end
+                            else
+                                # No background requested - use logo directly
+                                echo "✓ Using logo as-is (no background)"
                                 set modified_args $modified_args --icon "/output/brandfetch-logo.png"
                             end
                         end
@@ -620,13 +645,35 @@ function create-web-app --description 'Build desktop apps from websites using Pa
             return 1
         end
 
-        # Generate scaled icon versions from our 800x800 master (after successful build)
+        # Generate scaled icon versions (after successful build)
+        set -l source_icon ""
+        set -l resize_mode ""
+
         if test -f "$output_dir/brandfetch-logo-processed.png"
-            echo "Generating multi-size icons for deployment..."
+            # Using processed icon with background (square)
+            set source_icon "$output_dir/brandfetch-logo-processed.png"
+            set resize_mode "exact"
+            echo "Generating multi-size square icons for deployment..."
+        else if test -f "$output_dir/brandfetch-logo.png"
+            # Using logo without background (maintain aspect ratio)
+            set source_icon "$output_dir/brandfetch-logo.png"
+            set resize_mode "aspect"
+            echo "Generating multi-size icons (maintaining aspect ratio)..."
+        end
+
+        if test -n "$source_icon"
             set -l icon_sizes 16 32 48 64 128 256 512
             for size in $icon_sizes
                 set -l scaled_icon "$output_dir/icon-$size.png"
-                convert "$output_dir/brandfetch-logo-processed.png" -resize "$size"x"$size" PNG32:"$scaled_icon" 2>/dev/null
+
+                if test "$resize_mode" = "exact"
+                    # Exact square resize (for icons with background)
+                    convert "$source_icon" -resize "$size"x"$size"! -define png:color-type=6 PNG32:"$scaled_icon" 2>/dev/null
+                else
+                    # Maintain aspect ratio (for icons without background)
+                    convert "$source_icon" -resize "$size"x"$size" -define png:color-type=6 PNG32:"$scaled_icon" 2>/dev/null
+                end
+
                 if test $status -eq 0 -a -f "$scaled_icon"
                     echo "  ✓ Created $size x $size icon"
                 else
@@ -642,11 +689,11 @@ function create-web-app --description 'Build desktop apps from websites using Pa
         cp "$deb_file" "$role_path/files/$name.deb"
         echo "✓ Copied .deb package → $role_path/files/$name.deb"
 
-        # Copy themed icons (all sizes) if they were created
+        # Copy icons (all sizes) if they were created
         if test -f "$output_dir/brandfetch-logo-processed.png"
-            # Copy 800x800 master icon
+            # Copy 800x800 master icon (with background)
             cp "$output_dir/brandfetch-logo-processed.png" "$role_path/files/pake-$name-icon-800.png"
-            echo "✓ Copied 800x800 icon → $role_path/files/pake-$name-icon-800.png"
+            echo "✓ Copied 800x800 icon (with background) → $role_path/files/pake-$name-icon-800.png"
 
             # Copy scaled versions
             set -l icon_sizes 16 32 48 64 128 256 512
@@ -656,8 +703,21 @@ function create-web-app --description 'Build desktop apps from websites using Pa
                     echo "✓ Copied $size x $size icon → $role_path/files/pake-$name-icon-$size.png"
                 end
             end
+        else if test -f "$output_dir/brandfetch-logo.png"
+            # Copy original logo as 800px master (without background)
+            cp "$output_dir/brandfetch-logo.png" "$role_path/files/pake-$name-icon-800.png"
+            echo "✓ Copied master icon (no background) → $role_path/files/pake-$name-icon-800.png"
+
+            # Copy scaled versions
+            set -l icon_sizes 16 32 48 64 128 256 512
+            for size in $icon_sizes
+                if test -f "$output_dir/icon-$size.png"
+                    cp "$output_dir/icon-$size.png" "$role_path/files/pake-$name-icon-$size.png"
+                    echo "✓ Copied $size icon → $role_path/files/pake-$name-icon-$size.png"
+                end
+            end
         else
-            echo "⚠ No themed icons found to copy"
+            echo "⚠ No icons found to copy"
         end
 
         # Generate custom .desktop file
