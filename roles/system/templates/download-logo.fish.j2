@@ -1,0 +1,116 @@
+# Download brand logo from Brandfetch API
+# Usage: download-logo <url-or-domain> [output-file]
+#
+# Examples:
+#   download-logo google.com
+#   download-logo https://mail.google.com
+#   download-logo asana.com ~/Pictures/asana-logo.png
+
+function download-logo --description 'Download brand logo from Brandfetch API'
+    # Check for required argument
+    if test (count $argv) -lt 1
+        echo "Error: Missing required domain or URL"
+        echo ""
+        echo "Usage: download-logo <url-or-domain> [output-file]"
+        echo ""
+        echo "Examples:"
+        echo "  download-logo google.com"
+        echo "  download-logo https://mail.google.com"
+        echo "  download-logo asana.com ~/Pictures/asana-logo.png"
+        return 1
+    end
+
+    set -l input $argv[1]
+    set -l output_file ""
+
+    if test (count $argv) -ge 2
+        set output_file $argv[2]
+    end
+
+    # Extract domain from URL if full URL is provided
+    set -l domain (echo "$input" | sed -E 's|^https?://||' | sed -E 's|/.*$||' | sed -E 's|^www\.||')
+
+    if test -z "$domain"
+        echo "Error: Could not extract domain from input: $input"
+        return 1
+    end
+
+    echo "Searching Brandfetch for: $domain"
+
+    # Create temp directory for downloads
+    set -l temp_dir (mktemp -d)
+    set -l brand_json "$temp_dir/brand.json"
+
+    # Query Brandfetch Brand API
+    if curl -L -f -s -H "Authorization: Bearer {{ brandfetch_api_key }}" "https://api.brandfetch.io/v2/brands/$domain" -o "$brand_json" 2>/dev/null
+        echo "✓ Brand data retrieved"
+
+        # Extract largest PNG logo from JSON
+        set -l logo_url (jq -r '.logos[].formats[] |
+            select(.format == "png") |
+            {src, width: (.width // 0), height: (.height // 0), area: ((.width // 0) * (.height // 0))} |
+            select(.area > 0)' "$brand_json" 2>/dev/null | \
+            jq -sr 'sort_by(-.area) | .[0].src' 2>/dev/null)
+
+        if test -z "$logo_url"; or test "$logo_url" = "null"
+            # Fallback: Try any PNG without size info
+            set logo_url (jq -r '.logos[].formats[] | select(.format == "png") | .src' "$brand_json" 2>/dev/null | head -n 1)
+        end
+
+        if test -n "$logo_url"; and test "$logo_url" != "null"
+            echo "  Logo URL: $logo_url"
+
+            # Determine output filename
+            if test -z "$output_file"
+                set output_file "./$domain-logo.png"
+            end
+
+            # Download logo
+            echo "Downloading logo..."
+            if curl -L -f -s -o "$output_file" "$logo_url" 2>/dev/null
+                set -l file_size (stat -f%z "$output_file" 2>/dev/null || stat -c%s "$output_file" 2>/dev/null)
+
+                if test "$file_size" -gt 0
+                    set -l file_type (file -b --mime-type "$output_file" 2>/dev/null)
+                    echo "✓ Logo downloaded successfully"
+                    echo "  File: $output_file"
+                    echo "  Size: $file_size bytes"
+                    echo "  Type: $file_type"
+
+                    # Clean up temp directory
+                    rm -rf "$temp_dir"
+                    return 0
+                else
+                    echo "✗ Downloaded file is empty"
+                    rm -f "$output_file"
+                end
+            else
+                echo "✗ Failed to download logo from URL"
+            end
+        else
+            echo "✗ No PNG logo found for domain: $domain"
+        end
+    else
+        echo "✗ Failed to retrieve brand data from Brandfetch"
+        echo "  Domain '$domain' might not be in the database"
+    end
+
+    # Clean up temp directory
+    rm -rf "$temp_dir"
+
+    # No results found - open browser to Brandfetch
+    echo ""
+    echo "Opening Brandfetch in your browser for manual search..."
+    echo "If you find the brand, you can try again with the exact domain."
+
+    if command -v xdg-open &>/dev/null
+        xdg-open "https://brandfetch.com/" &>/dev/null
+    else if command -v open &>/dev/null
+        open "https://brandfetch.com/" &>/dev/null
+    else
+        echo "Could not detect browser opener (xdg-open or open)"
+        echo "Please visit: https://brandfetch.com/"
+    end
+
+    return 1
+end

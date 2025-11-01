@@ -44,6 +44,15 @@
     mode: '0644'
   become: yes
 
+- name: Deploy download-logo function
+  template:
+    src: download-logo.fish.j2
+    dest: "{{ user.home }}/.config/fish/conf.d/download-logo.fish"
+    owner: "{{ user.name }}"
+    group: "{{ user.name }}"
+    mode: '0644'
+  become: yes
+
 - name: Set fish as default shell
   user:
     name: "{{ user.name }}"
