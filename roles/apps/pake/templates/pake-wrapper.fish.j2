@@ -633,6 +633,7 @@ function create-web-app --description 'Build desktop apps from websites using Pa
     if test $pake_result -eq 0
         set -l repo_path ~/dev/iac/desktoperator
         set -l role_name "$name-pake"
+        set -l app_state_key "$name"  # Use simplified app name for state management
         set -l role_path "$repo_path/roles/apps/$role_name"
 
         echo "✓ Build successful! Setting up role structure..."
@@ -745,7 +746,7 @@ Type=Application" > "$role_path/files/pake-$name.desktop"
     name: $name
     state: absent
   become: yes
-  when: app_states['$role_name'] | default('present') == 'present'
+  when: app_states['$app_state_key'] | default('present') == 'present'
   tags: [\"never\", \"reinstall\"]
 
 - name: Install $name .deb package
@@ -753,7 +754,7 @@ Type=Application" > "$role_path/files/pake-$name.desktop"
     deb: \"{{ '{{' }} role_path {{ '}}' }}/files/$name.deb\"
     state: present
   become: yes
-  when: app_states['$role_name'] | default('present') == 'present'
+  when: app_states['$app_state_key'] | default('present') == 'present'
   tags: [\"always\"]
 
 - name: Remove .deb desktop files
@@ -764,12 +765,12 @@ Type=Application" > "$role_path/files/pake-$name.desktop"
     - /usr/share/applications/$name.desktop
     - /usr/share/applications/com.pake.$name.desktop
   become: yes
-  when: app_states['$role_name'] | default('present') == 'present'
+  when: app_states['$app_state_key'] | default('present') == 'present'
 
 - name: Remove .deb icon files (all sizes)
   shell: find /usr/share/icons/hicolor -name 'pake-$name.png' -delete
   become: yes
-  when: app_states['$role_name'] | default('present') == 'present'
+  when: app_states['$app_state_key'] | default('present') == 'present'
   changed_when: false
 
 - name: Install custom desktop file
@@ -778,7 +779,7 @@ Type=Application" > "$role_path/files/pake-$name.desktop"
     dest: /usr/share/applications/pake-$name.desktop
     mode: '0644'
   become: yes
-  when: app_states['$role_name'] | default('present') == 'present'
+  when: app_states['$app_state_key'] | default('present') == 'present'
 
 - name: Install themed icons at all sizes
   copy:
@@ -795,12 +796,12 @@ Type=Application" > "$role_path/files/pake-$name.desktop"
     - { src: 'pake-$name-icon-512.png', dest: '/usr/share/icons/hicolor/512x512/apps/pake-$name.png' }
     - { src: 'pake-$name-icon-800.png', dest: '/usr/share/icons/hicolor/800x800/apps/pake-$name.png' }
   become: yes
-  when: app_states['$role_name'] | default('present') == 'present'
+  when: app_states['$app_state_key'] | default('present') == 'present'
 
 - name: Update icon cache
   command: gtk-update-icon-cache -f /usr/share/icons/hicolor
   become: yes
-  when: app_states['$role_name'] | default('present') == 'present'
+  when: app_states['$app_state_key'] | default('present') == 'present'
   changed_when: false
 
 # Cleanup when absent
@@ -809,7 +810,7 @@ Type=Application" > "$role_path/files/pake-$name.desktop"
     name: $name
     state: absent
   become: yes
-  when: app_states['$role_name'] | default('present') == 'absent'
+  when: app_states['$app_state_key'] | default('present') == 'absent'
 " > "$role_path/tasks/main.yml"
         echo "✓ Created tasks/main.yml → $role_path/tasks/main.yml"
 
@@ -817,15 +818,14 @@ Type=Application" > "$role_path/files/pake-$name.desktop"
         echo "📦 Role created at: $role_path"
         echo ""
         echo "Next steps:"
-        echo "  1. Add '$role_name' to roles/apps/defaults/main.yml:"
-        echo "     - common_apps list"
-        echo "     - app_states dict"
+        echo "  1. Add '$app_state_key' to roles/apps/defaults/main.yml app_states:"
+        echo "     $app_state_key: present"
+        echo ""
         echo "  2. Add role include to roles/apps/tasks/main.yml:"
         echo "     - name: Include $name Pake App"
         echo "       import_role:"
         echo "         name: apps/$role_name"
-        echo "       tags: [$role_name, $name, desktop]"
-        echo "       when: \"'$role_name' in common_apps or app_states['$role_name'] is defined\""
+        echo "       tags: [$app_state_key]"
     else
         echo "✗ Build failed with exit code $pake_result"
     end
