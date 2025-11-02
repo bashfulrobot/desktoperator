@@ -8,7 +8,7 @@
 
 # Update everything (all package managers + Ansible configuration)
 [group('updates')]
-update-all: update-apt update-flatpak update-npm update-go update-ansible
+update-all: update-apt update-flatpak update-npm update-go update-ansible update-pake
     #!/usr/bin/env bash
     set -euo pipefail
     {{ header_msg }}
@@ -107,6 +107,22 @@ update-go:
     /usr/local/go/bin/go install golang.org/x/tools/gopls@latest || { error "Failed to update gopls"; exit 1; }
 
     success "Go tools updated"
+
+# Update all Pake desktop applications (reinstall to get latest versions)
+[group('updates')]
+update-pake:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    {{ header_msg }}
+    {{ success_msg }}
+    {{ error_msg }}
+
+    header "Updating Pake Applications"
+
+    echo "→ Reinstalling all Pake apps with latest packages..."
+    just update-ansible-tags pake,reinstall || { error "Failed to update Pake apps"; exit 1; }
+
+    success "Pake applications updated"
 {% endraw %}
 
 # Run full Ansible playbook (updates all Ansible-managed configuration)
