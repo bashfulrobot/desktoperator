@@ -11,7 +11,7 @@ create-web-app https://konghq.aha.io/products/AI/feature_cards aha
 create-web-app https://app.asana.com/1/536788629240466/project/1211778559292700/list/1211778559292717 asana --add-background
 create-web-app https://avanti.letter.ai/ avanti
 create-web-app https://github.com/bashfulrobot github
-create-web-app https://cloud.konghq.com/us/overview/ konnect
+create-web-app https://cloud.konghq.com/us/overview/ konnect --add-background
 create-web-app https://lucid.app/documents#/home lucid-chart
 create-web-app https://kong.lightning.force.com/lightning/page/home sfdc
 
@@ -29,8 +29,8 @@ echo ""
 echo "Building Workday app (with custom domain)..."
 # Workday (with custom domain)
 create-web-app https://wd12.myworkday.com/kong/d/home.htmld workday workday.com
-create-web-app https://developer.konghq.com/ kong-docs konghq.com
-create-web-app https://education.konghq.com/learner-dashboard kong-academy konghq.com
+create-web-app https://developer.konghq.com/ kong-docs konghq.com --add-background
+create-web-app https://education.konghq.com/learner-dashboard kong-academy konghq.com --add-background
 
 
 echo ""
