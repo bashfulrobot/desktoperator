@@ -187,6 +187,74 @@ app_states:
 - State checks inside role tasks: `app_states['app'] | default('present')`
 - Default to `'present'` so tag-based runs work by default
 
+## Reinstalling Packages (Force Reinstall)
+
+### The Reinstall Tag
+
+Some packages (like Pake apps) don't include version numbers in their filenames, which means Ansible can't detect when they've been updated. For these cases, we've implemented a `reinstall` tag that forces a clean reinstall.
+
+**How it works:**
+- Tasks tagged with `["never", "reinstall"]` only run when explicitly requested
+- The uninstall task removes the package
+- The install task (tagged with `["always"]`) then installs the updated package
+- During normal runs, the uninstall is skipped and install only runs if package is missing
+
+### Usage
+
+**Force reinstall of a single Pake app:**
+```bash
+ansible-playbook site.yml --tags reinstall,br-email
+```
+
+**Force reinstall of multiple Pake apps:**
+```bash
+ansible-playbook site.yml --tags reinstall,br-email,github,asana
+```
+
+**Typical workflow after regenerating a .deb file:**
+```bash
+# 1. Regenerate the .deb file with updated content
+create-web-app https://github.com GitHub
+
+# 2. Force reinstall on target machine
+ansible-playbook site.yml --tags reinstall,github
+```
+
+### Which Apps Support Reinstall?
+
+Currently implemented for:
+- **All Pake apps** (br-email, github, asana, sfdc, etc.)
+- Any app role that includes tasks tagged with `["never", "reinstall"]`
+
+### Implementation Details
+
+Each Pake app role includes these tasks:
+
+```yaml
+# Uninstall task - only runs with --tags reinstall
+- name: Uninstall app-name for reinstall
+  apt:
+    name: app-name
+    state: absent
+  become: yes
+  when: app_states['app-name'] | default('present') == 'present'
+  tags: ["never", "reinstall"]
+
+# Install task - always runs when included
+- name: Install app-name .deb package
+  apt:
+    deb: "{{ role_path }}/files/app-name.deb"
+    state: present
+  become: yes
+  when: app_states['app-name'] | default('present') == 'present'
+  tags: ["always"]
+```
+
+**Tag behavior:**
+- `never` = Skip this task unless explicitly requested
+- `reinstall` = Run when `--tags reinstall` is specified
+- `always` = Run even during tag-filtered runs
+
 ## Pake Apps (Web-to-Desktop Framework)
 
 Pake is just a framework for converting web apps to desktop apps. Tags use app names, not the framework:
