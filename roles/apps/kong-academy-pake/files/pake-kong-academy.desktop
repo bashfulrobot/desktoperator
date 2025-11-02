@@ -1,9 +1,0 @@
-[Desktop Entry]
-Categories=
-Comment=🤱🏻 Turn any webpage into a desktop app with Rust.
-Exec=pake-kongacademy
-StartupWMClass=pake-kong-academy
-Icon=pake-kong-academy
-Name=kong-academy
-Terminal=false
-Type=Application

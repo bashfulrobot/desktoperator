@@ -64,6 +64,5 @@ app_states:
   aha: present
   workday: present
   konnect: present
-  kong-academy: present
   kong-docs: present
   zns: present

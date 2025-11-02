@@ -30,7 +30,6 @@ echo "Building Workday app (with custom domain)..."
 # Workday (with custom domain)
 create-web-app https://wd12.myworkday.com/kong/d/home.htmld workday workday.com
 create-web-app https://developer.konghq.com/ kong-docs konghq.com --add-background
-create-web-app https://education.konghq.com/learner-dashboard kong-academy konghq.com --add-background
 
 
 echo ""

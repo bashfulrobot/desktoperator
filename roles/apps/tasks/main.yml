@@ -221,11 +221,6 @@
     name: apps/konnect-pake
   tags: [konnect, pake]
 
-- name: Include Kong Academy Pake App
-  import_role:
-    name: apps/kong-academy-pake
-  tags: [kong-academy, pake]
-
 - name: Include Kong Docs Pake App
   import_role:
     name: apps/kong-docs-pake
