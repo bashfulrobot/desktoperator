@@ -1,6 +1,13 @@
 {
     (
         modifiers: [
+            Super,
+        ],
+        key: "e",
+        description: Some("Editor"),
+    ): Spawn("code"),
+    (
+        modifiers: [
             Ctrl,
             Alt,
         ],
