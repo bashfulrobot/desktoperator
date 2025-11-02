@@ -149,87 +149,87 @@
 - name: Include Pake CLI web-to-desktop app builder
   import_role:
     name: apps/pake
-  tags: [pake]
+  tags: [pake-core, pake]
 
 - name: Include GitHub Pake App
   import_role:
     name: apps/github-pake
-  tags: [github]
+  tags: [github, pake]
 
 - name: Include Asana Pake App
   import_role:
     name: apps/asana-pake
-  tags: [asana]
+  tags: [asana, pake]
 
 - name: Include Avanti Pake App
   import_role:
     name: apps/avanti-pake
-  tags: [avanti]
+  tags: [avanti, pake]
 
 - name: Include Salesforce Pake App
   import_role:
     name: apps/sfdc-pake
-  tags: [sfdc, salesforce]
+  tags: [sfdc, salesforce, pake]
 
 - name: Include Lucidchart Pake App
   import_role:
     name: apps/lucid-chart-pake
-  tags: [lucid-chart, lucidchart]
+  tags: [lucid-chart, lucidchart, pake]
 
 - name: Include BR Email Pake App
   import_role:
     name: apps/br-email-pake
-  tags: [br-email]
+  tags: [br-email, pake]
 
 - name: Include Kong Email Pake App
   import_role:
     name: apps/kong-email-pake
-  tags: [kong-email]
+  tags: [kong-email, pake]
 
 - name: Include Kong Calendar Pake App
   import_role:
     name: apps/kong-calendar-pake
-  tags: [kong-calendar]
+  tags: [kong-calendar, pake]
 
 - name: Include BR Calendar Pake App
   import_role:
     name: apps/br-calendar-pake
-  tags: [br-calendar]
+  tags: [br-calendar, pake]
 
 - name: Include Kong Drive Pake App
   import_role:
     name: apps/kong-drive-pake
-  tags: [kong-drive]
+  tags: [kong-drive, pake]
 
 - name: Include BR Drive Pake App
   import_role:
     name: apps/br-drive-pake
-  tags: [br-drive]
+  tags: [br-drive, pake]
 
 - name: Include Aha Pake App
   import_role:
     name: apps/aha-pake
-  tags: [aha]
+  tags: [aha, pake]
 
 - name: Include Workday Pake App
   import_role:
     name: apps/workday-pake
-  tags: [workday]
+  tags: [workday, pake]
 
 - name: Include Konnect Pake App
   import_role:
     name: apps/konnect-pake
-  tags: [konnect]
+  tags: [konnect, pake]
 
 - name: Include Kong Academy Pake App
   import_role:
     name: apps/kong-academy-pake
-  tags: [kong-academy]
+  tags: [kong-academy, pake]
 
 - name: Include Kong Docs Pake App
   import_role:
     name: apps/kong-docs-pake
-  tags: [kong-docs]
+  tags: [kong-docs, pake]
 
 - name: Include zns DNS lookup tool
   import_role:

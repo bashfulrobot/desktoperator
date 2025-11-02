@@ -825,7 +825,7 @@ Type=Application" > "$role_path/files/pake-$name.desktop"
         echo "     - name: Include $name Pake App"
         echo "       import_role:"
         echo "         name: apps/$role_name"
-        echo "       tags: [$app_state_key]"
+        echo "       tags: [$app_state_key, pake]"
     else
         echo "✗ Build failed with exit code $pake_result"
     end
