@@ -2,12 +2,21 @@
 # workday Pake App installation
 # Debian package deployment
 
+- name: Uninstall workday for reinstall
+  apt:
+    name: workday
+    state: absent
+  become: yes
+  when: app_states['workday'] | default('present') == 'present'
+  tags: ["never", "reinstall"]
+
 - name: Install workday .deb package
   apt:
     deb: "{{ role_path }}/files/workday.deb"
     state: present
   become: yes
   when: app_states['workday'] | default('present') == 'present'
+  tags: ["always"]
 
 - name: Remove .deb desktop files
   file:

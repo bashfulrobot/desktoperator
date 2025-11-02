@@ -2,12 +2,21 @@
 # kong-email Pake App installation
 # Debian package deployment
 
+- name: Uninstall kong-email for reinstall
+  apt:
+    name: kong-email
+    state: absent
+  become: yes
+  when: app_states['kong-email'] | default('present') == 'present'
+  tags: ["never", "reinstall"]
+
 - name: Install kong-email .deb package
   apt:
     deb: "{{ role_path }}/files/kong-email.deb"
     state: present
   become: yes
   when: app_states['kong-email'] | default('present') == 'present'
+  tags: ["always"]
 
 - name: Remove .deb desktop files
   file:

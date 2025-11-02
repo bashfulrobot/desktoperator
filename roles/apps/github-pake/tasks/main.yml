@@ -2,12 +2,21 @@
 # github Pake App installation
 # Debian package deployment
 
+- name: Uninstall github for reinstall
+  apt:
+    name: github
+    state: absent
+  become: yes
+  when: app_states['github'] | default('present') == 'present'
+  tags: ["never", "reinstall"]
+
 - name: Install github .deb package
   apt:
     deb: "{{ role_path }}/files/github.deb"
     state: present
   become: yes
   when: app_states['github'] | default('present') == 'present'
+  tags: ["always"]
 
 - name: Remove .deb desktop files
   file:

@@ -2,12 +2,21 @@
 # sfdc Pake App installation
 # Debian package deployment
 
+- name: Uninstall sfdc for reinstall
+  apt:
+    name: sfdc
+    state: absent
+  become: yes
+  when: app_states['sfdc'] | default('present') == 'present'
+  tags: ["never", "reinstall"]
+
 - name: Install sfdc .deb package
   apt:
     deb: "{{ role_path }}/files/sfdc.deb"
     state: present
   become: yes
   when: app_states['sfdc'] | default('present') == 'present'
+  tags: ["always"]
 
 - name: Remove .deb desktop files
   file:

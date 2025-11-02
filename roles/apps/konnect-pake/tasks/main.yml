@@ -2,12 +2,21 @@
 # konnect Pake App installation
 # Debian package deployment
 
+- name: Uninstall konnect for reinstall
+  apt:
+    name: konnect
+    state: absent
+  become: yes
+  when: app_states['konnect'] | default('present') == 'present'
+  tags: ["never", "reinstall"]
+
 - name: Install konnect .deb package
   apt:
     deb: "{{ role_path }}/files/konnect.deb"
     state: present
   become: yes
   when: app_states['konnect'] | default('present') == 'present'
+  tags: ["always"]
 
 - name: Remove .deb desktop files
   file:

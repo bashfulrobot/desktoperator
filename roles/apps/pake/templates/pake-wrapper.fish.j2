@@ -740,12 +740,21 @@ Type=Application" > "$role_path/files/pake-$name.desktop"
 # $name Pake App installation
 # Debian package deployment
 
+- name: Uninstall $name for reinstall
+  apt:
+    name: $name
+    state: absent
+  become: yes
+  when: app_states['$role_name'] | default('present') == 'present'
+  tags: [\"never\", \"reinstall\"]
+
 - name: Install $name .deb package
   apt:
     deb: \"{{ '{{' }} role_path {{ '}}' }}/files/$name.deb\"
     state: present
   become: yes
   when: app_states['$role_name'] | default('present') == 'present'
+  tags: [\"always\"]
 
 - name: Remove .deb desktop files
   file:

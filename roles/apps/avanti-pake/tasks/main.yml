@@ -2,12 +2,21 @@
 # avanti Pake App installation
 # Debian package deployment
 
+- name: Uninstall avanti for reinstall
+  apt:
+    name: avanti
+    state: absent
+  become: yes
+  when: app_states['avanti'] | default('present') == 'present'
+  tags: ["never", "reinstall"]
+
 - name: Install avanti .deb package
   apt:
     deb: "{{ role_path }}/files/avanti.deb"
     state: present
   become: yes
   when: app_states['avanti'] | default('present') == 'present'
+  tags: ["always"]
 
 - name: Remove .deb desktop files
   file:

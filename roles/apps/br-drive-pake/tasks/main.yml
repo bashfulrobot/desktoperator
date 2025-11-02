@@ -2,12 +2,21 @@
 # br-drive Pake App installation
 # Debian package deployment
 
+- name: Uninstall br-drive for reinstall
+  apt:
+    name: br-drive
+    state: absent
+  become: yes
+  when: app_states['br-drive'] | default('present') == 'present'
+  tags: ["never", "reinstall"]
+
 - name: Install br-drive .deb package
   apt:
     deb: "{{ role_path }}/files/br-drive.deb"
     state: present
   become: yes
   when: app_states['br-drive'] | default('present') == 'present'
+  tags: ["always"]
 
 - name: Remove .deb desktop files
   file:

@@ -2,12 +2,21 @@
 # br-calendar Pake App installation
 # Debian package deployment
 
+- name: Uninstall br-calendar for reinstall
+  apt:
+    name: br-calendar
+    state: absent
+  become: yes
+  when: app_states['br-calendar'] | default('present') == 'present'
+  tags: ["never", "reinstall"]
+
 - name: Install br-calendar .deb package
   apt:
     deb: "{{ role_path }}/files/br-calendar.deb"
     state: present
   become: yes
   when: app_states['br-calendar'] | default('present') == 'present'
+  tags: ["always"]
 
 - name: Remove .deb desktop files
   file:

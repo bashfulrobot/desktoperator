@@ -2,12 +2,21 @@
 # aha Pake App installation
 # Debian package deployment
 
+- name: Uninstall aha for reinstall
+  apt:
+    name: aha
+    state: absent
+  become: yes
+  when: app_states['aha'] | default('present') == 'present'
+  tags: ["never", "reinstall"]
+
 - name: Install aha .deb package
   apt:
     deb: "{{ role_path }}/files/aha.deb"
     state: present
   become: yes
   when: app_states['aha'] | default('present') == 'present'
+  tags: ["always"]
 
 - name: Remove .deb desktop files
   file:

@@ -2,12 +2,21 @@
 # kong-drive Pake App installation
 # Debian package deployment
 
+- name: Uninstall kong-drive for reinstall
+  apt:
+    name: kong-drive
+    state: absent
+  become: yes
+  when: app_states['kong-drive'] | default('present') == 'present'
+  tags: ["never", "reinstall"]
+
 - name: Install kong-drive .deb package
   apt:
     deb: "{{ role_path }}/files/kong-drive.deb"
     state: present
   become: yes
   when: app_states['kong-drive'] | default('present') == 'present'
+  tags: ["always"]
 
 - name: Remove .deb desktop files
   file:

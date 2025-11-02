@@ -2,12 +2,21 @@
 # lucid-chart Pake App installation
 # Debian package deployment
 
+- name: Uninstall lucid-chart for reinstall
+  apt:
+    name: lucid-chart
+    state: absent
+  become: yes
+  when: app_states['lucid-chart'] | default('present') == 'present'
+  tags: ["never", "reinstall"]
+
 - name: Install lucid-chart .deb package
   apt:
     deb: "{{ role_path }}/files/lucid-chart.deb"
     state: present
   become: yes
   when: app_states['lucid-chart'] | default('present') == 'present'
+  tags: ["always"]
 
 - name: Remove .deb desktop files
   file:

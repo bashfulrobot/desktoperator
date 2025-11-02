@@ -2,12 +2,21 @@
 # br-email Pake App installation
 # Debian package deployment
 
+- name: Uninstall br-email for reinstall
+  apt:
+    name: br-email
+    state: absent
+  become: yes
+  when: app_states['br-email'] | default('present') == 'present'
+  tags: ["never", "reinstall"]
+
 - name: Install br-email .deb package
   apt:
     deb: "{{ role_path }}/files/br-email.deb"
     state: present
   become: yes
   when: app_states['br-email'] | default('present') == 'present'
+  tags: ["always"]
 
 - name: Remove .deb desktop files
   file:

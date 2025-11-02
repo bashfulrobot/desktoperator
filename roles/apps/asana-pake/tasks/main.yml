@@ -2,12 +2,21 @@
 # asana Pake App installation
 # Debian package deployment
 
+- name: Uninstall asana for reinstall
+  apt:
+    name: asana
+    state: absent
+  become: yes
+  when: app_states['asana'] | default('present') == 'present'
+  tags: ["never", "reinstall"]
+
 - name: Install asana .deb package
   apt:
     deb: "{{ role_path }}/files/asana.deb"
     state: present
   become: yes
   when: app_states['asana'] | default('present') == 'present'
+  tags: ["always"]
 
 - name: Remove .deb desktop files
   file:
