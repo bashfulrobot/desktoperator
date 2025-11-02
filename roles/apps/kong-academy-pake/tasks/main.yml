@@ -1,0 +1,66 @@
+---
+# kong-academy Pake App installation
+# Debian package deployment
+
+- name: Install kong-academy .deb package
+  apt:
+    deb: "{{ role_path }}/files/kong-academy.deb"
+    state: present
+  become: yes
+  when: app_states['kong-academy'] | default('present') == 'present'
+
+- name: Remove .deb desktop files
+  file:
+    path: "{{ item }}"
+    state: absent
+  loop:
+    - /usr/share/applications/kong-academy.desktop
+    - /usr/share/applications/com.pake.kong-academy.desktop
+  become: yes
+  when: app_states['kong-academy'] | default('present') == 'present'
+
+- name: Remove .deb icon files (all sizes)
+  shell: find /usr/share/icons/hicolor -name 'pake-kong-academy.png' -delete
+  become: yes
+  when: app_states['kong-academy'] | default('present') == 'present'
+  changed_when: false
+
+- name: Install custom desktop file
+  copy:
+    src: pake-kong-academy.desktop
+    dest: /usr/share/applications/pake-kong-academy.desktop
+    mode: '0644'
+  become: yes
+  when: app_states['kong-academy'] | default('present') == 'present'
+
+- name: Install themed icons at all sizes
+  copy:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+    mode: '0644'
+  loop:
+    - { src: 'pake-kong-academy-icon-16.png', dest: '/usr/share/icons/hicolor/16x16/apps/pake-kong-academy.png' }
+    - { src: 'pake-kong-academy-icon-32.png', dest: '/usr/share/icons/hicolor/32x32/apps/pake-kong-academy.png' }
+    - { src: 'pake-kong-academy-icon-48.png', dest: '/usr/share/icons/hicolor/48x48/apps/pake-kong-academy.png' }
+    - { src: 'pake-kong-academy-icon-64.png', dest: '/usr/share/icons/hicolor/64x64/apps/pake-kong-academy.png' }
+    - { src: 'pake-kong-academy-icon-128.png', dest: '/usr/share/icons/hicolor/128x128/apps/pake-kong-academy.png' }
+    - { src: 'pake-kong-academy-icon-256.png', dest: '/usr/share/icons/hicolor/256x256/apps/pake-kong-academy.png' }
+    - { src: 'pake-kong-academy-icon-512.png', dest: '/usr/share/icons/hicolor/512x512/apps/pake-kong-academy.png' }
+    - { src: 'pake-kong-academy-icon-800.png', dest: '/usr/share/icons/hicolor/800x800/apps/pake-kong-academy.png' }
+  become: yes
+  when: app_states['kong-academy'] | default('present') == 'present'
+
+- name: Update icon cache
+  command: gtk-update-icon-cache -f /usr/share/icons/hicolor
+  become: yes
+  when: app_states['kong-academy'] | default('present') == 'present'
+  changed_when: false
+
+# Cleanup when absent
+- name: Remove kong-academy Pake app
+  apt:
+    name: kong-academy
+    state: absent
+  become: yes
+  when: app_states['kong-academy'] | default('present') == 'absent'
+

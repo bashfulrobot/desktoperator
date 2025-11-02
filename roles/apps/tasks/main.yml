@@ -221,6 +221,16 @@
     name: apps/konnect-pake
   tags: [konnect]
 
+- name: Include Kong Academy Pake App
+  import_role:
+    name: apps/kong-academy-pake
+  tags: [kong-academy]
+
+- name: Include Kong Docs Pake App
+  import_role:
+    name: apps/kong-docs-pake
+  tags: [kong-docs]
+
 - name: Include zns DNS lookup tool
   import_role:
     name: apps/zns
