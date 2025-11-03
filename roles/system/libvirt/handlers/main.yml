@@ -6,6 +6,11 @@
     cmd: udevadm control --reload-rules && udevadm trigger --subsystem-match=misc
   become: true
 
+- name: reload apparmor profiles
+  ansible.builtin.command:
+    cmd: apparmor_parser -r /etc/apparmor.d/usr.sbin.libvirtd
+  become: true
+
 - name: restart libvirtd
   ansible.builtin.systemd:
     name: libvirtd
