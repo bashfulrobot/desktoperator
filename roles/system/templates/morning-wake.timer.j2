@@ -1,0 +1,14 @@
+[Unit]
+Description=Morning wake-up timer at 7:15am PST
+Documentation=man:systemd.timer(5)
+
+[Timer]
+# 7:15am PST = 3:15pm UTC (PST is UTC-8)
+OnCalendar=*-*-* 15:15:00
+Persistent=true
+
+# Wake system from suspend/sleep
+WakeSystem=true
+
+[Install]
+WantedBy=timers.target

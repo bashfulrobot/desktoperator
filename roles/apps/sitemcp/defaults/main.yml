@@ -3,3 +3,9 @@
 
 # Installation state (present/absent)
 sitemcp_state: present
+
+# Enable scheduled tasks (timers for cache refresh and morning wake)
+sitemcp_enable_scheduled_tasks: false
+
+# Path to the cache refresh script
+sitemcp_cache_refresh_script: "{{ user.home }}/Documents/Kong/My-drive/Docs/Mcp/refresh-cache.sh"

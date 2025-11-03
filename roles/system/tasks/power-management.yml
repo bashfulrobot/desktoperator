@@ -1,0 +1,62 @@
+---
+# Power management configuration for scheduled wake-ups
+
+- name: Deploy morning wake systemd service
+  ansible.builtin.template:
+    src: morning-wake.service.j2
+    dest: /etc/systemd/system/morning-wake.service
+    owner: root
+    group: root
+    mode: '0644'
+  become: yes
+  when:
+    - morning_wake_enabled | default(false)
+    - inventory_hostname == 'qbert'
+  notify: Reload systemd daemon
+
+- name: Deploy morning wake systemd timer
+  ansible.builtin.template:
+    src: morning-wake.timer.j2
+    dest: /etc/systemd/system/morning-wake.timer
+    owner: root
+    group: root
+    mode: '0644'
+  become: yes
+  when:
+    - morning_wake_enabled | default(false)
+    - inventory_hostname == 'qbert'
+  notify: Reload systemd daemon
+
+- name: Enable and start morning wake timer
+  ansible.builtin.systemd:
+    name: morning-wake.timer
+    enabled: true
+    state: started
+    daemon_reload: yes
+  become: yes
+  when:
+    - morning_wake_enabled | default(false)
+    - inventory_hostname == 'qbert'
+
+- name: Stop and disable morning wake timer when disabled
+  ansible.builtin.systemd:
+    name: morning-wake.timer
+    enabled: false
+    state: stopped
+  become: yes
+  when:
+    - not (morning_wake_enabled | default(false))
+    - inventory_hostname == 'qbert'
+  failed_when: false
+
+- name: Remove morning wake systemd units when disabled
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: absent
+  become: yes
+  loop:
+    - /etc/systemd/system/morning-wake.service
+    - /etc/systemd/system/morning-wake.timer
+  when:
+    - not (morning_wake_enabled | default(false))
+    - inventory_hostname == 'qbert'

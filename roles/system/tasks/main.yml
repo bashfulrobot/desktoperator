@@ -80,6 +80,10 @@
   import_tasks: tailscale.yml
   tags: [tailscale, vpn]
 
+- name: Import power management configuration
+  import_tasks: power-management.yml
+  tags: [power, power-management, wake]
+
 - name: Include justfile system management
   include_role:
     name: system/justfile

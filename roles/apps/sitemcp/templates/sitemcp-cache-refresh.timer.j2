@@ -1,0 +1,14 @@
+[Unit]
+Description=Daily SiteMCP cache refresh at 1am PST
+Documentation=man:systemd.timer(5)
+
+[Timer]
+# 1am PST = 9am UTC (PST is UTC-8)
+OnCalendar=*-*-* 09:00:00
+Persistent=true
+
+# Wake system from suspend/sleep
+WakeSystem=true
+
+[Install]
+WantedBy=timers.target

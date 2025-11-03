@@ -6,6 +6,12 @@ hostname: qbert
 # Host-specific apps (in addition to common apps)
 host_specific_apps: []
 
+# SiteMCP scheduled tasks configuration
+sitemcp_enable_scheduled_tasks: true
+
+# Power management - morning wake timer
+morning_wake_enabled: true
+
 # Libvirt configuration
 libvirt_install_gui_tools: true
 

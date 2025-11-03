@@ -9,6 +9,57 @@
   failed_when: false
   changed_when: sitemcp_install.rc == 0
 
+- name: Ensure systemd user directory exists
+  ansible.builtin.file:
+    path: "{{ user.home }}/.config/systemd/user"
+    state: directory
+    owner: "{{ user.name }}"
+    mode: '0755'
+  when:
+    - app_states['sitemcp'] | default('present') == 'present'
+    - sitemcp_enable_scheduled_tasks | default(false)
+    - inventory_hostname == 'qbert'
+
+- name: Deploy SiteMCP cache refresh systemd service
+  ansible.builtin.template:
+    src: sitemcp-cache-refresh.service.j2
+    dest: /etc/systemd/system/sitemcp-cache-refresh.service
+    owner: root
+    group: root
+    mode: '0644'
+  become: yes
+  when:
+    - app_states['sitemcp'] | default('present') == 'present'
+    - sitemcp_enable_scheduled_tasks | default(false)
+    - inventory_hostname == 'qbert'
+  notify: Reload systemd daemon
+
+- name: Deploy SiteMCP cache refresh systemd timer
+  ansible.builtin.template:
+    src: sitemcp-cache-refresh.timer.j2
+    dest: /etc/systemd/system/sitemcp-cache-refresh.timer
+    owner: root
+    group: root
+    mode: '0644'
+  become: yes
+  when:
+    - app_states['sitemcp'] | default('present') == 'present'
+    - sitemcp_enable_scheduled_tasks | default(false)
+    - inventory_hostname == 'qbert'
+  notify: Reload systemd daemon
+
+- name: Enable and start SiteMCP cache refresh timer
+  ansible.builtin.systemd:
+    name: sitemcp-cache-refresh.timer
+    enabled: true
+    state: started
+    daemon_reload: yes
+  become: yes
+  when:
+    - app_states['sitemcp'] | default('present') == 'present'
+    - sitemcp_enable_scheduled_tasks | default(false)
+    - inventory_hostname == 'qbert'
+
 - name: Uninstall sitemcp globally via npm
   shell: npm uninstall -g sitemcp
   become: yes
@@ -16,3 +67,22 @@
   register: sitemcp_uninstall
   failed_when: false
   changed_when: sitemcp_uninstall.rc == 0
+
+- name: Stop and disable SiteMCP cache refresh timer when absent
+  ansible.builtin.systemd:
+    name: sitemcp-cache-refresh.timer
+    enabled: false
+    state: stopped
+  become: yes
+  when: app_states['sitemcp'] | default('present') == 'absent'
+  failed_when: false
+
+- name: Remove SiteMCP systemd units when absent
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: absent
+  become: yes
+  loop:
+    - /etc/systemd/system/sitemcp-cache-refresh.service
+    - /etc/systemd/system/sitemcp-cache-refresh.timer
+  when: app_states['sitemcp'] | default('present') == 'absent'

@@ -1,0 +1,15 @@
+[Unit]
+Description=Morning wake-up at 7:15am PST
+Documentation=man:systemd.service(5)
+
+[Service]
+Type=oneshot
+# Just a dummy command to complete successfully
+ExecStart=/bin/true
+
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=morning-wake
+
+[Install]
+WantedBy=multi-user.target
