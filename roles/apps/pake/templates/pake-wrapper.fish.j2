@@ -755,7 +755,6 @@ Type=Application" > "$role_path/files/pake-$name.desktop"
     state: present
   become: yes
   when: app_states['$app_state_key'] | default('present') == 'present'
-  tags: [\"always\"]
 
 - name: Remove .deb desktop files
   file:
