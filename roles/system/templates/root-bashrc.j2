@@ -1,0 +1,59 @@
+# Root user bash configuration
+# Managed by Ansible - changes may be overwritten
+# Provides essential aliases and functions for sudo operations
+
+# Source global definitions
+if [ -f /etc/bashrc ]; then
+    . /etc/bashrc
+fi
+
+# eza aliases - modern replacement for ls
+if command -v eza &>/dev/null; then
+    # Main ls replacement with comprehensive options
+    alias ls="eza --long --header --octal-permissions --group-directories-first --icons=auto --color=auto --git --git-repos --time-style='+%Y-%m-%d %H:%M'"
+    alias la="eza --long --header --octal-permissions --group-directories-first --icons=auto --color=auto --git --git-repos --time-style='+%Y-%m-%d %H:%M' --all"
+    alias lt="eza --long --header --octal-permissions --group-directories-first --icons=auto --color=auto --git --git-repos --time-style='+%Y-%m-%d %H:%M' --tree"
+    alias lta="eza --long --header --octal-permissions --group-directories-first --icons=auto --color=auto --git --git-repos --time-style='+%Y-%m-%d %H:%M' --tree --all"
+fi
+
+# zns - DNS lookup tool (replaces dig)
+if command -v zns &>/dev/null; then
+    alias dig='zns'
+fi
+
+# glow - markdown viewer with theme support
+if command -v glow &>/dev/null; then
+    # COSMIC theme state - expose system dark/light mode
+    if [ -f ~/.config/cosmic/com.system76.CosmicTheme.Mode/v1/is_dark ]; then
+        COSMIC_IS_DARK=$(cat ~/.config/cosmic/com.system76.CosmicTheme.Mode/v1/is_dark)
+    else
+        COSMIC_IS_DARK=false
+    fi
+
+    if [ "$COSMIC_IS_DARK" = "true" ]; then
+        export GLOW_THEME=dark
+    else
+        export GLOW_THEME=light
+    fi
+
+    alias glow='glow -s $GLOW_THEME'
+fi
+
+# tmpcd - Create temporary directory and cd into it
+# Usage: tmpcd [prefix]
+# Example: tmpcd work    # Creates /tmp/tmp.XXXXXX with "work" prefix
+tmpcd() {
+    if [ $# -eq 0 ]; then
+        tmp_dir=$(mktemp -d)
+    else
+        tmp_dir=$(mktemp -d -t "$1.XXXXXX")
+    fi
+
+    if [ -d "$tmp_dir" ]; then
+        cd "$tmp_dir" || return 1
+        echo "Created and moved to: $tmp_dir"
+    else
+        echo "Failed to create temporary directory" >&2
+        return 1
+    fi
+}

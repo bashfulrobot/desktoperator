@@ -77,3 +77,7 @@ version_strategy: latest
 
 # Flatpak applications are now managed as individual roles in roles/apps/
 # (todoist, teams-for-linux, kooha, obsidian, okular)
+
+# Root user bash configuration
+# Deploy bashrc for root with essential aliases/functions for sudo operations
+root_bashrc_enabled: true

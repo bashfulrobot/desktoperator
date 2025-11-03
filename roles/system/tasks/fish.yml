@@ -59,3 +59,13 @@
     shell: "{{ user.shell }}"
   become: yes
   when: user.shell == '/usr/bin/fish'
+
+- name: Deploy root bashrc with essential aliases and functions
+  template:
+    src: root-bashrc.j2
+    dest: /root/.bashrc
+    owner: root
+    group: root
+    mode: '0644'
+  become: yes
+  when: root_bashrc_enabled | default(true)
