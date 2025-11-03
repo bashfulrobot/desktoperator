@@ -12,7 +12,10 @@
         "/konnect-platform/**",
         "--concurrency",
         "20"
-      ]
+      ],
+      "env": {
+        "XDG_CACHE_HOME": "{{ user.home }}/Documents/Kong/My-drive/Docs/Mcp/konnect/.cache"
+      }
     }
   }
 }

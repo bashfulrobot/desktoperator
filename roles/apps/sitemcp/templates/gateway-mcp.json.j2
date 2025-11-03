@@ -10,7 +10,10 @@
         "/gateway/**",
         "--concurrency",
         "20"
-      ]
+      ],
+      "env": {
+        "XDG_CACHE_HOME": "{{ user.home }}/Documents/Kong/My-drive/Docs/Mcp/gateway/.cache"
+      }
     }
   }
 }

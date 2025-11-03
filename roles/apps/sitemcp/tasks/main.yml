@@ -33,6 +33,22 @@
     - kubernetes
   when: app_states['sitemcp'] | default('present') == 'present'
 
+- name: Ensure product-specific cache directories exist
+  ansible.builtin.file:
+    path: "{{ user.home }}/Documents/Kong/My-drive/Docs/Mcp/{{ item }}/.cache/sitemcp"
+    state: directory
+    owner: "{{ user.name }}"
+    mode: '0755'
+  loop:
+    - gateway
+    - konnect
+    - ai-gateway
+    - mesh
+    - plugins
+    - deck
+    - kubernetes
+  when: app_states['sitemcp'] | default('present') == 'present'
+
 - name: Deploy cache refresh script
   ansible.builtin.copy:
     src: refresh-cache.sh
