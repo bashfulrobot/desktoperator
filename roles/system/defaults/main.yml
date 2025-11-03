@@ -8,6 +8,9 @@ user_groups:
   - audio
   - video
   - plugdev
+  - onepassword
+  - onepassword-cli
+  - users
 
 user_sudo_nopasswd: true
 
