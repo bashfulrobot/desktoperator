@@ -8,6 +8,7 @@
     state: present
     update_cache: true
   become: true
+  tags: [libvirt, virt, virtualization]
   when: app_states['libvirt'] | default('present') == 'present'
 
 - name: Check hardware virtualization support
@@ -17,6 +18,7 @@
   failed_when: false
   changed_when: false
   become: true
+  tags: [libvirt, virt, virtualization]
   when: app_states['libvirt'] | default('present') == 'present'
 
 - name: Display hardware virtualization status
@@ -42,6 +44,7 @@
       KVM acceleration is available and ready to use!
       ================================================================================
       {% endif %}
+  tags: [libvirt, virt, virtualization]
   when: app_states['libvirt'] | default('present') == 'present'
 
 # Installation tasks (when state is present)
@@ -53,6 +56,7 @@
     state: present
     reload: true
   become: true
+  tags: [libvirt, virt, virtualization]
   when: app_states['libvirt'] | default('present') == 'present'
 
 - name: Install libvirt packages
@@ -61,6 +65,7 @@
     state: present
     update_cache: true
   become: true
+  tags: [libvirt, virt, virtualization]
   when: app_states['libvirt'] | default('present') == 'present'
 
 - name: Load KVM kernel modules
@@ -74,6 +79,7 @@
     - kvm_intel
     - kvm_amd
   failed_when: false
+  tags: [libvirt, virt, virtualization]
   when: app_states['libvirt'] | default('present') == 'present'
 
 - name: Verify KVM kernel modules are loaded
@@ -82,6 +88,7 @@
   register: lsmod_output
   changed_when: false
   become: true
+  tags: [libvirt, virt, virtualization]
   when: app_states['libvirt'] | default('present') == 'present'
 
 - name: Check which KVM modules loaded successfully
@@ -90,6 +97,7 @@
       kvm: "{{ 'kvm' in lsmod_output.stdout }}"
       kvm_intel: "{{ 'kvm_intel' in lsmod_output.stdout }}"
       kvm_amd: "{{ 'kvm_amd' in lsmod_output.stdout }}"
+  tags: [libvirt, virt, virtualization]
   when: app_states['libvirt'] | default('present') == 'present'
 
 - name: Display KVM module status
@@ -108,6 +116,7 @@
       WARNING: Neither Intel nor AMD KVM module loaded. Check CPU support.
       {% endif %}
       ================================================================================
+  tags: [libvirt, virt, virtualization]
   when: app_states['libvirt'] | default('present') == 'present'
 
 - name: Configure udev rule for KVM device permissions
@@ -118,6 +127,7 @@
     mode: '0644'
   become: true
   notify: reload udev rules
+  tags: [libvirt, virt, virtualization]
   when: app_states['libvirt'] | default('present') == 'present'
 
 - name: Verify KVM device exists
@@ -125,6 +135,7 @@
     path: /dev/kvm
   register: kvm_device
   become: true
+  tags: [libvirt, virt, virtualization]
   when: app_states['libvirt'] | default('present') == 'present'
 
 - name: Fix KVM device permissions if incorrect
@@ -134,6 +145,7 @@
     group: kvm
     mode: '0660'
   become: true
+  tags: [libvirt, virt, virtualization]
   when:
     - app_states['libvirt'] | default('present') == 'present'
     - kvm_device.stat.exists
@@ -147,6 +159,7 @@
       - Running inside a VM without nested virtualization
       - KVM modules failed to load
       Check: grep -E 'vmx|svm' /proc/cpuinfo
+  tags: [libvirt, virt, virtualization]
   when:
     - app_states['libvirt'] | default('present') == 'present'
     - not kvm_device.stat.exists
@@ -156,6 +169,7 @@
     name: "{{ libvirt_gui_packages }}"
     state: present
   become: true
+  tags: [libvirt, virt, virtualization]
   when:
     - app_states['libvirt'] | default('present') == 'present'
     - libvirt_install_gui_tools | bool
@@ -170,6 +184,7 @@
     backup: true
   become: true
   notify: restart libvirtd
+  tags: [libvirt, virt, virtualization]
   when: app_states['libvirt'] | default('present') == 'present'
 
 - name: Set ACL permissions on default storage pool
@@ -181,6 +196,7 @@
     state: present
     recursive: true
   become: true
+  tags: [libvirt, virt, virtualization]
   when:
     - app_states['libvirt'] | default('present') == 'present'
     - libvirt_configure_acls | bool
@@ -195,6 +211,7 @@
     recursive: true
   become: true
   loop: "{{ libvirt_additional_storage_paths }}"
+  tags: [libvirt, virt, virtualization]
   when:
     - app_states['libvirt'] | default('present') == 'present'
     - libvirt_configure_acls | bool
@@ -206,6 +223,7 @@
     enabled: true
     state: started
   become: true
+  tags: [libvirt, virt, virtualization]
   when: app_states['libvirt'] | default('present') == 'present'
 
 - name: Ensure libvirt supporting services are enabled and started
@@ -217,6 +235,7 @@
   loop:
     - virtlogd.socket
     - virtlockd.socket
+  tags: [libvirt, virt, virtualization]
   when: app_states['libvirt'] | default('present') == 'present'
 
 - name: Configure libvirt images directory with proper permissions
@@ -227,6 +246,7 @@
     group: "{{ libvirt_qemu_group }}"
     mode: '2711'
   become: true
+  tags: [libvirt, virt, virtualization]
   when: app_states['libvirt'] | default('present') == 'present'
 
 - name: Add user to libvirt-related groups
@@ -236,6 +256,7 @@
     append: true
   become: true
   register: user_groups_changed
+  tags: [libvirt, virt, virtualization]
   when:
     - app_states['libvirt'] | default('present') == 'present'
     - libvirt_add_user_to_group | bool
@@ -255,6 +276,7 @@
 
       Without this, you won't be able to manage VMs or access /dev/kvm.
       ================================================================================
+  tags: [libvirt, virt, virtualization]
   when:
     - app_states['libvirt'] | default('present') == 'present'
     - libvirt_add_user_to_group | bool
@@ -265,6 +287,7 @@
     cmd: virsh net-autostart default --disable
   become: true
   failed_when: false
+  tags: [libvirt, virt, virtualization]
   when:
     - app_states['libvirt'] | default('present') == 'present'
     - not libvirt_default_network_autostart | bool
@@ -276,6 +299,7 @@
     mode: '0644'
   become: true
   loop: "{{ libvirt_routed_networks }}"
+  tags: [libvirt, virt, virtualization]
   when:
     - app_states['libvirt'] | default('present') == 'present'
     - libvirt_routed_networks | length > 0
@@ -288,6 +312,7 @@
   failed_when: false
   changed_when: false
   loop: "{{ libvirt_routed_networks }}"
+  tags: [libvirt, virt, virtualization]
   when:
     - app_states['libvirt'] | default('present') == 'present'
     - libvirt_routed_networks | length > 0
@@ -297,6 +322,7 @@
     cmd: "virsh net-define /tmp/{{ item.item.name }}.xml"
   become: true
   loop: "{{ routed_networks_exist.results }}"
+  tags: [libvirt, virt, virtualization]
   when:
     - app_states['libvirt'] | default('present') == 'present'
     - libvirt_routed_networks | length > 0
@@ -308,6 +334,7 @@
   become: true
   failed_when: false
   loop: "{{ libvirt_routed_networks }}"
+  tags: [libvirt, virt, virtualization]
   when:
     - app_states['libvirt'] | default('present') == 'present'
     - libvirt_routed_networks | length > 0
@@ -317,6 +344,7 @@
     cmd: "virsh net-autostart {{ item.name }} {{ '--disable' if not item.autostart else '' }}"
   become: true
   loop: "{{ libvirt_routed_networks }}"
+  tags: [libvirt, virt, virtualization]
   when:
     - app_states['libvirt'] | default('present') == 'present'
     - libvirt_routed_networks | length > 0
@@ -327,6 +355,7 @@
     state: absent
   become: true
   loop: "{{ libvirt_routed_networks }}"
+  tags: [libvirt, virt, virtualization]
   when:
     - app_states['libvirt'] | default('present') == 'present'
     - libvirt_routed_networks | length > 0
@@ -334,6 +363,7 @@
 - name: Get host primary IP address
   ansible.builtin.set_fact:
     host_primary_ip: "{{ ansible_default_ipv4.address }}"
+  tags: [libvirt, virt, virtualization]
   when:
     - app_states['libvirt'] | default('present') == 'present'
     - libvirt_routed_networks | length > 0
@@ -363,6 +393,7 @@
       ip route {{ network.subnet }} via {{ host_primary_ip }}
       {% endfor %}
       ================================================================================
+  tags: [libvirt, virt, virtualization]
   when:
     - app_states['libvirt'] | default('present') == 'present'
     - libvirt_routed_networks | length > 0
@@ -375,6 +406,7 @@
   register: all_libvirt_networks
   failed_when: false
   changed_when: false
+  tags: [libvirt, virt, virtualization]
   when: app_states['libvirt'] | default('present') == 'absent'
 
 - name: Destroy all non-default networks
@@ -383,6 +415,7 @@
   become: true
   failed_when: false
   loop: "{{ all_libvirt_networks.stdout_lines | default([]) }}"
+  tags: [libvirt, virt, virtualization]
   when:
     - app_states['libvirt'] | default('present') == 'absent'
     - item != 'default'
@@ -394,6 +427,7 @@
   become: true
   failed_when: false
   loop: "{{ all_libvirt_networks.stdout_lines | default([]) }}"
+  tags: [libvirt, virt, virtualization]
   when:
     - app_states['libvirt'] | default('present') == 'absent'
     - item != 'default'
@@ -411,6 +445,7 @@
     - virtlockd.socket
     - virtlogd.service
     - virtlockd.service
+  tags: [libvirt, virt, virtualization]
   when: app_states['libvirt'] | default('present') == 'absent'
 
 - name: Stop libvirtd service
@@ -420,6 +455,7 @@
     enabled: false
   become: true
   failed_when: false
+  tags: [libvirt, virt, virtualization]
   when: app_states['libvirt'] | default('present') == 'absent'
 
 - name: Remove libvirt packages
@@ -428,6 +464,7 @@
     state: absent
     purge: true
   become: true
+  tags: [libvirt, virt, virtualization]
   when: app_states['libvirt'] | default('present') == 'absent'
 
 - name: Remove user from libvirt-related groups
@@ -436,4 +473,5 @@
   become: true
   failed_when: false
   loop: "{{ libvirt_user_groups }}"
+  tags: [libvirt, virt, virtualization]
   when: app_states['libvirt'] | default('present') == 'absent'
