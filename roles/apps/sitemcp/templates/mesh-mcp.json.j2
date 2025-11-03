@@ -1,0 +1,18 @@
+{
+  "mcpServers": {
+    "kong-mesh": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "sitemcp",
+        "https://developer.konghq.com/",
+        "-m",
+        "/mesh/**",
+        "-m",
+        "/mesh-manager/**",
+        "--concurrency",
+        "20"
+      ]
+    }
+  }
+}

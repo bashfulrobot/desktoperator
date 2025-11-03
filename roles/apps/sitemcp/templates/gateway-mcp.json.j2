@@ -1,0 +1,16 @@
+{
+  "mcpServers": {
+    "kong-gateway": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "sitemcp",
+        "https://developer.konghq.com/",
+        "-m",
+        "/gateway/**",
+        "--concurrency",
+        "20"
+      ]
+    }
+  }
+}

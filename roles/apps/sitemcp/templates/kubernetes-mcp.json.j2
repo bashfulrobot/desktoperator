@@ -1,0 +1,18 @@
+{
+  "mcpServers": {
+    "kong-kubernetes": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "sitemcp",
+        "https://developer.konghq.com/",
+        "-m",
+        "/kubernetes-ingress-controller/**",
+        "-m",
+        "/operator/**",
+        "--concurrency",
+        "20"
+      ]
+    }
+  }
+}

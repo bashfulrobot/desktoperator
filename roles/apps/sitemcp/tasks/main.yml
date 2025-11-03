@@ -9,6 +9,94 @@
   failed_when: false
   changed_when: sitemcp_install.rc == 0
 
+- name: Ensure MCP base directory exists
+  ansible.builtin.file:
+    path: "{{ user.home }}/Documents/Kong/My-drive/Docs/Mcp"
+    state: directory
+    owner: "{{ user.name }}"
+    mode: '0755'
+  when: app_states['sitemcp'] | default('present') == 'present'
+
+- name: Ensure product-specific MCP directories exist
+  ansible.builtin.file:
+    path: "{{ user.home }}/Documents/Kong/My-drive/Docs/Mcp/{{ item }}"
+    state: directory
+    owner: "{{ user.name }}"
+    mode: '0755'
+  loop:
+    - gateway
+    - konnect
+    - ai-gateway
+    - mesh
+    - plugins
+    - deck
+    - kubernetes
+  when: app_states['sitemcp'] | default('present') == 'present'
+
+- name: Deploy cache refresh script
+  ansible.builtin.copy:
+    src: refresh-cache.sh
+    dest: "{{ user.home }}/Documents/Kong/My-drive/Docs/Mcp/refresh-cache.sh"
+    owner: "{{ user.name }}"
+    mode: '0755'
+  when: app_states['sitemcp'] | default('present') == 'present'
+
+- name: Deploy Gateway MCP configuration
+  ansible.builtin.template:
+    src: gateway-mcp.json.j2
+    dest: "{{ user.home }}/Documents/Kong/My-drive/Docs/Mcp/gateway/.mcp.json"
+    owner: "{{ user.name }}"
+    mode: '0644'
+  when: app_states['sitemcp'] | default('present') == 'present'
+
+- name: Deploy Konnect MCP configuration
+  ansible.builtin.template:
+    src: konnect-mcp.json.j2
+    dest: "{{ user.home }}/Documents/Kong/My-drive/Docs/Mcp/konnect/.mcp.json"
+    owner: "{{ user.name }}"
+    mode: '0644'
+  when: app_states['sitemcp'] | default('present') == 'present'
+
+- name: Deploy AI Gateway MCP configuration
+  ansible.builtin.template:
+    src: ai-gateway-mcp.json.j2
+    dest: "{{ user.home }}/Documents/Kong/My-drive/Docs/Mcp/ai-gateway/.mcp.json"
+    owner: "{{ user.name }}"
+    mode: '0644'
+  when: app_states['sitemcp'] | default('present') == 'present'
+
+- name: Deploy Mesh MCP configuration
+  ansible.builtin.template:
+    src: mesh-mcp.json.j2
+    dest: "{{ user.home }}/Documents/Kong/My-drive/Docs/Mcp/mesh/.mcp.json"
+    owner: "{{ user.name }}"
+    mode: '0644'
+  when: app_states['sitemcp'] | default('present') == 'present'
+
+- name: Deploy Plugins MCP configuration
+  ansible.builtin.template:
+    src: plugins-mcp.json.j2
+    dest: "{{ user.home }}/Documents/Kong/My-drive/Docs/Mcp/plugins/.mcp.json"
+    owner: "{{ user.name }}"
+    mode: '0644'
+  when: app_states['sitemcp'] | default('present') == 'present'
+
+- name: Deploy decK MCP configuration
+  ansible.builtin.template:
+    src: deck-mcp.json.j2
+    dest: "{{ user.home }}/Documents/Kong/My-drive/Docs/Mcp/deck/.mcp.json"
+    owner: "{{ user.name }}"
+    mode: '0644'
+  when: app_states['sitemcp'] | default('present') == 'present'
+
+- name: Deploy Kubernetes MCP configuration
+  ansible.builtin.template:
+    src: kubernetes-mcp.json.j2
+    dest: "{{ user.home }}/Documents/Kong/My-drive/Docs/Mcp/kubernetes/.mcp.json"
+    owner: "{{ user.name }}"
+    mode: '0644'
+  when: app_states['sitemcp'] | default('present') == 'present'
+
 - name: Ensure systemd user directory exists
   ansible.builtin.file:
     path: "{{ user.home }}/.config/systemd/user"
@@ -67,6 +155,12 @@
   register: sitemcp_uninstall
   failed_when: false
   changed_when: sitemcp_uninstall.rc == 0
+
+- name: Remove MCP configurations and directories when absent
+  ansible.builtin.file:
+    path: "{{ user.home }}/Documents/Kong/My-drive/Docs/Mcp"
+    state: absent
+  when: app_states['sitemcp'] | default('present') == 'absent'
 
 - name: Stop and disable SiteMCP cache refresh timer when absent
   ansible.builtin.systemd:
