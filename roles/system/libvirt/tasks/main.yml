@@ -1,6 +1,49 @@
 ---
 # Libvirt installation tasks for Ubuntu 24.04
 
+# Pre-flight checks
+- name: Install cpu-checker for hardware verification
+  ansible.builtin.apt:
+    name: cpu-checker
+    state: present
+    update_cache: true
+  become: true
+  when: app_states['libvirt'] | default('present') == 'present'
+
+- name: Check hardware virtualization support
+  ansible.builtin.command:
+    cmd: kvm-ok
+  register: kvm_check
+  failed_when: false
+  changed_when: false
+  become: true
+  when: app_states['libvirt'] | default('present') == 'present'
+
+- name: Display hardware virtualization status
+  ansible.builtin.debug:
+    msg: |
+      ================================================================================
+      HARDWARE VIRTUALIZATION CHECK
+      ================================================================================
+      {{ kvm_check.stdout }}
+      {% if kvm_check.rc != 0 %}
+
+      WARNING: KVM acceleration may not be available!
+
+      Possible solutions:
+      - Enable virtualization in BIOS/UEFI (look for Intel VT-x or AMD-V)
+      - If running in a VM, enable nested virtualization
+      - Check: grep -E 'vmx|svm' /proc/cpuinfo
+
+      Installation will continue, but VMs will run slowly without KVM acceleration.
+      ================================================================================
+      {% else %}
+
+      KVM acceleration is available and ready to use!
+      ================================================================================
+      {% endif %}
+  when: app_states['libvirt'] | default('present') == 'present'
+
 # Installation tasks (when state is present)
 - name: Enable IP forwarding for routed networks
   ansible.posix.sysctl:
@@ -31,6 +74,40 @@
     - kvm_intel
     - kvm_amd
   failed_when: false
+  when: app_states['libvirt'] | default('present') == 'present'
+
+- name: Verify KVM kernel modules are loaded
+  ansible.builtin.command:
+    cmd: lsmod
+  register: lsmod_output
+  changed_when: false
+  become: true
+  when: app_states['libvirt'] | default('present') == 'present'
+
+- name: Check which KVM modules loaded successfully
+  ansible.builtin.set_fact:
+    kvm_modules_loaded:
+      kvm: "{{ 'kvm' in lsmod_output.stdout }}"
+      kvm_intel: "{{ 'kvm_intel' in lsmod_output.stdout }}"
+      kvm_amd: "{{ 'kvm_amd' in lsmod_output.stdout }}"
+  when: app_states['libvirt'] | default('present') == 'present'
+
+- name: Display KVM module status
+  ansible.builtin.debug:
+    msg: |
+      ================================================================================
+      KVM KERNEL MODULES STATUS
+      ================================================================================
+      kvm (base):        {{ 'LOADED ✓' if kvm_modules_loaded.kvm else 'NOT LOADED ✗' }}
+      kvm_intel (Intel): {{ 'LOADED ✓' if kvm_modules_loaded.kvm_intel else 'NOT LOADED ✗' }}
+      kvm_amd (AMD):     {{ 'LOADED ✓' if kvm_modules_loaded.kvm_amd else 'NOT LOADED ✗' }}
+
+      {% if not kvm_modules_loaded.kvm %}
+      WARNING: Base KVM module failed to load. Virtualization will not work.
+      {% elif not kvm_modules_loaded.kvm_intel and not kvm_modules_loaded.kvm_amd %}
+      WARNING: Neither Intel nor AMD KVM module loaded. Check CPU support.
+      {% endif %}
+      ================================================================================
   when: app_states['libvirt'] | default('present') == 'present'
 
 - name: Configure udev rule for KVM device permissions
@@ -83,6 +160,46 @@
     - app_states['libvirt'] | default('present') == 'present'
     - libvirt_install_gui_tools | bool
 
+- name: Configure QEMU permissions and security
+  ansible.builtin.template:
+    src: qemu.conf.j2
+    dest: /etc/libvirt/qemu.conf
+    owner: root
+    group: root
+    mode: '0600'
+    backup: true
+  become: true
+  notify: restart libvirtd
+  when: app_states['libvirt'] | default('present') == 'present'
+
+- name: Set ACL permissions on default storage pool
+  ansible.posix.acl:
+    path: "{{ libvirt_default_storage_pool }}"
+    entity: "{{ libvirt_qemu_user }}"
+    etype: user
+    permissions: rwx
+    state: present
+    recursive: true
+  become: true
+  when:
+    - app_states['libvirt'] | default('present') == 'present'
+    - libvirt_configure_acls | bool
+
+- name: Set ACL permissions on additional storage paths
+  ansible.posix.acl:
+    path: "{{ item }}"
+    entity: "{{ libvirt_qemu_user }}"
+    etype: user
+    permissions: rwx
+    state: present
+    recursive: true
+  become: true
+  loop: "{{ libvirt_additional_storage_paths }}"
+  when:
+    - app_states['libvirt'] | default('present') == 'present'
+    - libvirt_configure_acls | bool
+    - libvirt_additional_storage_paths | length > 0
+
 - name: Ensure libvirtd service is enabled and started
   ansible.builtin.systemd:
     name: "{{ libvirt_service }}"
@@ -104,20 +221,18 @@
 
 - name: Configure libvirt images directory with proper permissions
   ansible.builtin.file:
-    path: /var/lib/libvirt/images
+    path: "{{ libvirt_default_storage_pool }}"
     state: directory
     owner: root
-    group: kvm
+    group: "{{ libvirt_qemu_group }}"
     mode: '2711'
   become: true
   when: app_states['libvirt'] | default('present') == 'present'
 
-- name: Add user to libvirt and kvm groups
+- name: Add user to libvirt-related groups
   ansible.builtin.user:
     name: "{{ user.name }}"
-    groups:
-      - libvirt
-      - kvm
+    groups: "{{ libvirt_user_groups }}"
     append: true
   become: true
   register: user_groups_changed
@@ -131,7 +246,8 @@
       ================================================================================
       USER GROUP MEMBERSHIP UPDATED
       ================================================================================
-      User '{{ user.name }}' has been added to libvirt and kvm groups.
+      User '{{ user.name }}' has been added to libvirt-related groups:
+      {{ libvirt_user_groups | join(', ') }}
 
       IMPORTANT: For group changes to take effect, you must either:
       - Log out and log back in, OR
@@ -314,12 +430,10 @@
   become: true
   when: app_states['libvirt'] | default('present') == 'absent'
 
-- name: Remove user from libvirt and kvm groups
+- name: Remove user from libvirt-related groups
   ansible.builtin.command:
     cmd: "gpasswd -d {{ user.name }} {{ item }}"
   become: true
   failed_when: false
-  loop:
-    - libvirt
-    - kvm
+  loop: "{{ libvirt_user_groups }}"
   when: app_states['libvirt'] | default('present') == 'absent'

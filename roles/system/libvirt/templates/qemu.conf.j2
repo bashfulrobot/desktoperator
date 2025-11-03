@@ -1,0 +1,23 @@
+# QEMU configuration managed by Ansible
+# This file configures QEMU processes for libvirt
+
+# User and group for QEMU processes
+# These determine which user/group QEMU VMs run as
+user = "{{ libvirt_qemu_user }}"
+group = "{{ libvirt_qemu_group }}"
+
+# Security driver configuration
+# Options: apparmor, selinux, none
+# WARNING: 'none' disables security confinement and is not recommended
+security_driver = "{{ libvirt_security_driver }}"
+
+# Dynamic ownership
+# When enabled (1), libvirt automatically changes ownership of VM disk images
+# to the QEMU user/group when VMs start, and changes them back when VMs stop
+# This helps prevent permission issues with storage files
+dynamic_ownership = {{ libvirt_dynamic_ownership }}
+
+# Remember ownership
+# When enabled with dynamic_ownership, libvirt remembers the original ownership
+# and restores it when the VM stops
+remember_owner = 1

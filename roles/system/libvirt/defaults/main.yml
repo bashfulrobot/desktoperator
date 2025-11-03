@@ -8,6 +8,8 @@ libvirt_packages:
   - libvirt-daemon-system
   - libvirt-clients
   - bridge-utils
+  - cpu-checker
+  - acl
 
 # Optional GUI tools (set to true to install)
 libvirt_install_gui_tools: false
@@ -19,6 +21,11 @@ libvirt_gui_packages:
 
 # Add user to libvirt group (allows managing VMs without sudo)
 libvirt_add_user_to_group: true
+
+# Libvirt-related groups to add user to
+libvirt_user_groups:
+  - libvirt
+  - kvm
 
 # Libvirt service name
 libvirt_service: libvirtd
@@ -40,3 +47,24 @@ libvirt_routed_networks:
 
 # Enable/disable default NAT network
 libvirt_default_network_autostart: false
+
+# Storage configuration
+libvirt_default_storage_pool: "/var/lib/libvirt/images"
+
+# QEMU configuration for permissions
+# User and group for QEMU processes (default: libvirt-qemu on Ubuntu)
+libvirt_qemu_user: "libvirt-qemu"
+libvirt_qemu_group: "kvm"
+
+# Security driver (apparmor, selinux, or none)
+# WARNING: Setting to 'none' reduces security
+libvirt_security_driver: "apparmor"
+
+# Dynamic ownership (allows libvirt to automatically manage file ownership)
+libvirt_dynamic_ownership: 1
+
+# Configure ACL permissions for storage directories
+libvirt_configure_acls: true
+
+# Additional storage paths to configure (beyond default storage pool)
+libvirt_additional_storage_paths: []
