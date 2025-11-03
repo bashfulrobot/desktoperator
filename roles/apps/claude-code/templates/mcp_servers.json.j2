@@ -1,0 +1,18 @@
+{
+  "mcpServers": {
+    "terraform": {
+      "type": "stdio",
+      "command": "docker",
+      "args": [
+        "run",
+        "-i",
+        "--rm",
+        "-e",
+        "TFE_ADDRESS=https://app.terraform.io",
+        "-e",
+        "TFE_TOKEN={{ tfe_token }}",
+        "hashicorp/terraform-mcp-server"
+      ]
+    }
+  }
+}

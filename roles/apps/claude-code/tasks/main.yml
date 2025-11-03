@@ -85,6 +85,14 @@
     mode: '0644'
   when: app_states['claude-code'] | default('present') == 'present'
 
+- name: Deploy MCP servers configuration to ~/dev
+  template:
+    src: mcp_servers.json.j2
+    dest: "{{ user.home }}/dev/.mcp.json"
+    owner: "{{ user.name }}"
+    mode: '0600'
+  when: app_states['claude-code'] | default('present') == 'present'
+
 - name: Deploy agent files
   copy:
     src: "agents/{{ item }}"
