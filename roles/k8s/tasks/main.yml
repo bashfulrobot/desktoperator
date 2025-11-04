@@ -51,7 +51,7 @@
   when: k8s_omnictl_enabled | default(true)
 
 - name: Get installed omnictl version
-  command: /usr/local/bin/omnictl version
+  command: /usr/local/bin/omnictl --version
   register: omnictl_current_version
   failed_when: false
   changed_when: false
@@ -72,7 +72,7 @@
     - not omnictl_binary.stat.exists or (k8s_omnictl_version not in omnictl_current_version.stdout | default(''))
 
 - name: Verify omnictl installation
-  command: /usr/local/bin/omnictl version
+  command: /usr/local/bin/omnictl --version
   register: omnictl_verify
   changed_when: false
   when: k8s_omnictl_enabled | default(true)
