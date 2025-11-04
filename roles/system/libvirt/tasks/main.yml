@@ -424,6 +424,19 @@
   tags: [libvirt]
   when: app_states['libvirt'] | default('present') == 'present'
 
+- name: Remove old libvirt forwarding rules block from UFW before.rules
+  ansible.builtin.blockinfile:
+    path: /etc/ufw/before.rules
+    marker: "# {mark} ANSIBLE MANAGED BLOCK - Libvirt routed networks"
+    state: absent
+    backup: true
+  become: true
+  notify: reload ufw
+  tags: [libvirt]
+  when:
+    - app_states['libvirt'] | default('present') == 'present'
+    - ufw_before_rules.stat.exists
+
 - name: Add NAT table section to UFW before.rules for persistent NAT
   ansible.builtin.blockinfile:
     path: /etc/ufw/before.rules

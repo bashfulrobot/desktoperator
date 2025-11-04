@@ -18,6 +18,9 @@
   become: true
 
 - name: reload ufw
-  ansible.builtin.command:
-    cmd: ufw reload
+  ansible.builtin.shell:
+    cmd: |
+      # Flush NAT POSTROUTING to prevent UFW from appending duplicate rules
+      iptables -t nat -F POSTROUTING
+      ufw reload
   become: true
