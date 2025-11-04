@@ -43,6 +43,47 @@
     - k8s_talosctl_enabled | default(true)
     - talosctl_verify is defined
 
+# Omnictl installation
+- name: Check if omnictl is already installed
+  stat:
+    path: /usr/local/bin/omnictl
+  register: omnictl_binary
+  when: k8s_omnictl_enabled | default(true)
+
+- name: Get installed omnictl version
+  command: /usr/local/bin/omnictl version
+  register: omnictl_current_version
+  failed_when: false
+  changed_when: false
+  when:
+    - k8s_omnictl_enabled | default(true)
+    - omnictl_binary.stat.exists
+
+- name: Download omnictl binary
+  get_url:
+    url: "https://github.com/siderolabs/omni/releases/download/{{ k8s_omnictl_version }}/omnictl-linux-amd64"
+    dest: /usr/local/bin/omnictl
+    mode: '0755'
+    owner: root
+    group: root
+  become: yes
+  when:
+    - k8s_omnictl_enabled | default(true)
+    - not omnictl_binary.stat.exists or (k8s_omnictl_version not in omnictl_current_version.stdout | default(''))
+
+- name: Verify omnictl installation
+  command: /usr/local/bin/omnictl version
+  register: omnictl_verify
+  changed_when: false
+  when: k8s_omnictl_enabled | default(true)
+
+- name: Display omnictl version
+  debug:
+    msg: "omnictl installed: {{ omnictl_verify.stdout }}"
+  when:
+    - k8s_omnictl_enabled | default(true)
+    - omnictl_verify is defined
+
 # Kubectl installation
 - name: Install kubectl prerequisites
   apt:
@@ -334,6 +375,13 @@
     state: absent
   become: yes
   when: not (k8s_talosctl_enabled | default(true))
+
+- name: Remove omnictl when disabled
+  file:
+    path: /usr/local/bin/omnictl
+    state: absent
+  become: yes
+  when: not (k8s_omnictl_enabled | default(true))
 
 - name: Remove kubectl when disabled
   apt:

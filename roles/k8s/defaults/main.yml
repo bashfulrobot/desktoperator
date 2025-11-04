@@ -5,6 +5,10 @@
 k8s_talosctl_enabled: true
 k8s_talosctl_version: "v1.11.0"  # See https://github.com/siderolabs/talos/releases
 
+# Omnictl configuration
+k8s_omnictl_enabled: true
+k8s_omnictl_version: "v1.2.1"  # See https://github.com/siderolabs/omni/releases
+
 # Kubectl configuration
 k8s_kubectl_enabled: true
 k8s_kubectl_repo_version: "v1.32"  # Repository version (v1.32, v1.31, etc)
