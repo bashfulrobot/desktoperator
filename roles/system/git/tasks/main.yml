@@ -111,3 +111,10 @@
     dest: "{{ user.home }}/.config/lazygit/config.yml"
     owner: "{{ user.name }}"
     mode: '0644'
+
+- name: Deploy git worktree fish functions
+  ansible.builtin.template:
+    src: fish-git-worktree-functions.fish.j2
+    dest: "{{ user.home }}/.config/fish/conf.d/git-worktree-functions.fish"
+    owner: "{{ user.name }}"
+    mode: '0644'

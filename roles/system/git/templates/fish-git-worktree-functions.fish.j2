@@ -1,0 +1,327 @@
+# Git Worktree Functions for Claude Code Parallel Development
+# Managed by Ansible - git role
+# Based on: https://medium.com/@dtunai/mastering-git-worktrees-with-claude-code-for-parallel-development-workflow-41dc91e645fe
+
+# Base directory for all worktrees
+# Worktrees will be organized as: $GIT_WORKTREE_BASE_DIR/<repo-name>/<worktree-name>
+set -g GIT_WORKTREE_BASE_DIR "$HOME/dev/worktrees"
+
+# Helper function to get the worktree path for a given name
+function _gtr_get_worktree_path --description "Get the full path for a worktree"
+    if test (count $argv) -ne 1
+        return 1
+    end
+
+    set -l name $argv[1]
+
+    # Check if we're in a git repository
+    if not git rev-parse --git-dir >/dev/null 2>&1
+        echo "Error: Not in a git repository" >&2
+        return 1
+    end
+
+    # Get the repository name
+    set -l repo_name (basename (git rev-parse --show-toplevel))
+
+    # Construct path: ~/dev/worktrees/<repo-name>/<worktree-name>
+    echo "$GIT_WORKTREE_BASE_DIR/$repo_name/$name"
+end
+
+# Helper function to get the repo-specific worktree directory
+function _gtr_get_repo_worktree_dir --description "Get the worktree directory for current repo"
+    if not git rev-parse --git-dir >/dev/null 2>&1
+        return 1
+    end
+
+    set -l repo_name (basename (git rev-parse --show-toplevel))
+    echo "$GIT_WORKTREE_BASE_DIR/$repo_name"
+end
+
+# gtr - Git worktree helper
+# Main command dispatcher for worktree operations
+function gtr --description "Git worktree helper for Claude Code parallel development"
+    if test (count $argv) -lt 1
+        echo "Usage: gtr {create|rm|cd|claude|list|prune} [args...]"
+        echo ""
+        echo "Commands:"
+        echo "  create <name...>  Create one or more worktrees"
+        echo "  rm <name...>      Remove one or more worktrees"
+        echo "  cd <name>         Change directory to a worktree"
+        echo "  claude <name>     Launch Claude Code in a worktree"
+        echo "  list              List all worktrees"
+        echo "  prune             Clean up stale worktree references"
+        echo ""
+        echo "Worktree Path Structure:"
+        echo "  \$HOME/dev/worktrees/<repo-name>/<worktree-name>"
+        echo "  Example: ~/dev/worktrees/desktoperator/feature1"
+        echo ""
+        echo "Examples:"
+        echo "  gtr create feature1       # Create worktree for feature1"
+        echo "  gtr create feat1 feat2    # Create multiple worktrees"
+        echo "  gtr claude feature1       # Launch Claude in feature1 worktree"
+        echo "  gtr cd feature1           # Change to feature1 worktree directory"
+        return 1
+    end
+
+    set -l cmd $argv[1]
+    set -e argv[1]
+
+    switch $cmd
+        case create
+            _gtr_create $argv
+        case rm remove
+            _gtr_remove $argv
+        case cd
+            _gtr_cd $argv
+        case claude
+            _gtr_claude $argv
+        case list ls
+            _gtr_list
+        case prune
+            _gtr_prune
+        case '*'
+            echo "Unknown command: $cmd"
+            echo "Run 'gtr' without arguments for usage help"
+            return 1
+    end
+end
+
+# Internal: Create worktrees
+function _gtr_create --description "Create git worktrees"
+    if test (count $argv) -lt 1
+        echo "Usage: gtr create <name...>"
+        return 1
+    end
+
+    for name in $argv
+        set -l worktree_path (_gtr_get_worktree_path $name)
+        or return 1
+
+        set -l branch_name "claude/$name"
+
+        if test -d "$worktree_path"
+            echo "Worktree already exists: $worktree_path"
+            continue
+        end
+
+        # Ensure the repo-specific worktree directory exists
+        set -l repo_dir (_gtr_get_repo_worktree_dir)
+        if not test -d "$repo_dir"
+            mkdir -p "$repo_dir"
+        end
+
+        echo "Creating worktree '$name' at $worktree_path (branch: $branch_name)..."
+        git worktree add -b "$branch_name" "$worktree_path"
+
+        if test $status -eq 0
+            echo "✓ Worktree '$name' created successfully"
+        else
+            echo "✗ Failed to create worktree '$name'"
+        end
+    end
+end
+
+# Internal: Remove worktrees
+function _gtr_remove --description "Remove git worktrees"
+    if test (count $argv) -lt 1
+        echo "Usage: gtr rm <name...>"
+        return 1
+    end
+
+    for name in $argv
+        set -l worktree_path (_gtr_get_worktree_path $name)
+        or return 1
+
+        if not test -d "$worktree_path"
+            echo "Worktree does not exist: $worktree_path"
+            continue
+        end
+
+        echo "Removing worktree '$name'..."
+        git worktree remove "$worktree_path"
+
+        if test $status -eq 0
+            echo "✓ Worktree '$name' removed successfully"
+        else
+            echo "✗ Failed to remove worktree '$name'"
+        end
+    end
+end
+
+# Internal: Change to worktree directory
+function _gtr_cd --description "Change to a worktree directory"
+    if test (count $argv) -ne 1
+        echo "Usage: gtr cd <name>"
+        return 1
+    end
+
+    set -l name $argv[1]
+    set -l worktree_path (_gtr_get_worktree_path $name)
+    or return 1
+
+    if not test -d "$worktree_path"
+        echo "Worktree does not exist: $worktree_path"
+        return 1
+    end
+
+    cd "$worktree_path"
+end
+
+# Internal: Launch Claude Code in worktree
+function _gtr_claude --description "Launch Claude Code in a worktree"
+    if test (count $argv) -ne 1
+        echo "Usage: gtr claude <name>"
+        return 1
+    end
+
+    set -l name $argv[1]
+    set -l worktree_path (_gtr_get_worktree_path $name)
+    or return 1
+
+    if not test -d "$worktree_path"
+        echo "Worktree '$name' doesn't exist."
+        read -l -P "Create it now? [y/N] " reply
+
+        switch $reply
+            case y Y yes YES
+                echo "Creating worktree '$name'..."
+
+                # Ensure the repo-specific worktree directory exists
+                set -l repo_dir (_gtr_get_repo_worktree_dir)
+                if not test -d "$repo_dir"
+                    mkdir -p "$repo_dir"
+                end
+
+                set -l branch_name "claude/$name"
+                git worktree add -b "$branch_name" "$worktree_path"
+
+                if test $status -ne 0
+                    echo "✗ Failed to create worktree"
+                    return 1
+                end
+            case '*'
+                echo "Aborted."
+                return 1
+        end
+    end
+
+    # Launch Claude Code in the worktree directory
+    pushd "$worktree_path"
+    claude
+    popd
+end
+
+# Internal: List all worktrees
+function _gtr_list --description "List all git worktrees"
+    git worktree list
+end
+
+# Internal: Prune stale worktree references
+function _gtr_prune --description "Clean up stale worktree references"
+    echo "Pruning stale worktree references..."
+    git worktree prune -v
+end
+
+# Convenience aliases for common git worktree operations
+alias gwt='git worktree'
+alias gwtl='git worktree list'
+alias gwta='git worktree add'
+alias gwtr='git worktree remove'
+alias gwtp='git worktree prune'
+
+# Additional helper functions
+
+# gwt-cleanup-merged - Remove worktrees for branches that have been merged
+function gwt-cleanup-merged --description "Remove worktrees for merged branches"
+    echo "Finding worktrees for merged branches..."
+
+    set -l default_branch (git remote show (git remote) | awk '/HEAD branch/ {print $NF}')
+    set -l merged_branches (git branch --merged $default_branch | string trim | grep -v "^\\*" | grep "claude/")
+
+    if test -z "$merged_branches"
+        echo "No merged 'claude/*' branches found."
+        return 0
+    end
+
+    echo "Merged branches:"
+    for branch in $merged_branches
+        echo "  - $branch"
+    end
+
+    read -l -P "Remove worktrees for these merged branches? [y/N] " reply
+
+    switch $reply
+        case y Y yes YES
+            for branch in $merged_branches
+                set -l branch_name (string replace "claude/" "" $branch)
+                set -l worktree_path (_gtr_get_worktree_path $branch_name)
+
+                if test -d "$worktree_path"
+                    echo "Removing worktree: $branch_name"
+                    git worktree remove "$worktree_path"
+                    git branch -d $branch
+                end
+            end
+            echo "✓ Cleanup complete"
+        case '*'
+            echo "Aborted."
+    end
+end
+
+# gwt-status - Show status of all worktrees
+function gwt-status --description "Show git status for all worktrees"
+    echo "Status of all worktrees:"
+    echo ""
+
+    for worktree in (git worktree list --porcelain | grep "worktree " | cut -d' ' -f2-)
+        if test -d "$worktree"
+            echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+            echo "📁 $worktree"
+            echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+            pushd "$worktree"
+            git status --short --branch
+            popd
+            echo ""
+        end
+    end
+end
+
+# gwt-branch-from-current - Create a worktree from the current branch
+function gwt-branch-from-current --description "Create a worktree for a new branch based on current branch"
+    if test (count $argv) -ne 1
+        echo "Usage: gwt-branch-from-current <new-branch-name>"
+        return 1
+    end
+
+    set -l new_branch $argv[1]
+    set -l current_branch (git branch --show-current)
+    set -l worktree_path (_gtr_get_worktree_path $new_branch)
+    or return 1
+
+    if test -d "$worktree_path"
+        echo "Worktree already exists: $worktree_path"
+        return 1
+    end
+
+    # Ensure the repo-specific worktree directory exists
+    set -l repo_dir (_gtr_get_repo_worktree_dir)
+    if not test -d "$repo_dir"
+        mkdir -p "$repo_dir"
+    end
+
+    echo "Creating worktree '$new_branch' from current branch '$current_branch'..."
+    git worktree add -b "claude/$new_branch" "$worktree_path" "$current_branch"
+
+    if test $status -eq 0
+        echo "✓ Worktree created at: $worktree_path"
+        echo "  Branch: claude/$new_branch (based on $current_branch)"
+    end
+end
+
+# Completion for gtr command
+complete -c gtr -n "__fish_use_subcommand" -a "create" -d "Create worktrees"
+complete -c gtr -n "__fish_use_subcommand" -a "rm" -d "Remove worktrees"
+complete -c gtr -n "__fish_use_subcommand" -a "cd" -d "Change to worktree directory"
+complete -c gtr -n "__fish_use_subcommand" -a "claude" -d "Launch Claude in worktree"
+complete -c gtr -n "__fish_use_subcommand" -a "list" -d "List all worktrees"
+complete -c gtr -n "__fish_use_subcommand" -a "prune" -d "Clean up stale references"
