@@ -15,12 +15,14 @@
     state: "{{ iac_state }}"
   become: true
   when: iac_state == 'present'
+  tags: [iac, system]
 
 - name: Update apt cache after HashiCorp repository changes
   ansible.builtin.apt:
     update_cache: true
   become: true
   when: iac_state == 'present'
+  tags: [iac, system]
 
 - name: Install Terraform package
   ansible.builtin.apt:
@@ -28,6 +30,7 @@
     state: "{{ iac_state }}"
     purge: "{{ iac_state == 'absent' }}"
   become: true
+  tags: [iac, system]
 
 # Google Cloud CLI installation
 - name: Create APT keyrings directory
@@ -37,6 +40,7 @@
     mode: '0755'
   become: true
   when: iac_state == 'present'
+  tags: [iac, system]
 
 - name: Download Google Cloud GPG key
   ansible.builtin.get_url:
@@ -44,6 +48,7 @@
     dest: /tmp/google-cloud.gpg
     mode: '0644'
   when: iac_state == 'present'
+  tags: [iac, system]
 
 - name: Import Google Cloud GPG key to keyring location
   ansible.builtin.shell: |
@@ -53,6 +58,7 @@
     creates: /etc/apt/keyrings/cloud.google.gpg
   become: true
   when: iac_state == 'present'
+  tags: [iac, system]
 
 # Explicitly specify arch=amd64 to prevent i386 package lookup warnings
 # For ARM support, change arch=amd64 to arch=amd64,arm64
@@ -62,12 +68,14 @@
     filename: google-cloud-sdk
     state: "{{ iac_state }}"
   become: true
+  tags: [iac, system]
 
 - name: Update apt cache after Google Cloud repository changes
   ansible.builtin.apt:
     update_cache: true
   become: true
   when: iac_state == 'present'
+  tags: [iac, system]
 
 - name: Install Google Cloud CLI
   ansible.builtin.apt:
@@ -75,12 +83,14 @@
     state: "{{ iac_state }}"
     purge: "{{ iac_state == 'absent' }}"
   become: true
+  tags: [iac, system]
 
 - name: Clean up Google Cloud GPG key file
   ansible.builtin.file:
     path: /tmp/google-cloud.gpg
     state: absent
   when: iac_state == 'present'
+  tags: [iac, system]
 
 # Cleanup when absent
 - name: Remove HashiCorp repository when absent
@@ -89,6 +99,7 @@
     state: absent
   become: true
   when: iac_state == 'absent'
+  tags: [iac, system]
 
 - name: Remove Google Cloud repository when absent
   ansible.builtin.apt_repository:
@@ -97,6 +108,7 @@
     state: absent
   become: true
   when: iac_state == 'absent'
+  tags: [iac, system]
 
 - name: Remove Google Cloud GPG key when absent
   ansible.builtin.file:
@@ -104,3 +116,4 @@
     state: absent
   become: true
   when: iac_state == 'absent'
+  tags: [iac, system]

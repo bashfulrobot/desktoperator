@@ -6,6 +6,7 @@
     name: fish
     state: present
   become: yes
+  tags: [system]
 
 - name: Create fish config directory
   file:
@@ -15,6 +16,7 @@
     group: "{{ user.name }}"
     mode: '0755'
   become: yes
+  tags: [system]
 
 - name: Create fish conf.d directory for modular configuration
   file:
@@ -24,6 +26,7 @@
     group: "{{ user.name }}"
     mode: '0755'
   become: yes
+  tags: [system]
 
 - name: Deploy fish config
   template:
@@ -34,6 +37,7 @@
     mode: '0644'
   become: yes
   when: fish_config_enabled | default(true)
+  tags: [system]
 
 - name: Deploy general fish functions
   template:
@@ -43,6 +47,7 @@
     group: "{{ user.name }}"
     mode: '0644'
   become: yes
+  tags: [system]
 
 - name: Deploy download-logo function
   template:
@@ -52,6 +57,7 @@
     group: "{{ user.name }}"
     mode: '0644'
   become: yes
+  tags: [system]
 
 - name: Set fish as default shell
   user:
@@ -59,6 +65,7 @@
     shell: "{{ user.shell }}"
   become: yes
   when: user.shell == '/usr/bin/fish'
+  tags: [system]
 
 - name: Deploy root bashrc with essential aliases and functions
   template:
@@ -69,3 +76,5 @@
     mode: '0644'
   become: yes
   when: root_bashrc_enabled | default(true)
+
+  tags: [system]

@@ -4,4 +4,4 @@
 - name: Include COSMIC desktop configuration
   include_role:
     name: desktop/cosmic
-  tags: [cosmic, desktop]
+  tags: [cosmic]

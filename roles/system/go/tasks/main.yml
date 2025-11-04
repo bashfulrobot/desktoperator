@@ -6,6 +6,7 @@
   stat:
     path: "{{ go_install_dir }}/go/bin/go"
   register: go_binary
+  tags: [go, system]
 
 - name: Get installed Go version
   shell: "{{ go_install_dir }}/go/bin/go version | awk '{print $3}' | sed 's/go//'"
@@ -13,10 +14,12 @@
   changed_when: false
   failed_when: false
   when: go_binary.stat.exists
+  tags: [go, system]
 
 - name: Determine if Go needs update
   set_fact:
     go_needs_update: "{{ not go_binary.stat.exists or installed_go_version.stdout != go_version }}"
+  tags: [go, system]
 
 - name: Remove old Go installation
   file:
@@ -24,6 +27,7 @@
     state: absent
   become: yes
   when: go_needs_update | bool
+  tags: [go, system]
 
 - name: Download Go tarball
   get_url:
@@ -31,6 +35,7 @@
     dest: "/tmp/go{{ go_version }}.linux-amd64.tar.gz"
     mode: '0644'
   when: go_needs_update | bool
+  tags: [go, system]
 
 - name: Extract Go tarball to {{ go_install_dir }}
   unarchive:
@@ -40,12 +45,14 @@
     creates: "{{ go_install_dir }}/go/bin/go"
   become: yes
   when: go_needs_update | bool
+  tags: [go, system]
 
 - name: Clean up Go tarball
   file:
     path: "/tmp/go{{ go_version }}.linux-amd64.tar.gz"
     state: absent
   when: go_needs_update | bool
+  tags: [go, system]
 
 - name: Create GOPATH directory
   file:
@@ -54,6 +61,7 @@
     owner: "{{ user.name }}"
     mode: '0755'
   become: yes
+  tags: [go, system]
 
 - name: Add Go to PATH in user profile
   lineinfile:
@@ -62,6 +70,7 @@
     create: yes
     owner: "{{ user.name }}"
     mode: '0644'
+  tags: [go, system]
 
 - name: Set GOPATH in user profile
   lineinfile:
@@ -70,9 +79,11 @@
     create: yes
     owner: "{{ user.name }}"
     mode: '0644'
+  tags: [go, system]
 
 - name: Verify Go installation
   shell: "{{ go_install_dir }}/go/bin/go version"
   register: go_version_output
   changed_when: false
   failed_when: go_version_output.rc != 0
+  tags: [go, system]

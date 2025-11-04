@@ -9,6 +9,7 @@
     purge: true
   become: true
   when: docker_state == 'present'
+  tags: [docker, system]
 
 - name: Add Docker repository with GPG key
   ansible.builtin.deb822_repository:
@@ -21,11 +22,13 @@
     signed_by: "{{ docker_gpg_key_url }}"
     state: "{{ docker_state }}"
   become: true
+  tags: [docker, system]
 
 - name: Update APT cache after repository changes
   ansible.builtin.apt:
     update_cache: true
   become: true
+  tags: [docker, system]
 
 - name: Install Docker packages
   ansible.builtin.apt:
@@ -33,6 +36,7 @@
     state: "{{ docker_state }}"
     purge: "{{ docker_state == 'absent' }}"
   become: true
+  tags: [docker, system]
 
 - name: Ensure Docker service is enabled and started
   ansible.builtin.systemd:
@@ -41,6 +45,7 @@
     state: "{{ 'started' if docker_state == 'present' else 'stopped' }}"
   become: true
   failed_when: false
+  tags: [docker, system]
 
 - name: Manage user docker group membership
   ansible.builtin.user:
@@ -50,3 +55,4 @@
   become: true
   when: docker_add_user_to_group | bool
   failed_when: false
+  tags: [docker, system]

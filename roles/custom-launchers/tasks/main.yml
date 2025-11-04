@@ -6,6 +6,7 @@
     mode: '0755'
     owner: root
     group: root
+  tags: [custom-launchers]
 
 - name: Install reboot-windows desktop file
   ansible.builtin.template:
@@ -23,8 +24,11 @@
 #     mode: '0644'
 #     owner: root
 #     group: root
+  tags: [custom-launchers]
 
 - name: Update desktop database
   ansible.builtin.command:
     cmd: update-desktop-database /usr/share/applications
   changed_when: true
+
+  tags: [custom-launchers]
