@@ -265,3 +265,8 @@
   import_role:
     name: apps/amber
   tags: [amber]
+
+- name: Include Typora markdown editor
+  import_role:
+    name: apps/typora
+  tags: [typora]

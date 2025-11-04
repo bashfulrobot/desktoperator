@@ -1,0 +1,64 @@
+---
+# Typora markdown editor installation via APT repository
+
+- name: Create APT keyrings directory
+  file:
+    path: /etc/apt/keyrings
+    state: directory
+    mode: '0755'
+  become: yes
+  when: app_states.typora | default('present') == 'present'
+
+- name: Download Typora GPG key
+  get_url:
+    url: https://downloads.typora.io/typora.gpg
+    dest: /etc/apt/keyrings/typora.gpg
+    mode: '0644'
+  become: yes
+  when: app_states.typora | default('present') == 'present'
+
+# Explicitly specify arch=amd64 to prevent i386 package lookup warnings
+# For ARM support, change arch=amd64 to arch=amd64,arm64
+- name: Add Typora APT repository
+  apt_repository:
+    repo: "deb [arch=amd64 signed-by=/etc/apt/keyrings/typora.gpg] https://downloads.typora.io/linux ./"
+    filename: typora
+    state: present
+  become: yes
+  when: app_states.typora | default('present') == 'present'
+
+- name: Update APT cache after repository changes
+  apt:
+    update_cache: yes
+  become: yes
+  when: app_states.typora | default('present') == 'present'
+
+- name: Install Typora
+  apt:
+    name: typora
+    state: "{{ app_states.typora | default('present') }}"
+    purge: "{{ app_states.typora | default('present') == 'absent' }}"
+  become: yes
+
+- name: Install Pandoc (required for Typora export features)
+  apt:
+    name: pandoc
+    state: "{{ app_states.typora | default('present') }}"
+    purge: "{{ app_states.typora | default('present') == 'absent' }}"
+  become: yes
+
+# Cleanup when absent
+- name: Remove Typora APT repository when absent
+  apt_repository:
+    repo: "deb [arch=amd64 signed-by=/etc/apt/keyrings/typora.gpg] https://downloads.typora.io/linux ./"
+    filename: typora
+    state: absent
+  become: yes
+  when: app_states.typora | default('present') == 'absent'
+
+- name: Remove Typora GPG key when absent
+  file:
+    path: /etc/apt/keyrings/typora.gpg
+    state: absent
+  become: yes
+  when: app_states.typora | default('present') == 'absent'
