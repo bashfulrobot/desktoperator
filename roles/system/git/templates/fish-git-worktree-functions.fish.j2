@@ -41,25 +41,27 @@ end
 # Main command dispatcher for worktree operations
 function gtr --description "Git worktree helper for Claude Code parallel development"
     if test (count $argv) -lt 1
-        echo "Usage: gtr {create|rm|cd|claude|list|prune} [args...]"
+        echo "Usage: gtr {create|finish|done|cd|claude|list|rm|prune} [args...]"
         echo ""
-        echo "Commands:"
-        echo "  create <name...>  Create one or more worktrees"
-        echo "  rm <name...>      Remove one or more worktrees"
+        echo "Primary Workflow:"
+        echo "  create <name>     Create worktree and cd into it"
+        echo "  finish            Commit, merge to main, cleanup (run from worktree)"
+        echo ""
+        echo "Other Commands:"
+        echo "  done [name]       Cleanup after external merge (auto-detects current worktree)"
         echo "  cd <name>         Change directory to a worktree"
         echo "  claude <name>     Launch Claude Code in a worktree"
         echo "  list              List all worktrees"
+        echo "  rm <name...>      Remove one or more worktrees"
         echo "  prune             Clean up stale worktree references"
         echo ""
-        echo "Worktree Path Structure:"
-        echo "  \$HOME/dev/worktrees/<repo-name>/<worktree-name>"
-        echo "  Example: ~/dev/worktrees/desktoperator/feature1"
+        echo "Simple Workflow Example:"
+        echo "  gtr create my-feature    # Create and enter worktree"
+        echo "  # ... do your work ..."
+        echo "  /commit                  # Commit changes (in Claude Code)"
+        echo "  gtr finish               # Merge, cleanup - done!"
         echo ""
-        echo "Examples:"
-        echo "  gtr create feature1       # Create worktree for feature1"
-        echo "  gtr create feat1 feat2    # Create multiple worktrees"
-        echo "  gtr claude feature1       # Launch Claude in feature1 worktree"
-        echo "  gtr cd feature1           # Change to feature1 worktree directory"
+        echo "Path: \$HOME/dev/worktrees/<repo-name>/<worktree-name>"
         return 1
     end
 
@@ -69,6 +71,10 @@ function gtr --description "Git worktree helper for Claude Code parallel develop
     switch $cmd
         case create
             _gtr_create $argv
+        case finish
+            _gtr_finish
+        case done
+            _gtr_done $argv
         case rm remove
             _gtr_remove $argv
         case cd
@@ -93,6 +99,8 @@ function _gtr_create --description "Create git worktrees"
         return 1
     end
 
+    set -l last_created_path ""
+
     for name in $argv
         set -l worktree_path (_gtr_get_worktree_path $name)
         or return 1
@@ -115,9 +123,15 @@ function _gtr_create --description "Create git worktrees"
 
         if test $status -eq 0
             echo "✓ Worktree '$name' created successfully"
+            set last_created_path "$worktree_path"
         else
             echo "✗ Failed to create worktree '$name'"
         end
+    end
+
+    # If only one worktree was requested and it was created successfully, cd into it
+    if test (count $argv) -eq 1 -a -n "$last_created_path"
+        cd "$last_created_path"
     end
 end
 
@@ -222,6 +236,223 @@ function _gtr_prune --description "Clean up stale worktree references"
     git worktree prune -v
 end
 
+# Internal: Finish workflow - commit, merge to main, cleanup, all from worktree
+function _gtr_finish --description "Complete workflow: commit, merge to main, cleanup from worktree"
+    # Auto-detect current worktree
+    set -l current_path (pwd)
+    set -l repo_dir (_gtr_get_repo_worktree_dir)
+
+    # Check if we're in a worktree subdirectory
+    if not string match -q "$repo_dir/*" "$current_path"
+        echo "Error: Must be run from within a worktree"
+        echo "Current path: $current_path"
+        return 1
+    end
+
+    # Extract worktree name from path
+    set -l name (string replace "$repo_dir/" "" $current_path | cut -d'/' -f1)
+    set -l branch_name "claude/$name"
+    # Get main repo location (first entry in worktree list is always the main repo)
+    set -l main_worktree (git worktree list | head -1 | awk '{print $1}')
+
+    echo "Working in worktree: $name (branch: $branch_name)"
+    echo ""
+
+    # Check if there are uncommitted changes
+    if not git diff-index --quiet HEAD --
+        echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+        echo "⚠ Uncommitted changes detected!"
+        echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+        git status --short
+        echo ""
+        echo "Please commit your changes first, then run 'gtr finish' again."
+        echo ""
+        echo "Recommended: Use '/commit' in Claude Code for conventional commits"
+        echo "Or manually: git add -A && git commit -m \"your message\""
+        echo ""
+        return 1
+    end
+
+    echo "✓ All changes committed"
+
+    # Push to remote
+    echo ""
+    echo "Pushing to remote..."
+    git push -u origin "$branch_name"
+
+    if test $status -ne 0
+        echo "✗ Failed to push to remote"
+        return 1
+    end
+    echo "✓ Pushed to remote"
+
+    # Get default branch
+    set -l default_branch (git remote show (git remote) | awk '/HEAD branch/ {print $NF}')
+
+    # Switch to main repository
+    echo ""
+    echo "Switching to main repository..."
+    cd "$main_worktree"
+    git checkout "$default_branch"
+
+    if test $status -ne 0
+        echo "✗ Failed to checkout $default_branch"
+        return 1
+    end
+
+    # Pull latest changes
+    echo "Pulling latest changes..."
+    git pull
+
+    if test $status -ne 0
+        echo "✗ Failed to pull latest changes"
+        return 1
+    end
+
+    # Merge the branch
+    echo ""
+    echo "Merging $branch_name into $default_branch..."
+    git merge "$branch_name" --no-edit
+
+    if test $status -ne 0
+        echo "✗ Failed to merge $branch_name"
+        echo "You may need to resolve conflicts manually"
+        return 1
+    end
+    echo "✓ Merged successfully"
+
+    # Push to remote
+    echo "Pushing merge to remote..."
+    git push
+
+    if test $status -ne 0
+        echo "✗ Failed to push merge"
+        return 1
+    end
+    echo "✓ Pushed to remote"
+
+    # Clean up worktree
+    echo ""
+    echo "Cleaning up worktree '$name'..."
+    set -l worktree_path (_gtr_get_worktree_path $name)
+    git worktree remove "$worktree_path"
+
+    if test $status -ne 0
+        echo "✗ Failed to remove worktree"
+        return 1
+    end
+
+    # Delete local branch
+    echo "Deleting local branch '$branch_name'..."
+    git branch -d "$branch_name"
+
+    if test $status -ne 0
+        echo "✗ Failed to delete local branch (may need -D to force)"
+    end
+
+    # Summary
+    echo ""
+    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    echo "✓ Workflow complete!"
+    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    echo "  Work committed and merged to $default_branch"
+    echo "  Worktree '$name' removed"
+    echo "  Branch '$branch_name' deleted"
+    echo "  Currently on: $default_branch in main repo"
+    echo ""
+end
+
+# Internal: Complete workflow after PR merge - cleanup and return to main
+function _gtr_done --description "Clean up worktree after PR merge and return to main"
+    set -l name ""
+
+    # If no argument provided, try to auto-detect current worktree
+    if test (count $argv) -eq 0
+        set -l current_path (pwd)
+        set -l repo_dir (_gtr_get_repo_worktree_dir)
+
+        # Check if we're in a worktree subdirectory
+        if string match -q "$repo_dir/*" "$current_path"
+            # Extract worktree name from path
+            set name (string replace "$repo_dir/" "" $current_path | cut -d'/' -f1)
+            echo "Auto-detected worktree: $name"
+        else
+            echo "Usage: gtr done [name]"
+            echo "Not currently in a worktree, please specify the worktree name"
+            return 1
+        end
+    else if test (count $argv) -eq 1
+        set name $argv[1]
+    else
+        echo "Usage: gtr done [name]"
+        return 1
+    end
+
+    set -l worktree_path (_gtr_get_worktree_path $name)
+    or return 1
+
+    if not test -d "$worktree_path"
+        echo "Worktree does not exist: $worktree_path"
+        return 1
+    end
+
+    set -l branch_name "claude/$name"
+    set -l current_path (pwd)
+    # Get main repo location (first entry in worktree list is always the main repo)
+    set -l main_worktree (git worktree list | head -1 | awk '{print $1}')
+
+    # Check if we're currently in the worktree being removed
+    set -l need_to_move false
+    if string match -q "$worktree_path*" "$current_path"
+        set need_to_move true
+        echo "Currently in worktree '$name', moving to main repository..."
+    end
+
+    # Move to main worktree if needed
+    if test "$need_to_move" = true
+        cd "$main_worktree"
+    end
+
+    # Get the default branch name
+    set -l default_branch (git remote show (git remote) | awk '/HEAD branch/ {print $NF}')
+
+    # Checkout default branch
+    echo "Checking out $default_branch..."
+    git checkout $default_branch
+
+    if test $status -ne 0
+        echo "✗ Failed to checkout $default_branch"
+        return 1
+    end
+
+    # Pull latest changes
+    echo "Pulling latest changes..."
+    git pull
+
+    # Remove the worktree
+    echo "Removing worktree '$name'..."
+    git worktree remove "$worktree_path"
+
+    if test $status -ne 0
+        echo "✗ Failed to remove worktree '$name'"
+        return 1
+    end
+
+    # Delete the local branch
+    echo "Deleting local branch '$branch_name'..."
+    git branch -d "$branch_name"
+
+    if test $status -eq 0
+        echo "✓ Cleanup complete!"
+        echo "  - Worktree removed: $name"
+        echo "  - Branch deleted: $branch_name"
+        echo "  - On branch: $default_branch"
+    else
+        echo "✗ Failed to delete branch '$branch_name'"
+        echo "  You may need to use 'git branch -D $branch_name' to force delete"
+    end
+end
+
 # Convenience aliases for common git worktree operations
 alias gwt='git worktree'
 alias gwtl='git worktree list'
@@ -252,6 +483,27 @@ function gwt-cleanup-merged --description "Remove worktrees for merged branches"
 
     switch $reply
         case y Y yes YES
+            set -l current_path (pwd)
+            # Get main repo location (first entry in worktree list is always the main repo)
+            set -l main_worktree (git worktree list | head -1 | awk '{print $1}')
+            set -l moved_to_main false
+
+            # Check if we're in any of the worktrees being removed
+            for branch in $merged_branches
+                set -l branch_name (string replace "claude/" "" $branch)
+                set -l worktree_path (_gtr_get_worktree_path $branch_name)
+
+                if test -d "$worktree_path"; and string match -q "$worktree_path*" "$current_path"
+                    echo "Currently in worktree '$branch_name' which will be removed"
+                    echo "Moving to main repository on $default_branch..."
+                    cd "$main_worktree"
+                    git checkout $default_branch
+                    set moved_to_main true
+                    break
+                end
+            end
+
+            # Remove all merged worktrees
             for branch in $merged_branches
                 set -l branch_name (string replace "claude/" "" $branch)
                 set -l worktree_path (_gtr_get_worktree_path $branch_name)
@@ -262,6 +514,13 @@ function gwt-cleanup-merged --description "Remove worktrees for merged branches"
                     git branch -d $branch
                 end
             end
+
+            # Pull latest changes if we moved to main
+            if test "$moved_to_main" = true
+                echo "Pulling latest changes..."
+                git pull
+            end
+
             echo "✓ Cleanup complete"
         case '*'
             echo "Aborted."
@@ -320,8 +579,10 @@ end
 
 # Completion for gtr command
 complete -c gtr -n "__fish_use_subcommand" -a "create" -d "Create worktrees"
-complete -c gtr -n "__fish_use_subcommand" -a "rm" -d "Remove worktrees"
+complete -c gtr -n "__fish_use_subcommand" -a "finish" -d "Commit, merge, cleanup workflow"
+complete -c gtr -n "__fish_use_subcommand" -a "done" -d "Cleanup after external merge"
 complete -c gtr -n "__fish_use_subcommand" -a "cd" -d "Change to worktree directory"
 complete -c gtr -n "__fish_use_subcommand" -a "claude" -d "Launch Claude in worktree"
 complete -c gtr -n "__fish_use_subcommand" -a "list" -d "List all worktrees"
+complete -c gtr -n "__fish_use_subcommand" -a "rm" -d "Remove worktrees"
 complete -c gtr -n "__fish_use_subcommand" -a "prune" -d "Clean up stale references"
