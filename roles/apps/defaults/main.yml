@@ -38,6 +38,7 @@ app_states:
   meetsum: present
   obsidian: present
   okular: present
+  trippy: present
   signal: present
   spotify: present
   terminal-experience: present

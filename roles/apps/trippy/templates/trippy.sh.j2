@@ -1,0 +1,42 @@
+# Trippy network diagnostic tool aliases
+# https://trippy.rs/guides/recommendation/
+#
+# Configuration is managed in ~/.config/trippy/trippy.toml
+#
+# Usage examples:
+#   traceroute example.com              # Basic ICMP trace
+#   trip --udp example.com              # UDP Dublin mode (ECMP)
+#   trip --tcp example.com              # TCP mode
+#   trip --mode markdown example.com    # Generate report
+
+# Check if trippy is installed
+if command -v trip &>/dev/null; then
+    # Wrapper for trip that automatically uses sudo (required for raw socket access)
+    # Use absolute path to avoid recursion
+    # Skip sudo if already running as root
+    trip() {
+        if [ "$EUID" -eq 0 ]; then
+            /usr/bin/trip "$@"
+        else
+            sudo /usr/bin/trip "$@"
+        fi
+    }
+
+    # Override standard traceroute commands
+    traceroute() {
+        echo "Using trippy..."
+        echo
+        trip "$@"
+    }
+
+    tracert() {
+        echo "Using trippy..."
+        echo
+        trip "$@"
+    }
+
+    # Export functions so they're available in subshells
+    export -f trip
+    export -f traceroute
+    export -f tracert
+fi

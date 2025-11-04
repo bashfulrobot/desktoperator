@@ -1,0 +1,143 @@
+---
+# Trippy network diagnostic tool installation
+# https://github.com/fujiapple852/trippy
+
+- name: Install software-properties-common for add-apt-repository
+  apt:
+    name: software-properties-common
+    state: present
+  become: yes
+  when: app_states['trippy'] | default('present') == 'present'
+
+- name: Add Trippy PPA
+  apt_repository:
+    repo: ppa:fujiapple/trippy
+    state: present
+    update_cache: no
+  become: yes
+  when: app_states['trippy'] | default('present') == 'present'
+
+- name: Update apt cache after adding PPA
+  apt:
+    update_cache: yes
+  become: yes
+  when: app_states['trippy'] | default('present') == 'present'
+
+- name: Install Trippy
+  apt:
+    name: trippy
+    state: present
+  become: yes
+  when: app_states['trippy'] | default('present') == 'present'
+
+# Fish shell integration
+- name: Create fish conf.d directory
+  file:
+    path: "{{ user.home }}/.config/fish/conf.d"
+    state: directory
+    owner: "{{ user.name }}"
+    group: "{{ user.name }}"
+    mode: '0755'
+  when: app_states['trippy'] | default('present') == 'present'
+
+- name: Deploy fish aliases for trippy
+  template:
+    src: trippy.fish.j2
+    dest: "{{ user.home }}/.config/fish/conf.d/trippy.fish"
+    owner: "{{ user.name }}"
+    group: "{{ user.name }}"
+    mode: '0644'
+  when: app_states['trippy'] | default('present') == 'present'
+
+# Bash shell integration (system-wide for all users including root)
+- name: Deploy bash aliases for trippy to profile.d
+  template:
+    src: trippy.sh.j2
+    dest: /etc/profile.d/trippy.sh
+    owner: root
+    group: root
+    mode: '0644'
+  become: yes
+  when: app_states['trippy'] | default('present') == 'present'
+
+# Trippy configuration
+- name: Create trippy config directory
+  file:
+    path: "{{ user.home }}/.config/trippy"
+    state: directory
+    owner: "{{ user.name }}"
+    group: "{{ user.name }}"
+    mode: '0755'
+  when: app_states['trippy'] | default('present') == 'present'
+
+- name: Deploy trippy configuration file
+  template:
+    src: trippy.toml.j2
+    dest: "{{ user.home }}/.config/trippy/trippy.toml"
+    owner: "{{ user.name }}"
+    group: "{{ user.name }}"
+    mode: '0644'
+  when: app_states['trippy'] | default('present') == 'present'
+
+# Root user configuration
+- name: Create trippy config directory for root
+  file:
+    path: /root/.config/trippy
+    state: directory
+    owner: root
+    group: root
+    mode: '0755'
+  become: yes
+  when: app_states['trippy'] | default('present') == 'present'
+
+- name: Deploy trippy configuration file for root
+  template:
+    src: trippy.toml.j2
+    dest: /root/.config/trippy/trippy.toml
+    owner: root
+    group: root
+    mode: '0644'
+  become: yes
+  when: app_states['trippy'] | default('present') == 'present'
+
+# Cleanup when absent
+- name: Remove Trippy when absent
+  apt:
+    name: trippy
+    state: absent
+    purge: yes
+  become: yes
+  when: app_states['trippy'] | default('present') == 'absent'
+
+- name: Remove Trippy PPA when absent
+  apt_repository:
+    repo: ppa:fujiapple/trippy
+    state: absent
+  become: yes
+  when: app_states['trippy'] | default('present') == 'absent'
+
+- name: Remove fish aliases for trippy when absent
+  file:
+    path: "{{ user.home }}/.config/fish/conf.d/trippy.fish"
+    state: absent
+  when: app_states['trippy'] | default('present') == 'absent'
+
+- name: Remove trippy configuration directory when absent
+  file:
+    path: "{{ user.home }}/.config/trippy"
+    state: absent
+  when: app_states['trippy'] | default('present') == 'absent'
+
+- name: Remove bash aliases from profile.d when absent
+  file:
+    path: /etc/profile.d/trippy.sh
+    state: absent
+  become: yes
+  when: app_states['trippy'] | default('present') == 'absent'
+
+- name: Remove root trippy configuration directory when absent
+  file:
+    path: /root/.config/trippy
+    state: absent
+  become: yes
+  when: app_states['trippy'] | default('present') == 'absent'
