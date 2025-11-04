@@ -1,0 +1,36 @@
+#!/bin/bash
+# RTC Sleep and Wake Script
+# Puts computer to sleep and wakes at 7:15 AM PST
+
+# Convert 7:15 AM PST to seconds since epoch
+# PST is UTC-8, so we need to account for timezone
+TARGET_HOUR=7
+TARGET_MINUTE=15
+
+# Get current date/time
+current_epoch=$(date +%s)
+
+# Calculate target time for tomorrow at 7:15 AM in local time
+# Note: Adjust TZ=America/Los_Angeles for PST/PDT handling
+target_epoch=$(TZ=America/Los_Angeles date -d "tomorrow ${TARGET_HOUR}:${TARGET_MINUTE}" +%s)
+
+# If target time today hasn't passed yet, use today instead of tomorrow
+today_target=$(TZ=America/Los_Angeles date -d "today ${TARGET_HOUR}:${TARGET_MINUTE}" +%s)
+if [ $today_target -gt $current_epoch ]; then
+    target_epoch=$today_target
+fi
+
+# Calculate seconds until wake time
+seconds_until_wake=$((target_epoch - current_epoch))
+
+echo "Current time: $(date)"
+echo "Wake time: $(TZ=America/Los_Angeles date -d @${target_epoch})"
+echo "Sleeping for $seconds_until_wake seconds"
+echo ""
+echo "Suspending system in 5 seconds... (Ctrl+C to cancel)"
+sleep 5
+
+# Use rtcwake to suspend and wake at specified time
+# -m mem: suspend to RAM (sleep mode)
+# -s: seconds until wake
+sudo rtcwake -m mem -s $seconds_until_wake

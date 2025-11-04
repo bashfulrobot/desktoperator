@@ -1,6 +1,16 @@
 ---
 # Power management configuration for scheduled wake-ups
 
+- name: Deploy rtc-sleep-wake script
+  ansible.builtin.copy:
+    src: rtc-sleep-wake
+    dest: /usr/local/bin/rtc-sleep-wake
+    owner: root
+    group: root
+    mode: '0755'
+  become: yes
+  tags: [system, power, scripts]
+
 - name: Deploy morning wake systemd service
   ansible.builtin.template:
     src: morning-wake.service.j2
