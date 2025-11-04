@@ -9,7 +9,7 @@
     repo: amber
     binary_name: ambr
     version: tags/v0.6.0
-    filename_substring: x86_64-linux.tar.gz
+    filename_substring: x86_64-lnx.zip
   when: app_states.amber | default('present') == 'present'
 
 - name: Create amber config directory
