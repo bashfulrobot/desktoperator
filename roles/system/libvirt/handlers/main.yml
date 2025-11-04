@@ -23,4 +23,7 @@
       # Flush NAT POSTROUTING to prevent UFW from appending duplicate rules
       iptables -t nat -F POSTROUTING
       ufw reload
+      # Restart libvirtd to re-insert libvirt chains at top of FORWARD chain
+      # This ensures LIBVIRT_FWI/FWO/FWX chains process VM traffic before UFW chains
+      systemctl restart libvirtd
   become: true
