@@ -1,0 +1,5 @@
+---
+# Amber default variables
+
+# Installation state (present/absent)
+amber_state: present

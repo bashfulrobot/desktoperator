@@ -1,0 +1,42 @@
+---
+# Amber installation - search and replace tool
+# https://github.com/dalance/amber
+
+- name: Install amber from GitHub
+  ansible.builtin.include_tasks: ../../system/tasks/includes/github_release.yml
+  vars:
+    org: dalance
+    repo: amber
+    binary_name: ambr
+    version: tags/v0.6.0
+    filename_substring: x86_64-linux.tar.gz
+  when: app_states.amber | default('present') == 'present'
+
+- name: Create amber config directory
+  ansible.builtin.file:
+    path: "{{ user.home }}/.config/amber"
+    state: directory
+    owner: "{{ user.name }}"
+    mode: '0755'
+  when: app_states.amber | default('present') == 'present'
+
+- name: Deploy amber configuration
+  ansible.builtin.template:
+    src: ambs.toml.j2
+    dest: "{{ user.home }}/.config/amber/ambs.toml"
+    owner: "{{ user.name }}"
+    mode: '0644'
+  when: app_states.amber | default('present') == 'present'
+
+- name: Remove amber binary when absent
+  ansible.builtin.file:
+    path: /usr/local/bin/ambr
+    state: absent
+  when: app_states.amber | default('present') == 'absent'
+  become: yes
+
+- name: Remove amber configuration when absent
+  ansible.builtin.file:
+    path: "{{ user.home }}/.config/amber"
+    state: absent
+  when: app_states.amber | default('present') == 'absent'

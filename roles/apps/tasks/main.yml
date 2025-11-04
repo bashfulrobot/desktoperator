@@ -260,3 +260,8 @@
   import_role:
     name: apps/trippy
   tags: [trippy]
+
+- name: Include Amber search and replace tool
+  import_role:
+    name: apps/amber
+  tags: [amber]

@@ -1,0 +1,29 @@
+# Amber configuration file
+# Search and replace tool settings
+# https://github.com/dalance/amber
+
+# Pattern matching
+regex = false              # Use literal text search by default (safer)
+
+# Display options
+column = true              # Show column numbers in results
+row = true                 # Show line/row numbers in results
+color = true               # Use colored output for better readability
+file = true                # Show filenames in results
+line_by_match = false      # Output grouped by file (more readable)
+
+# Search behavior
+interactive = true         # Prompt before each replacement (safer)
+recursive = true           # Search through subdirectories
+symlink = true             # Follow symbolic links
+binary = false             # Exclude binary files from search
+
+# Filtering
+skip_vcs = true           # Skip version control directories (.git, .hg, .svn, .bzr)
+skip_gitignore = true     # Respect .gitignore patterns
+parent_ignore = true      # Honor ignore rules from parent directories
+
+# Output options
+statistics = true         # Show summary statistics
+skipped = false          # Don't report skipped files (reduces noise)
+fixed_order = true       # Maintain consistent output ordering
