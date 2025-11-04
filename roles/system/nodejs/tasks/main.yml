@@ -14,11 +14,13 @@
     signed_by: https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key
     state: "{{ nodejs_state }}"
   become: true
+  tags: [nodejs, system]
 
 - name: Update APT cache after repository changes
   ansible.builtin.apt:
     update_cache: true
   become: true
+  tags: [nodejs, system]
 
 - name: Install Node.js and npm
   ansible.builtin.apt:
@@ -26,3 +28,4 @@
     state: "{{ nodejs_state }}"
     purge: "{{ nodejs_state == 'absent' }}"
   become: true
+  tags: [nodejs, system]

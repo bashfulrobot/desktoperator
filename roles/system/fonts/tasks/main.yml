@@ -6,6 +6,7 @@
       - unzip
     state: present
   become: true
+  tags: [fonts, system]
 
 - name: Create system fonts directory
   ansible.builtin.file:
@@ -13,6 +14,7 @@
     state: directory
     mode: '0755'
   become: true
+  tags: [fonts, system]
 
 - name: Create fonts state directory
   ansible.builtin.file:
@@ -20,15 +22,18 @@
     state: directory
     mode: '0755'
   become: true
+  tags: [fonts, system]
 
 - name: Process each Nerd Font
   ansible.builtin.include_tasks: install_font.yml
   loop: "{{ nerd_fonts }}"
   loop_control:
     loop_var: font
+  tags: [fonts, system]
 
 - name: Update font cache
   ansible.builtin.command: fc-cache -f -v
   become: true
   changed_when: true
   when: fonts_were_updated | default(false)
+  tags: [fonts, system]

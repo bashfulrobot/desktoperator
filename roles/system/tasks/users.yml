@@ -10,6 +10,7 @@
     state: present
     create_home: yes
   become: yes
+  tags: [system]
 
 - name: Set user password (if defined in vault)
   user:
@@ -18,6 +19,7 @@
   when: vault_user_password is defined
   become: yes
   no_log: true
+  tags: [system]
 
 - name: Create user directories
   file:
@@ -29,6 +31,7 @@
   loop: "{{ user_directories }}"
   when: user_directories is defined
   become: yes
+  tags: [system]
 
 - name: Configure sudo access
   template:
@@ -40,3 +43,5 @@
     validate: 'visudo -cf %s'
   when: user_sudo_nopasswd | default(false)
   become: yes
+
+  tags: [system]

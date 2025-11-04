@@ -6,6 +6,7 @@
     name: "{{ dev_packages }}"
     state: present
   become: yes
+  tags: [system]
 
 - name: Install Python packages via pip
   pip:
@@ -15,3 +16,5 @@
   become: yes
   become_user: "{{ user.name }}"
   when: python_packages is defined
+
+  tags: [system]

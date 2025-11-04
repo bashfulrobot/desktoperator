@@ -15,7 +15,7 @@
 
     # Desktop environment configuration
     - role: desktop
-      tags: [desktop, core]
+      tags: [cosmic, core]
 
     # User applications
     - role: apps

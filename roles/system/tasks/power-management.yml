@@ -13,6 +13,7 @@
     - morning_wake_enabled | default(false)
     - inventory_hostname == 'qbert'
   notify: Reload systemd daemon
+  tags: [system]
 
 - name: Deploy morning wake systemd timer
   ansible.builtin.template:
@@ -26,6 +27,7 @@
     - morning_wake_enabled | default(false)
     - inventory_hostname == 'qbert'
   notify: Reload systemd daemon
+  tags: [system]
 
 - name: Enable and start morning wake timer
   ansible.builtin.systemd:
@@ -37,6 +39,7 @@
   when:
     - morning_wake_enabled | default(false)
     - inventory_hostname == 'qbert'
+  tags: [system]
 
 - name: Stop and disable morning wake timer when disabled
   ansible.builtin.systemd:
@@ -48,6 +51,7 @@
     - not (morning_wake_enabled | default(false))
     - inventory_hostname == 'qbert'
   failed_when: false
+  tags: [system]
 
 - name: Remove morning wake systemd units when disabled
   ansible.builtin.file:
@@ -60,3 +64,5 @@
   when:
     - not (morning_wake_enabled | default(false))
     - inventory_hostname == 'qbert'
+
+  tags: [system]

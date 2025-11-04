@@ -12,6 +12,7 @@
   when: ssh_private_keys is defined
   no_log: true
   become: true
+  tags: [system]
 
 - name: Deploy SSH public keys
   ansible.builtin.copy:
@@ -23,6 +24,7 @@
   loop: "{{ ssh_public_keys | dict2items }}"
   when: ssh_public_keys is defined
   become: true
+  tags: [system]
 
 - name: Deploy SSH config
   ansible.builtin.template:
@@ -33,6 +35,7 @@
     mode: '0600'
   when: ssh_config is defined
   become: true
+  tags: [system]
 
 - name: Ensure SSH service is running
   ansible.builtin.service:
@@ -40,3 +43,5 @@
     state: started
     enabled: true
   become: true
+
+  tags: [system]

@@ -9,6 +9,7 @@
   register: auto_colors_file
   delegate_to: localhost
   become: no
+  tags: [system]
 
 - name: Generate color variables if missing
   command: "{{ playbook_dir }}/scripts/generate-cosmic-colors.sh"
@@ -17,12 +18,14 @@
   delegate_to: localhost
   become: no
   when: not auto_colors_file.stat.exists
+  tags: [system]
 
 - name: Load auto-generated color variables
   include_vars:
     file: "{{ playbook_dir }}/group_vars/all/auto-colors.yml"
 
 # Install extraction script to /usr/local/bin for manual use
+  tags: [system]
 - name: Install color extraction script for manual use
   ansible.builtin.copy:
     src: ../../../scripts/extract-cosmic-colors.sh
@@ -31,3 +34,5 @@
     owner: root
     group: root
   become: true
+
+  tags: [system]

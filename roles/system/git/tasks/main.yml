@@ -6,6 +6,7 @@
     name: git
     state: present
   become: true
+  tags: [git, system]
 
 - name: Install git-related tools
   ansible.builtin.apt:
@@ -16,6 +17,7 @@
       - git-delta
     state: present
   become: true
+  tags: [git, system]
 
 - name: Install difftastic from GitHub
   ansible.builtin.include_tasks: ../../tasks/includes/github_release.yml
@@ -25,6 +27,7 @@
     binary_name: difft
     filename_substring: x86_64-unknown-linux-gnu.tar.gz
   when: git_difftastic.enable | default(false)
+  tags: [git, system]
 
 - name: Install lazygit from GitHub
   ansible.builtin.include_tasks: ../../tasks/includes/github_release.yml
@@ -33,12 +36,14 @@
     repo: lazygit
     binary_name: lazygit
     filename_substring: linux_x86_64.tar.gz
+  tags: [git, system]
 
 - name: Remove old GitHub CLI repository configuration (if exists)
   ansible.builtin.file:
     path: /etc/apt/sources.list.d/github-cli.list
     state: absent
   become: true
+  tags: [git, system]
 
 - name: Add GitHub CLI repository with GPG key
   ansible.builtin.deb822_repository:
@@ -51,17 +56,20 @@
     signed_by: https://cli.github.com/packages/githubcli-archive-keyring.gpg
     state: present
   become: true
+  tags: [git, system]
 
 - name: Update APT cache after repository changes
   ansible.builtin.apt:
     update_cache: true
   become: true
+  tags: [git, system]
 
 - name: Install GitHub CLI
   ansible.builtin.apt:
     name: gh
     state: present
   become: true
+  tags: [git, system]
 
 - name: Create git config directory
   ansible.builtin.file:
@@ -69,6 +77,7 @@
     state: directory
     owner: "{{ user.name }}"
     mode: '0755'
+  tags: [git, system]
 
 - name: Deploy gitconfig
   ansible.builtin.template:
@@ -76,6 +85,7 @@
     dest: "{{ user.home }}/.gitconfig"
     owner: "{{ user.name }}"
     mode: '0644'
+  tags: [git, system]
 
 - name: Deploy git allowed_signers for SSH signing
   ansible.builtin.template:
@@ -83,6 +93,7 @@
     dest: "{{ user.home }}/.config/git/allowed_signers"
     owner: "{{ user.name }}"
     mode: '0644'
+  tags: [git, system]
 
 - name: Create gh config directory
   ansible.builtin.file:
@@ -90,6 +101,7 @@
     state: directory
     owner: "{{ user.name }}"
     mode: '0755'
+  tags: [git, system]
 
 - name: Deploy gh (GitHub CLI) config
   ansible.builtin.template:
@@ -97,6 +109,7 @@
     dest: "{{ user.home }}/.config/gh/config.yml"
     owner: "{{ user.name }}"
     mode: '0644'
+  tags: [git, system]
 
 - name: Create lazygit config directory
   ansible.builtin.file:
@@ -104,6 +117,7 @@
     state: directory
     owner: "{{ user.name }}"
     mode: '0755'
+  tags: [git, system]
 
 - name: Deploy lazygit config
   ansible.builtin.template:
@@ -111,6 +125,7 @@
     dest: "{{ user.home }}/.config/lazygit/config.yml"
     owner: "{{ user.name }}"
     mode: '0644'
+  tags: [git, system]
 
 - name: Deploy git worktree fish functions
   ansible.builtin.template:
@@ -118,3 +133,4 @@
     dest: "{{ user.home }}/.config/fish/conf.d/git-worktree-functions.fish"
     owner: "{{ user.name }}"
     mode: '0644'
+  tags: [git, system]
