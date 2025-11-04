@@ -156,3 +156,16 @@ tasks:
 [group('dev')]
 tags:
     @ansible-playbook site.yml --list-tags
+
+# Run Ansible with specific tag(s) on current host
+[group('dev')]
+tag TAG:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    {{ header_msg }}
+    {{ success_msg }}
+
+    header "Running Ansible with tag: {{ TAG }}"
+    echo "→ Executing on $(hostname) with tag '{{ TAG }}'..."
+    ansible-playbook site.yml --limit $(hostname) --tags "{{ TAG }}"
+    success "Tag '{{ TAG }}' execution completed"
