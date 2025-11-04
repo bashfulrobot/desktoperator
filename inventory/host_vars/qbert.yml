@@ -15,9 +15,9 @@ morning_wake_enabled: true
 # Libvirt configuration
 libvirt_install_gui_tools: true
 
-# Libvirt routed networks for qbert (5 networks)
+# Libvirt routed networks for qbert (6 networks)
 # Using obscure subnets in 172.29.x.x range to avoid common conflicts
-# qbert uses 172.29.10.0 - 172.29.14.0 range
+# qbert uses 172.29.10.0 - 172.29.14.0 range + 172.29.188.0 for Talos
 libvirt_routed_networks:
   - name: "routed-net-1"
     bridge: "virbr1"
@@ -53,4 +53,11 @@ libvirt_routed_networks:
     gateway: "172.29.14.1"
     dhcp_start: "172.29.14.100"
     dhcp_end: "172.29.14.200"
+    autostart: true
+  - name: "spitfire-network"
+    bridge: "virbr6"
+    subnet: "172.29.188.0/24"
+    gateway: "172.29.188.1"
+    dhcp_start: "172.29.188.2"
+    dhcp_end: "172.29.188.254"
     autostart: true
