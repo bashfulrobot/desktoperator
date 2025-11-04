@@ -34,36 +34,77 @@ function kns --description "Select and switch kubernetes namespace with fzf"
     end
 end
 
-# kcfg - Select and switch kubeconfig file (requires fzf)
-function kcfg --description "Select and activate kubeconfig from ~/.kube/clusters/ with fzf"
+# kcfg - Select and copy kubeconfig file to active location (requires fzf)
+function kcfg --description "Select kubeconfig from ~/.kube/clusters/ and copy to ~/.kube/config"
     if not type -q fzf
         echo "Error: fzf is not installed" >&2
         return 1
     end
 
     set clusters_dir "$HOME/.kube/clusters"
+    set active_config "$HOME/.kube/config"
 
     if not test -d "$clusters_dir"
         echo "Error: Directory $clusters_dir does not exist" >&2
         return 1
     end
 
-    # Get current kubeconfig
-    set current_config (basename "$KUBECONFIG" 2>/dev/null)
-    if test -z "$current_config"
-        set current_config "default (~/.kube/config)"
+    # Determine current config if it exists
+    set current_config "none"
+    if test -f "$active_config"
+        set current_context (kubectl config current-context 2>/dev/null)
+        if test -n "$current_context"
+            set current_config "$current_context"
+        end
     end
 
     # List kubeconfig files and select with fzf
     set selected_config (find "$clusters_dir" -maxdepth 1 -type f \( -name "*.yaml" -o -name "*.yml" -o -name "*config*" \) -printf "%f\n" | fzf --height=40% --reverse --header="Current: $current_config" --preview="kubectl --kubeconfig=$clusters_dir/{} config get-contexts 2>/dev/null")
 
     if test -n "$selected_config"
-        set -gx KUBECONFIG "$clusters_dir/$selected_config"
-        echo "✓ Activated kubeconfig: $selected_config"
+        cp "$clusters_dir/$selected_config" "$active_config"
+        echo "✓ Copied kubeconfig: $selected_config → ~/.kube/config"
         echo "  Contexts available:"
         kubectl config get-contexts
     else
         echo "No kubeconfig selected"
+    end
+end
+
+# tcfg - Select and copy talosconfig file to active location (requires fzf)
+function tcfg --description "Select talosconfig from ~/.talos/clusters/ and copy to ~/.talos/config"
+    if not type -q fzf
+        echo "Error: fzf is not installed" >&2
+        return 1
+    end
+
+    set clusters_dir "$HOME/.talos/clusters"
+    set active_config "$HOME/.talos/config"
+
+    if not test -d "$clusters_dir"
+        echo "Error: Directory $clusters_dir does not exist" >&2
+        return 1
+    end
+
+    # Determine current config if it exists
+    set current_config "none"
+    if test -f "$active_config"
+        set current_context (talosctl config info 2>/dev/null | grep -oP 'context:\s+\K\S+')
+        if test -n "$current_context"
+            set current_config "$current_context"
+        end
+    end
+
+    # List talosconfig files and select with fzf
+    set selected_config (find "$clusters_dir" -maxdepth 1 -type f \( -name "*.yaml" -o -name "*.yml" -o -name "*config*" \) -printf "%f\n" | fzf --height=40% --reverse --header="Current: $current_config" --preview="talosctl --talosconfig=$clusters_dir/{} config info 2>/dev/null")
+
+    if test -n "$selected_config"
+        cp "$clusters_dir/$selected_config" "$active_config"
+        echo "✓ Copied talosconfig: $selected_config → ~/.talos/config"
+        echo "  Config info:"
+        talosctl config info
+    else
+        echo "No talosconfig selected"
     end
 end
 
