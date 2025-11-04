@@ -320,7 +320,7 @@ function _gtr_finish --description "Complete workflow: commit, merge to main, cl
     # Merge the branch
     echo ""
     echo "Merging $branch_name into $default_branch..."
-    git merge "$branch_name" --no-edit
+    git merge "$branch_name" --no-ff --no-edit
 
     if test $status -ne 0
         echo "✗ Failed to merge $branch_name"
