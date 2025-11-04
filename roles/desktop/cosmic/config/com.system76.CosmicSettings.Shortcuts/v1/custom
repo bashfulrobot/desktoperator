@@ -37,4 +37,13 @@
         ],
         key: "f",
     ): Fullscreen,
+    (
+        modifiers: [
+            Ctrl,
+            Alt,
+            Shift,
+        ],
+        key: "s",
+        description: Some("suspect until 7:15"),
+    ): Spawn("/usr/local/bin/rtc-sleep-wake"),
 }
