@@ -34,9 +34,4 @@ if command -v trip &>/dev/null; then
         echo
         trip "$@"
     }
-
-    # Export functions so they're available in subshells
-    export -f trip
-    export -f traceroute
-    export -f tracert
 fi

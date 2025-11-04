@@ -49,14 +49,21 @@
     mode: '0644'
   when: app_states['trippy'] | default('present') == 'present'
 
-# Bash shell integration (system-wide for all users including root)
-- name: Deploy bash aliases for trippy to profile.d
+# Bash shell integration for root user
+- name: Deploy bash aliases for trippy to root's bash_aliases
   template:
-    src: trippy.sh.j2
-    dest: /etc/profile.d/trippy.sh
+    src: bash_aliases.j2
+    dest: /root/.bash_aliases
     owner: root
     group: root
     mode: '0644'
+  become: yes
+  when: app_states['trippy'] | default('present') == 'present'
+
+- name: Remove old bash aliases from profile.d (migration cleanup)
+  file:
+    path: /etc/profile.d/trippy.sh
+    state: absent
   become: yes
   when: app_states['trippy'] | default('present') == 'present'
 
@@ -128,12 +135,18 @@
     state: absent
   when: app_states['trippy'] | default('present') == 'absent'
 
-- name: Remove bash aliases from profile.d when absent
+- name: Remove bash aliases from root when absent
+  file:
+    path: /root/.bash_aliases
+    state: absent
+  become: yes
+  when: app_states['trippy'] | default('present') == 'absent'
+
+- name: Remove old bash aliases from profile.d (migration cleanup)
   file:
     path: /etc/profile.d/trippy.sh
     state: absent
   become: yes
-  when: app_states['trippy'] | default('present') == 'absent'
 
 - name: Remove root trippy configuration directory when absent
   file:
