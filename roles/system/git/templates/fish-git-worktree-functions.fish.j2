@@ -247,12 +247,13 @@ end
 function _gtr_finish --description "Complete workflow: commit, merge to main, cleanup from worktree"
     # Auto-detect current worktree
     set -l current_path (pwd)
-    set -l repo_dir (_gtr_get_repo_worktree_dir)
+    set -l repo_dir (realpath (_gtr_get_repo_worktree_dir))
 
     # Check if we're in a worktree subdirectory
     if not string match -q "$repo_dir/*" "$current_path"
         echo "Error: Must be run from within a worktree"
         echo "Current path: $current_path"
+        echo "Expected under: $repo_dir"
         return 1
     end
 
