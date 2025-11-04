@@ -35,13 +35,18 @@ extract_rgba_floats() {
         return
     fi
 
-    local content=$(cat "$file")
+    local content
+    content=$(cat "$file")
 
     # Extract first occurrence of each component
-    local red=$(echo "$content" | grep -m1 -oP 'red:\s*\K[0-9.]+' || echo "0.0")
-    local green=$(echo "$content" | grep -m1 -oP 'green:\s*\K[0-9.]+' || echo "0.0")
-    local blue=$(echo "$content" | grep -m1 -oP 'blue:\s*\K[0-9.]+' || echo "0.0")
-    local alpha=$(echo "$content" | grep -m1 -oP 'alpha:\s*\K[0-9.]+' || echo "1.0")
+    local red
+    red=$(echo "$content" | grep -m1 -oP 'red:\s*\K[0-9.]+' || echo "0.0")
+    local green
+    green=$(echo "$content" | grep -m1 -oP 'green:\s*\K[0-9.]+' || echo "0.0")
+    local blue
+    blue=$(echo "$content" | grep -m1 -oP 'blue:\s*\K[0-9.]+' || echo "0.0")
+    local alpha
+    alpha=$(echo "$content" | grep -m1 -oP 'alpha:\s*\K[0-9.]+' || echo "1.0")
 
     echo "$red $green $blue $alpha"
 }
@@ -50,9 +55,12 @@ extract_rgba_floats() {
 # Input: r g b a (floats)
 # Output: r g b (integers)
 rgba_to_rgb() {
-    local r=$(awk "BEGIN {printf \"%.0f\", $1 * 255}")
-    local g=$(awk "BEGIN {printf \"%.0f\", $2 * 255}")
-    local b=$(awk "BEGIN {printf \"%.0f\", $3 * 255}")
+    local r
+    r=$(awk "BEGIN {printf \"%.0f\", $1 * 255}")
+    local g
+    g=$(awk "BEGIN {printf \"%.0f\", $2 * 255}")
+    local b
+    b=$(awk "BEGIN {printf \"%.0f\", $3 * 255}")
     echo "$r $g $b"
 }
 
@@ -144,19 +152,29 @@ rgb_to_cmyk() {
 # Input: "r g b a" as floats
 build_color_json() {
     local rgba_floats="$1"
+    local rf gf bf af
     read -r rf gf bf af <<< "$rgba_floats"
 
     # Convert to RGB integers
-    local rgb_ints=$(rgba_to_rgb $rf $gf $bf $af)
+    local rgb_ints
+    rgb_ints=$(rgba_to_rgb "$rf" "$gf" "$bf" "$af")
+    local r g b
     read -r r g b <<< "$rgb_ints"
 
     # Generate all formats
-    local hex=$(rgb_to_hex $r $g $b)
-    local hsl=$(rgb_to_hsl $r $g $b)
+    local hex
+    hex=$(rgb_to_hex "$r" "$g" "$b")
+    local hsl
+    hsl=$(rgb_to_hsl "$r" "$g" "$b")
+    local h s l
     read -r h s l <<< "$hsl"
-    local hsv=$(rgb_to_hsv $r $g $b)
+    local hsv
+    hsv=$(rgb_to_hsv "$r" "$g" "$b")
+    local hv sv vv
     read -r hv sv vv <<< "$hsv"
-    local cmyk=$(rgb_to_cmyk $r $g $b)
+    local cmyk
+    cmyk=$(rgb_to_cmyk "$r" "$g" "$b")
+    local c m y k
     read -r c m y k <<< "$cmyk"
 
     # Build JSON object
@@ -239,13 +257,20 @@ main() {
     fi
 
     # Extract colors from theme files
-    local accent=$(extract_rgba_floats "$theme_dir/accent")
-    local success=$(extract_rgba_floats "$theme_dir/success")
-    local warning=$(extract_rgba_floats "$theme_dir/warning")
-    local destructive=$(extract_rgba_floats "$theme_dir/destructive")
-    local background=$(extract_rgba_floats "$theme_dir/background")
-    local primary=$(extract_rgba_floats "$theme_dir/primary")
-    local secondary=$(extract_rgba_floats "$theme_dir/secondary")
+    local accent
+    accent=$(extract_rgba_floats "$theme_dir/accent")
+    local success
+    success=$(extract_rgba_floats "$theme_dir/success")
+    local warning
+    warning=$(extract_rgba_floats "$theme_dir/warning")
+    local destructive
+    destructive=$(extract_rgba_floats "$theme_dir/destructive")
+    local background
+    background=$(extract_rgba_floats "$theme_dir/background")
+    local primary
+    primary=$(extract_rgba_floats "$theme_dir/primary")
+    local secondary
+    secondary=$(extract_rgba_floats "$theme_dir/secondary")
 
     # Build metadata
     local theme_name="cosmic-${mode,,}"
