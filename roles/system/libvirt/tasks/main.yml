@@ -416,6 +416,44 @@
     - app_states['libvirt'] | default('present') == 'present'
     - libvirt_routed_networks | length > 0
 
+- name: Check if UFW is installed
+  ansible.builtin.stat:
+    path: /etc/ufw/before.rules
+  register: ufw_before_rules
+  become: true
+  tags: [libvirt]
+  when: app_states['libvirt'] | default('present') == 'present'
+
+- name: Add NAT table section to UFW before.rules for persistent NAT
+  ansible.builtin.blockinfile:
+    path: /etc/ufw/before.rules
+    insertbefore: "^\\*filter"
+    marker: "# {mark} ANSIBLE MANAGED BLOCK - NAT for libvirt routed networks"
+    block: |
+      # NAT table rules for libvirt routed networks
+      *nat
+      :POSTROUTING ACCEPT [0:0]
+
+      # Masquerade traffic from routed networks to Internet
+      {% for network in libvirt_routed_networks %}
+      -A POSTROUTING -s {{ network.subnet }} -o {{ ansible_default_ipv4.interface }} -j MASQUERADE -m comment --comment "NAT for {{ network.name }}"
+      {% endfor %}
+
+      # don't delete the 'COMMIT' line or these nat rules won't be processed
+      COMMIT
+
+    backup: true
+    owner: root
+    group: root
+    mode: '0640'
+  become: true
+  notify: reload ufw
+  tags: [libvirt]
+  when:
+    - app_states['libvirt'] | default('present') == 'present'
+    - ufw_before_rules.stat.exists
+    - libvirt_routed_networks | length > 0
+
 - name: Get host primary IP address
   ansible.builtin.set_fact:
     host_primary_ip: "{{ ansible_default_ipv4.address }}"
@@ -433,6 +471,11 @@
 
       Host: {{ inventory_hostname }}
       Host IP: {{ host_primary_ip }}
+
+      NETWORK BEHAVIOR:
+      - LAN devices can directly access VMs (no NAT, pure routing)
+      - VM Internet traffic is NAT'd to host IP (workaround for router limitations)
+      - Static routes required on upstream router for LAN→VM communication
 
       Add these static routes to your upstream router:
 

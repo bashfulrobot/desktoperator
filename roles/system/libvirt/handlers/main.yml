@@ -16,3 +16,8 @@
     name: libvirtd
     state: restarted
   become: true
+
+- name: reload ufw
+  ansible.builtin.command:
+    cmd: ufw reload
+  become: true
