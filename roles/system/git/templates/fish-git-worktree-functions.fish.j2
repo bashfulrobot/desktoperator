@@ -22,7 +22,7 @@ function _gtr_get_worktree_path --description "Get the full path for a worktree"
 
     # Get the main repository name from the common git directory
     # This works correctly whether we're in the main repo or a worktree
-    set -l common_git_dir (git rev-parse --git-common-dir)
+    set -l common_git_dir (realpath (git rev-parse --git-common-dir))
     set -l main_repo_path (dirname $common_git_dir)
     set -l repo_name (basename $main_repo_path)
 
@@ -38,7 +38,7 @@ function _gtr_get_repo_worktree_dir --description "Get the worktree directory fo
 
     # Get the main repository name from the common git directory
     # This works correctly whether we're in the main repo or a worktree
-    set -l common_git_dir (git rev-parse --git-common-dir)
+    set -l common_git_dir (realpath (git rev-parse --git-common-dir))
     set -l main_repo_path (dirname $common_git_dir)
     set -l repo_name (basename $main_repo_path)
     echo "$GIT_WORKTREE_BASE_DIR/$repo_name"
@@ -247,7 +247,7 @@ end
 function _gtr_finish --description "Complete workflow: commit, merge to main, cleanup from worktree"
     # Auto-detect current worktree
     set -l current_path (pwd)
-    set -l repo_dir (realpath (_gtr_get_repo_worktree_dir))
+    set -l repo_dir (_gtr_get_repo_worktree_dir)
 
     # Check if we're in a worktree subdirectory
     if not string match -q "$repo_dir/*" "$current_path"
