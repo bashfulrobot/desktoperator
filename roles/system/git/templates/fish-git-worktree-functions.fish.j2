@@ -20,8 +20,11 @@ function _gtr_get_worktree_path --description "Get the full path for a worktree"
         return 1
     end
 
-    # Get the repository name
-    set -l repo_name (basename (git rev-parse --show-toplevel))
+    # Get the main repository name from the common git directory
+    # This works correctly whether we're in the main repo or a worktree
+    set -l common_git_dir (git rev-parse --git-common-dir)
+    set -l main_repo_path (dirname $common_git_dir)
+    set -l repo_name (basename $main_repo_path)
 
     # Construct path: ~/dev/worktrees/<repo-name>/<worktree-name>
     echo "$GIT_WORKTREE_BASE_DIR/$repo_name/$name"
@@ -33,7 +36,11 @@ function _gtr_get_repo_worktree_dir --description "Get the worktree directory fo
         return 1
     end
 
-    set -l repo_name (basename (git rev-parse --show-toplevel))
+    # Get the main repository name from the common git directory
+    # This works correctly whether we're in the main repo or a worktree
+    set -l common_git_dir (git rev-parse --git-common-dir)
+    set -l main_repo_path (dirname $common_git_dir)
+    set -l repo_name (basename $main_repo_path)
     echo "$GIT_WORKTREE_BASE_DIR/$repo_name"
 end
 
