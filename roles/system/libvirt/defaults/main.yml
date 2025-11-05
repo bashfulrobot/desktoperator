@@ -10,6 +10,7 @@ libvirt_packages:
   - bridge-utils
   - cpu-checker
   - acl
+  - virtiofsd
 
 # Optional GUI tools (set to true to install)
 libvirt_install_gui_tools: false
