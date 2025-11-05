@@ -1,0 +1,52 @@
+---
+# Insomnia API client installation
+# The open-source, cross-platform API client for GraphQL, REST, WebSockets and gRPC
+
+- name: Install apt prerequisites for Insomnia
+  apt:
+    name:
+      - apt-transport-https
+      - ca-certificates
+      - gnupg
+    state: present
+  become: yes
+
+- name: Add Insomnia GPG key
+  apt_key:
+    url: https://packages.konghq.com/public/insomnia/gpg.474B9148D779222B.key
+    keyring: /usr/share/keyrings/kong-insomnia-archive-keyring.gpg
+    state: present
+  become: yes
+
+- name: Add Insomnia repository
+  apt_repository:
+    repo: "deb [arch=amd64 signed-by=/usr/share/keyrings/kong-insomnia-archive-keyring.gpg] https://packages.konghq.com/public/insomnia/deb/ubuntu {{ ansible_distribution_release }} main"
+    filename: kong-insomnia
+    state: "{{ app_states['insomnia'] | default('present') }}"
+  become: yes
+  notify: Update apt cache
+
+- name: Flush handlers to ensure apt cache is updated
+  meta: flush_handlers
+
+- name: Install Insomnia
+  apt:
+    name: insomnia
+    state: "{{ app_states['insomnia'] | default('present') }}"
+    update_cache: yes
+  become: yes
+
+- name: Remove Insomnia repository when absent
+  apt_repository:
+    repo: "deb [arch=amd64 signed-by=/usr/share/keyrings/kong-insomnia-archive-keyring.gpg] https://packages.konghq.com/public/insomnia/deb/ubuntu {{ ansible_distribution_release }} main"
+    filename: kong-insomnia
+    state: absent
+  become: yes
+  when: app_states['insomnia'] | default('present') == 'absent'
+
+- name: Remove Insomnia GPG key when absent
+  file:
+    path: /usr/share/keyrings/kong-insomnia-archive-keyring.gpg
+    state: absent
+  become: yes
+  when: app_states['insomnia'] | default('present') == 'absent'

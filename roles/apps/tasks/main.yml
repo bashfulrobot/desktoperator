@@ -76,6 +76,11 @@
     name: apps/insync
   tags: [insync]
 
+- name: Include Insomnia
+  import_role:
+    name: apps/insomnia
+  tags: [insomnia]
+
 - name: Include Gemini CLI
   import_role:
     name: apps/gemini-cli
