@@ -1,6 +1,11 @@
 ---
 # Insomnia API client installation
 # The open-source, cross-platform API client for GraphQL, REST, WebSockets and gRPC
+# Note: Using focal repository as newer Ubuntu releases aren't supported yet
+
+- name: Set Insomnia repository codename
+  set_fact:
+    insomnia_codename: "focal"
 
 - name: Install apt prerequisites for Insomnia
   apt:
@@ -20,7 +25,7 @@
 
 - name: Add Insomnia repository
   apt_repository:
-    repo: "deb [arch=amd64 signed-by=/usr/share/keyrings/kong-insomnia-archive-keyring.gpg] https://packages.konghq.com/public/insomnia/deb/ubuntu {{ ansible_distribution_release }} main"
+    repo: "deb [arch=amd64 signed-by=/usr/share/keyrings/kong-insomnia-archive-keyring.gpg] https://packages.konghq.com/public/insomnia/deb/ubuntu {{ insomnia_codename }} main"
     filename: kong-insomnia
     state: "{{ app_states['insomnia'] | default('present') }}"
   become: yes
@@ -38,7 +43,7 @@
 
 - name: Remove Insomnia repository when absent
   apt_repository:
-    repo: "deb [arch=amd64 signed-by=/usr/share/keyrings/kong-insomnia-archive-keyring.gpg] https://packages.konghq.com/public/insomnia/deb/ubuntu {{ ansible_distribution_release }} main"
+    repo: "deb [arch=amd64 signed-by=/usr/share/keyrings/kong-insomnia-archive-keyring.gpg] https://packages.konghq.com/public/insomnia/deb/ubuntu {{ insomnia_codename }} main"
     filename: kong-insomnia
     state: absent
   become: yes
