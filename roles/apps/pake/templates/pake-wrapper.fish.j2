@@ -1,174 +1,238 @@
 # Pake Docker wrapper functions
 # Contains:
-#   - _generate_pake_icons: (Internal) Helper to fetch and process icons.
-#   - _create_ansible_role_scaffolding: (Internal) Helper to create the Ansible role structure.
-#   - create-web-app: Main function to build a new Pake app and role.
-#   - regenerate-pake-icons: Main function to regenerate icons for an existing role.
+#   - generate-icon-set: Download/process icons, generate multi-sized variants, create role structure
+#   - create-web-app: Build Pake desktop app using existing icons, complete Ansible scaffolding
+#   - _create_ansible_tasks: (Internal) Generate Ansible tasks and handlers
 
 # ------------------------------------------------------------------------------
-# INTERNAL HELPER: _generate_pake_icons
+# PUBLIC HELPER: generate-icon-set
 # ------------------------------------------------------------------------------
-function _generate_pake_icons --description 'Internal helper to fetch, process, and generate icons'
-    set -l url $argv[1]
-    set -l name $argv[2]
-    set -l custom_domain $argv[3]
-    set -l output_dir $argv[4]
-    set -l add_background $argv[5]
-    set -l user_icon_path $argv[6]
-
-    set -l master_icon ""
-    set -l pake_icon_path ""
-
-    if test -n "$user_icon_path"
-        # Clean the input path of any surrounding quotes
-        set -l cleaned_icon_path (string trim -c '\'"' -- $user_icon_path)
-
-        # Handle user-provided icon, which can be a local path or a URL
-        if string match -q "http*://" "$cleaned_icon_path"
-            echo "Downloading user-provided icon from URL: $cleaned_icon_path"
-            set -l temp_download "$output_dir/user-icon-download"
-            if curl -L -f -s -o "$temp_download" "$cleaned_icon_path"
-                if test (stat -f%z "$temp_download" 2>/dev/null || stat -c%s "$temp_download" 2>/dev/null) -gt 0
-                    echo "✓ Icon downloaded successfully."
-                    set master_icon "$output_dir/master-icon.png"
-                    # Process the downloaded file
-                    convert "$temp_download" -alpha on -define png:color-type=6 PNG32:"$master_icon"
-                else
-                    echo "✗ Error: Downloaded icon file is empty."
-                    return 1
-                end
-            else
-                echo "✗ Error: Failed to download icon from $cleaned_icon_path"
-                return 1
-            end
-        else
-            # Assume it's a local file path
-            echo "Using user-provided local icon: $cleaned_icon_path"
-            if test -f "$cleaned_icon_path"
-                set master_icon "$output_dir/master-icon.png"
-                convert "$cleaned_icon_path" -alpha on -define png:color-type=6 PNG32:"$master_icon"
-            else
-                echo "✗ Error: Icon file not found at $cleaned_icon_path"
-                return 1
-            end
-        end
-    else
-        # If no user icon, proceed with Brandfetch logic
-        echo "No custom icon provided, attempting to fetch logo from Brandfetch..."
-        set -l domain ""
-        if test -n "$custom_domain"
-            set domain (echo "$custom_domain" | sed -E 's|^https?://||' | sed -E 's|/.*$||' | sed -E 's|^www\\.||')
-        else
-            set -l full_domain (echo "$url" | sed -E 's|^https?://||' | sed -E 's|/.*$||' | sed -E 's|^www\\.||')
-            set domain (echo "$full_domain" | awk -F. '{ if (NF == 2) { print $0 } else if (NF > 2 && ($(NF-1) == "co" || $(NF-1) == "com" || $(NF-1) == "gov" || $(NF-1) == "ac")) { print $(NF-2)"."$(NF-1)"."$NF } else { print $(NF-1)"."$NF } }')
-        end
-        echo "Using domain: $domain"
-
-        if test -n "$domain"
-            echo "Querying Brandfetch API..."
-            set -l brand_json "$output_dir/brandfetch.json"
-            if curl -L -f -s -H "Authorization: Bearer $BRANDFETCH_API_KEY" "https://api.brandfetch.io/v2/brands/$domain" -o "$brand_json" 2>/dev/null
-                set -l logo_url (jq -r '.logos[] | select(.type == "icon") | .formats[] | select(.format == "svg") | .src' "$brand_json" 2>/dev/null | head -n 1)
-                if test -z "$logo_url"; or test "$logo_url" = "null"; set logo_url (jq -r '.logos[] | select(.type == "logo") | .formats[] | select(.format == "svg") | .src' "$brand_json" 2>/dev/null | head -n 1); end
-                if test -z "$logo_url"; or test "$logo_url" = "null"; set logo_url (jq -r '.logos[] as $logo | $logo.formats[] | select(.format == "png") | { src, width: (.width // 0), height: (.height // 0), type: $logo.type, theme: (.theme // "none"), type_score: (if $logo.type == "icon" then 1000 else 0 end), theme_score: (if .theme == "light" then 100 elif .theme == "dark" then 50 else 75 end), size_score: ( if ([.width // 0, .height // 0] | max) >= 800 then 10 elif ([.width // 0, .height // 0] | max) >= 512 then 8 elif ([.width // 0, .height // 0] | max) >= 256 then 5 else 1 end ), area: ((.width // 0) * (.height // 0)) } | select(.area > 0) | . + {total_score: (.type_score + .theme_score + .size_score)}' "$brand_json" 2>/dev/null | jq -sr 'sort_by(-.total_score, -.area) | .[0].src' 2>/dev/null); end
-                if test -z "$logo_url"; or test "$logo_url" = "null"; set logo_url (jq -r '.logos[].formats[] | select(.format == "jpeg" or .format == "jpg" or .format == "webp") | .src' "$brand_json" 2>/dev/null | head -n 1); end
-
-                if test -n "$logo_url"
-                    echo "Logo URL: $logo_url"
-                    set -l temp_download "$output_dir/logo-download"
-                    if curl -L -f -s -o "$temp_download" "$logo_url" 2>/dev/null
-                        if test (stat -f%z "$temp_download" 2>/dev/null || stat -c%s "$temp_download" 2>/dev/null) -gt 0
-                            echo "✓ Logo downloaded successfully."
-                            set -l file_type (file -b --mime-type "$temp_download" 2>/dev/null)
-                            set master_icon "$output_dir/master-icon.png"
-                            echo "Creating high-quality master PNG icon..."
-                            if string match -q "image/svg+xml" "$file_type"
-                                convert -background none -density 1228.8 -resize 1024x1024 "$temp_download" -alpha on -define png:color-type=6 PNG32:"$master_icon"
-                            else
-                                convert "$temp_download" -alpha on -define png:color-type=6 PNG32:"$master_icon"
-                            end
-                        end
-                    end
-                end
-            end
-        end
-    end
-
-    if test -z "$master_icon" -o ! -f "$master_icon"
-        echo "✗ Could not find or fetch an icon. Pake will use its default."
+# Downloads/processes icon and generates multi-sized variants
+# Usage: generate-icon-set <icon_source> <name> [--output <path>] [--add-background]
+#
+# Arguments:
+#   icon_source  - URL or local file path to icon (supports SVG, PNG, JPG)
+#   name         - App name (used for output filenames)
+#   --output     - Custom output directory (defaults to Ansible repo)
+#   --add-background - Add gray rounded background
+#
+# Output locations:
+#   Default: ~/dev/iac/desktoperator/roles/apps/{name}-pake/files/
+#     Files: pake-{name}-icon.png, pake-{name}-icon-16.png, ...
+#   With --output ~/Downloads: ~/Downloads/{name}/
+#     Files: {name}.png, {name}-16.png, {name}-32.png, ...
+#
+# Examples:
+#   generate-icon-set 'https://github.../logo.svg' github
+#   generate-icon-set './logo.png' myapp --output ~/Downloads
+#   generate-icon-set 'https://...' app --add-background
+function generate-icon-set --description 'Download/process icon and generate multi-sized variants'
+    # Parse arguments
+    if test (count $argv) -lt 2
+        echo "Usage: generate-icon-set <icon_source> <name> [--output <path>] [--add-background]"
+        echo ""
+        echo "Arguments:"
+        echo "  icon_source  - URL or local file path (supports SVG, PNG, JPG)"
+        echo "  name         - App name for output filenames"
+        echo "  --output     - Custom output directory (default: Ansible repo)"
+        echo "  --add-background - Add gray rounded background"
+        echo ""
+        echo "Examples:"
+        echo "  generate-icon-set 'https://github.../logo.svg' github"
+        echo "  generate-icon-set './my-icon.png' myapp --output ~/Downloads"
+        echo "  generate-icon-set 'https://...' app --add-background"
+        echo ""
+        echo "Output (default): ~/dev/iac/desktoperator/roles/apps/<name>-pake/files/"
+        echo "Output (custom):  <output-path>/<name>/"
         return 1
     end
 
-    set -l source_icon $master_icon
-    set -l resize_mode "aspect"
-    set pake_icon_path "/output/master-icon.png"
+    set -l icon_source $argv[1]
+    set -l name $argv[2]
+    set -l custom_output ""
+    set -l add_background 0
 
-    if test "$add_background" -eq 1
-        echo "Creating themed app icon with neutral background..."
-        set -l processed_icon "$output_dir/processed-icon.png"
-        set -l bg_color "#6B7280"
-        set -l canvas_size 1024
-        set -l logo_padded_size (math $canvas_size \* 0.85)
-        convert -size "$canvas_size"x"$canvas_size" xc:none -draw "roundrectangle 0,0,$canvas_size,$canvas_size,100,100" "$output_dir/mask.png"
-        convert -size "$canvas_size"x"$canvas_size" xc:"$bg_color" "$output_dir/mask.png" -compose copy-opacity -composite "$output_dir/background.png"
-        convert "$output_dir/background.png" \( "$master_icon" -filter Lanczos -resize \"$logo_padded_size\"x\"$logo_padded_size\" \) -gravity center -compose over -composite -define png:color-type=6 PNG32:"$processed_icon"
-        if test $status -eq 0 -a -f "$processed_icon"
-            echo "✓ Created themed app icon."
-            set source_icon $processed_icon
-            set resize_mode "exact"
-            set pake_icon_path "/output/processed-icon.png"
-        else
-            echo "✗ Failed to create themed icon. Using original logo."
+    # Parse optional flags
+    set -l i 3
+    while test $i -le (count $argv)
+        switch $argv[$i]
+            case '--output'
+                set i (math $i + 1)
+                if test $i -le (count $argv)
+                    set custom_output $argv[$i]
+                end
+            case '--add-background'
+                set add_background 1
         end
+        set i (math $i + 1)
     end
 
-    set -l icon_sizes 16 32 48 64 128 256 512 800
-    echo "Generating high-quality multi-size icons..."
-    for size in $icon_sizes
-        set -l scaled_icon "$output_dir/icon-$size.png"
-        if test "$resize_mode" = "exact"
-            convert "$source_icon" -filter Lanczos -resize "$size"x"$size"! -strip PNG32:"$scaled_icon"
-        else
-            convert "$source_icon" -filter Lanczos -resize "$size"x"$size" -background none -gravity center -extent "$size"x"$size" -strip PNG32:"$scaled_icon"
-        end
+    # Determine output directory and filename patterns
+    set -l output_dir ""
+    set -l master_filename ""
+    set -l size_filename_pattern ""
+    set -l role_path ""
 
-        if test $status -ne 0
-            echo "✗ Error: ImageMagick failed to create icon for size $size."
+    if test -n "$custom_output"
+        # Custom output (e.g., Downloads): use simple names
+        set output_dir "$custom_output/$name"
+        set master_filename "$name.png"
+        set size_filename_pattern "$name"
+    else
+        # Default (Ansible repo): use pake-{name}-icon pattern and create full structure
+        set role_path "$HOME/dev/iac/desktoperator/roles/apps/$name-pake"
+        set output_dir "$role_path/files"
+        set master_filename "pake-$name-icon.png"
+        set size_filename_pattern "pake-$name-icon"
+
+        # Create full Ansible role directory structure
+        echo "Creating Ansible role structure..."
+        mkdir -p "$role_path"/{files,tasks,handlers}
+        echo "✓ Created role directories: files/, tasks/, handlers/"
+    end
+
+    # Create output directory (also works for custom paths)
+    mkdir -p "$output_dir"
+    set -l temp_dir (mktemp -d)
+
+    echo "Generating icon set for '$name'..."
+    echo "Output directory: $output_dir"
+
+    # Download or read icon source
+    set -l master_icon ""
+    # Clean the input: remove quotes, newlines, and trim whitespace
+    set -l icon_source_cleaned (string replace -a '\n' '' -- $icon_source | string trim -c '\'"' | string trim)
+
+    if string match -q "http*://" "$icon_source_cleaned"
+        # Download from URL
+        echo "Downloading icon from URL..."
+        set -l temp_download "$temp_dir/downloaded-icon"
+        if curl -L -f -s -S --max-redirs 5 \
+            -A "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36" \
+            -o "$temp_download" "$icon_source_cleaned"
+            if test (stat -f%z "$temp_download" 2>/dev/null || stat -c%s "$temp_download" 2>/dev/null) -gt 0
+                echo "✓ Icon downloaded successfully"
+                set master_icon "$temp_download"
+            else
+                echo "✗ Error: Downloaded icon file is empty"
+                rm -rf "$temp_dir"
+                return 1
+            end
+        else
+            echo "✗ Error: Failed to download icon from $icon_source_cleaned"
+            rm -rf "$temp_dir"
+            return 1
+        end
+    else
+        # Local file path
+        if test -f "$icon_source_cleaned"
+            echo "Using local icon file: $icon_source_cleaned"
+            set master_icon "$icon_source_cleaned"
+        else
+            echo "✗ Error: Icon file not found at $icon_source_cleaned"
+            rm -rf "$temp_dir"
             return 1
         end
     end
 
-    echo $pake_icon_path
+    # Convert to high-quality PNG
+    set -l file_type (file -b --mime-type "$master_icon" 2>/dev/null)
+    set -l master_png "$temp_dir/master.png"
+    echo "Converting to PNG..."
+
+    if string match -q "image/svg+xml" "$file_type"
+        # SVG: render at high resolution using rsvg-convert (more robust than ImageMagick)
+        rsvg-convert -w 1024 -h 1024 -f png "$master_icon" -o "$master_png"
+
+        # OLD METHOD (ImageMagick - commented for rollback):
+        # convert -background none -density 1228.8 -resize 1024x1024 "$master_icon" -alpha on -define png:color-type=6 PNG32:"$master_png"
+    else
+        # Raster format (PNG, JPG, etc.) - still using ImageMagick
+        convert "$master_icon" -alpha on -define png:color-type=6 PNG32:"$master_png"
+    end
+
+    if test $status -ne 0 -o ! -f "$master_png"
+        echo "✗ Error: Failed to convert icon to PNG"
+        rm -rf "$temp_dir"
+        return 1
+    end
+
+    echo "✓ Icon converted to PNG"
+
+    # Apply background if requested
+    set -l source_icon "$master_png"
+    set -l resize_mode "aspect"
+
+    if test "$add_background" -eq 1
+        echo "Adding gray rounded background..."
+        set -l processed_icon "$temp_dir/with-background.png"
+        set -l bg_color "#636363"
+        set -l canvas_size 1024
+        set -l logo_padded_size (math $canvas_size \* 0.85)
+
+        convert -size "$canvas_size"x"$canvas_size" xc:none \
+            -draw "roundrectangle 0,0,$canvas_size,$canvas_size,100,100" "$temp_dir/mask.png"
+        convert -size "$canvas_size"x"$canvas_size" xc:"$bg_color" "$temp_dir/mask.png" \
+            -compose copy-opacity -composite "$temp_dir/background.png"
+        convert "$temp_dir/background.png" \
+            \( "$master_png" -filter Lanczos -resize "$logo_padded_size"x"$logo_padded_size" \) \
+            -gravity center -compose over -composite \
+            -define png:color-type=6 PNG32:"$processed_icon"
+
+        if test $status -eq 0 -a -f "$processed_icon"
+            echo "✓ Background added"
+            set source_icon "$processed_icon"
+            set resize_mode "exact"
+        else
+            echo "✗ Warning: Failed to add background, using original"
+        end
+    end
+
+    # Save master icon with proper naming
+    cp "$source_icon" "$output_dir/$master_filename"
+    echo "✓ Saved master icon: $master_filename"
+
+    # Generate multi-sized icons
+    set -l icon_sizes 16 32 48 64 128 256 512 800
+    echo "Generating multi-sized icons..."
+
+    for size in $icon_sizes
+        set -l sized_icon "$output_dir/$size_filename_pattern-$size.png"
+
+        if test "$resize_mode" = "exact"
+            convert "$source_icon" -filter Lanczos -resize "$size"x"$size"! \
+                -strip PNG32:"$sized_icon"
+        else
+            convert "$source_icon" -filter Lanczos -resize "$size"x"$size" \
+                -background none -gravity center -extent "$size"x"$size" \
+                -strip PNG32:"$sized_icon"
+        end
+
+        if test $status -ne 0
+            echo "✗ Error: Failed to create "$size"x"$size" icon"
+            rm -rf "$temp_dir"
+            return 1
+        end
+        echo "  ✓ "$size"x"$size
+    end
+
+    # Cleanup
+    rm -rf "$temp_dir"
+
+    echo ""
+    echo "✅ Icon set generated successfully!"
+    echo "   Master: $output_dir/$master_filename"
+    echo "   Sizes: 16, 32, 48, 64, 128, 256, 512, 800"
     return 0
 end
 
 # ------------------------------------------------------------------------------
-# INTERNAL HELPER: _create_ansible_role_scaffolding
+# INTERNAL HELPER: _create_ansible_tasks
 # ------------------------------------------------------------------------------
-function _create_ansible_role_scaffolding --description 'Internal helper to create Ansible role structure'
+function _create_ansible_tasks --description 'Internal helper to generate Ansible tasks and handlers'
     set -l name $argv[1]
-    set -l output_dir $argv[2]
-    set -l role_path $argv[3]
+    set -l role_path $argv[2]
     set -l app_state_key (echo "$name" | tr '-' '_')
-
-    echo "Creating Ansible role structure at $role_path..."
-    mkdir -p "$role_path"/{files,tasks,handlers}
-
-    set -l deb_file (find "$output_dir" -name "*.deb" -type f | head -n 1)
-    if test -z "$deb_file"
-        echo "✗ Error: Could not find built .deb package in $output_dir"
-        return 1
-    end
-    cp "$deb_file" "$role_path/files/$name.deb"
-    echo "✓ Copied .deb package."
-
-    set -l icon_sizes 16 32 48 64 128 256 512 800
-    for size in $icon_sizes
-        if test -f "$output_dir/icon-$size.png"
-            cp "$output_dir/icon-$size.png" "$role_path/files/pake-$name-icon-$size.png"
-        end
-    end
-    echo "✓ Copied all generated icons."
 
     set -l binary_name (echo "$name" | tr -d '-')
     set desktop_content "[Desktop Entry]\nCategories=\nComment=🤱🏻 Turn any webpage into a desktop app with Rust.\nExec=pake-$binary_name\nStartupWMClass=pake-$name\nIcon=pake-$name\nName=$name\nTerminal=false\nType=Application"
@@ -191,67 +255,87 @@ end
 # ------------------------------------------------------------------------------
 # MAIN FUNCTION: create-web-app
 # ------------------------------------------------------------------------------
-function create-web-app --description 'Build desktop apps from websites using Pake via Docker'
-    if test (count $argv) -eq 1; and test "$argv[1]" = "--help" -o "$argv[1]" = "-h"; echo "create-web-app - Docs in file"; return 0; end
-
-    set -l url $argv[1]
-    set -l name $argv[2]
-    set -l custom_domain ""
-    set -l extra_args_start 3
-    if test (count $argv) -ge 3
-        if not string match -q -- '--*' $argv[3]
-            set custom_domain $argv[3]
-            set extra_args_start 4
-        end
-    end
-    set -l extra_args $argv[$extra_args_start..-1]
-
-    set -l add_background 0
-    set -l user_icon_path ""
-    set -l pake_run_args
-    set -l i 1
-    while test $i -le (count $extra_args)
-        set -l arg $extra_args[$i]
-        switch $arg
-            case '--add-background'
-                set add_background 1
-            case '--icon'
-                set i (math $i + 1)
-                set user_icon_path $extra_args[$i]
-            case '*'
-                set pake_run_args $pake_run_args $arg
-        end
-        set i (math $i + 1)
-    end
-
-    if not command -v docker &>/dev/null; or not command -v jq &>/dev/null; or not command -v convert &>/dev/null
-        echo "Error: docker, jq, and imagemagick are required."
+function create-web-app --description 'Build desktop apps from websites using Pake via Docker (no icon generation)'
+    # Validate arguments
+    if test (count $argv) -lt 2
+        echo "Usage: create-web-app <app_url> <name> [pake-options...]"
+        echo ""
+        echo "Examples:"
+        echo "  create-web-app https://github.com github"
+        echo "  create-web-app https://mail.google.com gmail --width 1600 --height 1000"
         return 1
     end
 
-    set -l output_dir (mktemp -d)
-    set -l repo_path ~/dev/iac/desktoperator
-    set -l role_path "$repo_path/roles/apps/$name-pake"
-    echo "Building $name... Temp directory: $output_dir"
+    set -l url $argv[1]
+    set -l name $argv[2]
+    set -l pake_options $argv[3..-1]
 
-    set -l pake_icon_path (_generate_pake_icons $url $name $custom_domain $output_dir $add_background $user_icon_path)
-    set -l icon_result $status
-
-    set -l pake_args $url --name $name --targets deb $pake_run_args
-    if test $icon_result -eq 0
-        set pake_args $pake_args --icon $pake_icon_path
+    # Check dependencies
+    if not command -v docker &>/dev/null
+        echo "✗ Error: docker is required"
+        return 1
     end
 
+    set -l repo_path ~/dev/iac/desktoperator
+    set -l role_path "$repo_path/roles/apps/$name-pake"
+
+    # Check if icons exist (must be generated first!)
+    if not test -d "$role_path/files"
+        echo "✗ Error: Role directory not found at $role_path/files"
+        echo ""
+        echo "Icons must be generated FIRST. Run:"
+        echo "  generate-icon-set <icon_url> $name"
+        return 1
+    end
+
+    set -l master_icon "$role_path/files/pake-$name-icon.png"
+    if not test -f "$master_icon"
+        echo "✗ Error: Master icon not found at $master_icon"
+        echo ""
+        echo "Icons must be generated FIRST. Run:"
+        echo "  generate-icon-set <icon_url> $name"
+        return 1
+    end
+
+    echo "Building Pake app: $name"
+    echo "URL: $url"
+    echo "Using icon: $master_icon"
+
+    # Create temp directory and copy icon for Pake build
+    set -l output_dir (mktemp -d)
+    cp "$master_icon" "$output_dir/icon.png"
+
+    # Build .deb with Pake using our icon
+    set -l pake_args $url --name $name --targets deb --icon /output/icon.png $pake_options
     set -l docker_output "$output_dir/docker-build.log"
-    docker run --rm --privileged --device /dev/fuse --security-opt apparmor=unconfined -e NO_STRIP=1 -v "$output_dir":/output ghcr.io/tw93/pake $pake_args 2>&1 | tee "$docker_output"
+
+    echo ""
+    echo "Running Pake Docker build..."
+    docker run --rm --privileged --device /dev/fuse --security-opt apparmor=unconfined \
+        -e NO_STRIP=1 -v "$output_dir":/output \
+        ghcr.io/tw93/pake $pake_args 2>&1 | tee "$docker_output"
+
     set -l pake_result $status
 
     if test $pake_result -eq 0
-        _create_ansible_role_scaffolding $name $output_dir $role_path
+        # Copy .deb to role files/
+        set -l deb_file (find "$output_dir" -name "*.deb" -type f | head -n 1)
+        if test -z "$deb_file"
+            echo "✗ Error: Could not find built .deb package"
+            rm -rf "$output_dir"
+            return 1
+        end
+        cp "$deb_file" "$role_path/files/$name.deb"
+        echo "✓ Copied .deb package to role"
+
+        # Generate Ansible tasks and handlers
+        _create_ansible_tasks $name $role_path
         if test $status -eq 0
             echo ""
             echo "✅ Successfully created Pake app and Ansible role for '$name'."
-            echo "To enable it, add '$name: present' to your app_states config and include the role."
+            echo "   Role: $role_path"
+            echo ""
+            echo "Next step: Deploy with ansible-playbook site.yml --tags $name"
         end
     else
         echo "✗ Pake build failed. See log for details: $docker_output"
@@ -261,89 +345,5 @@ function create-web-app --description 'Build desktop apps from websites using Pa
     return $pake_result
 end
 
-# ------------------------------------------------------------------------------
-# MAIN FUNCTION: regenerate-pake-icons
-# ------------------------------------------------------------------------------
-function regenerate-pake-icons --description 'Regenerate icons for an existing Pake Ansible role'
-    if test (count $argv) -eq 1; and test "$argv[1]" = "--help" -o "$argv[1]" = "-h"; echo "regenerate-pake-icons - Docs in file"; return 0; end
-
-    set -l url $argv[1]
-    set -l name $argv[2]
-    set -l custom_domain ""
-    set -l extra_args_start 3
-    if test (count $argv) -ge 3
-        if not string match -q -- '--*' $argv[3]
-            set custom_domain $argv[3]
-            set extra_args_start 4
-        end
-    end
-    set -l extra_args $argv[$extra_args_start..-1]
-
-    set -l add_background 0
-    set -l user_icon_path ""
-    set -l i 1
-    while test $i -le (count $extra_args)
-        set -l arg $extra_args[$i]
-        switch $arg
-            case '--add-background'
-                set add_background 1
-            case '--icon'
-                set i (math $i + 1)
-                set user_icon_path $extra_args[$i]
-        end
-        set i (math $i + 1)
-    end
-
-    if not command -v jq &>/dev/null; or not command -v convert &>/dev/null
-        echo "Error: jq and imagemagick are required."
-        return 1
-    end
-
-    set -l output_dir (mktemp -d)
-    set -l repo_path ~/dev/iac/desktoperator
-    set -l role_path "$repo_path/roles/apps/$name-pake"
-
-    if not test -d "$role_path/files"
-        echo "✗ Error: Role directory not found at $role_path/files"
-        rm -rf "$output_dir"
-        return 1
-    end
-
-    echo "Regenerating icons for '$name' in $role_path..."
-
-    _generate_pake_icons $url $name $custom_domain $output_dir $add_background $user_icon_path
-    if test $status -ne 0
-        echo "✗ Icon generation failed. Aborting."
-        rm -rf "$output_dir"
-        return 1
-    end
-
-    echo "Copying new icons to role..."
-    set -l icon_sizes 16 32 48 64 128 256 512 800
-    set -l copied_count 0
-    for size in $icon_sizes
-        set -l source_file "$output_dir/icon-$size.png"
-        if test -f "$source_file"
-            cp "$source_file" "$role_path/files/pake-$name-icon-$size.png"
-            echo "  ✓ Replaced $size x $size icon"
-            set copied_count (math $copied_count + 1)
-        else
-            echo "  ✗ Warning: Could not find generated icon for size $size."
-        end
-    end
-
-    if test $copied_count -eq 0
-        echo ""
-        echo "✗ Error: No icons were generated or copied. The icon processing step likely failed."
-        echo "Contents of temporary directory ($output_dir):"
-        ls -l "$output_dir"
-        rm -rf "$output_dir"
-        return 1
-    end
-
-    rm -rf "$output_dir"
-    echo ""
-    echo "✅ Successfully regenerated and replaced icons for '$name'."
-    echo "Run ansible-playbook with the '$name' tag to deploy the new icons."
-    return 0
-end
+# Note: regenerate-pake-icons function has been removed.
+# Use generate-icon-set directly - it outputs to the Ansible role by default.

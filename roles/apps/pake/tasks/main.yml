@@ -2,8 +2,8 @@
 # Pake CLI Docker wrapper tasks
 # Turns webpages into desktop apps using Rust and Tauri via Docker
 # Dependencies: Docker (installed via docker role), FUSE (for AppImage builds),
-#              ImageMagick (for RGBA icon conversion), jq (for JSON parsing),
-#              curl (for Brandfetch API logo fetching)
+#              ImageMagick (for raster icon conversion), librsvg2-bin (for SVG conversion),
+#              jq (for JSON parsing), curl (for downloading icons)
 
 - name: Check if Docker is available
   command: docker --version
@@ -24,6 +24,7 @@
     name:
       - jq
       - imagemagick
+      - librsvg2-bin
       - curl
     state: present
   become: yes
