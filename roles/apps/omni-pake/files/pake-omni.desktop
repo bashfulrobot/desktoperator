@@ -1,0 +1,9 @@
+[Desktop Entry]
+Categories=
+Comment=🤱🏻 Turn any webpage into a desktop app with Rust.
+Exec=pake-omni
+StartupWMClass=pake-omni
+Icon=pake-omni
+Name=omni
+Terminal=false
+Type=Application
