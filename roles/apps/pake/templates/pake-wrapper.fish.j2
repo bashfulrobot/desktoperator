@@ -141,18 +141,21 @@ function generate-icon-set --description 'Download/process icon and generate mul
     echo "Converting to PNG..."
 
     if string match -q "image/svg+xml" "$file_type"
-        # SVG: render at high resolution using rsvg-convert (more robust than ImageMagick)
-        rsvg-convert -w 1024 -h 1024 -f png "$master_icon" -o "$master_png"
+        # SVG: Try rsvg-convert first (more robust for well-formed SVGs)
+        rsvg-convert -w 1024 -h 1024 -f png "$master_icon" -o "$master_png" 2>/dev/null
 
-        # OLD METHOD (ImageMagick - commented for rollback):
-        # convert -background none -density 1228.8 -resize 1024x1024 "$master_icon" -alpha on -define png:color-type=6 PNG32:"$master_png"
+        # If rsvg-convert fails, fall back to ImageMagick (more forgiving with malformed SVGs)
+        if test $status -ne 0 -o ! -f "$master_png"
+            echo "  ⚠ rsvg-convert failed, trying ImageMagick fallback..."
+            convert -background none -density 1228.8 -resize 1024x1024 "$master_icon" -alpha on -define png:color-type=6 PNG32:"$master_png" 2>/dev/null
+        end
     else
-        # Raster format (PNG, JPG, etc.) - still using ImageMagick
+        # Raster format (PNG, JPG, etc.) - use ImageMagick
         convert "$master_icon" -alpha on -define png:color-type=6 PNG32:"$master_png"
     end
 
     if test $status -ne 0 -o ! -f "$master_png"
-        echo "✗ Error: Failed to convert icon to PNG"
+        echo "✗ Error: Failed to convert icon to PNG (tried all available methods)"
         rm -rf "$temp_dir"
         return 1
     end
