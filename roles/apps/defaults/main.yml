@@ -11,6 +11,7 @@
 app_states:
   # Explicitly absent apps
   vivaldi: absent
+  asana: absent
 
   # Explicitly present apps with specific requirements
   1password: present
@@ -50,7 +51,6 @@ app_states:
   oq: present
   pake: present
   github: present
-  asana: present
   avanti: present
   sfdc: present
   salesforce: present  # alias for sfdc
