@@ -120,7 +120,7 @@ update-pake:
     header "Updating Pake Applications"
 
     echo "→ Reinstalling all Pake apps with latest packages..."
-    just update-ansible-tags pake,reinstall || { error "Failed to update Pake apps"; exit 1; }
+    jsys update-ansible-tags pake,reinstall || { error "Failed to update Pake apps"; exit 1; }
 
     success "Pake applications updated"
 {% endraw %}
