@@ -236,7 +236,7 @@ Each Pake app role includes these tasks:
   apt:
     name: app-name
     state: absent
-  become: yes
+  become: true
   when: app_states['app-name'] | default('present') == 'present'
   tags: ["never", "reinstall"]
 
@@ -245,7 +245,7 @@ Each Pake app role includes these tasks:
   apt:
     deb: "{{ role_path }}/files/app-name.deb"
     state: present
-  become: yes
+  become: true
   when: app_states['app-name'] | default('present') == 'present'
   tags: ["always"]
 ```
@@ -334,7 +334,7 @@ ansible-playbook site.yml --syntax-check
    - Global variables (`group_vars/all/`)
    - Vault secrets (`group_vars/all/vault.yml`)
    - Host-specific vars (`host_vars/`)
-   - Sudo/become (controlled by task's `become: yes`)
+   - Sudo/become (controlled by task's `become: true`)
 
 ## Common Patterns
 

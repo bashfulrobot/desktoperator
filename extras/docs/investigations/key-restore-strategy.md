@@ -59,7 +59,7 @@ Create an Ansible role that handles restoration:
   apt:
     name: restic
     state: present
-  become: yes
+  become: true
   when: restic_check.rc != 0
 
 - name: Check if keys already exist
@@ -76,7 +76,7 @@ Create an Ansible role that handles restoration:
     restic -r b2:{{ restic_backup.bucket }}:{{ restic_backup.repo }} restore latest \
       --target / \
       --include {{ user.home }}/.ssh
-  become: yes
+  become: true
   become_user: "{{ user.name }}"
   when:
     - not ssh_key_exists.stat.exists
@@ -92,7 +92,7 @@ Create an Ansible role that handles restoration:
     restic -r b2:{{ restic_backup.bucket }}:{{ restic_backup.repo }} restore latest \
       --target / \
       --include {{ user.home }}/.gnupg
-  become: yes
+  become: true
   become_user: "{{ user.name }}"
   when:
     - restore_from_backup | default(false)
@@ -105,13 +105,13 @@ Create an Ansible role that handles restoration:
     owner: "{{ user.name }}"
     mode: '0700'
     recurse: yes
-  become: yes
+  become: true
 
 - name: Fix SSH private key permissions
   shell: |
     chmod 600 {{ user.home }}/.ssh/id_* {{ user.home }}/.ssh/config 2>/dev/null || true
     chmod 644 {{ user.home }}/.ssh/*.pub 2>/dev/null || true
-  become: yes
+  become: true
   become_user: "{{ user.name }}"
   changed_when: false
 
@@ -121,12 +121,12 @@ Create an Ansible role that handles restoration:
     state: directory
     owner: "{{ user.name }}"
     mode: '0700'
-  become: yes
+  become: true
 
 - name: Fix GPG file permissions
   shell: |
     chmod 600 {{ user.home }}/.gnupg/* 2>/dev/null || true
-  become: yes
+  become: true
   become_user: "{{ user.name }}"
   changed_when: false
 ```

@@ -129,7 +129,7 @@ op read "op://Private/GPG Key/private key" | gpg --import
     - github
     - gitlab
   when: op_cli.rc == 0
-  become: yes
+  become: true
   become_user: "{{ user.name }}"
 ```
 
@@ -304,7 +304,7 @@ Host *
   shell: |
     echo "{{ vault_gpg_key.private }}" | gpg --batch --import
   when: vault_gpg_key is defined
-  become: yes
+  become: true
   become_user: "{{ user.name }}"
   no_log: true
   register: gpg_import
@@ -314,7 +314,7 @@ Host *
   shell: |
     echo "{{ vault_gpg_key.fingerprint }}:6:" | gpg --import-ownertrust
   when: vault_gpg_key is defined and vault_gpg_key.fingerprint is defined
-  become: yes
+  become: true
   become_user: "{{ user.name }}"
   changed_when: false
 ```
