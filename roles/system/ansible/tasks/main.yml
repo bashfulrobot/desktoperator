@@ -1,0 +1,26 @@
+---
+# Ansible tooling management
+# Ansible core is installed via bootstrap script (ppa:ansible/ansible)
+# This role manages ansible-lint which requires pipx for compatibility
+
+- name: Ensure pipx is installed
+  apt:
+    name: pipx
+    state: present
+  become: yes
+  tags: [ansible, dev]
+
+- name: Ensure pipx PATH is configured for user
+  command: pipx ensurepath
+  become: yes
+  become_user: "{{ user.name }}"
+  changed_when: false
+  tags: [ansible, dev]
+
+- name: Install ansible-lint via pipx
+  community.general.pipx:
+    name: ansible-lint
+    state: latest
+  become: yes
+  become_user: "{{ user.name }}"
+  tags: [ansible, dev]

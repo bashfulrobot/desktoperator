@@ -1,0 +1,6 @@
+---
+# Ansible tooling configuration
+# Ansible core is installed via apt from PPA (managed by bootstrap script)
+# ansible-lint requires pipx due to version incompatibility with Ubuntu's apt package
+
+ansible_lint_version: "latest"

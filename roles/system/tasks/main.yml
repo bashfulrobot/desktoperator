@@ -25,6 +25,11 @@
   import_tasks: python.yml
   tags: [python, dev]
 
+- name: Include Ansible tooling installation
+  include_role:
+    name: system/ansible
+  tags: [ansible, dev]
+
 - name: Include Go language installation
   include_role:
     name: system/go

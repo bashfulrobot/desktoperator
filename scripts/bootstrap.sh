@@ -56,8 +56,13 @@ sudo apt-get install -y software-properties-common git curl
 echo "Adding Ansible PPA..."
 sudo add-apt-repository --yes --update ppa:ansible/ansible
 
-echo "Installing Ansible..."
-sudo apt-get install -y ansible ansible-lint
+echo "Installing Ansible and pipx..."
+sudo apt-get install -y ansible pipx
+
+# Install ansible-lint via pipx
+echo "Installing ansible-lint via pipx..."
+pipx install ansible-lint
+pipx ensurepath
 
 # Install just command runner
 echo "Installing just..."
