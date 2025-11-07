@@ -1,75 +1,45 @@
 ---
 # kong-drive Pake App installation
-# Debian package deployment
-
-- name: Uninstall kong-drive for reinstall
-  apt:
-    name: kong-drive
-    state: absent
-  become: yes
-  when: app_states['kong-drive'] | default('present') == 'present'
-  tags: ["never", "reinstall"]
-
 - name: Install kong-drive .deb package
-  apt:
+  ansible.builtin.apt:
     deb: "{{ role_path }}/files/kong-drive.deb"
     state: present
-  become: yes
-  when: app_states['kong-drive'] | default('present') == 'present'
-  
+  become: true
+  when: app_states['kong_drive'] | default('present') == 'present'
 
 - name: Remove .deb desktop files
-  file:
+  ansible.builtin.file:
     path: "{{ item }}"
     state: absent
   loop:
     - /usr/share/applications/kong-drive.desktop
     - /usr/share/applications/com.pake.kong-drive.desktop
-  become: yes
-  when: app_states['kong-drive'] | default('present') == 'present'
+  become: true
+  when: app_states['kong_drive'] | default('present') == 'present'
 
-- name: Remove .deb icon files (all sizes)
-  shell: find /usr/share/icons/hicolor -name 'pake-kong-drive.png' -delete
-  become: yes
-  when: app_states['kong-drive'] | default('present') == 'present'
-  changed_when: false
-
-- name: Install custom desktop file
-  copy:
-    src: pake-kong-drive.desktop
-    dest: /usr/share/applications/pake-kong-drive.desktop
-    mode: '0644'
-  become: yes
-  when: app_states['kong-drive'] | default('present') == 'present'
-
-- name: Install themed icons at all sizes
-  copy:
+- name: Install custom desktop file and icons
+  ansible.builtin.copy:
     src: "{{ item.src }}"
     dest: "{{ item.dest }}"
-    mode: '0644'
+    mode: "0644"
   loop:
-    - { src: 'pake-kong-drive-icon-16.png', dest: '/usr/share/icons/hicolor/16x16/apps/pake-kong-drive.png' }
-    - { src: 'pake-kong-drive-icon-32.png', dest: '/usr/share/icons/hicolor/32x32/apps/pake-kong-drive.png' }
-    - { src: 'pake-kong-drive-icon-48.png', dest: '/usr/share/icons/hicolor/48x48/apps/pake-kong-drive.png' }
-    - { src: 'pake-kong-drive-icon-64.png', dest: '/usr/share/icons/hicolor/64x64/apps/pake-kong-drive.png' }
-    - { src: 'pake-kong-drive-icon-128.png', dest: '/usr/share/icons/hicolor/128x128/apps/pake-kong-drive.png' }
-    - { src: 'pake-kong-drive-icon-256.png', dest: '/usr/share/icons/hicolor/256x256/apps/pake-kong-drive.png' }
-    - { src: 'pake-kong-drive-icon-512.png', dest: '/usr/share/icons/hicolor/512x512/apps/pake-kong-drive.png' }
-    - { src: 'pake-kong-drive-icon-800.png', dest: '/usr/share/icons/hicolor/800x800/apps/pake-kong-drive.png' }
-  become: yes
-  when: app_states['kong-drive'] | default('present') == 'present'
-
-- name: Update icon cache
-  command: gtk-update-icon-cache -f /usr/share/icons/hicolor
-  become: yes
-  when: app_states['kong-drive'] | default('present') == 'present'
-  changed_when: false
+    - { src: "pake-kong-drive.desktop", dest: "/usr/share/applications/pake-kong-drive.desktop" }
+    - { src: "pake-kong-drive-icon-16.png", dest: "/usr/share/icons/hicolor/16x16/apps/pake-kong-drive.png" }
+    - { src: "pake-kong-drive-icon-32.png", dest: "/usr/share/icons/hicolor/32x32/apps/pake-kong-drive.png" }
+    - { src: "pake-kong-drive-icon-48.png", dest: "/usr/share/icons/hicolor/48x48/apps/pake-kong-drive.png" }
+    - { src: "pake-kong-drive-icon-64.png", dest: "/usr/share/icons/hicolor/64x64/apps/pake-kong-drive.png" }
+    - { src: "pake-kong-drive-icon-128.png", dest: "/usr/share/icons/hicolor/128x128/apps/pake-kong-drive.png" }
+    - { src: "pake-kong-drive-icon-256.png", dest: "/usr/share/icons/hicolor/256x256/apps/pake-kong-drive.png" }
+    - { src: "pake-kong-drive-icon-512.png", dest: "/usr/share/icons/hicolor/512x512/apps/pake-kong-drive.png" }
+    - { src: "pake-kong-drive-icon-800.png", dest: "/usr/share/icons/hicolor/scalable/apps/pake-kong-drive.png" }
+  become: true
+  when: app_states['kong_drive'] | default('present') == 'present'
+  notify: Update icon cache
 
 # Cleanup when absent
 - name: Remove kong-drive Pake app
-  apt:
+  ansible.builtin.apt:
     name: kong-drive
     state: absent
-  become: yes
-  when: app_states['kong-drive'] | default('present') == 'absent'
-
+  become: true
+  when: app_states['kong_drive'] | default('present') == 'absent'

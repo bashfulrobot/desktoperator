@@ -1,75 +1,45 @@
 ---
 # asana Pake App installation
-# Debian package deployment
-
-- name: Uninstall asana for reinstall
-  apt:
-    name: asana
-    state: absent
-  become: yes
-  when: app_states['asana'] | default('present') == 'present'
-  tags: ["never", "reinstall"]
-
 - name: Install asana .deb package
-  apt:
+  ansible.builtin.apt:
     deb: "{{ role_path }}/files/asana.deb"
     state: present
-  become: yes
+  become: true
   when: app_states['asana'] | default('present') == 'present'
-  
 
 - name: Remove .deb desktop files
-  file:
+  ansible.builtin.file:
     path: "{{ item }}"
     state: absent
   loop:
     - /usr/share/applications/asana.desktop
     - /usr/share/applications/com.pake.asana.desktop
-  become: yes
+  become: true
   when: app_states['asana'] | default('present') == 'present'
 
-- name: Remove .deb icon files (all sizes)
-  shell: find /usr/share/icons/hicolor -name 'pake-asana.png' -delete
-  become: yes
-  when: app_states['asana'] | default('present') == 'present'
-  changed_when: false
-
-- name: Install custom desktop file
-  copy:
-    src: pake-asana.desktop
-    dest: /usr/share/applications/pake-asana.desktop
-    mode: '0644'
-  become: yes
-  when: app_states['asana'] | default('present') == 'present'
-
-- name: Install themed icons at all sizes
-  copy:
+- name: Install custom desktop file and icons
+  ansible.builtin.copy:
     src: "{{ item.src }}"
     dest: "{{ item.dest }}"
-    mode: '0644'
+    mode: "0644"
   loop:
-    - { src: 'pake-asana-icon-16.png', dest: '/usr/share/icons/hicolor/16x16/apps/pake-asana.png' }
-    - { src: 'pake-asana-icon-32.png', dest: '/usr/share/icons/hicolor/32x32/apps/pake-asana.png' }
-    - { src: 'pake-asana-icon-48.png', dest: '/usr/share/icons/hicolor/48x48/apps/pake-asana.png' }
-    - { src: 'pake-asana-icon-64.png', dest: '/usr/share/icons/hicolor/64x64/apps/pake-asana.png' }
-    - { src: 'pake-asana-icon-128.png', dest: '/usr/share/icons/hicolor/128x128/apps/pake-asana.png' }
-    - { src: 'pake-asana-icon-256.png', dest: '/usr/share/icons/hicolor/256x256/apps/pake-asana.png' }
-    - { src: 'pake-asana-icon-512.png', dest: '/usr/share/icons/hicolor/512x512/apps/pake-asana.png' }
-    - { src: 'pake-asana-icon-800.png', dest: '/usr/share/icons/hicolor/800x800/apps/pake-asana.png' }
-  become: yes
+    - { src: "pake-asana.desktop", dest: "/usr/share/applications/pake-asana.desktop" }
+    - { src: "pake-asana-icon-16.png", dest: "/usr/share/icons/hicolor/16x16/apps/pake-asana.png" }
+    - { src: "pake-asana-icon-32.png", dest: "/usr/share/icons/hicolor/32x32/apps/pake-asana.png" }
+    - { src: "pake-asana-icon-48.png", dest: "/usr/share/icons/hicolor/48x48/apps/pake-asana.png" }
+    - { src: "pake-asana-icon-64.png", dest: "/usr/share/icons/hicolor/64x64/apps/pake-asana.png" }
+    - { src: "pake-asana-icon-128.png", dest: "/usr/share/icons/hicolor/128x128/apps/pake-asana.png" }
+    - { src: "pake-asana-icon-256.png", dest: "/usr/share/icons/hicolor/256x256/apps/pake-asana.png" }
+    - { src: "pake-asana-icon-512.png", dest: "/usr/share/icons/hicolor/512x512/apps/pake-asana.png" }
+    - { src: "pake-asana-icon-800.png", dest: "/usr/share/icons/hicolor/scalable/apps/pake-asana.png" }
+  become: true
   when: app_states['asana'] | default('present') == 'present'
-
-- name: Update icon cache
-  command: gtk-update-icon-cache -f /usr/share/icons/hicolor
-  become: yes
-  when: app_states['asana'] | default('present') == 'present'
-  changed_when: false
+  notify: Update icon cache
 
 # Cleanup when absent
 - name: Remove asana Pake app
-  apt:
+  ansible.builtin.apt:
     name: asana
     state: absent
-  become: yes
+  become: true
   when: app_states['asana'] | default('present') == 'absent'
-

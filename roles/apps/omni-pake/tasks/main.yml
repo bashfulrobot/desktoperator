@@ -1,46 +1,45 @@
 ---
 # omni Pake App installation
 - name: Install omni .deb package
-  apt:
-    deb: '{{ role_path }}/files/omni.deb'
+  ansible.builtin.apt:
+    deb: "{{ role_path }}/files/omni.deb"
     state: present
-  become: yes
+  become: true
   when: app_states['omni'] | default('present') == 'present'
 
 - name: Remove .deb desktop files
-  file:
-    path: '{{ item }}'
+  ansible.builtin.file:
+    path: "{{ item }}"
     state: absent
   loop:
     - /usr/share/applications/omni.desktop
     - /usr/share/applications/com.pake.omni.desktop
-  become: yes
+  become: true
   when: app_states['omni'] | default('present') == 'present'
 
 - name: Install custom desktop file and icons
-  copy:
-    src: '{{ item.src }}'
-    dest: '{{ item.dest }}'
-    mode: '0644'
+  ansible.builtin.copy:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+    mode: "0644"
   loop:
-    - { src: 'pake-omni.desktop', dest: '/usr/share/applications/pake-omni.desktop' }
-    - { src: 'pake-omni-icon-16.png', dest: '/usr/share/icons/hicolor/16x16/apps/pake-omni.png' }
-    - { src: 'pake-omni-icon-32.png', dest: '/usr/share/icons/hicolor/32x32/apps/pake-omni.png' }
-    - { src: 'pake-omni-icon-48.png', dest: '/usr/share/icons/hicolor/48x48/apps/pake-omni.png' }
-    - { src: 'pake-omni-icon-64.png', dest: '/usr/share/icons/hicolor/64x64/apps/pake-omni.png' }
-    - { src: 'pake-omni-icon-128.png', dest: '/usr/share/icons/hicolor/128x128/apps/pake-omni.png' }
-    - { src: 'pake-omni-icon-256.png', dest: '/usr/share/icons/hicolor/256x256/apps/pake-omni.png' }
-    - { src: 'pake-omni-icon-512.png', dest: '/usr/share/icons/hicolor/512x512/apps/pake-omni.png' }
-    - { src: 'pake-omni-icon-800.png', dest: '/usr/share/icons/hicolor/scalable/apps/pake-omni.png' }
-  become: yes
+    - { src: "pake-omni.desktop", dest: "/usr/share/applications/pake-omni.desktop" }
+    - { src: "pake-omni-icon-16.png", dest: "/usr/share/icons/hicolor/16x16/apps/pake-omni.png" }
+    - { src: "pake-omni-icon-32.png", dest: "/usr/share/icons/hicolor/32x32/apps/pake-omni.png" }
+    - { src: "pake-omni-icon-48.png", dest: "/usr/share/icons/hicolor/48x48/apps/pake-omni.png" }
+    - { src: "pake-omni-icon-64.png", dest: "/usr/share/icons/hicolor/64x64/apps/pake-omni.png" }
+    - { src: "pake-omni-icon-128.png", dest: "/usr/share/icons/hicolor/128x128/apps/pake-omni.png" }
+    - { src: "pake-omni-icon-256.png", dest: "/usr/share/icons/hicolor/256x256/apps/pake-omni.png" }
+    - { src: "pake-omni-icon-512.png", dest: "/usr/share/icons/hicolor/512x512/apps/pake-omni.png" }
+    - { src: "pake-omni-icon-800.png", dest: "/usr/share/icons/hicolor/scalable/apps/pake-omni.png" }
+  become: true
   when: app_states['omni'] | default('present') == 'present'
   notify: Update icon cache
 
 # Cleanup when absent
 - name: Remove omni Pake app
-  apt:
+  ansible.builtin.apt:
     name: omni
     state: absent
-  become: yes
+  become: true
   when: app_states['omni'] | default('present') == 'absent'
-

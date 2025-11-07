@@ -1,66 +1,45 @@
 ---
 # kong-docs Pake App installation
-# Debian package deployment
-
 - name: Install kong-docs .deb package
-  apt:
+  ansible.builtin.apt:
     deb: "{{ role_path }}/files/kong-docs.deb"
     state: present
-  become: yes
-  when: app_states['kong-docs'] | default('present') == 'present'
+  become: true
+  when: app_states['kong_docs'] | default('present') == 'present'
 
 - name: Remove .deb desktop files
-  file:
+  ansible.builtin.file:
     path: "{{ item }}"
     state: absent
   loop:
     - /usr/share/applications/kong-docs.desktop
     - /usr/share/applications/com.pake.kong-docs.desktop
-  become: yes
-  when: app_states['kong-docs'] | default('present') == 'present'
+  become: true
+  when: app_states['kong_docs'] | default('present') == 'present'
 
-- name: Remove .deb icon files (all sizes)
-  shell: find /usr/share/icons/hicolor -name 'pake-kong-docs.png' -delete
-  become: yes
-  when: app_states['kong-docs'] | default('present') == 'present'
-  changed_when: false
-
-- name: Install custom desktop file
-  copy:
-    src: pake-kong-docs.desktop
-    dest: /usr/share/applications/pake-kong-docs.desktop
-    mode: '0644'
-  become: yes
-  when: app_states['kong-docs'] | default('present') == 'present'
-
-- name: Install themed icons at all sizes
-  copy:
+- name: Install custom desktop file and icons
+  ansible.builtin.copy:
     src: "{{ item.src }}"
     dest: "{{ item.dest }}"
-    mode: '0644'
+    mode: "0644"
   loop:
-    - { src: 'pake-kong-docs-icon-16.png', dest: '/usr/share/icons/hicolor/16x16/apps/pake-kong-docs.png' }
-    - { src: 'pake-kong-docs-icon-32.png', dest: '/usr/share/icons/hicolor/32x32/apps/pake-kong-docs.png' }
-    - { src: 'pake-kong-docs-icon-48.png', dest: '/usr/share/icons/hicolor/48x48/apps/pake-kong-docs.png' }
-    - { src: 'pake-kong-docs-icon-64.png', dest: '/usr/share/icons/hicolor/64x64/apps/pake-kong-docs.png' }
-    - { src: 'pake-kong-docs-icon-128.png', dest: '/usr/share/icons/hicolor/128x128/apps/pake-kong-docs.png' }
-    - { src: 'pake-kong-docs-icon-256.png', dest: '/usr/share/icons/hicolor/256x256/apps/pake-kong-docs.png' }
-    - { src: 'pake-kong-docs-icon-512.png', dest: '/usr/share/icons/hicolor/512x512/apps/pake-kong-docs.png' }
-    - { src: 'pake-kong-docs-icon-800.png', dest: '/usr/share/icons/hicolor/800x800/apps/pake-kong-docs.png' }
-  become: yes
-  when: app_states['kong-docs'] | default('present') == 'present'
-
-- name: Update icon cache
-  command: gtk-update-icon-cache -f /usr/share/icons/hicolor
-  become: yes
-  when: app_states['kong-docs'] | default('present') == 'present'
-  changed_when: false
+    - { src: "pake-kong-docs.desktop", dest: "/usr/share/applications/pake-kong-docs.desktop" }
+    - { src: "pake-kong-docs-icon-16.png", dest: "/usr/share/icons/hicolor/16x16/apps/pake-kong-docs.png" }
+    - { src: "pake-kong-docs-icon-32.png", dest: "/usr/share/icons/hicolor/32x32/apps/pake-kong-docs.png" }
+    - { src: "pake-kong-docs-icon-48.png", dest: "/usr/share/icons/hicolor/48x48/apps/pake-kong-docs.png" }
+    - { src: "pake-kong-docs-icon-64.png", dest: "/usr/share/icons/hicolor/64x64/apps/pake-kong-docs.png" }
+    - { src: "pake-kong-docs-icon-128.png", dest: "/usr/share/icons/hicolor/128x128/apps/pake-kong-docs.png" }
+    - { src: "pake-kong-docs-icon-256.png", dest: "/usr/share/icons/hicolor/256x256/apps/pake-kong-docs.png" }
+    - { src: "pake-kong-docs-icon-512.png", dest: "/usr/share/icons/hicolor/512x512/apps/pake-kong-docs.png" }
+    - { src: "pake-kong-docs-icon-800.png", dest: "/usr/share/icons/hicolor/scalable/apps/pake-kong-docs.png" }
+  become: true
+  when: app_states['kong_docs'] | default('present') == 'present'
+  notify: Update icon cache
 
 # Cleanup when absent
 - name: Remove kong-docs Pake app
-  apt:
+  ansible.builtin.apt:
     name: kong-docs
     state: absent
-  become: yes
-  when: app_states['kong-docs'] | default('present') == 'absent'
-
+  become: true
+  when: app_states['kong_docs'] | default('present') == 'absent'

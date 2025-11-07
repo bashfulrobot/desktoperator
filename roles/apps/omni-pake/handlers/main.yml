@@ -1,6 +1,5 @@
 ---
 - name: Update icon cache
-  command: gtk-update-icon-cache -f /usr/share/icons/hicolor
-  become: yes
+  ansible.builtin.command: gtk-update-icon-cache -f /usr/share/icons/hicolor
+  become: true
   changed_when: false
-
