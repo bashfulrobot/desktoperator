@@ -17,10 +17,28 @@
   changed_when: false
   tags: [ansible, dev]
 
-- name: Install ansible-lint via pipx
-  community.general.pipx:
-    name: ansible-lint
-    state: latest
+- name: Check if ansible-lint is already installed via pipx
+  command: pipx list
   become: yes
   become_user: "{{ user.name }}"
+  register: pipx_list
+  changed_when: false
+  failed_when: false
+  tags: [ansible, dev]
+
+- name: Install ansible-lint via pipx
+  command: pipx install ansible-lint
+  become: yes
+  become_user: "{{ user.name }}"
+  when: "'ansible-lint' not in pipx_list.stdout"
+  tags: [ansible, dev]
+
+- name: Upgrade ansible-lint via pipx
+  command: pipx upgrade ansible-lint
+  become: yes
+  become_user: "{{ user.name }}"
+  when: "'ansible-lint' in pipx_list.stdout"
+  register: pipx_upgrade
+  changed_when: "'upgraded package' in pipx_upgrade.stdout"
+  failed_when: false
   tags: [ansible, dev]
