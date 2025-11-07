@@ -5,7 +5,6 @@ hostname: donkeykong
 
 # Host-specific apps (in addition to common apps)
 host_specific_apps: []
-
 # Libvirt configuration
 libvirt_install_gui_tools: true
 

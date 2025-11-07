@@ -6,7 +6,7 @@
 
 # Ansible version (managed via apt from PPA)
 # Note: Installed from ppa:ansible/ansible, always uses latest from PPA
-ansible_version: "latest"
+target_ansible_version: "latest"
 
 # Python packages (optional development tools)
 python_package_versions:
