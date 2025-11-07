@@ -4,6 +4,7 @@
 .vault_pass
 .vault_password
 vault_pass.txt
+.ansible/
 
 # Ansible Galaxy
 collections/
