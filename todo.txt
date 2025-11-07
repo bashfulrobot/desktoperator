@@ -1,12 +1,16 @@
 Next Steps:
 
-1.  **Deploy Updated Functions:** Run your Ansible playbook to deploy the latest version of `pake-wrapper.fish` to your system. This will include the fixes for `--icon` URL handling and the Brandfetch API key usage.
-
-2.  **Set Brandfetch API Key:** Add your Brandfetch API key as an environment variable in your Fish shell configuration. Open `~/.config/fish/config.fish` and add the following line (replace `YOUR_API_KEY_HERE` with your actual key):
-    ```fish
-    set -x BRANDFETCH_API_KEY 'YOUR_API_KEY_HERE'
+1.  **Deploy Updated Functions:** Run your Ansible playbook to deploy the latest version of `pake-wrapper.fish`:
+    ```bash
+    ansible-playbook site.yml --tags pake
     ```
+    This deploys the fixed template with Brandfetch API key from vault.
 
-3.  **Restart Terminal:** Close and reopen your terminal to ensure the new functions and environment variable are loaded.
+2.  **Restart Terminal:** Close and reopen your terminal to load the updated functions.
 
-4.  **Run Icon Regeneration:** You can now run the `regenerate-pake-icons.fish` script. It should successfully fetch icons from both direct URLs and the Brandfetch API.
+3.  **Run Icon Regeneration:** Execute the icon regeneration script:
+    ```bash
+    cd ~/dev/iac/desktoperator
+    ./scripts/regenerate-pake-icons.fish
+    ```
+    Icons will be fetched from both direct URLs and the Brandfetch API.
