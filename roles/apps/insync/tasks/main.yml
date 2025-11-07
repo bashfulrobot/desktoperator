@@ -3,23 +3,23 @@
 # Cloud storage sync client for Google Drive, OneDrive, and Dropbox
 
 - name: Download Insync GPG key
-  get_url:
+  ansible.builtin.get_url:
     url: https://apt.insync.io/insynchq.gpg
     dest: /tmp/insynchq.gpg
-    mode: '0644'
+    mode: "0644"
   when: app_states['insync'] | default('present') == 'present'
 
 - name: Import Insync GPG key to modern keyring location
-  shell: |
+  ansible.builtin.shell: |
     gpg --dearmor < /tmp/insynchq.gpg > /usr/share/keyrings/insynchq.gpg
     chmod 644 /usr/share/keyrings/insynchq.gpg
   args:
     creates: /usr/share/keyrings/insynchq.gpg
-  become: yes
+  become: true
   when: app_states['insync'] | default('present') == 'present'
 
 - name: Get Ubuntu codename
-  command: lsb_release -cs
+  ansible.builtin.command: lsb_release -cs
   register: ubuntu_codename
   changed_when: false
   when: app_states['insync'] | default('present') == 'present'
@@ -27,35 +27,35 @@
 # Explicitly specify arch=amd64 to prevent i386 package lookup warnings
 # For ARM support, change arch=amd64 to arch=amd64,arm64
 - name: Add Insync APT repository
-  apt_repository:
+  ansible.builtin.apt_repository:
     repo: "deb [arch=amd64 signed-by=/usr/share/keyrings/insynchq.gpg] http://apt.insync.io/ubuntu {{ ubuntu_codename.stdout }} non-free contrib"
     filename: insync
     state: present
-  become: yes
+  become: true
   when: app_states['insync'] | default('present') == 'present'
 
 - name: Update APT cache
-  apt:
-    update_cache: yes
-  become: yes
+  ansible.builtin.apt:
+    update_cache: true
+  become: true
   when: app_states['insync'] | default('present') == 'present'
 
 - name: Install Insync
-  apt:
+  ansible.builtin.apt:
     name: insync
     state: present
-  become: yes
+  become: true
   when: app_states['insync'] | default('present') == 'present'
 
 - name: Clean up GPG key file
-  file:
+  ansible.builtin.file:
     path: /tmp/insynchq.gpg
     state: absent
   when: app_states['insync'] | default('present') == 'present'
 
 # Fix for COSMIC Desktop - Insync requires XCB platform on Wayland
 - name: Create Insync wrapper script for COSMIC/Wayland
-  copy:
+  ansible.builtin.copy:
     content: |
       #!/bin/bash
       # Insync wrapper for COSMIC Desktop (Wayland)
@@ -63,84 +63,85 @@
       export QT_QPA_PLATFORM=xcb
       exec /usr/bin/insync.real "$@"
     dest: /usr/local/bin/insync-wrapper
-    mode: '0755'
-  become: yes
+    mode: "0755"
+  become: true
   when: app_states['insync'] | default('present') == 'present'
 
 - name: Backup original insync binary
-  command: mv /usr/bin/insync /usr/bin/insync.real
+  ansible.builtin.command: mv /usr/bin/insync /usr/bin/insync.real
   args:
     creates: /usr/bin/insync.real
-  become: yes
+  become: true
   when: app_states['insync'] | default('present') == 'present'
 
 - name: Create symlink to wrapper script
-  file:
+  ansible.builtin.file:
     src: /usr/local/bin/insync-wrapper
     dest: /usr/bin/insync
     state: link
-  become: yes
+  become: true
   when: app_states['insync'] | default('present') == 'present'
 
 # Create Insync folder structure
 - name: Create parent Insync folders
-  file:
+  ansible.builtin.file:
     path: "{{ insync_base_dir }}/{{ item.name }}"
     state: directory
-    mode: '0755'
+    mode: "0755"
   loop: "{{ insync_folders }}"
   when: app_states['insync'] | default('present') == 'present'
 
 - name: Create Insync subdirectories
-  file:
+  ansible.builtin.file:
     path: "{{ insync_base_dir }}/{{ item.0.name }}/{{ item.1 }}"
     state: directory
-    mode: '0755'
+    mode: "0755"
   loop: "{{ insync_folders | subelements('subdirs') }}"
   when: app_states['insync'] | default('present') == 'present'
 
 # Cleanup when absent
 - name: Remove insync symlink when absent
-  file:
+  ansible.builtin.file:
     path: /usr/bin/insync
     state: absent
-  become: yes
+  become: true
   when: app_states['insync'] | default('present') == 'absent'
 
 - name: Restore original insync binary when absent
-  command: mv /usr/bin/insync.real /usr/bin/insync
+  ansible.builtin.command: mv /usr/bin/insync.real /usr/bin/insync
   args:
     removes: /usr/bin/insync.real
-  become: yes
+  become: true
   when: app_states['insync'] | default('present') == 'absent'
-  ignore_errors: yes
+  failed_when: false
+  changed_when: true
 
 - name: Remove Insync wrapper script when absent
-  file:
+  ansible.builtin.file:
     path: /usr/local/bin/insync-wrapper
     state: absent
-  become: yes
+  become: true
   when: app_states['insync'] | default('present') == 'absent'
 
 - name: Remove Insync when absent
-  apt:
+  ansible.builtin.apt:
     name: insync
     state: absent
-    purge: yes
-  become: yes
+    purge: true
+  become: true
   when: app_states['insync'] | default('present') == 'absent'
 
 - name: Remove Insync repository when absent
-  apt_repository:
+  ansible.builtin.apt_repository:
     repo: "deb [arch=amd64 signed-by=/usr/share/keyrings/insynchq.gpg] http://apt.insync.io/ubuntu {{ ubuntu_codename.stdout }} non-free contrib"
     filename: insync
     state: absent
-  become: yes
+  become: true
   when: app_states['insync'] | default('present') == 'absent'
 
 - name: Remove Insync GPG key when absent
-  file:
+  ansible.builtin.file:
     path: /usr/share/keyrings/insynchq.gpg
     state: absent
-  become: yes
+  become: true
   when: app_states['insync'] | default('present') == 'absent'

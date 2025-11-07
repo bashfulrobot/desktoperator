@@ -90,7 +90,7 @@ Every role should have:
   apt:
     name: package-name
     state: "{{ app_states.appname | default('present') }}"
-  become: yes
+  become: true
   when: app_states.appname | default('present') == 'present'
 
 # Always include appropriate tags
@@ -226,13 +226,13 @@ When adding or modifying features:
    ```yaml
    ---
    # Newapp installation and configuration
-   
+
    - name: Install newapp
      apt:
        name: newapp
        state: "{{ app_states.newapp | default('present') }}"
-     become: yes
-   
+     become: true
+
    - name: Configure newapp
      template:
        src: config.j2
@@ -240,7 +240,7 @@ When adding or modifying features:
        owner: "{{ user.name }}"
        mode: '0644'
      when: app_states.newapp | default('present') == 'present'
-   
+
    - name: Remove config when absent
      file:
        path: "{{ user.home }}/.config/newapp"

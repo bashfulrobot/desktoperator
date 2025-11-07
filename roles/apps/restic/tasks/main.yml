@@ -2,27 +2,27 @@
 # Restic and Autorestic installation and configuration
 
 - name: Install restic from apt
-  apt:
+  ansible.builtin.apt:
     name: restic
     state: "{{ app_states.restic | default('present') }}"
-  become: yes
+  become: true
 
 - name: Check if autorestic is installed
-  stat:
+  ansible.builtin.stat:
     path: /usr/local/bin/autorestic
   register: autorestic_installed
 
 - name: Download autorestic installation script
-  get_url:
+  ansible.builtin.get_url:
     url: https://raw.githubusercontent.com/cupcakearmy/autorestic/master/install.sh
     dest: /tmp/autorestic-install.sh
-    mode: '0755'
+    mode: "0755"
   when:
     - not autorestic_installed.stat.exists
     - app_states.restic | default('present') == 'present'
 
 - name: Install autorestic
-  shell: bash /tmp/autorestic-install.sh
+  ansible.builtin.command: bash /tmp/autorestic-install.sh
   args:
     creates: ./autorestic
   when:
@@ -31,18 +31,18 @@
   register: autorestic_download
 
 - name: Move autorestic to /usr/local/bin
-  copy:
+  ansible.builtin.copy:
     src: "{{ ansible_env.PWD }}/autorestic"
     dest: /usr/local/bin/autorestic
-    mode: '0755'
-    remote_src: yes
-  become: yes
+    mode: "0755"
+    remote_src: true
+  become: true
   when:
     - autorestic_download is defined
     - autorestic_download.changed
 
 - name: Remove installation script and downloaded binary
-  file:
+  ansible.builtin.file:
     path: "{{ item }}"
     state: absent
   loop:
@@ -54,44 +54,44 @@
 
 # Configuration deployment (when present)
 - name: Create autorestic config directory
-  file:
+  ansible.builtin.file:
     path: "{{ user.home }}/.config/autorestic"
     state: directory
     owner: "{{ user.name }}"
-    mode: '0755'
+    mode: "0755"
   when: app_states.restic | default('present') == 'present'
 
 - name: Deploy autorestic configuration
-  template:
+  ansible.builtin.template:
     src: autorestic.yml.j2
     dest: "{{ user.home }}/.config/autorestic/autorestic.yml"
     owner: "{{ user.name }}"
-    mode: '0600'
+    mode: "0600"
   when: app_states.restic | default('present') == 'present'
 
 - name: Deploy autorestic exclude file
-  template:
+  ansible.builtin.template:
     src: autorestic-exclude.j2
     dest: "{{ user.home }}/.config/autorestic/exclude"
     owner: "{{ user.name }}"
-    mode: '0644'
+    mode: "0644"
   when: app_states.restic | default('present') == 'present'
 
 - name: Create autorestic log directory
-  file:
+  ansible.builtin.file:
     path: "{{ user.home }}/.local/share/autorestic"
     state: directory
     owner: "{{ user.name }}"
-    mode: '0755'
+    mode: "0755"
   when: app_states.restic | default('present') == 'present'
 
 # Deploy convenience scripts
 - name: Deploy restic convenience scripts
-  copy:
+  ansible.builtin.copy:
     src: "{{ item }}"
     dest: /usr/local/bin/{{ item }}
-    mode: '0755'
-  become: yes
+    mode: "0755"
+  become: true
   loop:
     - restic-backup
     - restic-restore
@@ -102,42 +102,42 @@
 
 # Systemd service and timer (user-level)
 - name: Get user UID
-  command: id -u {{ user.name }}
+  ansible.builtin.command: id -u {{ user.name }}
   register: user_uid_result
   changed_when: false
   when: app_states.restic | default('present') == 'present'
 
 - name: Create systemd user directory
-  file:
+  ansible.builtin.file:
     path: "{{ user.home }}/.config/systemd/user"
     state: directory
     owner: "{{ user.name }}"
-    mode: '0755'
+    mode: "0755"
   when: app_states.restic | default('present') == 'present'
 
 - name: Deploy systemd service unit
-  template:
+  ansible.builtin.template:
     src: autorestic-backup.service.j2
     dest: "{{ user.home }}/.config/systemd/user/autorestic-backup.service"
     owner: "{{ user.name }}"
-    mode: '0644'
+    mode: "0644"
   when: app_states.restic | default('present') == 'present'
   register: systemd_service
 
 - name: Deploy systemd timer unit
-  template:
+  ansible.builtin.template:
     src: autorestic-backup.timer.j2
     dest: "{{ user.home }}/.config/systemd/user/autorestic-backup.timer"
     owner: "{{ user.name }}"
-    mode: '0644'
+    mode: "0644"
   when: app_states.restic | default('present') == 'present'
   register: systemd_timer
 
 - name: Reload systemd user daemon
-  systemd:
-    daemon_reload: yes
+  ansible.builtin.systemd:
+    daemon_reload: true
     scope: user
-  become: yes
+  become: true
   become_user: "{{ user.name }}"
   when:
     - app_states.restic | default('present') == 'present'
@@ -146,12 +146,12 @@
     XDG_RUNTIME_DIR: "/run/user/{{ user_uid_result.stdout }}"
 
 - name: Enable and start autorestic timer
-  systemd:
+  ansible.builtin.systemd:
     name: autorestic-backup.timer
-    enabled: yes
+    enabled: true
     state: started
     scope: user
-  become: yes
+  become: true
   become_user: "{{ user.name }}"
   when: app_states.restic | default('present') == 'present'
   environment:
@@ -159,18 +159,18 @@
 
 # Cleanup when state is absent
 - name: Get user UID for cleanup
-  command: id -u {{ user.name }}
+  ansible.builtin.command: id -u {{ user.name }}
   register: user_uid_cleanup
   changed_when: false
   when: app_states.restic | default('present') == 'absent'
 
 - name: Stop and disable autorestic timer when state is absent
-  systemd:
+  ansible.builtin.systemd:
     name: autorestic-backup.timer
-    enabled: no
+    enabled: false
     state: stopped
     scope: user
-  become: yes
+  become: true
   become_user: "{{ user.name }}"
   when: app_states.restic | default('present') == 'absent'
   environment:
@@ -178,7 +178,7 @@
   failed_when: false
 
 - name: Remove systemd units when state is absent
-  file:
+  ansible.builtin.file:
     path: "{{ user.home }}/.config/systemd/user/{{ item }}"
     state: absent
   loop:
@@ -187,23 +187,23 @@
   when: app_states.restic | default('present') == 'absent'
 
 - name: Remove autorestic when state is absent
-  file:
+  ansible.builtin.file:
     path: /usr/local/bin/autorestic
     state: absent
-  become: yes
+  become: true
   when: app_states.restic | default('present') == 'absent'
 
 - name: Remove autorestic configuration when state is absent
-  file:
+  ansible.builtin.file:
     path: "{{ user.home }}/.config/autorestic"
     state: absent
   when: app_states.restic | default('present') == 'absent'
 
 - name: Remove restic scripts when state is absent
-  file:
+  ansible.builtin.file:
     path: /usr/local/bin/{{ item }}
     state: absent
-  become: yes
+  become: true
   loop:
     - restic-backup
     - restic-restore

@@ -57,7 +57,7 @@
   ansible.builtin.get_url:
     url: "https://cdn.zoom.us/prod/{{ zoom_target_version }}/zoom_amd64.deb"
     dest: "/tmp/zoom-{{ zoom_target_version }}.deb"
-    mode: '0644'
+    mode: "0644"
   when:
     - app_states['zoom'] | default('present') == 'present'
     - zoom_needs_change | bool
@@ -97,7 +97,7 @@
     state: directory
     owner: root
     group: root
-    mode: '0755'
+    mode: "0755"
   become: true
   when:
     - app_states['zoom'] | default('present') == 'present'
@@ -115,7 +115,7 @@
     dest: /etc/apt/preferences.d/zoom-pin
     owner: root
     group: root
-    mode: '0644'
+    mode: "0644"
   become: true
   when:
     - app_states['zoom'] | default('present') == 'present'

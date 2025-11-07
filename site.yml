@@ -2,10 +2,10 @@
 # Main playbook - runs all configuration
 - name: Configure Desktop Systems
   hosts: all
-  become: yes
+  become: true
 
   roles:
-    # Bootstrap role - only run with --tags bootstrap (never runs by default)
+  # Bootstrap role - only run with --tags bootstrap (never runs by default)
     - role: bootstrap
       tags: [bootstrap, never]
 
@@ -26,6 +26,6 @@
       tags: [k8s, kubernetes, infrastructure]
 
     # Custom desktop launchers
-    - role: custom-launchers
+    - role: custom_launchers
       when: inventory_hostname == 'qbert'
-      tags: [custom-launchers, apps]
+      tags: [custom_launchers, apps]

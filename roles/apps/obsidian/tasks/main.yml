@@ -5,7 +5,7 @@
   ansible.builtin.package:
     name: flatpak
     state: present
-  become: yes
+  become: true
   when: app_states['obsidian'] | default('present') == 'present'
 
 - name: Ensure Flathub repository exists
@@ -13,7 +13,7 @@
     name: flathub
     state: present
     flatpakrepo_url: https://dl.flathub.org/repo/flathub.flatpakrepo
-  become: yes
+  become: true
   when: app_states['obsidian'] | default('present') == 'present'
 
 - name: Install Obsidian
@@ -21,12 +21,12 @@
     name: md.obsidian.Obsidian
     state: present
     remote: flathub
-  become: yes
+  become: true
   when: app_states['obsidian'] | default('present') == 'present'
 
 - name: Remove Obsidian
   community.general.flatpak:
     name: md.obsidian.Obsidian
     state: absent
-  become: yes
+  become: true
   when: app_states['obsidian'] | default('present') == 'absent'

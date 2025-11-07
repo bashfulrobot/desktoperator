@@ -6,53 +6,53 @@
 #              jq (for JSON parsing), curl (for downloading icons)
 
 - name: Check if Docker is available
-  command: docker --version
+  ansible.builtin.command: docker --version
   register: docker_check
   changed_when: false
   failed_when: false
   when: app_states['pake'] | default('present') == 'present'
 
 - name: Fail if Docker is not installed
-  fail:
+  ansible.builtin.fail:
     msg: "Docker is required for Pake. Please ensure the docker role is enabled."
   when:
     - app_states['pake'] | default('present') == 'present'
     - docker_check.rc != 0
 
 - name: Install build dependencies
-  apt:
+  ansible.builtin.apt:
     name:
       - jq
       - imagemagick
       - librsvg2-bin
       - curl
     state: present
-  become: yes
+  become: true
   when: app_states['pake'] | default('present') == 'present'
 
 - name: Ensure FUSE packages are installed for AppImage support
-  apt:
+  ansible.builtin.apt:
     name:
       - fuse3
       - libfuse2t64
     state: present
-  become: yes
+  become: true
   when: app_states['pake'] | default('present') == 'present'
 
 - name: Ensure user is in docker group
-  user:
+  ansible.builtin.user:
     name: "{{ user.name }}"
     groups: docker
-    append: yes
-  become: yes
+    append: true
+  become: true
   when: app_states['pake'] | default('present') == 'present'
 
 - name: Clean up old pake-cli installation (migration to Docker)
-  shell: npm uninstall -g pake-cli
+  ansible.builtin.command: npm uninstall -g pake-cli
   environment:
     HOME: "{{ user.home }}"
     npm_config_prefix: "{{ user.home }}/.local"
-  become: yes
+  become: true
   become_user: "{{ user.name }}"
   when: app_states['pake'] | default('present') == 'present'
   register: pake_cleanup
@@ -60,23 +60,23 @@
   changed_when: pake_cleanup.rc == 0
 
 - name: Ensure Fish conf.d directory exists
-  file:
+  ansible.builtin.file:
     path: "{{ user.home }}/.config/fish/conf.d"
     state: directory
     owner: "{{ user.name }}"
-    mode: '0755'
+    mode: "0755"
   when: app_states['pake'] | default('present') == 'present'
 
 - name: Deploy pake wrapper function to Fish
-  template:
+  ansible.builtin.template:
     src: pake-wrapper.fish.j2
     dest: "{{ user.home }}/.config/fish/conf.d/pake-wrapper.fish"
     owner: "{{ user.name }}"
-    mode: '0644'
+    mode: "0644"
   when: app_states['pake'] | default('present') == 'present'
 
 - name: Remove pake wrapper function from Fish
-  file:
+  ansible.builtin.file:
     path: "{{ user.home }}/.config/fish/conf.d/pake-wrapper.fish"
     state: absent
   when: app_states['pake'] | default('present') == 'absent'

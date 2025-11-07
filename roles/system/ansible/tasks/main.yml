@@ -4,22 +4,22 @@
 # This role manages ansible-lint which requires pipx for compatibility
 
 - name: Ensure pipx is installed
-  apt:
+  ansible.builtin.apt:
     name: pipx
     state: present
-  become: yes
+  become: true
   tags: [ansible, dev]
 
 - name: Ensure pipx PATH is configured for user
-  command: pipx ensurepath
-  become: yes
+  ansible.builtin.command: pipx ensurepath
+  become: true
   become_user: "{{ user.name }}"
   changed_when: false
   tags: [ansible, dev]
 
 - name: Check if ansible-lint is already installed via pipx
-  command: pipx list
-  become: yes
+  ansible.builtin.command: pipx list
+  become: true
   become_user: "{{ user.name }}"
   register: pipx_list
   changed_when: false
@@ -27,15 +27,15 @@
   tags: [ansible, dev]
 
 - name: Install ansible-lint via pipx
-  command: pipx install ansible-lint
-  become: yes
+  ansible.builtin.command: pipx install ansible-lint
+  become: true
   become_user: "{{ user.name }}"
   when: "'ansible-lint' not in pipx_list.stdout"
   tags: [ansible, dev]
 
 - name: Upgrade ansible-lint via pipx
-  command: pipx upgrade ansible-lint
-  become: yes
+  ansible.builtin.command: pipx upgrade ansible-lint
+  become: true
   become_user: "{{ user.name }}"
   when: "'ansible-lint' in pipx_list.stdout"
   register: pipx_upgrade

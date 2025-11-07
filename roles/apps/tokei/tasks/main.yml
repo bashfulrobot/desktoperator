@@ -12,8 +12,8 @@
   when: app_states.tokei | default('present') == 'present'
 
 - name: Remove tokei binary when absent
-  file:
+  ansible.builtin.file:
     path: /usr/local/bin/tokei
     state: absent
   when: app_states.tokei | default('present') == 'absent'
-  become: yes
+  become: true

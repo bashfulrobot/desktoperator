@@ -14,8 +14,8 @@
   when: app_states['instruqt-cli'] | default('present') == 'present'
 
 - name: Remove instruqt-cli binary when absent
-  file:
+  ansible.builtin.file:
     path: /usr/local/bin/instruqt
     state: absent
   when: app_states['instruqt-cli'] | default('present') == 'absent'
-  become: yes
+  become: true

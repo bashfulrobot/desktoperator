@@ -2,281 +2,281 @@
 # Apps role - application installations
 
 - name: Include 1Password installation
-  import_role:
+  ansible.builtin.import_role:
     name: apps/1password
   tags: [1password]
 
 - name: Include restic/autorestic installation
-  import_role:
+  ansible.builtin.import_role:
     name: apps/restic
   tags: [restic]
 
 - name: Include Helix editor installation
-  import_role:
+  ansible.builtin.import_role:
     name: apps/helix
   tags: [helix]
 
 - name: Include Zellij terminal multiplexer
-  import_role:
+  ansible.builtin.import_role:
     name: apps/zellij
   tags: [zellij]
 
 - name: Include Zen Browser
-  import_role:
+  ansible.builtin.import_role:
     name: apps/zen-browser
   tags: [zen-browser]
 
 - name: Include Slack
-  import_role:
+  ansible.builtin.import_role:
     name: apps/slack
   tags: [slack]
 
 - name: Include Claude Code
-  import_role:
+  ansible.builtin.import_role:
     name: apps/claude-code
   tags: [claude-code]
 
 - name: Include Starship prompt
-  import_role:
+  ansible.builtin.import_role:
     name: apps/starship
   tags: [starship]
 
 - name: Include Shadowenv directory-based env manager
-  import_role:
+  ansible.builtin.import_role:
     name: apps/shadowenv
   tags: [shadowenv]
 
 - name: Include Firefox browser
-  import_role:
+  ansible.builtin.import_role:
     name: apps/firefox
   tags: [firefox]
 
 - name: Include Vivaldi browser
-  import_role:
+  ansible.builtin.import_role:
     name: apps/vivaldi
   tags: [vivaldi]
 
 - name: Include Visual Studio Code
-  import_role:
+  ansible.builtin.import_role:
     name: apps/vscode
   tags: [vscode]
 
 - name: Include Google Chrome
-  import_role:
+  ansible.builtin.import_role:
     name: apps/chrome
   tags: [chrome]
 
 - name: Include Zoom
-  import_role:
+  ansible.builtin.import_role:
     name: apps/zoom
   tags: [zoom]
 
 - name: Include Insync
-  import_role:
+  ansible.builtin.import_role:
     name: apps/insync
   tags: [insync]
 
 - name: Include Insomnia
-  import_role:
+  ansible.builtin.import_role:
     name: apps/insomnia
   tags: [insomnia]
 
 - name: Include Gemini CLI
-  import_role:
+  ansible.builtin.import_role:
     name: apps/gemini-cli
   tags: [gemini-cli]
 
 - name: Include Codex CLI
-  import_role:
+  ansible.builtin.import_role:
     name: apps/codex-cli
   tags: [codex-cli]
 
 - name: Include SiteMCP
-  import_role:
+  ansible.builtin.import_role:
     name: apps/sitemcp
   tags: [sitemcp]
 
 - name: Include Glow markdown reader
-  import_role:
+  ansible.builtin.import_role:
     name: apps/glow
   tags: [glow]
 
 - name: Include Gum shell scripts
-  import_role:
+  ansible.builtin.import_role:
     name: apps/gum
   tags: [gum]
 
 - name: Include Meetsum meeting summary generator
-  import_role:
+  ansible.builtin.import_role:
     name: apps/meetsum
   tags: [meetsum]
 
 - name: Include Signal messenger
-  import_role:
+  ansible.builtin.import_role:
     name: apps/signal
   tags: [signal]
 
 - name: Include Spotify music clients
-  import_role:
+  ansible.builtin.import_role:
     name: apps/spotify
   tags: [spotify]
 
 - name: Include Terminal Experience
-  import_role:
+  ansible.builtin.import_role:
     name: apps/terminal-experience
   tags: [terminal-experience]
 
 - name: Include eza modern ls replacement
-  import_role:
+  ansible.builtin.import_role:
     name: apps/eza
   tags: [eza]
 
 - name: Include Fonts installation
-  import_role:
+  ansible.builtin.import_role:
     name: apps/fonts
   tags: [fonts]
 
 - name: Include Tokei code statistics
-  import_role:
+  ansible.builtin.import_role:
     name: apps/tokei
   tags: [tokei]
 
 - name: Include Instruqt CLI
-  import_role:
+  ansible.builtin.import_role:
     name: apps/instruqt-cli
   tags: [instruqt-cli]
 
 - name: Include oq performant jq alternative
-  import_role:
+  ansible.builtin.import_role:
     name: apps/oq
   tags: [oq]
 
 - name: Include Pake CLI web-to-desktop app builder
-  import_role:
+  ansible.builtin.import_role:
     name: apps/pake
   tags: [pake-core, pake]
 
 - name: Include GitHub Pake App
-  import_role:
+  ansible.builtin.import_role:
     name: apps/github-pake
   tags: [github, pake]
 
 - name: Include Asana Pake App
-  import_role:
+  ansible.builtin.import_role:
     name: apps/asana-pake
   tags: [asana, pake]
 
 - name: Include Avanti Pake App
-  import_role:
+  ansible.builtin.import_role:
     name: apps/avanti-pake
   tags: [avanti, pake]
 
 - name: Include Salesforce Pake App
-  import_role:
+  ansible.builtin.import_role:
     name: apps/sfdc-pake
   tags: [sfdc, salesforce, pake]
 
 - name: Include Lucidchart Pake App
-  import_role:
+  ansible.builtin.import_role:
     name: apps/lucid-chart-pake
   tags: [lucid-chart, lucidchart, pake]
 
 - name: Include BR Email Pake App
-  import_role:
+  ansible.builtin.import_role:
     name: apps/br-email-pake
   tags: [br-email, pake]
 
 - name: Include Kong Email Pake App
-  import_role:
+  ansible.builtin.import_role:
     name: apps/kong-email-pake
   tags: [kong-email, pake]
 
 - name: Include Kong Calendar Pake App
-  import_role:
+  ansible.builtin.import_role:
     name: apps/kong-calendar-pake
   tags: [kong-calendar, pake]
 
 - name: Include BR Calendar Pake App
-  import_role:
+  ansible.builtin.import_role:
     name: apps/br-calendar-pake
   tags: [br-calendar, pake]
 
 - name: Include Kong Drive Pake App
-  import_role:
+  ansible.builtin.import_role:
     name: apps/kong-drive-pake
   tags: [kong-drive, pake]
 
 - name: Include BR Drive Pake App
-  import_role:
+  ansible.builtin.import_role:
     name: apps/br-drive-pake
   tags: [br-drive, pake]
 
 - name: Include Aha Pake App
-  import_role:
+  ansible.builtin.import_role:
     name: apps/aha-pake
   tags: [aha, pake]
 
 - name: Include Workday Pake App
-  import_role:
+  ansible.builtin.import_role:
     name: apps/workday-pake
   tags: [workday, pake]
 
 - name: Include Konnect Pake App
-  import_role:
+  ansible.builtin.import_role:
     name: apps/konnect-pake
   tags: [konnect, pake]
 
 - name: Include Kong Docs Pake App
-  import_role:
+  ansible.builtin.import_role:
     name: apps/kong-docs-pake
   tags: [kong-docs, pake]
 
 - name: Include Omni Pake App
-  import_role:
+  ansible.builtin.import_role:
     name: apps/omni-pake
   tags: [omni, pake]
 
 - name: Include zns DNS lookup tool
-  import_role:
+  ansible.builtin.import_role:
     name: apps/zns
   tags: [zns]
 
 - name: Include Todoist
-  import_role:
+  ansible.builtin.import_role:
     name: apps/todoist
   tags: [todoist]
 
 - name: Include Teams for Linux
-  import_role:
+  ansible.builtin.import_role:
     name: apps/teams-for-linux
   tags: [teams-for-linux, teams]
 
 - name: Include Kooha screen recorder
-  import_role:
+  ansible.builtin.import_role:
     name: apps/kooha
   tags: [kooha]
 
 - name: Include Obsidian
-  import_role:
+  ansible.builtin.import_role:
     name: apps/obsidian
   tags: [obsidian]
 
 - name: Include Okular PDF viewer
-  import_role:
+  ansible.builtin.import_role:
     name: apps/okular
   tags: [okular]
 
 - name: Include Trippy network diagnostic tool
-  import_role:
+  ansible.builtin.import_role:
     name: apps/trippy
   tags: [trippy]
 
 - name: Include Amber search and replace tool
-  import_role:
+  ansible.builtin.import_role:
     name: apps/amber
   tags: [amber]
 
 - name: Include Typora markdown editor
-  import_role:
+  ansible.builtin.import_role:
     name: apps/typora
   tags: [typora]

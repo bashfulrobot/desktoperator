@@ -2,37 +2,37 @@
 # Firewall configuration tasks
 
 - name: Install ufw
-  apt:
+  ansible.builtin.apt:
     name: ufw
     state: present
-  become: yes
+  become: true
   tags: [system]
 
 - name: Configure ufw defaults
-  ufw:
+  community.general.ufw:
     direction: "{{ item.direction }}"
     policy: "{{ item.policy }}"
   loop:
-    - { direction: 'incoming', policy: 'deny' }
-    - { direction: 'outgoing', policy: 'allow' }
-  become: yes
+    - { direction: "incoming", policy: "deny" }
+    - { direction: "outgoing", policy: "allow" }
+  become: true
   when: firewall.enabled | default(true)
   tags: [system]
 
 - name: Allow configured ports
-  ufw:
+  community.general.ufw:
     rule: allow
     port: "{{ item.split('/')[0] }}"
     proto: "{{ item.split('/')[1] }}"
   loop: "{{ firewall.allowed_ports }}"
-  become: yes
+  become: true
   when: firewall.enabled | default(true)
   tags: [system]
 
 - name: Enable ufw
-  ufw:
+  community.general.ufw:
     state: enabled
-  become: yes
+  become: true
   when: firewall.enabled | default(true)
 
   tags: [system]

@@ -2,14 +2,14 @@
 # Claude Code installation via native binary
 
 - name: Check if Claude Code is installed
-  command: which claude
+  ansible.builtin.command: which claude
   register: claude_installed
   changed_when: false
   failed_when: false
   when: app_states['claude-code'] | default('present') == 'present'
 
 - name: Get current Claude Code version
-  command: claude --version
+  ansible.builtin.command: claude --version
   register: claude_current_version
   changed_when: false
   failed_when: false
@@ -18,26 +18,26 @@
     - claude_installed.rc == 0
 
 - name: Download Claude Code installation script
-  get_url:
+  ansible.builtin.get_url:
     url: https://claude.ai/install.sh
     dest: /tmp/claude-install.sh
-    mode: '0755'
+    mode: "0755"
   when:
     - app_states['claude-code'] | default('present') == 'present'
     - claude_installed.rc != 0 or (claude_current_version is defined and not claude_current_version.skipped and claude_current_version.rc != 0)
 
 - name: Install Claude Code (latest version)
-  shell: bash /tmp/claude-install.sh latest
+  ansible.builtin.command: bash /tmp/claude-install.sh latest
   environment:
     HOME: "{{ user.home }}"
-  become: yes
+  become: true
   become_user: "{{ user.name }}"
   when:
     - app_states['claude-code'] | default('present') == 'present'
     - claude_installed.rc != 0 or (claude_current_version is defined and not claude_current_version.skipped and claude_current_version.rc != 0)
 
 - name: Clean up installation script
-  file:
+  ansible.builtin.file:
     path: /tmp/claude-install.sh
     state: absent
   when:
@@ -46,59 +46,59 @@
 
 # Deploy configuration files
 - name: Create .claude directory
-  file:
+  ansible.builtin.file:
     path: "{{ user.home }}/.claude"
     state: directory
     owner: "{{ user.name }}"
-    mode: '0755'
+    mode: "0755"
   when: app_states['claude-code'] | default('present') == 'present'
 
 - name: Create .claude/agents directory
-  file:
+  ansible.builtin.file:
     path: "{{ user.home }}/.claude/agents"
     state: directory
     owner: "{{ user.name }}"
-    mode: '0755'
+    mode: "0755"
   when: app_states['claude-code'] | default('present') == 'present'
 
 - name: Create .claude/commands directory
-  file:
+  ansible.builtin.file:
     path: "{{ user.home }}/.claude/commands"
     state: directory
     owner: "{{ user.name }}"
-    mode: '0755'
+    mode: "0755"
   when: app_states['claude-code'] | default('present') == 'present'
 
 - name: Deploy CLAUDE.md configuration
-  copy:
+  ansible.builtin.copy:
     src: CLAUDE.md
     dest: "{{ user.home }}/.claude/CLAUDE.md"
     owner: "{{ user.name }}"
-    mode: '0644'
+    mode: "0644"
   when: app_states['claude-code'] | default('present') == 'present'
 
 - name: Deploy settings.json
-  copy:
+  ansible.builtin.copy:
     src: settings.json
     dest: "{{ user.home }}/.claude/settings.json"
     owner: "{{ user.name }}"
-    mode: '0644'
+    mode: "0644"
   when: app_states['claude-code'] | default('present') == 'present'
 
 - name: Deploy MCP servers configuration to ~/dev
-  template:
+  ansible.builtin.template:
     src: mcp_servers.json.j2
     dest: "{{ user.home }}/dev/.mcp.json"
     owner: "{{ user.name }}"
-    mode: '0600'
+    mode: "0600"
   when: app_states['claude-code'] | default('present') == 'present'
 
 - name: Deploy agent files
-  copy:
+  ansible.builtin.copy:
     src: "agents/{{ item }}"
     dest: "{{ user.home }}/.claude/agents/{{ item }}"
     owner: "{{ user.name }}"
-    mode: '0644'
+    mode: "0644"
   loop:
     - api.md
     - bash.md
@@ -111,28 +111,28 @@
   when: app_states['claude-code'] | default('present') == 'present'
 
 - name: Deploy commit command
-  copy:
+  ansible.builtin.copy:
     src: commands/commit.md
     dest: "{{ user.home }}/.claude/commands/commit.md"
     owner: "{{ user.name }}"
-    mode: '0644'
+    mode: "0644"
   when: app_states['claude-code'] | default('present') == 'present'
 
 # Cleanup when absent
 - name: Remove Claude Code configuration directory when absent
-  file:
+  ansible.builtin.file:
     path: "{{ user.home }}/.claude"
     state: absent
   when: app_states['claude-code'] | default('present') == 'absent'
 
 - name: Remove Claude Code data directory when absent
-  file:
+  ansible.builtin.file:
     path: "{{ user.home }}/.local/share/claude-code"
     state: absent
   when: app_states['claude-code'] | default('present') == 'absent'
 
 - name: Remove Claude Code binary when absent
-  file:
+  ansible.builtin.file:
     path: "{{ user.home }}/.local/bin/claude"
     state: absent
   when: app_states['claude-code'] | default('present') == 'absent'

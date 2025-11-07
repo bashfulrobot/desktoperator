@@ -3,42 +3,42 @@
 # https://github.com/eza-community/eza
 
 - name: Install eza
-  apt:
+  ansible.builtin.apt:
     name: eza
     state: present
-  become: yes
+  become: true
   when: app_states['eza'] | default('present') == 'present'
 
 # Fish shell integration
 - name: Create fish conf.d directory
-  file:
+  ansible.builtin.file:
     path: "{{ user.home }}/.config/fish/conf.d"
     state: directory
     owner: "{{ user.name }}"
     group: "{{ user.name }}"
-    mode: '0755'
+    mode: "0755"
   when: app_states['eza'] | default('present') == 'present'
 
 - name: Deploy fish aliases for eza
-  template:
+  ansible.builtin.template:
     src: eza.fish.j2
     dest: "{{ user.home }}/.config/fish/conf.d/eza.fish"
     owner: "{{ user.name }}"
     group: "{{ user.name }}"
-    mode: '0644'
+    mode: "0644"
   when: app_states['eza'] | default('present') == 'present'
 
 # Cleanup when absent
 - name: Remove eza when absent
-  apt:
+  ansible.builtin.apt:
     name: eza
     state: absent
-    purge: yes
-  become: yes
+    purge: true
+  become: true
   when: app_states['eza'] | default('present') == 'absent'
 
 - name: Remove fish aliases for eza when absent
-  file:
+  ansible.builtin.file:
     path: "{{ user.home }}/.config/fish/conf.d/eza.fish"
     state: absent
   when: app_states['eza'] | default('present') == 'absent'

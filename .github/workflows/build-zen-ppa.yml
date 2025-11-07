@@ -1,16 +1,17 @@
+---
 name: Build Zen Browser PPA
 
 on:
   # Run nightly at 11:59 PM PST (7:59 AM UTC) - only builds if new version available
   # Note: During PDT (daylight saving), this runs at 11:59 PM PDT (6:59 AM UTC)
   schedule:
-    - cron: '59 7 * * *'
+    - cron: "59 7 * * *"
 
   # Allow manual triggers for testing or forced rebuilds
   workflow_dispatch:
     inputs:
       force:
-        description: 'Force rebuild even if no new version (for packaging fixes)'
+        description: "Force rebuild even if no new version (for packaging fixes)"
         required: false
         type: boolean
         default: false

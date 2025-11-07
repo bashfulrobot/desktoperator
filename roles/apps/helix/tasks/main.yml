@@ -2,168 +2,172 @@
 # Helix editor installation and configuration
 
 - name: Install software-properties-common for add-apt-repository
-  apt:
+  ansible.builtin.apt:
     name:
       - software-properties-common
       - gpg
     state: present
-  become: yes
+  become: true
   when: app_states.helix | default('present') == 'present'
 
 - name: Download Helix PPA GPG key
-  get_url:
+  ansible.builtin.get_url:
     url: https://keyserver.ubuntu.com/pks/lookup?op=get&search=0x27642B9FD7F1A161FC2524E3355A4FA515D7C855
     dest: /tmp/helix-ppa.asc
-    mode: '0644'
-  become: yes
+    mode: "0644"
+  become: true
   when: app_states.helix | default('present') == 'present'
 
 - name: Add Helix PPA GPG key to keyrings
-  shell: |
+  ansible.builtin.shell: |
     gpg --dearmor < /tmp/helix-ppa.asc > /usr/share/keyrings/helix-ppa.gpg
     chmod 644 /usr/share/keyrings/helix-ppa.gpg
   args:
     creates: /usr/share/keyrings/helix-ppa.gpg
-  become: yes
+  become: true
   when: app_states.helix | default('present') == 'present'
 
 - name: Clean up temporary Helix GPG key file
-  file:
+  ansible.builtin.file:
     path: /tmp/helix-ppa.asc
     state: absent
-  become: yes
+  become: true
   when: app_states.helix | default('present') == 'present'
 
 # Explicitly specify arch=amd64 to prevent i386 package lookup warnings
 # For ARM support, change arch=amd64 to arch=amd64,arm64
 - name: Add Helix PPA with modern signed-by keyring
-  apt_repository:
-    repo: "deb [arch=amd64 signed-by=/usr/share/keyrings/helix-ppa.gpg] https://ppa.launchpadcontent.net/maveonair/helix-editor/ubuntu {{ ansible_distribution_release }} main"
+  ansible.builtin.apt_repository:
+    repo: "deb [arch=amd64 signed-by=/usr/share/keyrings/helix-ppa.gpg] https://ppa.launchpadcontent.net/maveonair/helix-editor/ubuntu {{ ansible_distribution_release
+      }} main"
     filename: helix-ppa
     state: present
-  become: yes
+  become: true
   when: app_states.helix | default('present') == 'present'
 
 - name: Install Helix editor
-  apt:
+  ansible.builtin.apt:
     name: helix
     state: "{{ app_states.helix | default('present') }}"
-    update_cache: yes
-  become: yes
+    update_cache: true
+  become: true
 
 # Install language servers and tools
 # Note: gopls requires Go to be installed (system/go role)
 # Note: yaml-language-server requires Node.js/npm (system/nodejs role)
 - name: Install Go language server (gopls)
-  shell: |
+  ansible.builtin.shell: |
     /usr/local/go/bin/go install golang.org/x/tools/gopls@latest
-  become: yes
+  become: true
   become_user: "{{ user.name }}"
   when: app_states.helix | default('present') == 'present'
-  ignore_errors: yes
+  failed_when: false
+  changed_when: false
 
 - name: Check if npm is available
-  command: which npm
+  ansible.builtin.command: which npm
   register: npm_check
   failed_when: false
   changed_when: false
   when: app_states.helix | default('present') == 'present'
 
 - name: Install YAML language server via npm
-  shell: |
+  ansible.builtin.shell: |
     npm install -g yaml-language-server
-  become: yes
+  become: true
   when:
     - app_states.helix | default('present') == 'present'
     - npm_check.rc == 0
-  ignore_errors: yes
+  failed_when: false
+  changed_when: false
 
 - name: Install Marksman (Markdown LSP)
-  get_url:
+  ansible.builtin.get_url:
     url: "https://github.com/artempyanykh/marksman/releases/latest/download/marksman-linux-x64"
     dest: "/usr/local/bin/marksman"
-    mode: '0755'
-  become: yes
+    mode: "0755"
+  become: true
   when: app_states.helix | default('present') == 'present'
-  ignore_errors: yes
+  failed_when: false
 
 # Create Helix configuration directory
 - name: Create Helix config directory
-  file:
+  ansible.builtin.file:
     path: "{{ user.home }}/.config/helix"
     state: directory
     owner: "{{ user.name }}"
-    mode: '0755'
+    mode: "0755"
   when: app_states.helix | default('present') == 'present'
 
 - name: Create Helix themes directory
-  file:
+  ansible.builtin.file:
     path: "{{ user.home }}/.config/helix/themes"
     state: directory
     owner: "{{ user.name }}"
-    mode: '0755'
+    mode: "0755"
   when: app_states.helix | default('present') == 'present'
 
 # Deploy Helix configuration files
 - name: Deploy Helix config.toml
-  template:
+  ansible.builtin.template:
     src: config.toml.j2
     dest: "{{ user.home }}/.config/helix/config.toml"
     owner: "{{ user.name }}"
-    mode: '0644'
+    mode: "0644"
   when: app_states.helix | default('present') == 'present'
 
 - name: Deploy Helix languages.toml
-  template:
+  ansible.builtin.template:
     src: languages.toml.j2
     dest: "{{ user.home }}/.config/helix/languages.toml"
     owner: "{{ user.name }}"
-    mode: '0644'
+    mode: "0644"
   when: app_states.helix | default('present') == 'present'
 
 - name: Deploy custom COSMIC theme
-  template:
+  ansible.builtin.template:
     src: cosmic-term16.toml.j2
     dest: "{{ user.home }}/.config/helix/themes/cosmic-term16.toml"
     owner: "{{ user.name }}"
-    mode: '0644'
+    mode: "0644"
   when: app_states.helix | default('present') == 'present'
 
 # Set Helix as default editor
 - name: Set EDITOR environment variable for Helix
-  lineinfile:
+  ansible.builtin.lineinfile:
     path: "{{ user.home }}/.profile"
-    line: 'export EDITOR=hx'
-    create: yes
+    line: "export EDITOR=hx"
+    create: true
     owner: "{{ user.name }}"
-    mode: '0644'
+    mode: "0644"
   when: app_states.helix | default('present') == 'present'
 
 # Cleanup when absent
 - name: Remove Helix configuration when absent
-  file:
+  ansible.builtin.file:
     path: "{{ user.home }}/.config/helix"
     state: absent
   when: app_states.helix | default('present') == 'absent'
 
 - name: Remove Helix PPA when absent
-  apt_repository:
-    repo: "deb [arch=amd64 signed-by=/usr/share/keyrings/helix-ppa.gpg] https://ppa.launchpadcontent.net/maveonair/helix-editor/ubuntu {{ ansible_distribution_release }} main"
+  ansible.builtin.apt_repository:
+    repo: "deb [arch=amd64 signed-by=/usr/share/keyrings/helix-ppa.gpg] https://ppa.launchpadcontent.net/maveonair/helix-editor/ubuntu {{ ansible_distribution_release
+      }} main"
     filename: helix-ppa
     state: absent
-  become: yes
+  become: true
   when: app_states.helix | default('present') == 'absent'
 
 - name: Remove Helix GPG key when absent
-  file:
+  ansible.builtin.file:
     path: /usr/share/keyrings/helix-ppa.gpg
     state: absent
-  become: yes
+  become: true
   when: app_states.helix | default('present') == 'absent'
 
 - name: Remove EDITOR variable when absent
-  lineinfile:
+  ansible.builtin.lineinfile:
     path: "{{ user.home }}/.profile"
-    line: 'export EDITOR=hx'
+    line: "export EDITOR=hx"
     state: absent
   when: app_states.helix | default('present') == 'absent'

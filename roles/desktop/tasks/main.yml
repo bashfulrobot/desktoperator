@@ -2,6 +2,6 @@
 # Desktop role - desktop environment configuration
 
 - name: Include COSMIC desktop configuration
-  include_role:
+  ansible.builtin.include_role:
     name: desktop/cosmic
   tags: [cosmic]

@@ -1,23 +1,23 @@
 ---
 # Handlers for libvirt role
 
-- name: reload udev rules
+- name: Reload udev rules
   ansible.builtin.command:
     cmd: udevadm control --reload-rules && udevadm trigger --subsystem-match=misc
   become: true
 
-- name: reload apparmor profiles
+- name: Reload apparmor profiles
   ansible.builtin.command:
     cmd: apparmor_parser -r /etc/apparmor.d/usr.sbin.libvirtd
   become: true
 
-- name: restart libvirtd
+- name: Restart libvirtd
   ansible.builtin.systemd:
     name: libvirtd
     state: restarted
   become: true
 
-- name: reload ufw
+- name: Reload ufw
   ansible.builtin.shell:
     cmd: |
       # Flush NAT POSTROUTING to prevent UFW from appending duplicate rules

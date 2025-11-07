@@ -18,4 +18,4 @@ codex_cli_mcp_extra_args: ["--cache"]
 # Cache update automation
 codex_cli_cache_script: "{{ playbook_dir }}/scripts/mcp-cache-update.sh"
 codex_cli_cache_update_enabled: true
-codex_cli_cache_timer_wake_system: false  # Set to true to wake from suspend
+codex_cli_cache_timer_wake_system: false # Set to true to wake from suspend

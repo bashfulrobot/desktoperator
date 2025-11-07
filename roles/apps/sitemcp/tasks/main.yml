@@ -2,8 +2,8 @@
 # SiteMCP installation tasks
 
 - name: Install sitemcp globally via npm
-  shell: npm install -g sitemcp
-  become: yes
+  ansible.builtin.command: npm install -g sitemcp
+  become: true
   when: app_states['sitemcp'] | default('present') == 'present'
   register: sitemcp_install
   failed_when: false
@@ -14,7 +14,7 @@
     path: "{{ user.home }}/Documents/Kong/My-drive/Docs/Mcp"
     state: directory
     owner: "{{ user.name }}"
-    mode: '0755'
+    mode: "0755"
   when: app_states['sitemcp'] | default('present') == 'present'
 
 - name: Ensure product-specific MCP directories exist
@@ -22,7 +22,7 @@
     path: "{{ user.home }}/Documents/Kong/My-drive/Docs/Mcp/{{ item }}"
     state: directory
     owner: "{{ user.name }}"
-    mode: '0755'
+    mode: "0755"
   loop:
     - gateway
     - konnect
@@ -38,7 +38,7 @@
     path: "{{ user.home }}/Documents/Kong/My-drive/Docs/Mcp/{{ item }}/.cache/sitemcp"
     state: directory
     owner: "{{ user.name }}"
-    mode: '0755'
+    mode: "0755"
   loop:
     - gateway
     - konnect
@@ -54,7 +54,7 @@
     src: refresh-cache.sh
     dest: "{{ user.home }}/Documents/Kong/My-drive/Docs/Mcp/refresh-cache.sh"
     owner: "{{ user.name }}"
-    mode: '0755'
+    mode: "0755"
   when: app_states['sitemcp'] | default('present') == 'present'
 
 - name: Deploy Gateway MCP configuration
@@ -62,7 +62,7 @@
     src: gateway-mcp.json.j2
     dest: "{{ user.home }}/Documents/Kong/My-drive/Docs/Mcp/gateway/.mcp.json"
     owner: "{{ user.name }}"
-    mode: '0644'
+    mode: "0644"
   when: app_states['sitemcp'] | default('present') == 'present'
 
 - name: Deploy Konnect MCP configuration
@@ -70,7 +70,7 @@
     src: konnect-mcp.json.j2
     dest: "{{ user.home }}/Documents/Kong/My-drive/Docs/Mcp/konnect/.mcp.json"
     owner: "{{ user.name }}"
-    mode: '0644'
+    mode: "0644"
   when: app_states['sitemcp'] | default('present') == 'present'
 
 - name: Deploy AI Gateway MCP configuration
@@ -78,7 +78,7 @@
     src: ai-gateway-mcp.json.j2
     dest: "{{ user.home }}/Documents/Kong/My-drive/Docs/Mcp/ai-gateway/.mcp.json"
     owner: "{{ user.name }}"
-    mode: '0644'
+    mode: "0644"
   when: app_states['sitemcp'] | default('present') == 'present'
 
 - name: Deploy Mesh MCP configuration
@@ -86,7 +86,7 @@
     src: mesh-mcp.json.j2
     dest: "{{ user.home }}/Documents/Kong/My-drive/Docs/Mcp/mesh/.mcp.json"
     owner: "{{ user.name }}"
-    mode: '0644'
+    mode: "0644"
   when: app_states['sitemcp'] | default('present') == 'present'
 
 - name: Deploy Plugins MCP configuration
@@ -94,7 +94,7 @@
     src: plugins-mcp.json.j2
     dest: "{{ user.home }}/Documents/Kong/My-drive/Docs/Mcp/plugins/.mcp.json"
     owner: "{{ user.name }}"
-    mode: '0644'
+    mode: "0644"
   when: app_states['sitemcp'] | default('present') == 'present'
 
 - name: Deploy decK MCP configuration
@@ -102,7 +102,7 @@
     src: deck-mcp.json.j2
     dest: "{{ user.home }}/Documents/Kong/My-drive/Docs/Mcp/deck/.mcp.json"
     owner: "{{ user.name }}"
-    mode: '0644'
+    mode: "0644"
   when: app_states['sitemcp'] | default('present') == 'present'
 
 - name: Deploy Kubernetes MCP configuration
@@ -110,7 +110,7 @@
     src: kubernetes-mcp.json.j2
     dest: "{{ user.home }}/Documents/Kong/My-drive/Docs/Mcp/kubernetes/.mcp.json"
     owner: "{{ user.name }}"
-    mode: '0644'
+    mode: "0644"
   when: app_states['sitemcp'] | default('present') == 'present'
 
 - name: Ensure systemd user directory exists
@@ -118,7 +118,7 @@
     path: "{{ user.home }}/.config/systemd/user"
     state: directory
     owner: "{{ user.name }}"
-    mode: '0755'
+    mode: "0755"
   when:
     - app_states['sitemcp'] | default('present') == 'present'
     - sitemcp_enable_scheduled_tasks | default(false)
@@ -130,8 +130,8 @@
     dest: /etc/systemd/system/sitemcp-cache-refresh.service
     owner: root
     group: root
-    mode: '0644'
-  become: yes
+    mode: "0644"
+  become: true
   when:
     - app_states['sitemcp'] | default('present') == 'present'
     - sitemcp_enable_scheduled_tasks | default(false)
@@ -144,8 +144,8 @@
     dest: /etc/systemd/system/sitemcp-cache-refresh.timer
     owner: root
     group: root
-    mode: '0644'
-  become: yes
+    mode: "0644"
+  become: true
   when:
     - app_states['sitemcp'] | default('present') == 'present'
     - sitemcp_enable_scheduled_tasks | default(false)
@@ -157,16 +157,16 @@
     name: sitemcp-cache-refresh.timer
     enabled: true
     state: started
-    daemon_reload: yes
-  become: yes
+    daemon_reload: true
+  become: true
   when:
     - app_states['sitemcp'] | default('present') == 'present'
     - sitemcp_enable_scheduled_tasks | default(false)
     - inventory_hostname == 'qbert'
 
 - name: Uninstall sitemcp globally via npm
-  shell: npm uninstall -g sitemcp
-  become: yes
+  ansible.builtin.command: npm uninstall -g sitemcp
+  become: true
   when: app_states['sitemcp'] | default('present') == 'absent'
   register: sitemcp_uninstall
   failed_when: false
@@ -183,7 +183,7 @@
     name: sitemcp-cache-refresh.timer
     enabled: false
     state: stopped
-  become: yes
+  become: true
   when: app_states['sitemcp'] | default('present') == 'absent'
   failed_when: false
 
@@ -191,7 +191,7 @@
   ansible.builtin.file:
     path: "{{ item }}"
     state: absent
-  become: yes
+  become: true
   loop:
     - /etc/systemd/system/sitemcp-cache-refresh.service
     - /etc/systemd/system/sitemcp-cache-refresh.timer

@@ -6,7 +6,7 @@
   ansible.builtin.file:
     path: "{{ nerd_fonts_state_dir }}/{{ font.name }}"
     state: directory
-    mode: '0755'
+    mode: "0755"
   become: true
 
 - name: "Read installed version metadata for {{ font.name }}"
@@ -39,11 +39,11 @@
         suffix: "_{{ font.name }}"
       register: font_temp_dir
 
-    - name: "Download {{ font.name }} release"
+    - name: "Download font release: {{ font.name }}"
       ansible.builtin.get_url:
         url: "https://github.com/ryanoasis/nerd-fonts/releases/download/{{ font_release_data.json.tag_name }}/{{ font.name }}.zip"
         dest: "{{ font_temp_dir.path }}/{{ font.name }}.zip"
-        mode: '0644'
+        mode: "0644"
 
     - name: "Extract {{ font.name }}"
       ansible.builtin.unarchive:
@@ -66,7 +66,7 @@
             "html_url": "{{ font_release_data.json.html_url }}"
           }
         dest: "{{ nerd_fonts_state_dir }}/{{ font.name }}/version.json"
-        mode: '0644'
+        mode: "0644"
       become: true
 
     - name: "Clean up temporary directory for {{ font.name }}"

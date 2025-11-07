@@ -14,7 +14,7 @@
     path: "{{ user.home }}/.config/fish/conf.d"
     state: directory
     owner: "{{ user.name }}"
-    mode: '0755'
+    mode: "0755"
   when: app_states['codex-cli'] | default('present') == 'present'
 
 - name: Deploy Fish completions for Codex CLI
@@ -22,7 +22,7 @@
     src: codex-cli.fish
     dest: "{{ user.home }}/.config/fish/conf.d/codex-cli.fish"
     owner: "{{ user.name }}"
-    mode: '0644'
+    mode: "0644"
   when: app_states['codex-cli'] | default('present') == 'present'
 
 - name: Ensure Codex CLI config directory exists
@@ -30,7 +30,7 @@
     path: "{{ codex_cli_config_dir }}"
     state: directory
     owner: "{{ user.name }}"
-    mode: '0755'
+    mode: "0755"
   when: app_states['codex-cli'] | default('present') == 'present'
 
 - name: Configure Codex CLI MCP servers
@@ -38,7 +38,7 @@
     src: config.toml.j2
     dest: "{{ codex_cli_config_file }}"
     owner: "{{ user.name }}"
-    mode: '0644'
+    mode: "0644"
   when: app_states['codex-cli'] | default('present') == 'present'
 
 - name: Create MCP cache log directory
@@ -47,7 +47,7 @@
     state: directory
     owner: "{{ user.name }}"
     group: "{{ user.name }}"
-    mode: '0755'
+    mode: "0755"
   become: true
   when:
     - app_states['codex-cli'] | default('present') == 'present'
@@ -58,7 +58,7 @@
     src: mcp-cache-update.service.j2
     dest: "{{ user.home }}/.config/systemd/user/mcp-cache-update.service"
     owner: "{{ user.name }}"
-    mode: '0644'
+    mode: "0644"
   when:
     - app_states['codex-cli'] | default('present') == 'present'
     - codex_cli_cache_update_enabled | default(true)
@@ -69,7 +69,7 @@
     src: mcp-cache-update.timer.j2
     dest: "{{ user.home }}/.config/systemd/user/mcp-cache-update.timer"
     owner: "{{ user.name }}"
-    mode: '0644'
+    mode: "0644"
   when:
     - app_states['codex-cli'] | default('present') == 'present'
     - codex_cli_cache_update_enabled | default(true)

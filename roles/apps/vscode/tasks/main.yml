@@ -3,144 +3,144 @@
 
 # Ensure color variables exist (auto-generate if missing)
 - name: Check if auto-colors.yml exists
-  stat:
+  ansible.builtin.stat:
     path: "{{ playbook_dir }}/group_vars/all/auto-colors.yml"
   register: auto_colors_file
   delegate_to: localhost
-  become: no
+  become: false
 
 - name: Generate color variables if missing
-  command: "{{ playbook_dir }}/scripts/generate-cosmic-colors.sh"
+  ansible.builtin.command: "{{ playbook_dir }}/scripts/generate-cosmic-colors.sh"
   args:
     chdir: "{{ playbook_dir }}"
   delegate_to: localhost
-  become: no
+  become: false
   when:
     - not auto_colors_file.stat.exists
     - app_states['vscode'] | default('present') == 'present'
 
 - name: Load auto-generated color variables
-  include_vars:
+  ansible.builtin.include_vars:
     file: "{{ playbook_dir }}/group_vars/all/auto-colors.yml"
   when: app_states['vscode'] | default('present') == 'present'
 
 - name: Install dependencies for VSCode
-  apt:
+  ansible.builtin.apt:
     name:
       - wget
       - gpg
       - apt-transport-https
     state: present
-  become: yes
+  become: true
   when: app_states['vscode'] | default('present') == 'present'
 
 - name: Remove conflicting VSCode repository files
-  file:
+  ansible.builtin.file:
     path: "{{ item }}"
     state: absent
   loop:
     - /etc/apt/sources.list.d/vscode.list
     - /etc/apt/sources.list.d/vscode.sources
-  become: yes
+  become: true
   when: app_states['vscode'] | default('present') == 'present'
 
 - name: Remove conflicting Microsoft GPG keys
-  file:
+  ansible.builtin.file:
     path: "{{ item }}"
     state: absent
   loop:
     - /usr/share/keyrings/microsoft.gpg
     - /etc/apt/trusted.gpg.d/microsoft.gpg
-  become: yes
+  become: true
   when: app_states['vscode'] | default('present') == 'present'
 
 - name: Download Microsoft GPG key
-  get_url:
+  ansible.builtin.get_url:
     url: https://packages.microsoft.com/keys/microsoft.asc
     dest: /tmp/microsoft.asc
-    mode: '0644'
-  become: yes
+    mode: "0644"
+  become: true
   when: app_states['vscode'] | default('present') == 'present'
 
 - name: Add Microsoft GPG key to keyrings
-  shell: |
+  ansible.builtin.shell: |
     gpg --dearmor < /tmp/microsoft.asc > /usr/share/keyrings/packages.microsoft.gpg
     chmod 644 /usr/share/keyrings/packages.microsoft.gpg
   args:
     creates: /usr/share/keyrings/packages.microsoft.gpg
-  become: yes
+  become: true
   when: app_states['vscode'] | default('present') == 'present'
 
 - name: Clean up temporary GPG key file
-  file:
+  ansible.builtin.file:
     path: /tmp/microsoft.asc
     state: absent
-  become: yes
+  become: true
   when: app_states['vscode'] | default('present') == 'present'
 
 - name: Add VSCode repository
-  apt_repository:
+  ansible.builtin.apt_repository:
     repo: "deb [arch=amd64 signed-by=/usr/share/keyrings/packages.microsoft.gpg] https://packages.microsoft.com/repos/code stable main"
     filename: vscode
     state: present
-  become: yes
+  become: true
   when: app_states['vscode'] | default('present') == 'present'
 
 - name: Flush handlers to ensure apt cache is updated
-  meta: flush_handlers
-
+  ansible.builtin.meta: flush_handlers
 - name: Install Visual Studio Code
-  apt:
+  ansible.builtin.apt:
     name: code
     state: "{{ app_states['vscode'] | default('present') }}"
-    update_cache: yes
-  become: yes
+    update_cache: true
+  become: true
 
 # Install high-resolution icon in proper icon theme directory
 # VSCode package installs 1024x1024 PNG to pixmaps, copy to hicolor theme
 - name: Ensure hicolor 1024x1024 apps directory exists
-  file:
+  ansible.builtin.file:
     path: /usr/share/icons/hicolor/1024x1024/apps
     state: directory
-    mode: '0755'
-  become: yes
+    mode: "0755"
+  become: true
   when: app_states['vscode'] | default('present') == 'present'
 
 - name: Copy VSCode icon to hicolor theme directory (1024x1024)
-  copy:
+  ansible.builtin.copy:
     src: /usr/share/pixmaps/vscode.png
     dest: /usr/share/icons/hicolor/1024x1024/apps/vscode.png
-    remote_src: yes
-    mode: '0644'
-  become: yes
+    remote_src: true
+    mode: "0644"
+  become: true
   when: app_states['vscode'] | default('present') == 'present'
 
 - name: Update icon cache for VSCode
-  command: gtk-update-icon-cache -f -t /usr/share/icons/hicolor
-  become: yes
+  ansible.builtin.command: gtk-update-icon-cache -f -t /usr/share/icons/hicolor
+  become: true
   when: app_states['vscode'] | default('present') == 'present'
-  ignore_errors: yes
+  failed_when: false
+  changed_when: false
 
 # Fix keyring access on COSMIC Desktop (Chromium doesn't recognize COSMIC)
 # Force VSCode to use gnome-libsecret for password storage + Wayland optimizations
 - name: Create VSCode config directory
-  file:
+  ansible.builtin.file:
     path: "{{ user.home }}/.config/Code/User"
     state: directory
     owner: "{{ user.name }}"
-    mode: '0755'
+    mode: "0755"
   when: app_states['vscode'] | default('present') == 'present'
 
 - name: Create .vscode directory for argv.json
-  file:
+  ansible.builtin.file:
     path: "{{ user.home }}/.vscode"
     state: directory
     owner: "{{ user.name }}"
-    mode: '0755'
+    mode: "0755"
   when: app_states['vscode'] | default('present') == 'present'
 
 - name: Configure VSCode runtime arguments (argv.json)
-  copy:
+  ansible.builtin.copy:
     content: |
       // This configuration file allows you to pass permanent command line arguments to VS Code.
       // Only a subset of arguments is currently supported to reduce the likelihood of breaking
@@ -167,17 +167,17 @@
       }
     dest: "{{ user.home }}/.vscode/argv.json"
     owner: "{{ user.name }}"
-    mode: '0644'
+    mode: "0644"
   when: app_states['vscode'] | default('present') == 'present'
 
 - name: Configure VSCode Wayland flags (code-flags.conf)
-  copy:
+  ansible.builtin.copy:
     content: |
       --enable-features=UseOzonePlatform,WaylandWindowDecorations
       --ozone-platform=wayland
     dest: "{{ user.home }}/.config/code-flags.conf"
     owner: "{{ user.name }}"
-    mode: '0644'
+    mode: "0644"
   when: app_states['vscode'] | default('present') == 'present'
 
 # COSMIC Theme Integration
@@ -185,26 +185,26 @@
 # Ansible only checks that they exist
 
 - name: Check if VSCode theme VSIX files exist
-  stat:
+  ansible.builtin.stat:
     path: "{{ playbook_dir }}/extras/themes/vscode/cosmic-theme.vsix"
   register: vscode_vsix_file
   delegate_to: localhost
-  become: no
+  become: false
 
 - name: Generate VSCode themes if missing
-  command: "{{ playbook_dir }}/scripts/generate-vscode-themes.sh"
+  ansible.builtin.command: "{{ playbook_dir }}/scripts/generate-vscode-themes.sh"
   args:
     chdir: "{{ playbook_dir }}"
   delegate_to: localhost
-  become: no
+  become: false
   when:
     - app_states['vscode'] | default('present') == 'present'
     - not vscode_vsix_file.stat.exists
 
 # Install vsce globally for packaging VSCode extensions (needed by generation script)
 - name: Install vsce globally via npm
-  shell: npm install -g @vscode/vsce
-  become: yes
+  ansible.builtin.command: npm install -g @vscode/vsce
+  become: true
   when: app_states['vscode'] | default('present') == 'present'
   register: vsce_install
   failed_when: false
@@ -212,16 +212,16 @@
 
 # Cleanup when absent
 - name: Remove VSCode repository when absent
-  apt_repository:
+  ansible.builtin.apt_repository:
     repo: "deb [arch=amd64 signed-by=/usr/share/keyrings/packages.microsoft.gpg] https://packages.microsoft.com/repos/code stable main"
     filename: vscode
     state: absent
-  become: yes
+  become: true
   when: app_states['vscode'] | default('present') == 'absent'
 
 - name: Remove Microsoft GPG key when absent
-  file:
+  ansible.builtin.file:
     path: /usr/share/keyrings/packages.microsoft.gpg
     state: absent
-  become: yes
+  become: true
   when: app_states['vscode'] | default('present') == 'absent'

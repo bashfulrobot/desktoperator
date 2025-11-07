@@ -22,7 +22,7 @@
   ansible.builtin.file:
     path: "{{ github_release_state_dir }}"
     state: directory
-    mode: '0755'
+    mode: "0755"
   become: true
 
 - name: "Check if binary exists for {{ repo }}"
@@ -50,7 +50,8 @@
 
 - name: "Determine if update is needed for {{ repo }}"
   ansible.builtin.set_fact:
-    github_needs_update: "{{ not system_github_binary_exists.stat.exists or (github_installed_published_at | default('')) != system_github_release_data.json.published_at }}"
+    github_needs_update: "{{ not system_github_binary_exists.stat.exists or (github_installed_published_at | default('')) != system_github_release_data.json.published_at
+      }}"
 
 - name: "Download and install release from GitHub for {{ repo }}"
   when: github_needs_update | bool
@@ -79,7 +80,7 @@
         src: "{{ github_release_asset.browser_download_url }}"
         dest: "{{ system_github_temp_dir.path }}"
         remote_src: true
-        mode: '0755'
+        mode: "0755"
 
     - name: "Find extracted binary"
       ansible.builtin.find:
@@ -92,7 +93,7 @@
       ansible.builtin.copy:
         src: "{{ system_github_found_binary.files[0].path }}"
         dest: "{{ github_release_install_dir }}/{{ binary_name }}"
-        mode: '0755'
+        mode: "0755"
         remote_src: true
       become: true
 
@@ -105,7 +106,7 @@
             "html_url": "{{ system_github_release_data.json.html_url }}"
           }
         dest: "{{ github_release_state_dir }}/version.json"
-        mode: '0644'
+        mode: "0644"
       become: true
 
     - name: "Clean up temporary directory"

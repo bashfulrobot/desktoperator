@@ -191,6 +191,11 @@ function generate-icon-set --description 'Download/process icon and generate mul
         end
     end
 
+    # Save original input icon (before any processing) with same filename
+    set -l original_filename (basename "$master_icon")
+    cp "$master_icon" "$output_dir/$original_filename"
+    echo "✓ Saved original icon: $original_filename"
+
     # Save master icon with proper naming
     cp "$source_icon" "$output_dir/$master_filename"
     echo "✓ Saved master icon: $master_filename"
@@ -243,11 +248,11 @@ function _create_ansible_tasks --description 'Internal helper to generate Ansibl
     echo "✓ Generated desktop file."
 
 {% raw %}
-    set tasks_content "---\n# $name Pake App installation\n- name: Install $name .deb package\n  apt:\n    deb: '{{ role_path }}/files/$name.deb'\n    state: present\n  become: yes\n  when: app_states['$app_state_key'] | default('present') == 'present'\n\n- name: Remove .deb desktop files\n  file:\n    path: '{{ item }}'\n    state: absent\n  loop:\n    - /usr/share/applications/$name.desktop\n    - /usr/share/applications/com.pake.$name.desktop\n  become: yes\n  when: app_states['$app_state_key'] | default('present') == 'present'\n\n- name: Install custom desktop file and icons\n  copy:\n    src: '{{ item.src }}'\n    dest: '{{ item.dest }}'\n    mode: '0644'\n  loop:\n    - { src: 'pake-$name.desktop', dest: '/usr/share/applications/pake-$name.desktop' }\n    - { src: 'pake-$name-icon-16.png', dest: '/usr/share/icons/hicolor/16x16/apps/pake-$name.png' }\n    - { src: 'pake-$name-icon-32.png', dest: '/usr/share/icons/hicolor/32x32/apps/pake-$name.png' }\n    - { src: 'pake-$name-icon-48.png', dest: '/usr/share/icons/hicolor/48x48/apps/pake-$name.png' }\n    - { src: 'pake-$name-icon-64.png', dest: '/usr/share/icons/hicolor/64x64/apps/pake-$name.png' }\n    - { src: 'pake-$name-icon-128.png', dest: '/usr/share/icons/hicolor/128x128/apps/pake-$name.png' }\n    - { src: 'pake-$name-icon-256.png', dest: '/usr/share/icons/hicolor/256x256/apps/pake-$name.png' }\n    - { src: 'pake-$name-icon-512.png', dest: '/usr/share/icons/hicolor/512x512/apps/pake-$name.png' }\n    - { src: 'pake-$name-icon-800.png', dest: '/usr/share/icons/hicolor/scalable/apps/pake-$name.png' }\n  become: yes\n  when: app_states['$app_state_key'] | default('present') == 'present'\n  notify: Update icon cache\n\n# Cleanup when absent\n- name: Remove $name Pake app\n  apt:\n    name: $name\n    state: absent\n  become: yes\n  when: app_states['$app_state_key'] | default('present') == 'absent'\n"
+    set tasks_content "---\n# $name Pake App installation\n- name: Install $name .deb package\n  apt:\n    deb: '{{ role_path }}/files/$name.deb'\n    state: present\n  become: true\n  when: app_states['$app_state_key'] | default('present') == 'present'\n\n- name: Remove .deb desktop files\n  file:\n    path: '{{ item }}'\n    state: absent\n  loop:\n    - /usr/share/applications/$name.desktop\n    - /usr/share/applications/com.pake.$name.desktop\n  become: true\n  when: app_states['$app_state_key'] | default('present') == 'present'\n\n- name: Install custom desktop file and icons\n  copy:\n    src: '{{ item.src }}'\n    dest: '{{ item.dest }}'\n    mode: '0644'\n  loop:\n    - { src: 'pake-$name.desktop', dest: '/usr/share/applications/pake-$name.desktop' }\n    - { src: 'pake-$name-icon-16.png', dest: '/usr/share/icons/hicolor/16x16/apps/pake-$name.png' }\n    - { src: 'pake-$name-icon-32.png', dest: '/usr/share/icons/hicolor/32x32/apps/pake-$name.png' }\n    - { src: 'pake-$name-icon-48.png', dest: '/usr/share/icons/hicolor/48x48/apps/pake-$name.png' }\n    - { src: 'pake-$name-icon-64.png', dest: '/usr/share/icons/hicolor/64x64/apps/pake-$name.png' }\n    - { src: 'pake-$name-icon-128.png', dest: '/usr/share/icons/hicolor/128x128/apps/pake-$name.png' }\n    - { src: 'pake-$name-icon-256.png', dest: '/usr/share/icons/hicolor/256x256/apps/pake-$name.png' }\n    - { src: 'pake-$name-icon-512.png', dest: '/usr/share/icons/hicolor/512x512/apps/pake-$name.png' }\n    - { src: 'pake-$name-icon-800.png', dest: '/usr/share/icons/hicolor/scalable/apps/pake-$name.png' }\n  become: true\n  when: app_states['$app_state_key'] | default('present') == 'present'\n  notify: Update icon cache\n\n# Cleanup when absent\n- name: Remove $name Pake app\n  apt:\n    name: $name\n    state: absent\n  become: true\n  when: app_states['$app_state_key'] | default('present') == 'absent'\n"
     echo -e $tasks_content > "$role_path/tasks/main.yml"
     echo "✓ Created tasks/main.yml."
 
-    set handlers_content "---\n- name: Update icon cache\n  command: gtk-update-icon-cache -f /usr/share/icons/hicolor\n  become: yes\n  changed_when: false\n"
+    set handlers_content "---\n- name: Update icon cache\n  command: gtk-update-icon-cache -f /usr/share/icons/hicolor\n  become: true\n  changed_when: false\n"
     echo -e $handlers_content > "$role_path/handlers/main.yml"
     echo "✓ Created handlers/main.yml."
 {% endraw %}

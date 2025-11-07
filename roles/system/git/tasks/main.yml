@@ -76,7 +76,7 @@
     path: "{{ user.home }}/.config/git"
     state: directory
     owner: "{{ user.name }}"
-    mode: '0755'
+    mode: "0755"
   tags: [git, system]
 
 - name: Deploy gitconfig
@@ -84,7 +84,7 @@
     src: gitconfig.j2
     dest: "{{ user.home }}/.gitconfig"
     owner: "{{ user.name }}"
-    mode: '0644'
+    mode: "0644"
   tags: [git, system]
 
 - name: Deploy git allowed_signers for SSH signing
@@ -92,7 +92,7 @@
     src: git-allowed_signers.j2
     dest: "{{ user.home }}/.config/git/allowed_signers"
     owner: "{{ user.name }}"
-    mode: '0644'
+    mode: "0644"
   tags: [git, system]
 
 - name: Create gh config directory
@@ -100,7 +100,7 @@
     path: "{{ user.home }}/.config/gh"
     state: directory
     owner: "{{ user.name }}"
-    mode: '0755'
+    mode: "0755"
   tags: [git, system]
 
 - name: Deploy gh (GitHub CLI) config
@@ -108,7 +108,7 @@
     src: gh-config.yml.j2
     dest: "{{ user.home }}/.config/gh/config.yml"
     owner: "{{ user.name }}"
-    mode: '0644'
+    mode: "0644"
   tags: [git, system]
 
 - name: Create lazygit config directory
@@ -116,7 +116,7 @@
     path: "{{ user.home }}/.config/lazygit"
     state: directory
     owner: "{{ user.name }}"
-    mode: '0755'
+    mode: "0755"
   tags: [git, system]
 
 - name: Deploy lazygit config
@@ -124,7 +124,7 @@
     src: lazygit-config.yml.j2
     dest: "{{ user.home }}/.config/lazygit/config.yml"
     owner: "{{ user.name }}"
-    mode: '0644'
+    mode: "0644"
   tags: [git, system]
 
 - name: Deploy git worktree fish functions
@@ -132,5 +132,5 @@
     src: fish-git-worktree-functions.fish.j2
     dest: "{{ user.home }}/.config/fish/conf.d/git-worktree-functions.fish"
     owner: "{{ user.name }}"
-    mode: '0644'
+    mode: "0644"
   tags: [git, system]

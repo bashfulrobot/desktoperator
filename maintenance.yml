@@ -2,43 +2,43 @@
 # Maintenance playbook - updates, cleanup, etc.
 - name: System Maintenance
   hosts: all
-  become: yes
+  become: true
 
   tasks:
     - name: Update apt cache
-      apt:
-        update_cache: yes
+      ansible.builtin.apt:
+        update_cache: true
         cache_valid_time: 3600
 
     - name: Upgrade all packages
-      apt:
+      ansible.builtin.apt:
         upgrade: dist
-        autoremove: yes
-        autoclean: yes
+        autoremove: true
+        autoclean: true
       when: updates.auto_update | default(false)
 
     - name: Update flatpak packages
-      command: flatpak update -y
+      ansible.builtin.command: flatpak update -y
       changed_when: false
       failed_when: false
 
     - name: Update snap packages
-      command: snap refresh
+      ansible.builtin.command: snap refresh
       changed_when: false
       failed_when: false
 
     - name: Clean up old kernels
-      shell: |
+      ansible.builtin.shell: |
         apt autoremove --purge -y
       changed_when: false
 
     - name: Check if reboot is required
-      stat:
+      ansible.builtin.stat:
         path: /var/run/reboot-required
       register: reboot_required
 
     - name: Reboot if required
-      reboot:
+      ansible.builtin.reboot:
         msg: "Rebooting to apply updates"
         reboot_timeout: 300
       when:

@@ -14,8 +14,8 @@
   when: app_states['oq'] | default('present') == 'present'
 
 - name: Remove oq binary when absent
-  file:
+  ansible.builtin.file:
     path: /usr/local/bin/oq
     state: absent
   when: app_states['oq'] | default('present') == 'absent'
-  become: yes
+  become: true

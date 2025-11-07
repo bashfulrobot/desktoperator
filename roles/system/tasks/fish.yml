@@ -2,79 +2,79 @@
 # Fish shell configuration
 
 - name: Install fish shell
-  apt:
+  ansible.builtin.apt:
     name: fish
     state: present
-  become: yes
+  become: true
   tags: [system]
 
 - name: Create fish config directory
-  file:
+  ansible.builtin.file:
     path: "{{ user.home }}/.config/fish"
     state: directory
     owner: "{{ user.name }}"
     group: "{{ user.name }}"
-    mode: '0755'
-  become: yes
+    mode: "0755"
+  become: true
   tags: [system]
 
 - name: Create fish conf.d directory for modular configuration
-  file:
+  ansible.builtin.file:
     path: "{{ user.home }}/.config/fish/conf.d"
     state: directory
     owner: "{{ user.name }}"
     group: "{{ user.name }}"
-    mode: '0755'
-  become: yes
+    mode: "0755"
+  become: true
   tags: [system]
 
 - name: Deploy fish config
-  template:
+  ansible.builtin.template:
     src: config.fish.j2
     dest: "{{ user.home }}/.config/fish/config.fish"
     owner: "{{ user.name }}"
     group: "{{ user.name }}"
-    mode: '0644'
-  become: yes
+    mode: "0644"
+  become: true
   when: fish_config_enabled | default(true)
   tags: [system]
 
 - name: Deploy general fish functions
-  template:
+  ansible.builtin.template:
     src: fish-general-functions.fish.j2
     dest: "{{ user.home }}/.config/fish/conf.d/general-functions.fish"
     owner: "{{ user.name }}"
     group: "{{ user.name }}"
-    mode: '0644'
-  become: yes
+    mode: "0644"
+  become: true
   tags: [system]
 
 - name: Deploy download-logo function
-  template:
+  ansible.builtin.template:
     src: download-logo.fish.j2
     dest: "{{ user.home }}/.config/fish/conf.d/download-logo.fish"
     owner: "{{ user.name }}"
     group: "{{ user.name }}"
-    mode: '0644'
-  become: yes
+    mode: "0644"
+  become: true
   tags: [system]
 
 - name: Set fish as default shell
-  user:
+  ansible.builtin.user:
     name: "{{ user.name }}"
     shell: "{{ user.shell }}"
-  become: yes
+  become: true
   when: user.shell == '/usr/bin/fish'
   tags: [system]
 
 - name: Deploy root bashrc with essential aliases and functions
-  template:
+  ansible.builtin.template:
     src: root-bashrc.j2
     dest: /root/.bashrc
     owner: root
     group: root
-    mode: '0644'
-  become: yes
+    mode: "0644"
+  become: true
   when: root_bashrc_enabled | default(true)
 
   tags: [system]

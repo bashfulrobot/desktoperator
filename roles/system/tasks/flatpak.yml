@@ -3,10 +3,10 @@
 # Individual flatpak apps are now managed as individual roles in roles/apps/
 
 - name: Install flatpak
-  apt:
+  ansible.builtin.apt:
     name: flatpak
     state: present
-  become: yes
+  become: true
   tags: [system]
 
 - name: Add Flathub repository
@@ -14,6 +14,6 @@
     name: flathub
     state: present
     flatpakrepo_url: https://dl.flathub.org/repo/flathub.flatpakrepo
-  become: yes
+  become: true
 
   tags: [system]

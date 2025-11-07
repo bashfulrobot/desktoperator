@@ -13,17 +13,17 @@
   ansible.builtin.apt:
     name:
       # Font management tools
-      - fontconfig                  # Font configuration library
-      - unzip                       # For extracting font archives
-      - font-manager                # GUI font management tool
+      - fontconfig # Font configuration library
+      - unzip # For extracting font archives
+      - font-manager # GUI font management tool
       # System fonts
-      - fonts-noto                  # Google Noto fonts (fallback)
-      - fonts-noto-color-emoji      # Google Noto color emoji
-      - fonts-noto-mono             # Google Noto monospace
-      - fonts-liberation            # Liberation fonts (metric-compatible with proprietary fonts)
-      - fonts-cantarell             # GNOME default sans-serif font
-      - culmus                      # Hebrew fonts collection (includes Aharoni-like fonts)
-      - ttf-mscorefonts-installer   # Microsoft Core Fonts (Arial, Times New Roman, etc.)
+      - fonts-noto # Google Noto fonts (fallback)
+      - fonts-noto-color-emoji # Google Noto color emoji
+      - fonts-noto-mono # Google Noto monospace
+      - fonts-liberation # Liberation fonts (metric-compatible with proprietary fonts)
+      - fonts-cantarell # GNOME default sans-serif font
+      - culmus # Hebrew fonts collection (includes Aharoni-like fonts)
+      - ttf-mscorefonts-installer # Microsoft Core Fonts (Arial, Times New Roman, etc.)
     state: present
   become: true
   when: app_states['fonts'] | default('present') == 'present'
@@ -32,7 +32,7 @@
   ansible.builtin.file:
     path: "{{ system_fonts_dir }}"
     state: directory
-    mode: '0755'
+    mode: "0755"
   become: true
   when: app_states['fonts'] | default('present') == 'present'
 
@@ -40,7 +40,7 @@
   ansible.builtin.file:
     path: "{{ system_fonts_direct_url_dir }}"
     state: directory
-    mode: '0755'
+    mode: "0755"
   become: true
   when: app_states['fonts'] | default('present') == 'present'
 
@@ -48,7 +48,7 @@
   ansible.builtin.file:
     path: "{{ system_fonts_google_dir }}"
     state: directory
-    mode: '0755'
+    mode: "0755"
   become: true
   when: app_states['fonts'] | default('present') == 'present'
 
@@ -56,7 +56,7 @@
   ansible.builtin.file:
     path: "{{ system_fonts_github_dir }}"
     state: directory
-    mode: '0755'
+    mode: "0755"
   become: true
   when: app_states['fonts'] | default('present') == 'present'
 
@@ -64,7 +64,7 @@
   ansible.builtin.file:
     path: "{{ nerd_fonts_state_dir }}"
     state: directory
-    mode: '0755'
+    mode: "0755"
   become: true
   when: app_states['fonts'] | default('present') == 'present'
 
@@ -72,7 +72,7 @@
   ansible.builtin.file:
     path: "{{ direct_url_fonts_state_dir }}"
     state: directory
-    mode: '0755'
+    mode: "0755"
   become: true
   when: app_states['fonts'] | default('present') == 'present'
 
@@ -80,7 +80,7 @@
   ansible.builtin.file:
     path: "{{ google_fonts_state_dir }}"
     state: directory
-    mode: '0755'
+    mode: "0755"
   become: true
   when: app_states['fonts'] | default('present') == 'present'
 
@@ -88,7 +88,7 @@
   ansible.builtin.file:
     path: "{{ github_fonts_state_dir }}"
     state: directory
-    mode: '0755'
+    mode: "0755"
   become: true
   when: app_states['fonts'] | default('present') == 'present'
 

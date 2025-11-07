@@ -37,7 +37,7 @@
   ansible.builtin.file:
     path: /etc/apt/keyrings
     state: directory
-    mode: '0755'
+    mode: "0755"
   become: true
   when: iac_state == 'present'
   tags: [iac, system]
@@ -46,7 +46,7 @@
   ansible.builtin.get_url:
     url: "{{ gcloud_gpg_key_url }}"
     dest: /tmp/google-cloud.gpg
-    mode: '0644'
+    mode: "0644"
   when: iac_state == 'present'
   tags: [iac, system]
 

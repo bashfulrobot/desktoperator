@@ -4,13 +4,13 @@
 
 # Talosctl installation
 - name: Check if talosctl is already installed
-  stat:
+  ansible.builtin.stat:
     path: /usr/local/bin/talosctl
   register: talosctl_binary
   when: k8s_talosctl_enabled | default(true)
 
 - name: Get installed talosctl version
-  command: /usr/local/bin/talosctl version --client --short
+  ansible.builtin.command: /usr/local/bin/talosctl version --client --short
   register: talosctl_current_version
   failed_when: false
   changed_when: false
@@ -19,25 +19,25 @@
     - talosctl_binary.stat.exists
 
 - name: Download talosctl binary
-  get_url:
+  ansible.builtin.get_url:
     url: "https://github.com/siderolabs/talos/releases/download/{{ k8s_talosctl_version }}/talosctl-linux-amd64"
     dest: /usr/local/bin/talosctl
-    mode: '0755'
+    mode: "0755"
     owner: root
     group: root
-  become: yes
+  become: true
   when:
     - k8s_talosctl_enabled | default(true)
     - not talosctl_binary.stat.exists or (k8s_talosctl_version not in talosctl_current_version.stdout | default(''))
 
 - name: Verify talosctl installation
-  command: /usr/local/bin/talosctl version --client --short
+  ansible.builtin.command: /usr/local/bin/talosctl version --client --short
   register: talosctl_verify
   changed_when: false
   when: k8s_talosctl_enabled | default(true)
 
 - name: Display talosctl version
-  debug:
+  ansible.builtin.debug:
     msg: "talosctl installed: {{ talosctl_verify.stdout }}"
   when:
     - k8s_talosctl_enabled | default(true)
@@ -45,13 +45,13 @@
 
 # Omnictl installation
 - name: Check if omnictl is already installed
-  stat:
+  ansible.builtin.stat:
     path: /usr/local/bin/omnictl
   register: omnictl_binary
   when: k8s_omnictl_enabled | default(true)
 
 - name: Get installed omnictl version
-  command: /usr/local/bin/omnictl --version
+  ansible.builtin.command: /usr/local/bin/omnictl --version
   register: omnictl_current_version
   failed_when: false
   changed_when: false
@@ -60,25 +60,25 @@
     - omnictl_binary.stat.exists
 
 - name: Download omnictl binary
-  get_url:
+  ansible.builtin.get_url:
     url: "https://github.com/siderolabs/omni/releases/download/{{ k8s_omnictl_version }}/omnictl-linux-amd64"
     dest: /usr/local/bin/omnictl
-    mode: '0755'
+    mode: "0755"
     owner: root
     group: root
-  become: yes
+  become: true
   when:
     - k8s_omnictl_enabled | default(true)
     - not omnictl_binary.stat.exists or (k8s_omnictl_version not in omnictl_current_version.stdout | default(''))
 
 - name: Verify omnictl installation
-  command: /usr/local/bin/omnictl --version
+  ansible.builtin.command: /usr/local/bin/omnictl --version
   register: omnictl_verify
   changed_when: false
   when: k8s_omnictl_enabled | default(true)
 
 - name: Display omnictl version
-  debug:
+  ansible.builtin.debug:
     msg: "omnictl installed: {{ omnictl_verify.stdout }}"
   when:
     - k8s_omnictl_enabled | default(true)
@@ -86,74 +86,74 @@
 
 # Kubectl installation
 - name: Install kubectl prerequisites
-  apt:
+  ansible.builtin.apt:
     name:
       - apt-transport-https
       - ca-certificates
       - curl
       - gnupg
     state: present
-  become: yes
+  become: true
   when: k8s_kubectl_enabled | default(true)
 
 - name: Create keyrings directory for kubectl
-  file:
+  ansible.builtin.file:
     path: /etc/apt/keyrings
     state: directory
-    mode: '0755'
-  become: yes
+    mode: "0755"
+  become: true
   when: k8s_kubectl_enabled | default(true)
 
 - name: Download Kubernetes GPG key
-  get_url:
+  ansible.builtin.get_url:
     url: "https://pkgs.k8s.io/core:/stable:/{{ k8s_kubectl_repo_version }}/deb/Release.key"
     dest: /tmp/kubernetes-release.key
-    mode: '0644'
-  become: yes
+    mode: "0644"
+  become: true
   when: k8s_kubectl_enabled | default(true)
 
 - name: Add Kubernetes GPG key to keyrings
-  shell: |
+  ansible.builtin.shell: |
     gpg --dearmor < /tmp/kubernetes-release.key > /etc/apt/keyrings/kubernetes-apt-keyring.gpg
     chmod 644 /etc/apt/keyrings/kubernetes-apt-keyring.gpg
   args:
     creates: /etc/apt/keyrings/kubernetes-apt-keyring.gpg
-  become: yes
+  become: true
   when: k8s_kubectl_enabled | default(true)
 
 - name: Clean up temporary Kubernetes GPG key file
-  file:
+  ansible.builtin.file:
     path: /tmp/kubernetes-release.key
     state: absent
-  become: yes
+  become: true
   when: k8s_kubectl_enabled | default(true)
 
 # Explicitly specify arch=amd64 to prevent i386 package lookup warnings
 # For ARM support, change arch=amd64 to arch=amd64,arm64
 - name: Add Kubernetes APT repository
-  apt_repository:
+  ansible.builtin.apt_repository:
     repo: "deb [arch=amd64 signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/{{ k8s_kubectl_repo_version }}/deb/ /"
     filename: kubernetes
     state: present
-  become: yes
+  become: true
   when: k8s_kubectl_enabled | default(true)
 
 - name: Install kubectl
-  apt:
+  ansible.builtin.apt:
     name: kubectl
     state: present
-    update_cache: yes
-  become: yes
+    update_cache: true
+  become: true
   when: k8s_kubectl_enabled | default(true)
 
 - name: Verify kubectl installation
-  command: kubectl version --client --output=yaml
+  ansible.builtin.command: kubectl version --client --output=yaml
   register: kubectl_verify
   changed_when: false
   when: k8s_kubectl_enabled | default(true)
 
 - name: Display kubectl version
-  debug:
+  ansible.builtin.debug:
     msg: "kubectl installed: {{ kubectl_verify.stdout_lines[0] }}"
   when:
     - k8s_kubectl_enabled | default(true)
@@ -161,65 +161,65 @@
 
 # Helm installation
 - name: Install Helm prerequisites
-  apt:
+  ansible.builtin.apt:
     name:
       - curl
       - gpg
       - apt-transport-https
     state: present
-  become: yes
+  become: true
   when: k8s_helm_enabled | default(true)
 
 - name: Download Helm GPG key
-  get_url:
+  ansible.builtin.get_url:
     url: https://packages.buildkite.com/helm-linux/helm-debian/gpgkey
     dest: /tmp/helm-gpgkey.asc
-    mode: '0644'
-  become: yes
+    mode: "0644"
+  become: true
   when: k8s_helm_enabled | default(true)
 
 - name: Add Helm GPG key to keyrings
-  shell: |
+  ansible.builtin.shell: |
     gpg --dearmor < /tmp/helm-gpgkey.asc > /usr/share/keyrings/helm.gpg
     chmod 644 /usr/share/keyrings/helm.gpg
   args:
     creates: /usr/share/keyrings/helm.gpg
-  become: yes
+  become: true
   when: k8s_helm_enabled | default(true)
 
 - name: Clean up temporary Helm GPG key file
-  file:
+  ansible.builtin.file:
     path: /tmp/helm-gpgkey.asc
     state: absent
-  become: yes
+  become: true
   when: k8s_helm_enabled | default(true)
 
 # Explicitly specify arch=amd64 to prevent i386 package lookup warnings
 # For ARM support, change arch=amd64 to arch=amd64,arm64
 - name: Add Helm APT repository
-  apt_repository:
+  ansible.builtin.apt_repository:
     repo: "deb [arch=amd64 signed-by=/usr/share/keyrings/helm.gpg] https://packages.buildkite.com/helm-linux/helm-debian/any/ any main"
     filename: helm-stable-debian
     state: present
-  become: yes
+  become: true
   when: k8s_helm_enabled | default(true)
 
 - name: Install Helm
-  apt:
+  ansible.builtin.apt:
     name: helm
     state: present
-    update_cache: yes
-  become: yes
+    update_cache: true
+  become: true
   when: k8s_helm_enabled | default(true)
 
 - name: Verify Helm installation
-  command: helm version --short
+  ansible.builtin.command: helm version --short
   register: helm_verify
   changed_when: false
   when: k8s_helm_enabled | default(true)
 
 - name: Display Helm version
-  debug:
+  ansible.builtin.debug:
     msg: "Helm installed: {{ helm_verify.stdout }}"
   when:
     - k8s_helm_enabled | default(true)
@@ -227,88 +227,88 @@
 
 # GKE gcloud auth plugin installation
 - name: Install GKE auth plugin prerequisites
-  apt:
+  ansible.builtin.apt:
     name:
       - apt-transport-https
       - ca-certificates
       - curl
       - gnupg
     state: present
-  become: yes
+  become: true
   when: k8s_gke_auth_plugin_enabled | default(true)
 
 - name: Create APT keyrings directory
-  file:
+  ansible.builtin.file:
     path: /etc/apt/keyrings
     state: directory
-    mode: '0755'
-  become: yes
+    mode: "0755"
+  become: true
   when: k8s_gke_auth_plugin_enabled | default(true)
 
 - name: Remove conflicting Google Cloud SDK repository entries
-  file:
+  ansible.builtin.file:
     path: /etc/apt/sources.list.d/google-cloud-sdk.list
     state: absent
-  become: yes
+  become: true
   when: k8s_gke_auth_plugin_enabled | default(true)
 
 - name: Download Google Cloud SDK GPG key
-  get_url:
+  ansible.builtin.get_url:
     url: https://packages.cloud.google.com/apt/doc/apt-key.gpg
     dest: /tmp/google-cloud-sdk-gpg.key
-    mode: '0644'
-  become: yes
+    mode: "0644"
+  become: true
   when: k8s_gke_auth_plugin_enabled | default(true)
 
 - name: Add Google Cloud SDK GPG key to keyrings
-  shell: |
+  ansible.builtin.shell: |
     gpg --dearmor < /tmp/google-cloud-sdk-gpg.key > /etc/apt/keyrings/cloud.google.gpg
     chmod 644 /etc/apt/keyrings/cloud.google.gpg
   args:
     creates: /etc/apt/keyrings/cloud.google.gpg
-  become: yes
+  become: true
   when: k8s_gke_auth_plugin_enabled | default(true)
 
 - name: Clean up temporary Google Cloud SDK GPG key file
-  file:
+  ansible.builtin.file:
     path: /tmp/google-cloud-sdk-gpg.key
     state: absent
-  become: yes
+  become: true
   when: k8s_gke_auth_plugin_enabled | default(true)
 
 - name: Remove old Google Cloud SDK GPG key from /usr/share/keyrings
-  file:
+  ansible.builtin.file:
     path: /usr/share/keyrings/cloud.google.gpg
     state: absent
-  become: yes
+  become: true
   when: k8s_gke_auth_plugin_enabled | default(true)
 
 # Explicitly specify arch=amd64 to prevent i386 package lookup warnings
 # For ARM support, change arch=amd64 to arch=amd64,arm64
 - name: Add Google Cloud SDK APT repository
-  apt_repository:
+  ansible.builtin.apt_repository:
     repo: "deb [arch=amd64 signed-by=/etc/apt/keyrings/cloud.google.gpg] https://packages.cloud.google.com/apt cloud-sdk main"
     filename: google-cloud-sdk
     state: present
-  become: yes
+  become: true
   when: k8s_gke_auth_plugin_enabled | default(true)
 
 - name: Install gke-gcloud-auth-plugin
-  apt:
+  ansible.builtin.apt:
     name: google-cloud-sdk-gke-gcloud-auth-plugin
     state: present
-    update_cache: yes
-  become: yes
+    update_cache: true
+  become: true
   when: k8s_gke_auth_plugin_enabled | default(true)
 
 - name: Verify gke-gcloud-auth-plugin installation
-  command: gke-gcloud-auth-plugin --version
+  ansible.builtin.command: gke-gcloud-auth-plugin --version
   register: gke_plugin_verify
   changed_when: false
   when: k8s_gke_auth_plugin_enabled | default(true)
 
 - name: Display gke-gcloud-auth-plugin version
-  debug:
+  ansible.builtin.debug:
     msg: "gke-gcloud-auth-plugin installed: {{ gke_plugin_verify.stdout }}"
   when:
     - k8s_gke_auth_plugin_enabled | default(true)
@@ -316,126 +316,126 @@
 
 # Booter installation
 - name: Create booter directory
-  file:
+  ansible.builtin.file:
     path: "{{ k8s_booter_dir }}"
     state: directory
     owner: "{{ user.name }}"
     group: "{{ user.name }}"
-    mode: '0755'
+    mode: "0755"
   when: k8s_booter_enabled | default(true)
 
 - name: Deploy booter docker-compose.yml
-  template:
+  ansible.builtin.template:
     src: booter-compose.yml.j2
     dest: "{{ k8s_booter_dir }}/docker-compose.yml"
     owner: "{{ user.name }}"
     group: "{{ user.name }}"
-    mode: '0644'
+    mode: "0644"
   when: k8s_booter_enabled | default(true)
 
 - name: Create booter wrapper script
-  template:
+  ansible.builtin.template:
     src: booter.sh.j2
     dest: /usr/local/bin/booter
-    mode: '0755'
-  become: yes
+    mode: "0755"
+  become: true
   when: k8s_booter_enabled | default(true)
 
 - name: Pull booter Docker image
   community.docker.docker_image:
     name: "ghcr.io/siderolabs/booter:{{ k8s_booter_version }}"
     source: pull
-  become: yes
+  become: true
   when: k8s_booter_enabled | default(true)
-  ignore_errors: yes
+  failed_when: false
 
 # Fish shell integration - kubectl functions
 - name: Create fish conf.d directory
-  file:
+  ansible.builtin.file:
     path: "{{ user.home }}/.config/fish/conf.d"
     state: directory
     owner: "{{ user.name }}"
     group: "{{ user.name }}"
-    mode: '0755'
+    mode: "0755"
   when: k8s_kubectl_enabled | default(true)
 
 - name: Deploy kubectl fish functions
-  template:
+  ansible.builtin.template:
     src: fish-kubectl-functions.fish.j2
     dest: "{{ user.home }}/.config/fish/conf.d/kubectl-functions.fish"
     owner: "{{ user.name }}"
     group: "{{ user.name }}"
-    mode: '0644'
+    mode: "0644"
   when: k8s_kubectl_enabled | default(true)
 
 # Cleanup when disabled
 - name: Remove talosctl when disabled
-  file:
+  ansible.builtin.file:
     path: /usr/local/bin/talosctl
     state: absent
-  become: yes
+  become: true
   when: not (k8s_talosctl_enabled | default(true))
 
 - name: Remove omnictl when disabled
-  file:
+  ansible.builtin.file:
     path: /usr/local/bin/omnictl
     state: absent
-  become: yes
+  become: true
   when: not (k8s_omnictl_enabled | default(true))
 
 - name: Remove kubectl when disabled
-  apt:
+  ansible.builtin.apt:
     name: kubectl
     state: absent
-  become: yes
+  become: true
   when: not (k8s_kubectl_enabled | default(true))
 
 - name: Remove Kubernetes APT repository when disabled
-  apt_repository:
+  ansible.builtin.apt_repository:
     repo: "deb [arch=amd64 signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/{{ k8s_kubectl_repo_version }}/deb/ /"
     filename: kubernetes
     state: absent
-  become: yes
+  become: true
   when: not (k8s_kubectl_enabled | default(true))
 
 - name: Remove Kubernetes GPG key when disabled
-  file:
+  ansible.builtin.file:
     path: /etc/apt/keyrings/kubernetes-apt-keyring.gpg
     state: absent
-  become: yes
+  become: true
   when: not (k8s_kubectl_enabled | default(true))
 
 - name: Remove Helm when disabled
-  apt:
+  ansible.builtin.apt:
     name: helm
     state: absent
-  become: yes
+  become: true
   when: not (k8s_helm_enabled | default(true))
 
 - name: Remove Helm APT repository when disabled
-  apt_repository:
+  ansible.builtin.apt_repository:
     repo: "deb [arch=amd64 signed-by=/usr/share/keyrings/helm.gpg] https://packages.buildkite.com/helm-linux/helm-debian/any/ any main"
     filename: helm-stable-debian
     state: absent
-  become: yes
+  become: true
   when: not (k8s_helm_enabled | default(true))
 
 - name: Remove Helm GPG key when disabled
-  file:
+  ansible.builtin.file:
     path: /usr/share/keyrings/helm.gpg
     state: absent
-  become: yes
+  become: true
   when: not (k8s_helm_enabled | default(true))
 
 - name: Remove booter directory when disabled
-  file:
+  ansible.builtin.file:
     path: "{{ k8s_booter_dir }}"
     state: absent
   when: not (k8s_booter_enabled | default(true))
 
 - name: Remove booter wrapper script when disabled
-  file:
+  ansible.builtin.file:
     path: /usr/local/bin/booter
     state: absent
-  become: yes
+  become: true
   when: not (k8s_booter_enabled | default(true))

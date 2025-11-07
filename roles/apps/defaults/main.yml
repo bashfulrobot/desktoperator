@@ -53,9 +53,9 @@ app_states:
   github: present
   avanti: present
   sfdc: present
-  salesforce: present  # alias for sfdc
+  salesforce: present # alias for sfdc
   lucid-chart: present
-  lucidchart: present  # alias for lucid-chart
+  lucidchart: present # alias for lucid-chart
   br-email: present
   kong-email: present
   kong-calendar: present

@@ -30,7 +30,7 @@
   ansible.builtin.get_url:
     url: "https://downloads.slack-edge.com/desktop-releases/linux/x64/{{ slack_latest_version }}/slack-desktop-{{ slack_latest_version }}-amd64.deb"
     dest: "/tmp/slack-desktop-{{ slack_latest_version }}.deb"
-    mode: '0644'
+    mode: "0644"
   when:
     - app_states['slack'] | default('present') == 'present'
     - slack_needs_update | bool
@@ -59,16 +59,16 @@
   ansible.builtin.get_url:
     url: "https://raw.githubusercontent.com/simple-icons/simple-icons/develop/icons/slack.svg"
     dest: "/usr/share/icons/hicolor/scalable/apps/slack.svg"
-    mode: '0644'
+    mode: "0644"
   become: true
   when: app_states['slack'] | default('present') == 'present'
-  ignore_errors: true
+  failed_when: false
 
 - name: Update icon cache for Slack
   ansible.builtin.command: gtk-update-icon-cache -f -t /usr/share/icons/hicolor
   become: true
   when: app_states['slack'] | default('present') == 'present'
-  ignore_errors: true
+  failed_when: false
   changed_when: false
 
 # Cleanup when absent

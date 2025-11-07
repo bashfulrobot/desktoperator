@@ -2,27 +2,27 @@
 # User management tasks
 
 - name: Ensure user exists with correct configuration
-  user:
+  ansible.builtin.user:
     name: "{{ user.name }}"
     shell: "{{ user.shell }}"
     groups: "{{ user_groups }}"
-    append: yes
+    append: true
     state: present
-    create_home: yes
-  become: yes
+    create_home: true
+  become: true
   tags: [system]
 
 - name: Set user password (if defined in vault)
-  user:
+  ansible.builtin.user:
     name: "{{ user.name }}"
     password: "{{ vault_user_password | password_hash('sha512') }}"
   when: vault_user_password is defined
-  become: yes
+  become: true
   no_log: true
   tags: [system]
 
 - name: Create user directories
-  file:
+  ansible.builtin.file:
     path: "{{ user.home }}/{{ item }}"
     state: directory
     owner: "{{ user.name }}"
@@ -30,18 +30,18 @@
     mode: "{{ user_directory_modes[item] | default('0755') }}"
   loop: "{{ user_directories }}"
   when: user_directories is defined
-  become: yes
+  become: true
   tags: [system]
 
 - name: Configure sudo access
-  template:
+  ansible.builtin.template:
     src: sudoers.j2
     dest: "/etc/sudoers.d/{{ user.name }}"
     owner: root
     group: root
-    mode: '0440'
-    validate: 'visudo -cf %s'
+    mode: "0440"
+    validate: "visudo -cf %s"
   when: user_sudo_nopasswd | default(false)
-  become: yes
+  become: true
 
   tags: [system]

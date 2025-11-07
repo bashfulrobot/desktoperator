@@ -2,74 +2,74 @@
 # System role - core system configuration
 
 - name: Import nala package manager installation
-  import_tasks: nala.yml
+  ansible.builtin.import_tasks: nala.yml
   tags: [nala, packages]
 
 - name: Import core packages installation
-  import_tasks: packages.yml
+  ansible.builtin.import_tasks: packages.yml
   tags: [packages]
 
 - name: Import COSMIC theme color extraction
-  import_tasks: cosmic-theme.yml
+  ansible.builtin.import_tasks: cosmic-theme.yml
   tags: [cosmic, theme, colors]
 
 - name: Import hostname configuration
-  import_tasks: hostname.yml
+  ansible.builtin.import_tasks: hostname.yml
   tags: [hostname]
 
 - name: Import user management tasks
-  import_tasks: users.yml
+  ansible.builtin.import_tasks: users.yml
   tags: [users]
 
 - name: Import Python packages installation
-  import_tasks: python.yml
+  ansible.builtin.import_tasks: python.yml
   tags: [python, dev]
 
 - name: Include Ansible tooling installation
-  include_role:
+  ansible.builtin.include_role:
     name: system/ansible
   tags: [ansible, dev]
 
 - name: Include Go language installation
-  include_role:
+  ansible.builtin.include_role:
     name: system/go
   tags: [go, dev, golang]
 
 - name: Include Node.js installation
-  include_role:
+  ansible.builtin.include_role:
     name: system/nodejs
   tags: [nodejs, node, npm, dev]
 
 - name: Include Docker installation
-  include_role:
+  ansible.builtin.include_role:
     name: system/docker
   tags: [docker, containers, dev]
 
 - name: Include libvirt virtualization
-  include_role:
+  ansible.builtin.include_role:
     name: system/libvirt
   tags: [libvirt, virtualization, virt]
 
 - name: Include IAC tools (Terraform, gcloud CLI)
-  include_role:
+  ansible.builtin.include_role:
     name: system/iac
   tags: [iac, terraform, gcloud, dev]
 
 - name: Import flatpak configuration
-  import_tasks: flatpak.yml
+  ansible.builtin.import_tasks: flatpak.yml
   tags: [flatpak]
 
 - name: Import fish shell configuration
-  import_tasks: fish.yml
+  ansible.builtin.import_tasks: fish.yml
   tags: [fish, shell]
 
 - name: Include git role
-  include_role:
+  ansible.builtin.include_role:
     name: system/git
   tags: [git]
 
 - name: Import SSH configuration
-  import_tasks: ssh.yml
+  ansible.builtin.import_tasks: ssh.yml
   tags: [ssh]
 
 # GPG import disabled - see TODO.md for configuration requirements
@@ -78,18 +78,18 @@
 #   tags: [gpg]
 
 - name: Import firewall configuration
-  import_tasks: firewall.yml
+  ansible.builtin.import_tasks: firewall.yml
   tags: [firewall]
 
 - name: Import Tailscale VPN configuration
-  import_tasks: tailscale.yml
+  ansible.builtin.import_tasks: tailscale.yml
   tags: [tailscale, vpn]
 
 - name: Import power management configuration
-  import_tasks: power-management.yml
+  ansible.builtin.import_tasks: power-management.yml
   tags: [power, power-management, wake]
 
 - name: Include justfile system management
-  include_role:
+  ansible.builtin.include_role:
     name: system/justfile
   tags: [justfile, system-admin]

@@ -11,35 +11,35 @@
   when: app_states.zellij | default('present') == 'present'
 
 - name: Create zellij config directory
-  file:
+  ansible.builtin.file:
     path: "{{ user.home }}/.config/zellij"
     state: directory
     owner: "{{ user.name }}"
     group: "{{ user.name }}"
-    mode: '0755'
-  become: yes
+    mode: "0755"
+  become: true
   when: app_states.zellij | default('present') == 'present'
 
 - name: Deploy zellij config
-  template:
+  ansible.builtin.template:
     src: config.kdl.j2
     dest: "{{ user.home }}/.config/zellij/config.kdl"
     owner: "{{ user.name }}"
     group: "{{ user.name }}"
-    mode: '0644'
-  become: yes
+    mode: "0644"
+  become: true
   when: app_states.zellij | default('present') == 'present'
 
 - name: Remove zellij binary when absent
-  file:
+  ansible.builtin.file:
     path: /usr/local/bin/zellij
     state: absent
   when: app_states.zellij | default('present') == 'absent'
-  become: yes
+  become: true
 
 - name: Remove zellij config when absent
-  file:
+  ansible.builtin.file:
     path: "{{ user.home }}/.config/zellij"
     state: absent
   when: app_states.zellij | default('present') == 'absent'
-  become: yes
+  become: true

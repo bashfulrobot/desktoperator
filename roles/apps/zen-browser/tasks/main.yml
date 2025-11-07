@@ -2,7 +2,8 @@
 # Zen Browser installation via GitHub releases (native, for 1Password integration)
 
 - name: Check current Zen Browser version
-  shell: |
+  ansible.builtin.shell: |
+    set -o pipefail
     if [ -f /opt/zen/zen ]; then
       /opt/zen/zen --version | grep -oP 'Zen Browser \K[0-9]+\.[0-9]+\.[0-9]+[a-z]?' || echo "unknown"
     else
@@ -14,54 +15,54 @@
   when: app_states['zen-browser'] | default('present') == 'present'
 
 - name: Get latest Zen Browser release info
-  uri:
+  ansible.builtin.uri:
     url: https://api.github.com/repos/zen-browser/desktop/releases/latest
-    return_content: yes
+    return_content: true
   register: zen_release_info
   when: app_states['zen-browser'] | default('present') == 'present'
 
 - name: Set Zen Browser version facts
-  set_fact:
+  ansible.builtin.set_fact:
     zen_latest_version: "{{ zen_release_info.json.tag_name }}"
     zen_needs_update: "{{ zen_current_version.stdout == 'not_installed' or zen_current_version.stdout != zen_release_info.json.tag_name }}"
   when: app_states['zen-browser'] | default('present') == 'present'
 
 - name: Download Zen Browser tarball
-  get_url:
+  ansible.builtin.get_url:
     url: "https://github.com/zen-browser/desktop/releases/download/{{ zen_latest_version }}/zen.linux-x86_64.tar.xz"
     dest: "/tmp/zen-{{ zen_latest_version }}.tar.xz"
-    mode: '0644'
+    mode: "0644"
   when:
     - app_states['zen-browser'] | default('present') == 'present'
     - zen_needs_update | bool
-  become: yes
+  become: true
 
 - name: Remove old Zen Browser installation
-  file:
+  ansible.builtin.file:
     path: /opt/zen
     state: absent
-  become: yes
+  become: true
   when:
     - app_states['zen-browser'] | default('present') == 'present'
     - zen_needs_update | bool
 
 - name: Extract Zen Browser tarball
-  unarchive:
+  ansible.builtin.unarchive:
     src: "/tmp/zen-{{ zen_latest_version }}.tar.xz"
     dest: /opt
-    remote_src: yes
+    remote_src: true
     owner: root
     group: root
-  become: yes
+  become: true
   when:
     - app_states['zen-browser'] | default('present') == 'present'
     - zen_needs_update | bool
   tags: zen-browser
 
 - name: Create Zen Browser desktop entry
-  copy:
+  ansible.builtin.copy:
     dest: /usr/share/applications/zen-browser.desktop
-    mode: '0644'
+    mode: "0644"
     content: |
       [Desktop Entry]
       Version=1.0
@@ -75,79 +76,79 @@
       MimeType=text/html;text/xml;application/xhtml+xml;application/xml;application/vnd.mozilla.xul+xml;application/rss+xml;application/rdf+xml;x-scheme-handler/http;x-scheme-handler/https;
       StartupNotify=true
       StartupWMClass=zen
-  become: yes
+  become: true
   when: app_states['zen-browser'] | default('present') == 'present'
 
 - name: Create Zen Browser symlink
-  file:
+  ansible.builtin.file:
     src: /opt/zen/zen
     dest: /usr/local/bin/zen
     state: link
-  become: yes
+  become: true
   when: app_states['zen-browser'] | default('present') == 'present'
 
 - name: Clean up downloaded tarball
-  file:
+  ansible.builtin.file:
     path: "/tmp/zen-{{ zen_latest_version }}.tar.xz"
     state: absent
   when:
     - app_states['zen-browser'] | default('present') == 'present'
     - zen_needs_update | bool
-  become: yes
+  become: true
 
 # 1Password Integration for Zen Browser
 - name: Create 1Password config directory
-  file:
+  ansible.builtin.file:
     path: /etc/1password
     state: directory
     owner: root
     group: root
-    mode: '0755'
-  become: yes
+    mode: "0755"
+  become: true
   when: app_states['zen-browser'] | default('present') == 'present'
 
 - name: Add Zen Browser to 1Password allowed browsers
-  blockinfile:
+  ansible.builtin.blockinfile:
     path: /etc/1password/custom_allowed_browsers
     block: |
       zen
       zen-bin
-    create: yes
+    create: true
     owner: root
     group: root
-    mode: '0755'
+    mode: "0755"
     marker: "# {mark} ANSIBLE MANAGED BLOCK - Zen Browser"
-  become: yes
+  become: true
   when: app_states['zen-browser'] | default('present') == 'present'
 
 # Cleanup when absent
 - name: Remove Zen Browser symlink when absent
-  file:
+  ansible.builtin.file:
     path: /usr/local/bin/zen
     state: absent
-  become: yes
+  become: true
   when: app_states['zen-browser'] | default('present') == 'absent'
 
 - name: Remove Zen Browser desktop entry when absent
-  file:
+  ansible.builtin.file:
     path: /usr/share/applications/zen-browser.desktop
     state: absent
-  become: yes
+  become: true
   when: app_states['zen-browser'] | default('present') == 'absent'
 
 - name: Remove Zen Browser installation when absent
-  file:
+  ansible.builtin.file:
     path: /opt/zen
     state: absent
-  become: yes
+  become: true
   when: app_states['zen-browser'] | default('present') == 'absent'
 
 - name: Remove Zen Browser from 1Password allowed browsers when absent
-  blockinfile:
+  ansible.builtin.blockinfile:
     path: /etc/1password/custom_allowed_browsers
     block: ""
     state: absent
     marker: "# {mark} ANSIBLE MANAGED BLOCK - Zen Browser"
-  become: yes
+  become: true
   when: app_states['zen-browser'] | default('present') == 'absent'
   failed_when: false

@@ -10,28 +10,21 @@ echo ""
 
 # Regular apps
 echo "Regenerating regular app icons..."
-generate-icon-set 'https://konghq.aha.io/products/AI/favicon.ico' aha
-generate-icon-set 'https://app.asana.com/-/favicon.ico' asana --add-background
-generate-icon-set 'https://avanti.letter.ai/favicon.ico' avanti
-generate-icon-set 'https://github.githubassets.com/favicons/favicon.svg' github
-generate-icon-set 'https://cloud.konghq.com/favicon.ico' konnect --add-background
-generate-icon-set 'https://lucid.app/favicon.ico' lucid-chart
-generate-icon-set 'https://www.salesforce.com/content/dam/sfdc-docs/www/resources/campaign-assets/images/salesforce-logo-avatar.png' sfdc
-
-echo ""
-echo "Regenerating Google-based app icons..."
-# Google-based apps (using specific icon URL)
-generate-icon-set 'https://cdn.brandfetch.io/id6O2oGzv-/theme/dark/idMX2_OMSc.svg?c=1bxid64Mup7aczewSAYMX&t=1755572706253' br-email
-generate-icon-set 'https://cdn.brandfetch.io/id6O2oGzv-/theme/dark/idMX2_OMSc.svg?c=1bxid64Mup7aczewSAYMX&t=1755572706253' br-calendar
-generate-icon-set 'https://cdn.brandfetch.io/id6O2oGzv-/theme/dark/idMX2_OMSc.svg?c=1bxid64Mup7aczewSAYMX&t=1755572706253' br-drive
-generate-icon-set 'https://cdn.brandfetch.io/id6O2oGzv-/theme/dark/idMX2_OMSc.svg?c=1bxid64Mup7aczewSAYMX&t=1755572706253' kong-email
-generate-icon-set 'https://cdn.brandfetch.io/id6O2oGzv-/theme/dark/idMX2_OMSc.svg?c=1bxid64Mup7aczewSAYMX&t=1755572706253' kong-calendar
-generate-icon-set 'https://cdn.brandfetch.io/id6O2oGzv-/theme/dark/idMX2_OMSc.svg?c=1bxid64Mup7aczewSAYMX&t=1755572706253' kong-drive
-
-echo ""
-echo "Regenerating Workday and Kong Docs icons..."
-generate-icon-set 'https://www.workday.com/content/dam/web/images/icons/wd-favicon.svg' workday
-generate-icon-set 'https://docs.konghq.com/assets/images/favicon.png' kong-docs --add-background
+generate-icon-set '/home/dustin/dev/iac/desktoperator/roles/apps/aha-pake/files/pake-aha-icon.png' aha --add-background
+generate-icon-set '/home/dustin/dev/iac/desktoperator/roles/apps/avanti-pake/files/colour-kong.svg' avanti --add-background
+generate-icon-set '/home/dustin/dev/iac/desktoperator/roles/apps/br-email-pake/files/gmail.svg' br-email --add-background
+generate-icon-set '/home/dustin/dev/iac/desktoperator/roles/apps/br-calendar-pake/files/cal.svg' br-calendar
+generate-icon-set '/home/dustin/dev/iac/desktoperator/roles/apps/br-drive-pake/files/drive.svg' br-drive
+generate-icon-set '/home/dustin/dev/iac/desktoperator/roles/apps/github-pake/files/github.svg' github
+generate-icon-set '/home/dustin/dev/iac/desktoperator/roles/apps/kong-email-pake/files/gmail.svg' kong-email
+generate-icon-set '/home/dustin/dev/iac/desktoperator/roles/apps/kong-calendar-pake/files/cal.svg' kong-calendar
+generate-icon-set '/home/dustin/dev/iac/desktoperator/roles/apps/kong-drive-pake/files/drive.svg' kong-drive
+generate-icon-set '/home/dustin/dev/iac/desktoperator/roles/apps/konnect-pake/files/colour-kong.svg' konnect --add-background
+generate-icon-set '/home/dustin/dev/iac/desktoperator/roles/apps/kong-docs-pake/files/white-kong.svg' kong-docs --add-background
+generate-icon-set '/home/dustin/dev/iac/desktoperator/roles/apps/lucid-chart-pake/files/lucidchart.svg' lucid-chart
+generate-icon-set '/home/dustin/dev/iac/desktoperator/roles/apps/omni-pake/files/sidero.svg' omni
+generate-icon-set '/home/dustin/dev/iac/desktoperator/roles/apps/sfdc-pake/files/sfdc.svg' sfdc
+generate-icon-set '/home/dustin/dev/iac/desktoperator/roles/apps/workday-pake/files/workday.svg' workday
 
 echo ""
 echo "✓ All Pake application icons regenerated successfully!"

@@ -3,13 +3,13 @@
 # https://shopify.github.io/shadowenv/
 
 - name: Check if shadowenv is already installed
-  stat:
+  ansible.builtin.stat:
     path: /usr/local/bin/shadowenv
   register: shadowenv_binary
   when: app_states['shadowenv'] | default('present') == 'present'
 
 - name: Get installed shadowenv version
-  command: /usr/local/bin/shadowenv --version
+  ansible.builtin.command: /usr/local/bin/shadowenv --version
   register: shadowenv_current_version
   failed_when: false
   changed_when: false
@@ -18,32 +18,32 @@
     - shadowenv_binary.stat.exists | default(false)
 
 - name: Get latest shadowenv release info
-  uri:
+  ansible.builtin.uri:
     url: https://api.github.com/repos/Shopify/shadowenv/releases/latest
     return_content: true
   register: shadowenv_release_info
   when: app_states['shadowenv'] | default('present') == 'present'
 
 - name: Download shadowenv binary
-  get_url:
+  ansible.builtin.get_url:
     url: "https://github.com/Shopify/shadowenv/releases/download/{{ shadowenv_release_info.json.tag_name }}/shadowenv-x86_64-unknown-linux-gnu"
     dest: /usr/local/bin/shadowenv
-    mode: '0755'
+    mode: "0755"
     owner: root
     group: root
-  become: yes
+  become: true
   when:
     - app_states['shadowenv'] | default('present') == 'present'
     - not shadowenv_binary.stat.exists | default(false) or (shadowenv_release_info.json.tag_name not in shadowenv_current_version.stdout | default(''))
 
 - name: Verify shadowenv installation
-  command: /usr/local/bin/shadowenv --version
+  ansible.builtin.command: /usr/local/bin/shadowenv --version
   register: shadowenv_verify
   changed_when: false
   when: app_states['shadowenv'] | default('present') == 'present'
 
 - name: Display shadowenv version
-  debug:
+  ansible.builtin.debug:
     msg: "shadowenv installed: {{ shadowenv_verify.stdout }}"
   when:
     - app_states['shadowenv'] | default('present') == 'present'
@@ -51,33 +51,33 @@
 
 # Fish shell integration
 - name: Create fish conf.d directory
-  file:
+  ansible.builtin.file:
     path: "{{ user.home }}/.config/fish/conf.d"
     state: directory
     owner: "{{ user.name }}"
     group: "{{ user.name }}"
-    mode: '0755'
+    mode: "0755"
   when: app_states['shadowenv'] | default('present') == 'present'
 
 - name: Deploy fish configuration for shadowenv
-  template:
+  ansible.builtin.template:
     src: shadowenv.fish.j2
     dest: "{{ user.home }}/.config/fish/conf.d/shadowenv.fish"
     owner: "{{ user.name }}"
     group: "{{ user.name }}"
-    mode: '0644'
+    mode: "0644"
   when: app_states['shadowenv'] | default('present') == 'present'
 
 # Cleanup when absent
 - name: Remove shadowenv binary when absent
-  file:
+  ansible.builtin.file:
     path: /usr/local/bin/shadowenv
     state: absent
-  become: yes
+  become: true
   when: app_states['shadowenv'] | default('present') == 'absent'
 
 - name: Remove fish configuration for shadowenv when absent
-  file:
+  ansible.builtin.file:
     path: "{{ user.home }}/.config/fish/conf.d/shadowenv.fish"
     state: absent
   when: app_states['shadowenv'] | default('present') == 'absent'

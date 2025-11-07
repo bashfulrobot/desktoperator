@@ -5,23 +5,23 @@
 
 # Official Spotify client installation
 - name: Download Spotify GPG key
-  get_url:
+  ansible.builtin.get_url:
     url: https://download.spotify.com/debian/pubkey_C85668DF69375001.gpg
     dest: /tmp/spotify.gpg
-    mode: '0644'
+    mode: "0644"
   when: app_states['spotify'] | default('present') == 'present'
 
 - name: Add Spotify GPG key to trusted keyring
-  shell: |
+  ansible.builtin.shell: |
     gpg --dearmor < /tmp/spotify.gpg > /etc/apt/trusted.gpg.d/spotify.gpg
     chmod 644 /etc/apt/trusted.gpg.d/spotify.gpg
   args:
     creates: /etc/apt/trusted.gpg.d/spotify.gpg
-  become: yes
+  become: true
   when: app_states['spotify'] | default('present') == 'present'
 
 - name: Clean up temporary Spotify GPG key file
-  file:
+  ansible.builtin.file:
     path: /tmp/spotify.gpg
     state: absent
   when: app_states['spotify'] | default('present') == 'present'
@@ -29,24 +29,24 @@
 # Explicitly specify arch=amd64 to prevent i386 package lookup warnings
 # For ARM support, change arch=amd64 to arch=amd64,arm64
 - name: Add Spotify APT repository
-  apt_repository:
+  ansible.builtin.apt_repository:
     repo: "deb [arch=amd64] https://repository.spotify.com stable non-free"
     filename: spotify
     state: present
-  become: yes
+  become: true
   when: app_states['spotify'] | default('present') == 'present'
 
 - name: Update APT cache
-  apt:
-    update_cache: yes
-  become: yes
+  ansible.builtin.apt:
+    update_cache: true
+  become: true
   when: app_states['spotify'] | default('present') == 'present'
 
 - name: Install Spotify client
-  apt:
+  ansible.builtin.apt:
     name: spotify-client
     state: present
-  become: yes
+  become: true
   when: app_states['spotify'] | default('present') == 'present'
 
 # ncspot terminal client installation (Flatpak)
@@ -55,36 +55,36 @@
     name: io.github.hrkfdn.ncspot
     state: present
     remote: flathub
-  become: yes
+  become: true
   when: app_states['spotify'] | default('present') == 'present'
 
 # Cleanup when absent
 - name: Remove Spotify client when absent
-  apt:
+  ansible.builtin.apt:
     name: spotify-client
     state: absent
-    purge: yes
-  become: yes
+    purge: true
+  become: true
   when: app_states['spotify'] | default('present') == 'absent'
 
 - name: Remove Spotify repository when absent
-  apt_repository:
+  ansible.builtin.apt_repository:
     repo: "deb [arch=amd64] https://repository.spotify.com stable non-free"
     filename: spotify
     state: absent
-  become: yes
+  become: true
   when: app_states['spotify'] | default('present') == 'absent'
 
 - name: Remove Spotify GPG key when absent
-  file:
+  ansible.builtin.file:
     path: /etc/apt/trusted.gpg.d/spotify.gpg
     state: absent
-  become: yes
+  become: true
   when: app_states['spotify'] | default('present') == 'absent'
 
 - name: Remove ncspot when absent
   community.general.flatpak:
     name: io.github.hrkfdn.ncspot
     state: absent
-  become: yes
+  become: true
   when: app_states['spotify'] | default('present') == 'absent'

@@ -6,24 +6,24 @@ restic:
   folder_name: "{{ ansible_hostname }}"
 
   # Backup schedule (cron format for autorestic)
-  schedule: "0 2 * * *"  # 2 AM daily
+  schedule: "0 2 * * *" # 2 AM daily
 
   # Timer schedule (systemd OnCalendar format)
-  timer_schedule: "02:00"  # 2 AM daily
+  timer_schedule: "02:00" # 2 AM daily
 
   # Retention policy
   retention_policy:
-    keep_last: 5      # Keep last 5 snapshots
-    keep_hourly: 24   # Keep 24 hourly snapshots
-    keep_daily: 7     # Keep 7 daily snapshots
-    keep_weekly: 4    # Keep 4 weekly snapshots
-    keep_monthly: 6   # Keep 6 monthly snapshots
-    keep_yearly: 2    # Keep 2 yearly snapshots
+    keep_last: 5 # Keep last 5 snapshots
+    keep_hourly: 24 # Keep 24 hourly snapshots
+    keep_daily: 7 # Keep 7 daily snapshots
+    keep_weekly: 4 # Keep 4 weekly snapshots
+    keep_monthly: 6 # Keep 6 monthly snapshots
+    keep_yearly: 2 # Keep 2 yearly snapshots
 
   # Optional local backup (in addition to B2)
   local_backup:
     enable: false
-    path: ""  # e.g., "/mnt/backup" - mount point must exist
+    path: "" # e.g., "/mnt/backup" - mount point must exist
 
   # Exclude large media files (ISOs, DMGs, etc)
   exclude_large_media: true

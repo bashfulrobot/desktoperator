@@ -4,54 +4,55 @@
 # Note: Using focal repository as newer Ubuntu releases aren't supported yet
 
 - name: Set Insomnia repository codename
-  set_fact:
+  ansible.builtin.set_fact:
     insomnia_codename: "focal"
 
 - name: Install apt prerequisites for Insomnia
-  apt:
+  ansible.builtin.apt:
     name:
       - apt-transport-https
       - ca-certificates
       - gnupg
     state: present
-  become: yes
+  become: true
 
 - name: Add Insomnia GPG key
-  apt_key:
+  ansible.builtin.apt_key:
     url: https://packages.konghq.com/public/insomnia/gpg.474B9148D779222B.key
     keyring: /usr/share/keyrings/kong-insomnia-archive-keyring.gpg
     state: present
-  become: yes
+  become: true
 
 - name: Add Insomnia repository
-  apt_repository:
-    repo: "deb [arch=amd64 signed-by=/usr/share/keyrings/kong-insomnia-archive-keyring.gpg] https://packages.konghq.com/public/insomnia/deb/ubuntu {{ insomnia_codename }} main"
+  ansible.builtin.apt_repository:
+    repo: "deb [arch=amd64 signed-by=/usr/share/keyrings/kong-insomnia-archive-keyring.gpg] https://packages.konghq.com/public/insomnia/deb/ubuntu {{ insomnia_codename
+      }} main"
     filename: kong-insomnia
     state: "{{ app_states['insomnia'] | default('present') }}"
-  become: yes
+  become: true
   notify: Update apt cache
 
 - name: Flush handlers to ensure apt cache is updated
-  meta: flush_handlers
-
+  ansible.builtin.meta: flush_handlers
 - name: Install Insomnia
-  apt:
+  ansible.builtin.apt:
     name: insomnia
     state: "{{ app_states['insomnia'] | default('present') }}"
-    update_cache: yes
-  become: yes
+    update_cache: true
+  become: true
 
 - name: Remove Insomnia repository when absent
-  apt_repository:
-    repo: "deb [arch=amd64 signed-by=/usr/share/keyrings/kong-insomnia-archive-keyring.gpg] https://packages.konghq.com/public/insomnia/deb/ubuntu {{ insomnia_codename }} main"
+  ansible.builtin.apt_repository:
+    repo: "deb [arch=amd64 signed-by=/usr/share/keyrings/kong-insomnia-archive-keyring.gpg] https://packages.konghq.com/public/insomnia/deb/ubuntu {{ insomnia_codename
+      }} main"
     filename: kong-insomnia
     state: absent
-  become: yes
+  become: true
   when: app_states['insomnia'] | default('present') == 'absent'
 
 - name: Remove Insomnia GPG key when absent
-  file:
+  ansible.builtin.file:
     path: /usr/share/keyrings/kong-insomnia-archive-keyring.gpg
     state: absent
-  become: yes
+  become: true
   when: app_states['insomnia'] | default('present') == 'absent'

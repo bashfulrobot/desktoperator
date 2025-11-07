@@ -5,7 +5,7 @@
   ansible.builtin.package:
     name: flatpak
     state: present
-  become: yes
+  become: true
   when: app_states['kooha'] | default('present') == 'present'
 
 - name: Ensure Flathub repository exists
@@ -13,7 +13,7 @@
     name: flathub
     state: present
     flatpakrepo_url: https://dl.flathub.org/repo/flathub.flatpakrepo
-  become: yes
+  become: true
   when: app_states['kooha'] | default('present') == 'present'
 
 - name: Install Kooha
@@ -21,12 +21,12 @@
     name: io.github.seadve.Kooha
     state: present
     remote: flathub
-  become: yes
+  become: true
   when: app_states['kooha'] | default('present') == 'present'
 
 - name: Remove Kooha
   community.general.flatpak:
     name: io.github.seadve.Kooha
     state: absent
-  become: yes
+  become: true
   when: app_states['kooha'] | default('present') == 'absent'

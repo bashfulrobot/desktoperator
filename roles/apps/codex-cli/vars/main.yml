@@ -4,4 +4,3 @@
 # single source of truth.
 
 codex_cli_mcp_sites: "{{ lookup('ansible.builtin.file', role_path + '/files/mcp-sites.json') | from_json }}"
-

@@ -31,7 +31,7 @@ ansible-playbook -i localhost, -c local /dev/stdin <<EOF
 
     - name: Install vsce globally via npm
       shell: npm install -g @vscode/vsce
-      become: yes
+      become: true
       when: vsce_check.rc != 0
 
     # Create build directories

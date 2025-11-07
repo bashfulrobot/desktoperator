@@ -4,33 +4,33 @@
 
 # Ensure color variables exist (auto-generate if missing)
 - name: Check if auto-colors.yml exists
-  stat:
+  ansible.builtin.stat:
     path: "{{ playbook_dir }}/group_vars/all/auto-colors.yml"
   register: auto_colors_file
   delegate_to: localhost
-  become: no
+  become: false
   tags: [system]
 
 - name: Generate color variables if missing
-  command: "{{ playbook_dir }}/scripts/generate-cosmic-colors.sh"
+  ansible.builtin.command: "{{ playbook_dir }}/scripts/generate-cosmic-colors.sh"
   args:
     chdir: "{{ playbook_dir }}"
   delegate_to: localhost
-  become: no
+  become: false
   when: not auto_colors_file.stat.exists
   tags: [system]
 
 - name: Load auto-generated color variables
-  include_vars:
+  ansible.builtin.include_vars:
     file: "{{ playbook_dir }}/group_vars/all/auto-colors.yml"
 
-# Install extraction script to /usr/local/bin for manual use
+  # Install extraction script to /usr/local/bin for manual use
   tags: [system]
 - name: Install color extraction script for manual use
   ansible.builtin.copy:
     src: ../../../scripts/extract-cosmic-colors.sh
     dest: /usr/local/bin/extract-cosmic-colors
-    mode: '0755'
+    mode: "0755"
     owner: root
     group: root
   become: true

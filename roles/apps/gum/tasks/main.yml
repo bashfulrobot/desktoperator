@@ -3,78 +3,78 @@
 # Tool for glamorous shell scripts
 
 - name: Create APT keyrings directory
-  file:
+  ansible.builtin.file:
     path: /etc/apt/keyrings
     state: directory
-    mode: '0755'
-  become: yes
+    mode: "0755"
+  become: true
   when: app_states['gum'] | default('present') == 'present'
 
 - name: Download Charm GPG key
-  get_url:
+  ansible.builtin.get_url:
     url: https://repo.charm.sh/apt/gpg.key
     dest: /tmp/charm.gpg
-    mode: '0644'
+    mode: "0644"
   when: app_states['gum'] | default('present') == 'present'
 
 - name: Import Charm GPG key to modern keyring location
-  shell: |
+  ansible.builtin.shell: |
     gpg --dearmor < /tmp/charm.gpg > /etc/apt/keyrings/charm.gpg
     chmod 644 /etc/apt/keyrings/charm.gpg
   args:
     creates: /etc/apt/keyrings/charm.gpg
-  become: yes
+  become: true
   when: app_states['gum'] | default('present') == 'present'
 
 # Explicitly specify arch=amd64 to prevent i386 package lookup warnings
 # For ARM support, change arch=amd64 to arch=amd64,arm64
 - name: Add Charm APT repository
-  apt_repository:
+  ansible.builtin.apt_repository:
     repo: "deb [arch=amd64 signed-by=/etc/apt/keyrings/charm.gpg] https://repo.charm.sh/apt/ * *"
     filename: charm
     state: present
-  become: yes
+  become: true
   when: app_states['gum'] | default('present') == 'present'
 
 - name: Update APT cache
-  apt:
-    update_cache: yes
-  become: yes
+  ansible.builtin.apt:
+    update_cache: true
+  become: true
   when: app_states['gum'] | default('present') == 'present'
 
 - name: Install Gum
-  apt:
+  ansible.builtin.apt:
     name: gum
     state: present
-  become: yes
+  become: true
   when: app_states['gum'] | default('present') == 'present'
 
 - name: Clean up GPG key file
-  file:
+  ansible.builtin.file:
     path: /tmp/charm.gpg
     state: absent
   when: app_states['gum'] | default('present') == 'present'
 
 # Cleanup when absent
 - name: Remove Gum when absent
-  apt:
+  ansible.builtin.apt:
     name: gum
     state: absent
-    purge: yes
-  become: yes
+    purge: true
+  become: true
   when: app_states['gum'] | default('present') == 'absent'
 
 - name: Remove Charm repository when absent
-  apt_repository:
+  ansible.builtin.apt_repository:
     repo: "deb [arch=amd64 signed-by=/etc/apt/keyrings/charm.gpg] https://repo.charm.sh/apt/ * *"
     filename: charm
     state: absent
-  become: yes
+  become: true
   when: app_states['gum'] | default('present') == 'absent'
 
 - name: Remove Charm GPG key when absent
-  file:
+  ansible.builtin.file:
     path: /etc/apt/keyrings/charm.gpg
     state: absent
-  become: yes
+  become: true
   when: app_states['gum'] | default('present') == 'absent'

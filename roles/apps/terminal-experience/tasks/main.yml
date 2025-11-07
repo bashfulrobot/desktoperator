@@ -19,7 +19,7 @@
   ansible.builtin.get_url:
     url: "{{ ripgrep_deb_asset.browser_download_url }}"
     dest: "/tmp/ripgrep.deb"
-    mode: '0644'
+    mode: "0644"
   when: terminal_experience_state == 'present'
 
 - name: Install ripgrep from .deb
@@ -111,7 +111,7 @@
     path: "{{ user.home }}/.config/bat"
     state: directory
     owner: "{{ user.name }}"
-    mode: '0755'
+    mode: "0755"
   when: terminal_experience_state == 'present'
 
 - name: Deploy bat configuration
@@ -119,7 +119,7 @@
     src: bat-config.j2
     dest: "{{ user.home }}/.config/bat/config"
     owner: "{{ user.name }}"
-    mode: '0644'
+    mode: "0644"
   when: terminal_experience_state == 'present'
 
 - name: Ensure Fish conf.d directory exists
@@ -127,7 +127,7 @@
     path: "{{ user.home }}/.config/fish/conf.d"
     state: directory
     owner: "{{ user.name }}"
-    mode: '0755'
+    mode: "0755"
   when: terminal_experience_state == 'present'
 
 - name: Deploy Fish configuration for terminal experience
@@ -135,7 +135,7 @@
     src: terminal-experience.fish.j2
     dest: "{{ user.home }}/.config/fish/conf.d/terminal-experience.fish"
     owner: "{{ user.name }}"
-    mode: '0644'
+    mode: "0644"
   when: terminal_experience_state == 'present'
 
 # Cleanup when absent
@@ -190,4 +190,3 @@
     path: "{{ user.home }}/.config/fish/conf.d/terminal-experience.fish"
     state: absent
   when: terminal_experience_state == 'absent'
-

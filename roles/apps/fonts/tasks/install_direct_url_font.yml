@@ -6,7 +6,7 @@
   ansible.builtin.file:
     path: "{{ direct_url_fonts_state_dir }}/{{ font.name }}"
     state: directory
-    mode: '0755'
+    mode: "0755"
   become: true
 
 - name: "Read installed version metadata for {{ font.name }}"
@@ -37,7 +37,7 @@
       ansible.builtin.get_url:
         url: "{{ font.url }}"
         dest: "{{ direct_url_temp_dir.path }}/{{ font.name }}.zip"
-        mode: '0644'
+        mode: "0644"
 
     - name: "Extract {{ font.name }}"
       ansible.builtin.unarchive:
@@ -60,7 +60,7 @@
             "url": "{{ font.url }}"
           }
         dest: "{{ direct_url_fonts_state_dir }}/{{ font.name }}/version.json"
-        mode: '0644'
+        mode: "0644"
       become: true
 
     - name: "Clean up temporary directory for {{ font.name }}"

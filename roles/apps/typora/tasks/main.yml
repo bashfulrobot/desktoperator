@@ -2,63 +2,63 @@
 # Typora markdown editor installation via APT repository
 
 - name: Create APT keyrings directory
-  file:
+  ansible.builtin.file:
     path: /etc/apt/keyrings
     state: directory
-    mode: '0755'
-  become: yes
+    mode: "0755"
+  become: true
   when: app_states.typora | default('present') == 'present'
 
 - name: Download Typora GPG key
-  get_url:
+  ansible.builtin.get_url:
     url: https://downloads.typora.io/typora.gpg
     dest: /etc/apt/keyrings/typora.gpg
-    mode: '0644'
-  become: yes
+    mode: "0644"
+  become: true
   when: app_states.typora | default('present') == 'present'
 
 # Explicitly specify arch=amd64 to prevent i386 package lookup warnings
 # For ARM support, change arch=amd64 to arch=amd64,arm64
 - name: Add Typora APT repository
-  apt_repository:
+  ansible.builtin.apt_repository:
     repo: "deb [arch=amd64 signed-by=/etc/apt/keyrings/typora.gpg] https://downloads.typora.io/linux ./"
     filename: typora
     state: present
-  become: yes
+  become: true
   when: app_states.typora | default('present') == 'present'
 
 - name: Update APT cache after repository changes
-  apt:
-    update_cache: yes
-  become: yes
+  ansible.builtin.apt:
+    update_cache: true
+  become: true
   when: app_states.typora | default('present') == 'present'
 
 - name: Install Typora
-  apt:
+  ansible.builtin.apt:
     name: typora
     state: "{{ app_states.typora | default('present') }}"
     purge: "{{ app_states.typora | default('present') == 'absent' }}"
-  become: yes
+  become: true
 
 - name: Install Pandoc (required for Typora export features)
-  apt:
+  ansible.builtin.apt:
     name: pandoc
     state: "{{ app_states.typora | default('present') }}"
     purge: "{{ app_states.typora | default('present') == 'absent' }}"
-  become: yes
+  become: true
 
 # Cleanup when absent
 - name: Remove Typora APT repository when absent
-  apt_repository:
+  ansible.builtin.apt_repository:
     repo: "deb [arch=amd64 signed-by=/etc/apt/keyrings/typora.gpg] https://downloads.typora.io/linux ./"
     filename: typora
     state: absent
-  become: yes
+  become: true
   when: app_states.typora | default('present') == 'absent'
 
 - name: Remove Typora GPG key when absent
-  file:
+  ansible.builtin.file:
     path: /etc/apt/keyrings/typora.gpg
     state: absent
-  become: yes
+  become: true
   when: app_states.typora | default('present') == 'absent'

@@ -2,6 +2,6 @@
 # Handlers for 1password role
 
 - name: Update apt cache
-  apt:
-    update_cache: yes
-  become: yes
+  ansible.builtin.apt:
+    update_cache: true
+  become: true

@@ -12,7 +12,7 @@
   ansible.builtin.file:
     path: "{{ system_fonts_dir }}"
     state: directory
-    mode: '0755'
+    mode: "0755"
   become: true
   tags: [fonts, system]
 
@@ -20,7 +20,7 @@
   ansible.builtin.file:
     path: "{{ nerd_fonts_state_dir }}"
     state: directory
-    mode: '0755'
+    mode: "0755"
   become: true
   tags: [fonts, system]
 

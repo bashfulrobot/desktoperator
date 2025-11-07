@@ -36,7 +36,7 @@ core_packages:
   - just
   - fd-find
   - jq
-  - libsecret-tools  # Required for apps to access gnome-keyring (VSCode, etc.)
+  - libsecret-tools # Required for apps to access gnome-keyring (VSCode, etc.)
   - tree
   - bat
 
@@ -54,12 +54,11 @@ dev_packages:
 # Note: Due to PEP 668, use pipx for development tools instead
 # Example: pipx install ansible-lint, pipx install yamllint
 python_packages: []
-
 # Firewall configuration
 firewall:
   enabled: true
   allowed_ports:
-    - 22/tcp  # SSH
+    - 22/tcp # SSH
 
 # System update preferences
 updates:

@@ -6,7 +6,7 @@
   ansible.builtin.file:
     path: "{{ google_fonts_state_dir }}/{{ font.name }}"
     state: directory
-    mode: '0755'
+    mode: "0755"
   become: true
 
 - name: "Read installed version metadata for {{ font.name }}"
@@ -31,7 +31,7 @@
       ansible.builtin.get_url:
         url: "{{ google_fonts_base_url }}/{{ font.font_path }}/{{ item }}"
         dest: "{{ system_fonts_google_dir }}/{{ item }}"
-        mode: '0644'
+        mode: "0644"
       loop: "{{ font.files }}"
       become: true
 
@@ -45,7 +45,7 @@
             "source": "{{ google_fonts_base_url }}/{{ font.font_path }}"
           }
         dest: "{{ google_fonts_state_dir }}/{{ font.name }}/version.json"
-        mode: '0644'
+        mode: "0644"
       become: true
 
     - name: "Mark that fonts were updated"

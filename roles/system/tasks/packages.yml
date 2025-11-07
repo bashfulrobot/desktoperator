@@ -2,39 +2,39 @@
 # Core system packages installation
 
 - name: Debug - Show all variables
-  debug:
+  ansible.builtin.debug:
     msg: "core_packages={{ core_packages | default('UNDEFINED') }}, hostvars keys={{ hostvars[inventory_hostname].keys() | list }}"
   tags: [packages, debug]
 
 - name: Update apt cache
-  apt:
-    update_cache: yes
+  ansible.builtin.apt:
+    update_cache: true
     cache_valid_time: 3600
-  become: yes
+  become: true
   tags: [packages]
 
 # Note: Ansible PPA is managed by bootstrap script
 # No need to manage it here as Ansible can't reliably update its own installation source
 
 - name: Install core system packages
-  apt:
+  ansible.builtin.apt:
     name: "{{ core_packages }}"
     state: present
-  become: yes
+  become: true
   tags: [packages]
 
 - name: Install development packages
-  apt:
+  ansible.builtin.apt:
     name: "{{ dev_packages }}"
     state: present
-  become: yes
+  become: true
   when: dev_packages is defined
   tags: [packages, dev]
 
 - name: Create .local/bin directory
-  file:
+  ansible.builtin.file:
     path: "{{ user.home }}/.local/bin"
     state: directory
     owner: "{{ user.name }}"
-    mode: '0755'
+    mode: "0755"
   tags: [packages]

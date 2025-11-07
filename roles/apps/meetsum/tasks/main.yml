@@ -6,7 +6,7 @@
   ansible.builtin.file:
     path: /var/lib/ansible/github_releases/bashfulrobot/meetsum
     state: directory
-    mode: '0755'
+    mode: "0755"
   become: true
   when: app_states.meetsum | default('present') == 'present'
 
@@ -55,7 +55,7 @@
   ansible.builtin.get_url:
     url: "{{ meetsum_binary_asset.browser_download_url }}"
     dest: /usr/local/bin/meetsum
-    mode: '0755'
+    mode: "0755"
     owner: root
     group: root
   become: true
@@ -72,7 +72,7 @@
         "html_url": "{{ meetsum_release_data.json.html_url }}"
       }
     dest: /var/lib/ansible/github_releases/bashfulrobot/meetsum/version.json
-    mode: '0644'
+    mode: "0644"
   become: true
   when:
     - app_states.meetsum | default('present') == 'present'
@@ -88,7 +88,7 @@
     path: "{{ meetsum_config_dir }}"
     state: directory
     owner: "{{ user.name }}"
-    mode: '0755'
+    mode: "0755"
   when: app_states.meetsum | default('present') == 'present'
 
 - name: Deploy meetsum settings configuration
@@ -96,7 +96,7 @@
     src: settings.yaml.j2
     dest: "{{ meetsum_config_file }}"
     owner: "{{ user.name }}"
-    mode: '0644'
+    mode: "0644"
   when: app_states.meetsum | default('present') == 'present'
 
 - name: Ensure meetsum automation directory exists
@@ -104,7 +104,7 @@
     path: "{{ meetsum_automation_dir }}"
     state: directory
     owner: "{{ user.name }}"
-    mode: '0755'
+    mode: "0755"
   when: app_states.meetsum | default('present') == 'present'
 
 - name: Deploy meetsum LLM instructions template
@@ -112,7 +112,7 @@
     src: Meeting-summary-llm-instructions.md.j2
     dest: "{{ meetsum_automation_dir }}/Meeting-summary-llm-instructions.md"
     owner: "{{ user.name }}"
-    mode: '0644'
+    mode: "0644"
     force: false
   when: app_states.meetsum | default('present') == 'present'
 
@@ -121,7 +121,7 @@
     path: "{{ meetsum_customers_dir }}"
     state: directory
     owner: "{{ user.name }}"
-    mode: '0755'
+    mode: "0755"
   when: app_states.meetsum | default('present') == 'present'
 
 - name: Remove meetsum binary when absent

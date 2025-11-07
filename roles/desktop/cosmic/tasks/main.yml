@@ -2,15 +2,15 @@
 # COSMIC Desktop configuration management
 
 - name: Ensure COSMIC config directory exists
-  file:
+  ansible.builtin.file:
     path: "{{ cosmic_config_path }}"
     state: directory
     owner: "{{ user.name }}"
-    mode: '0755'
+    mode: "0755"
   tags: [cosmic]
 
 - name: Check if cosmic config files exist in role
-  stat:
+  ansible.builtin.stat:
     path: "{{ role_path }}/config"
   register: cosmic_config_repo_dir
   delegate_to: localhost
@@ -20,7 +20,7 @@
   synchronize:
     src: "{{ role_path }}/config/"
     dest: "{{ cosmic_config_path }}/"
-    delete: yes
+    delete: true
     rsync_opts:
       - "--chown={{ user.name }}:{{ user.name }}"
       - "--chmod=D0755,F0644"

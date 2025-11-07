@@ -7,8 +7,8 @@
     dest: /usr/local/bin/rtc-sleep-wake
     owner: root
     group: root
-    mode: '0755'
-  become: yes
+    mode: "0755"
+  become: true
   tags: [system, power, scripts]
 
 - name: Deploy morning wake systemd service
@@ -17,8 +17,8 @@
     dest: /etc/systemd/system/morning-wake.service
     owner: root
     group: root
-    mode: '0644'
-  become: yes
+    mode: "0644"
+  become: true
   when:
     - morning_wake_enabled | default(false)
     - inventory_hostname == 'qbert'
@@ -31,8 +31,8 @@
     dest: /etc/systemd/system/morning-wake.timer
     owner: root
     group: root
-    mode: '0644'
-  become: yes
+    mode: "0644"
+  become: true
   when:
     - morning_wake_enabled | default(false)
     - inventory_hostname == 'qbert'
@@ -44,8 +44,8 @@
     name: morning-wake.timer
     enabled: true
     state: started
-    daemon_reload: yes
-  become: yes
+    daemon_reload: true
+  become: true
   when:
     - morning_wake_enabled | default(false)
     - inventory_hostname == 'qbert'
@@ -56,7 +56,7 @@
     name: morning-wake.timer
     enabled: false
     state: stopped
-  become: yes
+  become: true
   when:
     - not (morning_wake_enabled | default(false))
     - inventory_hostname == 'qbert'
@@ -67,7 +67,7 @@
   ansible.builtin.file:
     path: "{{ item }}"
     state: absent
-  become: yes
+  become: true
   loop:
     - /etc/systemd/system/morning-wake.service
     - /etc/systemd/system/morning-wake.timer

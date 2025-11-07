@@ -10,25 +10,25 @@
     filename_substring: x86_64-unknown-linux-musl.tar.gz
 
 - name: Create just system config directory
-  file:
+  ansible.builtin.file:
     path: /usr/local/share/just
     state: directory
-    mode: '0755'
-  become: yes
+    mode: "0755"
+  become: true
 
 - name: Create just modules directory
-  file:
+  ansible.builtin.file:
     path: /usr/local/share/just/modules
     state: directory
-    mode: '0755'
-  become: yes
+    mode: "0755"
+  become: true
 
 - name: Deploy system justfile modules
-  template:
+  ansible.builtin.template:
     src: "{{ item }}"
     dest: "/usr/local/share/just/modules/{{ item | basename | regex_replace('\\.j2$', '') }}"
-    mode: '0644'
-  become: yes
+    mode: "0644"
+  become: true
   loop:
     - modules/updates.just.j2
     - modules/maintenance.just.j2
@@ -37,67 +37,67 @@
   tags: [always]
 
 - name: Deploy main system justfile
-  template:
+  ansible.builtin.template:
     src: system.just.j2
     dest: "{{ justfile_system_path }}"
-    mode: '0644'
-  become: yes
+    mode: "0644"
+  become: true
   tags: [always]
 
 - name: Deploy development justfile
-  template:
+  ansible.builtin.template:
     src: dev.just.j2
     dest: "{{ justfile_dev_path }}"
-    mode: '0644'
-  become: yes
+    mode: "0644"
+  become: true
   tags: [always]
 
 - name: Create jsys wrapper command
-  copy:
+  ansible.builtin.copy:
     content: |
       #!/usr/bin/env bash
       # jsys - System management command wrapper
       # Runs the system justfile from anywhere
       just --justfile {{ justfile_system_path }} "$@"
     dest: "/usr/local/bin/{{ justfile_wrapper_command }}"
-    mode: '0755'
-  become: yes
+    mode: "0755"
+  become: true
 
 - name: Create jdev wrapper command
-  copy:
+  ansible.builtin.copy:
     content: |
       #!/usr/bin/env bash
       # jdev - Development workflow command wrapper
       # Runs development justfile
       just --justfile {{ justfile_dev_path }} "$@"
     dest: "/usr/local/bin/jdev"
-    mode: '0755'
-  become: yes
+    mode: "0755"
+  become: true
 
 - name: Verify just installation
-  command: just --version
+  ansible.builtin.command: just --version
   register: just_version_output
   changed_when: false
   failed_when: just_version_output.rc != 0
 
 # Install developer scripts
 - name: Install git-commit-gum script
-  copy:
+  ansible.builtin.copy:
     src: ../../../../scripts/git-commit-gum.sh
     dest: /usr/local/bin/git-commit-gum
-    mode: '0755'
-  become: yes
+    mode: "0755"
+  become: true
 
 # Fish shell completion for jsys
 - name: Create fish completions directory
-  file:
+  ansible.builtin.file:
     path: "{{ user.home }}/.config/fish/completions"
     state: directory
     owner: "{{ user.name }}"
-    mode: '0755'
+    mode: "0755"
 
 - name: Create fish completion for jsys
-  copy:
+  ansible.builtin.copy:
     content: |
       # jsys completion - wraps system justfile
       function __fish_jsys_complete_recipes
@@ -116,12 +116,12 @@
       complete -c jsys -l help -d 'Print help information'
     dest: "{{ user.home }}/.config/fish/completions/jsys.fish"
     owner: "{{ user.name }}"
-    mode: '0644'
-  become: yes
+    mode: "0644"
+  become: true
   tags: [always]
 
 - name: Create fish completion for jdev
-  copy:
+  ansible.builtin.copy:
     content: |
       # jdev completion - wraps development justfile
       function __fish_jdev_complete_recipes
@@ -140,21 +140,21 @@
       complete -c jdev -l help -d 'Print help information'
     dest: "{{ user.home }}/.config/fish/completions/jdev.fish"
     owner: "{{ user.name }}"
-    mode: '0644'
-  become: yes
+    mode: "0644"
+  become: true
   tags: [always]
 
 - name: Create fish conf.d directory for jsys aliases
-  file:
+  ansible.builtin.file:
     path: "{{ user.home }}/.config/fish/conf.d"
     state: directory
     owner: "{{ user.name }}"
-    mode: '0755'
-  become: yes
+    mode: "0755"
+  become: true
   tags: [always]
 
 - name: Deploy jsys fish aliases
-  copy:
+  ansible.builtin.copy:
     content: |
       # jsys command aliases with completions
       # Managed by Ansible - changes may be overwritten
@@ -170,6 +170,6 @@
       complete -c uast -d 'Run Ansible skipping specific tags'
     dest: "{{ user.home }}/.config/fish/conf.d/jsys-aliases.fish"
     owner: "{{ user.name }}"
-    mode: '0644'
-  become: yes
+    mode: "0644"
+  become: true
   tags: [always]

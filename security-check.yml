@@ -3,16 +3,16 @@
 - name: Security Pre-flight Checks
   hosts: localhost
   connection: local
-  gather_facts: no
+  gather_facts: false
 
   tasks:
     - name: Check if .vault_pass exists
-      stat:
+      ansible.builtin.stat:
         path: "{{ playbook_dir }}/../.vault_pass"
       register: vault_pass_file
 
     - name: Verify .vault_pass permissions
-      assert:
+      ansible.builtin.assert:
         that:
           - vault_pass_file.stat.exists
           - vault_pass_file.stat.mode == '0600'
@@ -21,19 +21,21 @@
       when: vault_pass_file.stat.exists
 
     - name: Check if vault.yml exists
-      stat:
+      ansible.builtin.stat:
         path: "{{ playbook_dir }}/../group_vars/all/vault.yml"
       register: vault_file
 
     - name: Verify vault.yml is encrypted
-      shell: head -1 "{{ playbook_dir }}/../group_vars/all/vault.yml" | grep -q '$ANSIBLE_VAULT'
+      ansible.builtin.shell: |
+        set -o pipefail
+        head -1 "{{ playbook_dir }}/../group_vars/all/vault.yml" | grep -q '$ANSIBLE_VAULT'
       register: vault_encrypted
       failed_when: false
       changed_when: false
       when: vault_file.stat.exists
 
     - name: Assert vault.yml is encrypted
-      assert:
+      ansible.builtin.assert:
         that:
           - vault_encrypted.rc == 0
         fail_msg: "⚠️  vault.yml exists but is NOT encrypted! Run: just vault-encrypt group_vars/all/vault.yml"
@@ -41,7 +43,7 @@
       when: vault_file.stat.exists
 
     - name: Verify vault.yml permissions
-      assert:
+      ansible.builtin.assert:
         that:
           - vault_file.stat.mode == '0600'
         fail_msg: "vault.yml must have 600 permissions. Run: chmod 600 group_vars/all/vault.yml"
@@ -49,7 +51,7 @@
       when: vault_file.stat.exists
 
     - name: Check for unencrypted sensitive files
-      find:
+      ansible.builtin.find:
         paths:
           - "{{ playbook_dir }}/../group_vars"
           - "{{ playbook_dir }}/../host_vars"
@@ -59,11 +61,12 @@
           - "*token*"
           - "*.key"
           - "*.pem"
-        recurse: yes
+        recurse: true
       register: sensitive_files
 
     - name: Verify sensitive files are encrypted or examples
-      shell: |
+      ansible.builtin.shell: |
+        set -o pipefail
         if [[ "{{ item.path }}" == *".example"* ]]; then
           exit 0
         fi
@@ -74,15 +77,16 @@
       loop: "{{ sensitive_files.files }}"
       when: sensitive_files.files | length > 0
 
-    - name: Check git status for staged sensitive files
-      shell: |
+    - name: Check git status for staged sensitive files  # noqa: command-instead-of-module
+      ansible.builtin.shell: |
+        set -o pipefail
         git status --porcelain | grep -E '(vault\.yml$|\.vault_pass|password|secret|token|\.key$|\.pem$)' || exit 0
       register: git_sensitive
       changed_when: false
       failed_when: git_sensitive.stdout | length > 0
 
     - name: Final security report
-      debug:
+      ansible.builtin.debug:
         msg:
           - "=================================="
           - "Security Check: PASSED ✓"

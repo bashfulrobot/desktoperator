@@ -3,81 +3,80 @@
 # Both GUI app and CLI
 
 - name: Add 1Password GPG key
-  apt_key:
+  ansible.builtin.apt_key:
     url: https://downloads.1password.com/linux/keys/1password.asc
     keyring: /usr/share/keyrings/1password-archive-keyring.gpg
     state: present
-  become: yes
+  become: true
 
 - name: Add 1Password repository
-  apt_repository:
+  ansible.builtin.apt_repository:
     repo: "deb [arch=amd64 signed-by=/usr/share/keyrings/1password-archive-keyring.gpg] https://downloads.1password.com/linux/debian/amd64 stable main"
     filename: 1password
     state: "{{ app_states['1password'] | default('present') }}"
-  become: yes
+  become: true
   notify: Update apt cache
 
 - name: Setup debsig verification policy directory
-  file:
+  ansible.builtin.file:
     path: /etc/debsig/policies/AC2D62742012EA22/
     state: directory
-    mode: '0755'
-  become: yes
+    mode: "0755"
+  become: true
   when: app_states['1password'] | default('present') == 'present'
 
 - name: Download debsig verification policy
-  get_url:
+  ansible.builtin.get_url:
     url: https://downloads.1password.com/linux/debian/debsig/1password.pol
     dest: /etc/debsig/policies/AC2D62742012EA22/1password.pol
-    mode: '0644'
-  become: yes
+    mode: "0644"
+  become: true
   when: app_states['1password'] | default('present') == 'present'
 
 - name: Setup debsig keyring directory
-  file:
+  ansible.builtin.file:
     path: /usr/share/debsig/keyrings/AC2D62742012EA22
     state: directory
-    mode: '0755'
-  become: yes
+    mode: "0755"
+  become: true
   when: app_states['1password'] | default('present') == 'present'
 
 - name: Add 1Password debsig GPG key
-  apt_key:
+  ansible.builtin.apt_key:
     url: https://downloads.1password.com/linux/keys/1password.asc
     keyring: /usr/share/debsig/keyrings/AC2D62742012EA22/debsig.gpg
     state: present
-  become: yes
+  become: true
   when: app_states['1password'] | default('present') == 'present'
 
 - name: Flush handlers to ensure apt cache is updated
-  meta: flush_handlers
-
+  ansible.builtin.meta: flush_handlers
 - name: Install 1Password desktop app
-  apt:
+  ansible.builtin.apt:
     name: 1password
     state: "{{ app_states['1password'] | default('present') }}"
-    update_cache: yes
-  become: yes
+    update_cache: true
+  become: true
 
 - name: Install 1Password CLI
-  apt:
+  ansible.builtin.apt:
     name: 1password-cli
     state: "{{ app_states['1password'] | default('present') }}"
-  become: yes
+  become: true
 
 - name: Create autostart directory
-  file:
+  ansible.builtin.file:
     path: "{{ user.home }}/.config/autostart"
     state: directory
     owner: "{{ user.name }}"
-    mode: '0755'
+    mode: "0755"
   when: app_states['1password'] | default('present') == 'present'
 
 - name: Enable 1Password autostart
-  copy:
+  ansible.builtin.copy:
     dest: "{{ user.home }}/.config/autostart/1password.desktop"
     owner: "{{ user.name }}"
-    mode: '0644'
+    mode: "0644"
     content: |
       [Desktop Entry]
       Type=Application
@@ -92,26 +91,26 @@
   when: app_states['1password'] | default('present') == 'present'
 
 - name: Remove 1Password repository when absent
-  apt_repository:
+  ansible.builtin.apt_repository:
     repo: "deb [arch=amd64 signed-by=/usr/share/keyrings/1password-archive-keyring.gpg] https://downloads.1password.com/linux/debian/amd64 stable main"
     filename: 1password
     state: absent
-  become: yes
+  become: true
   when: app_states['1password'] | default('present') == 'absent'
 
 - name: Remove 1Password GPG keys when absent
-  file:
+  ansible.builtin.file:
     path: "{{ item }}"
     state: absent
   loop:
     - /usr/share/keyrings/1password-archive-keyring.gpg
     - /usr/share/debsig/keyrings/AC2D62742012EA22/debsig.gpg
     - /etc/debsig/policies/AC2D62742012EA22/1password.pol
-  become: yes
+  become: true
   when: app_states['1password'] | default('present') == 'absent'
 
 - name: Remove 1Password autostart when absent
-  file:
+  ansible.builtin.file:
     path: "{{ user.home }}/.config/autostart/1password.desktop"
     state: absent
   when: app_states['1password'] | default('present') == 'absent'

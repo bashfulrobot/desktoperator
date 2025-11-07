@@ -6,7 +6,7 @@
   ansible.builtin.file:
     path: "{{ github_fonts_state_dir }}/{{ font.name }}"
     state: directory
-    mode: '0755'
+    mode: "0755"
   become: true
 
 - name: "Read installed version metadata for {{ font.name }}"
@@ -29,9 +29,10 @@
   block:
     - name: "Download font files for {{ font.name }}"
       ansible.builtin.get_url:
-        url: "{{ github_fonts_base_url }}/{{ font.repo }}/{{ font.branch }}/{{ font.base_path | default('') }}{{ '/' if font.base_path is defined else '' }}{{ item }}"
+        url: "{{ github_fonts_base_url }}/{{ font.repo }}/{{ font.branch }}/{{ font.base_path | default('') }}{{ '/' if font.base_path is defined else '' }}{{ item
+          }}"
         dest: "{{ system_fonts_github_dir }}/{{ item | basename }}"
-        mode: '0644'
+        mode: "0644"
       loop: "{{ font.files }}"
       become: true
 
@@ -46,7 +47,7 @@
             "source": "{{ github_fonts_base_url }}/{{ font.repo }}/{{ font.branch }}"
           }
         dest: "{{ github_fonts_state_dir }}/{{ font.name }}/version.json"
-        mode: '0644'
+        mode: "0644"
       become: true
 
     - name: "Mark that fonts were updated"

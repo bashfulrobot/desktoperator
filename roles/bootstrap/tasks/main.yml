@@ -2,7 +2,7 @@
 # Bootstrap role - initial system setup tasks
 
 - name: Configure NOPASSWD sudo for user
-  copy:
+  ansible.builtin.copy:
     content: |
       # Sudo configuration for {{ user.name }}
       # Managed by Ansible - DO NOT EDIT MANUALLY
@@ -11,7 +11,7 @@
     dest: "/etc/sudoers.d/{{ user.name }}"
     owner: root
     group: root
-    mode: '0440'
-    validate: 'visudo -cf %s'
-  become: yes
+    mode: "0440"
+    validate: "visudo -cf %s"
+  become: true
   tags: [bootstrap]
