@@ -6,12 +6,14 @@ profile: production
 exclude_paths:
   - .git/
   - .vscode/
-  - collections/  # External collections downloaded via Galaxy
+  - collections/ # External collections downloaded via Galaxy
   # Note: roles/ is NOT excluded - we lint our own roles
 
 # Skip specific rules if needed
 skip_list:
-  - yaml[line-length]  # Allow longer lines in some cases
+  - yaml[line-length] # Allow longer lines in some cases
+  - var-naming[no-role-prefix] # Allow role-specific variable naming
+  - role-name[path] # Allow subdirectory organization of roles
 
 # Warn only for certain rules
 warn_list:
