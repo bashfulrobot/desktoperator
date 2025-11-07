@@ -231,6 +231,11 @@
     name: apps/kong-docs-pake
   tags: [kong-docs, pake]
 
+- name: Include Omni Pake App
+  import_role:
+    name: apps/omni-pake
+  tags: [omni, pake]
+
 - name: Include zns DNS lookup tool
   import_role:
     name: apps/zns
