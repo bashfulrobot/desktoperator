@@ -29,3 +29,6 @@ k8s_booter_log_level: "info"
 # For Omni users: Get these from Omni Overview page -> Copy Kernel Parameters
 # Example: k8s_booter_kernel_params: "talos.platform=metal console=ttyS0"
 k8s_booter_kernel_params: ""
+
+# Kubelogin configuration
+k8s_kubelogin_enabled: true

@@ -84,6 +84,82 @@
     - k8s_omnictl_enabled | default(true)
     - omnictl_verify is defined
 
+# Kubelogin installation
+- name: Check if kubelogin is already installed
+  ansible.builtin.stat:
+    path: /usr/local/bin/kubectl-oidc_login
+  register: kubelogin_binary
+  when: k8s_kubelogin_enabled | default(true)
+
+- name: Get installed kubelogin version
+  ansible.builtin.command: /usr/local/bin/kubectl-oidc_login --version
+  register: kubelogin_current_version
+  failed_when: false
+  changed_when: false
+  when:
+    - k8s_kubelogin_enabled | default(true)
+    - kubelogin_binary.stat.exists
+
+- name: Get latest kubelogin release info
+  ansible.builtin.uri:
+    url: https://api.github.com/repos/int128/kubelogin/releases/latest
+    return_content: true
+  register: kubelogin_release_info
+  when: k8s_kubelogin_enabled | default(true)
+
+- name: Download kubelogin binary
+  ansible.builtin.get_url:
+    url: "https://github.com/int128/kubelogin/releases/download/{{ kubelogin_release_info.json.tag_name }}/kubelogin_linux_amd64.zip"
+    dest: /tmp/kubelogin_linux_amd64.zip
+    mode: "0644"
+  when:
+    - k8s_kubelogin_enabled | default(true)
+    - not kubelogin_binary.stat.exists or (kubelogin_release_info.json.tag_name not in kubelogin_current_version.stdout | default(''))
+
+- name: Extract kubelogin binary
+  ansible.builtin.unarchive:
+    src: /tmp/kubelogin_linux_amd64.zip
+    dest: /tmp
+    remote_src: true
+  when:
+    - k8s_kubelogin_enabled | default(true)
+    - not kubelogin_binary.stat.exists or (kubelogin_release_info.json.tag_name not in kubelogin_current_version.stdout | default(''))
+
+- name: Install kubelogin binary
+  ansible.builtin.copy:
+    src: /tmp/kubelogin
+    dest: /usr/local/bin/kubectl-oidc_login
+    mode: "0755"
+    owner: root
+    group: root
+    remote_src: true
+  become: true
+  when:
+    - k8s_kubelogin_enabled | default(true)
+    - not kubelogin_binary.stat.exists or (kubelogin_release_info.json.tag_name not in kubelogin_current_version.stdout | default(''))
+
+- name: Clean up kubelogin download files
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: absent
+  loop:
+    - /tmp/kubelogin_linux_amd64.zip
+    - /tmp/kubelogin
+  when: k8s_kubelogin_enabled | default(true)
+
+- name: Verify kubelogin installation
+  ansible.builtin.command: /usr/local/bin/kubectl-oidc_login --version
+  register: kubelogin_verify
+  changed_when: false
+  when: k8s_kubelogin_enabled | default(true)
+
+- name: Display kubelogin version
+  ansible.builtin.debug:
+    msg: "kubelogin installed: {{ kubelogin_verify.stdout }}"
+  when:
+    - k8s_kubelogin_enabled | default(true)
+    - kubelogin_verify is defined
+
 # Kubectl installation
 - name: Install kubectl prerequisites
   ansible.builtin.apt:
@@ -439,3 +515,10 @@
     state: absent
   become: true
   when: not (k8s_booter_enabled | default(true))
+
+- name: Remove kubelogin when disabled
+  ansible.builtin.file:
+    path: /usr/local/bin/kubectl-oidc_login
+    state: absent
+  become: true
+  when: not (k8s_kubelogin_enabled | default(true))
