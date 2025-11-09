@@ -41,5 +41,26 @@
   ansible.builtin.apt:
     name: asana
     state: absent
+    purge: true
   become: true
   when: app_states['asana'] | default('present') == 'absent'
+
+- name: Remove custom desktop file and icons
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: absent
+  loop:
+    - /usr/share/applications/pake-asana.desktop
+    - /usr/share/applications/asana.desktop
+    - /usr/share/applications/com.pake.asana.desktop
+    - /usr/share/icons/hicolor/16x16/apps/pake-asana.png
+    - /usr/share/icons/hicolor/32x32/apps/pake-asana.png
+    - /usr/share/icons/hicolor/48x48/apps/pake-asana.png
+    - /usr/share/icons/hicolor/64x64/apps/pake-asana.png
+    - /usr/share/icons/hicolor/128x128/apps/pake-asana.png
+    - /usr/share/icons/hicolor/256x256/apps/pake-asana.png
+    - /usr/share/icons/hicolor/512x512/apps/pake-asana.png
+    - /usr/share/icons/hicolor/scalable/apps/pake-asana.png
+  become: true
+  when: app_states['asana'] | default('present') == 'absent'
+  notify: Update icon cache

@@ -41,5 +41,26 @@
   ansible.builtin.apt:
     name: github
     state: absent
+    purge: true
   become: true
   when: app_states['github'] | default('present') == 'absent'
+
+- name: Remove custom desktop file and icons
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: absent
+  loop:
+    - /usr/share/applications/pake-github.desktop
+    - /usr/share/applications/github.desktop
+    - /usr/share/applications/com.pake.github.desktop
+    - /usr/share/icons/hicolor/16x16/apps/pake-github.png
+    - /usr/share/icons/hicolor/32x32/apps/pake-github.png
+    - /usr/share/icons/hicolor/48x48/apps/pake-github.png
+    - /usr/share/icons/hicolor/64x64/apps/pake-github.png
+    - /usr/share/icons/hicolor/128x128/apps/pake-github.png
+    - /usr/share/icons/hicolor/256x256/apps/pake-github.png
+    - /usr/share/icons/hicolor/512x512/apps/pake-github.png
+    - /usr/share/icons/hicolor/scalable/apps/pake-github.png
+  become: true
+  when: app_states['github'] | default('present') == 'absent'
+  notify: Update icon cache
