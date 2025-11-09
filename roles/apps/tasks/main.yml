@@ -16,6 +16,11 @@
     name: apps/helix
   tags: [helix]
 
+- name: Include Zed editor installation
+  ansible.builtin.import_role:
+    name: apps/zed
+  tags: [zed]
+
 - name: Include Zellij terminal multiplexer
   ansible.builtin.import_role:
     name: apps/zellij

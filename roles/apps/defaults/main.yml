@@ -18,6 +18,7 @@ app_states:
   restic: present
   zellij: present
   helix: present
+  zed: present
   zen-browser: present
   slack: present
   claude-code: present

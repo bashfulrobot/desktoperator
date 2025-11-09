@@ -1,0 +1,32 @@
+---
+# Zed Editor installation via Flatpak
+
+- name: Ensure Flatpak is available
+  ansible.builtin.package:
+    name: flatpak
+    state: present
+  become: true
+  when: app_states['zed'] | default('present') == 'present'
+
+- name: Ensure Flathub repository exists
+  community.general.flatpak_remote:
+    name: flathub
+    state: present
+    flatpakrepo_url: https://dl.flathub.org/repo/flathub.flatpakrepo
+  become: true
+  when: app_states['zed'] | default('present') == 'present'
+
+- name: Install Zed Editor
+  community.general.flatpak:
+    name: dev.zed.Zed
+    state: present
+    remote: flathub
+  become: true
+  when: app_states['zed'] | default('present') == 'present'
+
+- name: Remove Zed Editor
+  community.general.flatpak:
+    name: dev.zed.Zed
+    state: absent
+  become: true
+  when: app_states['zed'] | default('present') == 'absent'
