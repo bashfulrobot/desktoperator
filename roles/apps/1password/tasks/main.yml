@@ -114,3 +114,13 @@
     path: "{{ user.home }}/.config/autostart/1password.desktop"
     state: absent
   when: app_states['1password'] | default('present') == 'absent'
+
+- name: Remove 1Password debsig directories when absent
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: absent
+  loop:
+    - /etc/debsig/policies/AC2D62742012EA22
+    - /usr/share/debsig/keyrings/AC2D62742012EA22
+  become: true
+  when: app_states['1password'] | default('present') == 'absent'
