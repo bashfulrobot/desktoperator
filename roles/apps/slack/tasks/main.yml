@@ -79,3 +79,17 @@
     purge: true
   become: true
   when: app_states['slack'] | default('present') == 'absent'
+
+- name: Remove Slack custom icon when absent
+  ansible.builtin.file:
+    path: /usr/share/icons/hicolor/scalable/apps/slack.svg
+    state: absent
+  become: true
+  when: app_states['slack'] | default('present') == 'absent'
+
+- name: Update icon cache after Slack removal
+  ansible.builtin.command: gtk-update-icon-cache -f -t /usr/share/icons/hicolor
+  become: true
+  when: app_states['slack'] | default('present') == 'absent'
+  failed_when: false
+  changed_when: false
