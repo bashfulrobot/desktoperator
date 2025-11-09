@@ -225,3 +225,28 @@
     state: absent
   become: true
   when: app_states['vscode'] | default('present') == 'absent'
+
+- name: Remove VSCode icon from hicolor theme when absent
+  ansible.builtin.file:
+    path: /usr/share/icons/hicolor/1024x1024/apps/vscode.png
+    state: absent
+  become: true
+  when: app_states['vscode'] | default('present') == 'absent'
+
+- name: Remove VSCode configuration files when absent
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: absent
+  loop:
+    - "{{ user.home }}/.vscode/argv.json"
+    - "{{ user.home }}/.config/code-flags.conf"
+    - "{{ user.home }}/.vscode"
+    - "{{ user.home }}/.config/Code"
+  when: app_states['vscode'] | default('present') == 'absent'
+
+- name: Update icon cache after VSCode removal
+  ansible.builtin.command: gtk-update-icon-cache -f -t /usr/share/icons/hicolor
+  become: true
+  when: app_states['vscode'] | default('present') == 'absent'
+  failed_when: false
+  changed_when: false
