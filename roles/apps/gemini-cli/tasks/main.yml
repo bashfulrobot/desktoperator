@@ -16,3 +16,9 @@
   register: gemini_cli_uninstall
   failed_when: false
   changed_when: gemini_cli_uninstall.rc == 0
+
+- name: Remove gemini-cli configuration directory
+  ansible.builtin.file:
+    path: "{{ user.home }}/.gemini"
+    state: absent
+  when: app_states['gemini-cli'] | default('present') == 'absent'
