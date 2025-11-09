@@ -145,3 +145,12 @@
     state: absent
   become: true
   when: app_states['insync'] | default('present') == 'absent'
+
+- name: Remove Insync configuration and cache directories when absent
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: absent
+  loop:
+    - "{{ user.home }}/.config/Insync"
+    - "{{ user.home }}/.local/share/Insync"
+  when: app_states['insync'] | default('present') == 'absent'
