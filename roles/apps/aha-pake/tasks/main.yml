@@ -15,7 +15,7 @@
     - /usr/share/applications/aha.desktop
     - /usr/share/applications/com.pake.aha.desktop
   become: true
-  when: app_states['aha'] | default('present') == 'absent'
+  when: app_states['aha'] | default('present') == 'present'
 
 - name: Install custom desktop file and icons
   ansible.builtin.copy:
@@ -41,5 +41,26 @@
   ansible.builtin.apt:
     name: aha
     state: absent
+    purge: true
   become: true
   when: app_states['aha'] | default('present') == 'absent'
+
+- name: Remove custom desktop file and icons
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: absent
+  loop:
+    - /usr/share/applications/pake-aha.desktop
+    - /usr/share/applications/aha.desktop
+    - /usr/share/applications/com.pake.aha.desktop
+    - /usr/share/icons/hicolor/16x16/apps/pake-aha.png
+    - /usr/share/icons/hicolor/32x32/apps/pake-aha.png
+    - /usr/share/icons/hicolor/48x48/apps/pake-aha.png
+    - /usr/share/icons/hicolor/64x64/apps/pake-aha.png
+    - /usr/share/icons/hicolor/128x128/apps/pake-aha.png
+    - /usr/share/icons/hicolor/256x256/apps/pake-aha.png
+    - /usr/share/icons/hicolor/512x512/apps/pake-aha.png
+    - /usr/share/icons/hicolor/scalable/apps/pake-aha.png
+  become: true
+  when: app_states['aha'] | default('present') == 'absent'
+  notify: Update icon cache
