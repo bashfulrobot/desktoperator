@@ -5,6 +5,10 @@ hostname: qbert
 
 # Host-specific apps (in addition to common apps)
 host_specific_apps: []
+
+# Host-specific app states
+app_states:
+  zed: present
 # SiteMCP scheduled tasks configuration
 sitemcp_enable_scheduled_tasks: true
 

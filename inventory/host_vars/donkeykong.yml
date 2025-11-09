@@ -5,6 +5,10 @@ hostname: donkeykong
 
 # Host-specific apps (in addition to common apps)
 host_specific_apps: []
+
+# Host-specific app states
+app_states:
+  zed: absent
 # Libvirt configuration
 libvirt_install_gui_tools: true
 
