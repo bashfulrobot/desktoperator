@@ -71,6 +71,16 @@
     name: apps/chrome
   tags: [chrome]
 
+- name: Include Chromium
+  ansible.builtin.import_role:
+    name: apps/chromium
+  tags: [chromium]
+
+- name: Include Ulaa Browser
+  ansible.builtin.import_role:
+    name: apps/ulaa-browser
+  tags: [ulaa-browser, ulaa]
+
 - name: Include Zoom
   ansible.builtin.import_role:
     name: apps/zoom

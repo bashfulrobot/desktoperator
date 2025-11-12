@@ -1,0 +1,134 @@
+---
+# Chromium installation via xtradeb PPA
+# https://launchpad.net/~xtradeb/+archive/ubuntu/apps
+
+- name: Install software-properties-common for add-apt-repository
+  ansible.builtin.apt:
+    name: software-properties-common
+    state: present
+  become: true
+  when: app_states['chromium'] | default('present') == 'present'
+
+- name: Add Chromium PPA
+  ansible.builtin.apt_repository:
+    repo: ppa:xtradeb/apps
+    state: present
+    update_cache: false
+  become: true
+  when: app_states['chromium'] | default('present') == 'present'
+
+- name: Update apt cache after adding PPA
+  ansible.builtin.apt:
+    update_cache: true
+  become: true
+  when: app_states['chromium'] | default('present') == 'present'
+
+# APT pinning - prioritizes Chromium from xtradeb PPA
+- name: Create APT preferences directory
+  ansible.builtin.file:
+    path: /etc/apt/preferences.d
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+  become: true
+  when:
+    - app_states['chromium'] | default('present') == 'present'
+    - chromium_apt_pin_enabled | default(true)
+
+- name: Pin Chromium package to xtradeb PPA
+  ansible.builtin.copy:
+    content: |
+      # Managed by Ansible - prioritizes Chromium from xtradeb PPA
+      Package: chromium*
+      Pin: release o=LP-PPA-xtradeb-apps
+      Pin-Priority: {{ chromium_apt_pin_priority }}
+    dest: /etc/apt/preferences.d/chromium-pin
+    owner: root
+    group: root
+    mode: "0644"
+  become: true
+  when:
+    - app_states['chromium'] | default('present') == 'present'
+    - chromium_apt_pin_enabled | default(true)
+
+- name: Install Chromium
+  ansible.builtin.apt:
+    name: chromium
+    state: present
+  become: true
+  when: app_states['chromium'] | default('present') == 'present'
+
+# 1Password Integration for Chromium
+- name: Create 1Password config directory
+  ansible.builtin.file:
+    path: /etc/1password
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+  become: true
+  when: app_states['chromium'] | default('present') == 'present'
+
+- name: Add chromium to 1Password allowed browsers
+  ansible.builtin.lineinfile:
+    path: /etc/1password/custom_allowed_browsers
+    line: chromium
+    create: true
+    owner: root
+    group: root
+    mode: "0755"
+  become: true
+  when: app_states['chromium'] | default('present') == 'present'
+
+- name: Add chromium-browser to 1Password allowed browsers
+  ansible.builtin.lineinfile:
+    path: /etc/1password/custom_allowed_browsers
+    line: chromium-browser
+    create: true
+    owner: root
+    group: root
+    mode: "0755"
+  become: true
+  when: app_states['chromium'] | default('present') == 'present'
+
+# Cleanup when absent
+- name: Remove Chromium when absent
+  ansible.builtin.apt:
+    name: chromium
+    state: absent
+    purge: true
+  become: true
+  when: app_states['chromium'] | default('present') == 'absent'
+
+- name: Remove Chromium PPA when absent
+  ansible.builtin.apt_repository:
+    repo: ppa:xtradeb/apps
+    state: absent
+  become: true
+  when: app_states['chromium'] | default('present') == 'absent'
+
+- name: Remove Chromium APT pin when absent
+  ansible.builtin.file:
+    path: /etc/apt/preferences.d/chromium-pin
+    state: absent
+  become: true
+  when: app_states['chromium'] | default('present') == 'absent'
+
+- name: Remove chromium from 1Password allowed browsers when absent
+  ansible.builtin.lineinfile:
+    path: /etc/1password/custom_allowed_browsers
+    line: chromium
+    state: absent
+  become: true
+  when: app_states['chromium'] | default('present') == 'absent'
+  failed_when: false
+
+- name: Remove chromium-browser from 1Password allowed browsers when absent
+  ansible.builtin.lineinfile:
+    path: /etc/1password/custom_allowed_browsers
+    line: chromium-browser
+    state: absent
+  become: true
+  when: app_states['chromium'] | default('present') == 'absent'
+  failed_when: false

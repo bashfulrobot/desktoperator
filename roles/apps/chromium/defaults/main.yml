@@ -1,0 +1,5 @@
+---
+# Chromium defaults
+# PPA pinning configuration
+chromium_apt_pin_enabled: true
+chromium_apt_pin_priority: 1001

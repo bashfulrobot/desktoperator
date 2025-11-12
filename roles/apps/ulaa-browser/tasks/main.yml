@@ -1,0 +1,160 @@
+---
+# Ulaa Browser installation via APT repository
+# https://ulaa.zoho.com/
+
+# 1Password Integration - Must be done BEFORE installation
+- name: Create 1Password config directory
+  ansible.builtin.file:
+    path: /etc/1password
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+  become: true
+  when: app_states['ulaa-browser'] | default('present') == 'present'
+
+- name: Add Ulaa Browser to 1Password allowed browsers
+  ansible.builtin.blockinfile:
+    path: /etc/1password/custom_allowed_browsers
+    block: |
+      ulaa
+      ulaa-browser
+      ulaa-browser-stable
+    create: true
+    owner: root
+    group: root
+    mode: "0755"
+    marker: "# {mark} ANSIBLE MANAGED BLOCK - Ulaa Browser"
+  become: true
+  when: app_states['ulaa-browser'] | default('present') == 'present'
+
+# Repository setup
+- name: Download Ulaa Browser GPG key
+  ansible.builtin.get_url:
+    url: https://ulaa.zoho.com/release/linux/stable/pubkey
+    dest: /tmp/ulaa-browser.gpg
+    mode: "0644"
+  when: app_states['ulaa-browser'] | default('present') == 'present'
+
+- name: Add Ulaa Browser GPG key to trusted keyring
+  ansible.builtin.shell: |
+    gpg --dearmor < /tmp/ulaa-browser.gpg > /etc/apt/trusted.gpg.d/ulaa-browser-release.gpg
+    chmod 644 /etc/apt/trusted.gpg.d/ulaa-browser-release.gpg
+  args:
+    creates: /etc/apt/trusted.gpg.d/ulaa-browser-release.gpg
+  become: true
+  when: app_states['ulaa-browser'] | default('present') == 'present'
+
+- name: Clean up temporary Ulaa Browser GPG key file
+  ansible.builtin.file:
+    path: /tmp/ulaa-browser.gpg
+    state: absent
+  when: app_states['ulaa-browser'] | default('present') == 'present'
+
+# Remove old repository file if it exists (from manual installation)
+- name: Remove old Ulaa Browser repository file
+  ansible.builtin.file:
+    path: /etc/apt/sources.list.d/ulaa-browser-release.list
+    state: absent
+  become: true
+  when: app_states['ulaa-browser'] | default('present') == 'present'
+
+# Explicitly specify arch=amd64 to prevent i386 package lookup warnings
+# For ARM support, change arch=amd64 to arch=amd64,arm64
+- name: Add Ulaa Browser APT repository
+  ansible.builtin.apt_repository:
+    repo: "deb [arch=amd64 signed-by=/etc/apt/trusted.gpg.d/ulaa-browser-release.gpg] https://ulaa.zoho.com/release/linux/stable /"
+    filename: ulaa-browser
+    state: present
+  become: true
+  when: app_states['ulaa-browser'] | default('present') == 'present'
+
+- name: Update APT cache
+  ansible.builtin.apt:
+    update_cache: true
+  become: true
+  when: app_states['ulaa-browser'] | default('present') == 'present'
+
+# APT pinning - prioritizes Ulaa Browser from official repository
+- name: Create APT preferences directory
+  ansible.builtin.file:
+    path: /etc/apt/preferences.d
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+  become: true
+  when:
+    - app_states['ulaa-browser'] | default('present') == 'present'
+    - ulaa_apt_pin_enabled | default(true)
+
+- name: Pin Ulaa Browser package to official repository
+  ansible.builtin.copy:
+    content: |
+      # Managed by Ansible - prioritizes Ulaa Browser from official Zoho repository
+      Package: ulaa-browser*
+      Pin: origin ulaa.zoho.com
+      Pin-Priority: {{ ulaa_apt_pin_priority }}
+    dest: /etc/apt/preferences.d/ulaa-browser-pin
+    owner: root
+    group: root
+    mode: "0644"
+  become: true
+  when:
+    - app_states['ulaa-browser'] | default('present') == 'present'
+    - ulaa_apt_pin_enabled | default(true)
+
+- name: Install Ulaa Browser
+  ansible.builtin.apt:
+    name: ulaa-browser
+    state: present
+  become: true
+  when: app_states['ulaa-browser'] | default('present') == 'present'
+
+# Cleanup when absent
+- name: Remove Ulaa Browser when absent
+  ansible.builtin.apt:
+    name: ulaa-browser
+    state: absent
+    purge: true
+  become: true
+  when: app_states['ulaa-browser'] | default('present') == 'absent'
+
+- name: Remove Ulaa Browser repository when absent
+  ansible.builtin.apt_repository:
+    repo: "deb [arch=amd64 signed-by=/etc/apt/trusted.gpg.d/ulaa-browser-release.gpg] https://ulaa.zoho.com/release/linux/stable /"
+    filename: ulaa-browser
+    state: absent
+  become: true
+  when: app_states['ulaa-browser'] | default('present') == 'absent'
+
+- name: Remove old Ulaa Browser repository file when absent
+  ansible.builtin.file:
+    path: /etc/apt/sources.list.d/ulaa-browser-release.list
+    state: absent
+  become: true
+  when: app_states['ulaa-browser'] | default('present') == 'absent'
+
+- name: Remove Ulaa Browser GPG key when absent
+  ansible.builtin.file:
+    path: /etc/apt/trusted.gpg.d/ulaa-browser-release.gpg
+    state: absent
+  become: true
+  when: app_states['ulaa-browser'] | default('present') == 'absent'
+
+- name: Remove Ulaa Browser APT pin when absent
+  ansible.builtin.file:
+    path: /etc/apt/preferences.d/ulaa-browser-pin
+    state: absent
+  become: true
+  when: app_states['ulaa-browser'] | default('present') == 'absent'
+
+- name: Remove Ulaa Browser from 1Password allowed browsers when absent
+  ansible.builtin.blockinfile:
+    path: /etc/1password/custom_allowed_browsers
+    block: ""
+    state: absent
+    marker: "# {mark} ANSIBLE MANAGED BLOCK - Ulaa Browser"
+  become: true
+  when: app_states['ulaa-browser'] | default('present') == 'absent'
+  failed_when: false
