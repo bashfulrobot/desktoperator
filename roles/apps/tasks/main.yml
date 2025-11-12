@@ -76,6 +76,11 @@
     name: apps/chromium
   tags: [chromium]
 
+- name: Include Brave Browser
+  ansible.builtin.import_role:
+    name: apps/brave-browser
+  tags: [brave-browser, brave]
+
 - name: Include Ulaa Browser
   ansible.builtin.import_role:
     name: apps/ulaa-browser

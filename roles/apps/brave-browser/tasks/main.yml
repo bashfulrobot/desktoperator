@@ -1,0 +1,127 @@
+---
+# Brave Browser installation via APT repository
+# https://brave.com/linux/
+
+# 1Password Integration - Must be done BEFORE installation
+- name: Create 1Password config directory
+  ansible.builtin.file:
+    path: /etc/1password
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+  become: true
+  when: app_states['brave-browser'] | default('present') == 'present'
+
+- name: Add Brave Browser to 1Password allowed browsers
+  ansible.builtin.blockinfile:
+    path: /etc/1password/custom_allowed_browsers
+    block: |
+      brave
+      brave-browser
+    create: true
+    owner: root
+    group: root
+    mode: "0755"
+    marker: "# {mark} ANSIBLE MANAGED BLOCK - Brave Browser"
+  become: true
+  when: app_states['brave-browser'] | default('present') == 'present'
+
+# Repository setup
+- name: Download Brave Browser GPG key
+  ansible.builtin.get_url:
+    url: https://brave-browser-apt-release.s3.brave.com/brave-browser-archive-keyring.gpg
+    dest: /usr/share/keyrings/brave-browser-archive-keyring.gpg
+    mode: "0644"
+  become: true
+  when: app_states['brave-browser'] | default('present') == 'present'
+
+- name: Download Brave Browser repository sources file
+  ansible.builtin.get_url:
+    url: https://brave-browser-apt-release.s3.brave.com/brave-browser.sources
+    dest: /etc/apt/sources.list.d/brave-browser-release.sources
+    mode: "0644"
+  become: true
+  when: app_states['brave-browser'] | default('present') == 'present'
+
+- name: Update APT cache
+  ansible.builtin.apt:
+    update_cache: true
+  become: true
+  when: app_states['brave-browser'] | default('present') == 'present'
+
+# APT pinning - prioritizes Brave Browser from official repository
+- name: Create APT preferences directory
+  ansible.builtin.file:
+    path: /etc/apt/preferences.d
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+  become: true
+  when:
+    - app_states['brave-browser'] | default('present') == 'present'
+    - brave_apt_pin_enabled | default(true)
+
+- name: Pin Brave Browser package to official repository
+  ansible.builtin.copy:
+    content: |
+      # Managed by Ansible - prioritizes Brave Browser from official repository
+      Package: brave-browser*
+      Pin: origin brave-browser-apt-release.s3.brave.com
+      Pin-Priority: {{ brave_apt_pin_priority }}
+    dest: /etc/apt/preferences.d/brave-browser-pin
+    owner: root
+    group: root
+    mode: "0644"
+  become: true
+  when:
+    - app_states['brave-browser'] | default('present') == 'present'
+    - brave_apt_pin_enabled | default(true)
+
+- name: Install Brave Browser
+  ansible.builtin.apt:
+    name: brave-browser
+    state: present
+  become: true
+  when: app_states['brave-browser'] | default('present') == 'present'
+
+# Cleanup when absent
+- name: Remove Brave Browser when absent
+  ansible.builtin.apt:
+    name: brave-browser
+    state: absent
+    purge: true
+  become: true
+  when: app_states['brave-browser'] | default('present') == 'absent'
+
+- name: Remove Brave Browser repository sources file when absent
+  ansible.builtin.file:
+    path: /etc/apt/sources.list.d/brave-browser-release.sources
+    state: absent
+  become: true
+  when: app_states['brave-browser'] | default('present') == 'absent'
+
+- name: Remove Brave Browser GPG key when absent
+  ansible.builtin.file:
+    path: /usr/share/keyrings/brave-browser-archive-keyring.gpg
+    state: absent
+  become: true
+  when: app_states['brave-browser'] | default('present') == 'absent'
+
+- name: Remove Brave Browser APT pin when absent
+  ansible.builtin.file:
+    path: /etc/apt/preferences.d/brave-browser-pin
+    state: absent
+  become: true
+  when: app_states['brave-browser'] | default('present') == 'absent'
+
+- name: Remove Brave Browser from 1Password allowed browsers when absent
+  ansible.builtin.blockinfile:
+    path: /etc/1password/custom_allowed_browsers
+    block: ""
+    state: absent
+    marker: "# {mark} ANSIBLE MANAGED BLOCK - Brave Browser"
+  become: true
+  when: app_states['brave-browser'] | default('present') == 'absent'
+  failed_when: false

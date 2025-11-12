@@ -1,0 +1,5 @@
+---
+# Brave Browser defaults
+# APT pinning configuration
+brave_apt_pin_enabled: true
+brave_apt_pin_priority: 1001
