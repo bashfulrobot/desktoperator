@@ -138,6 +138,23 @@
     mode: "0644"
   when: app_states['terminal-experience'] | default('present') == 'present'
 
+# just command runner completions
+- name: Ensure Fish completions directory exists
+  ansible.builtin.file:
+    path: "{{ user.home }}/.config/fish/completions"
+    state: directory
+    owner: "{{ user.name }}"
+    mode: "0755"
+  when: app_states['terminal-experience'] | default('present') == 'present'
+
+- name: Install just completion for Fish
+  ansible.builtin.shell: just --completions fish > {{ user.home }}/.config/fish/completions/just.fish
+  args:
+    creates: "{{ user.home }}/.config/fish/completions/just.fish"
+  become: true
+  become_user: "{{ user.name }}"
+  when: app_states['terminal-experience'] | default('present') == 'present'
+
 # Cleanup when absent
 - name: Remove terminal utilities when absent
   ansible.builtin.apt:
@@ -188,5 +205,11 @@
 - name: Remove Fish configuration for terminal experience when absent
   ansible.builtin.file:
     path: "{{ user.home }}/.config/fish/conf.d/terminal-experience.fish"
+    state: absent
+  when: app_states['terminal-experience'] | default('present') == 'absent'
+
+- name: Remove just Fish completion when absent
+  ansible.builtin.file:
+    path: "{{ user.home }}/.config/fish/completions/just.fish"
     state: absent
   when: app_states['terminal-experience'] | default('present') == 'absent'
