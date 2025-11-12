@@ -2,18 +2,51 @@
 # Chromium installation via xtradeb PPA
 # https://launchpad.net/~xtradeb/+archive/ubuntu/apps
 
-- name: Install software-properties-common for add-apt-repository
-  ansible.builtin.apt:
-    name: software-properties-common
-    state: present
+- name: Download Chromium PPA GPG key
+  ansible.builtin.get_url:
+    url: https://keyserver.ubuntu.com/pks/lookup?op=get&search=0x5301FA4FD93244FBC6F6149982BB6851C64F6880
+    dest: /tmp/chromium-ppa.gpg
+    mode: "0644"
+  when: app_states['chromium'] | default('present') == 'present'
+
+- name: Add Chromium PPA GPG key to keyring
+  ansible.builtin.shell: |
+    gpg --dearmor < /tmp/chromium-ppa.gpg > /usr/share/keyrings/xtradeb-apps.gpg
+    chmod 644 /usr/share/keyrings/xtradeb-apps.gpg
+  args:
+    creates: /usr/share/keyrings/xtradeb-apps.gpg
   become: true
   when: app_states['chromium'] | default('present') == 'present'
 
-- name: Add Chromium PPA
+- name: Clean up temporary GPG key file
+  ansible.builtin.file:
+    path: /tmp/chromium-ppa.gpg
+    state: absent
+  when: app_states['chromium'] | default('present') == 'present'
+
+# Remove old GPG key location if it exists
+- name: Remove legacy Chromium PPA GPG key
+  ansible.builtin.file:
+    path: /etc/apt/trusted.gpg.d/xtradeb_ubuntu_apps.gpg
+    state: absent
+  become: true
+  when: app_states['chromium'] | default('present') == 'present'
+
+# Remove old PPA repository format (must be done before adding new format)
+- name: Remove old Chromium PPA repository file
+  ansible.builtin.file:
+    path: /etc/apt/sources.list.d/ppa_xtradeb_apps_noble.list
+    state: absent
+  become: true
+  when: app_states['chromium'] | default('present') == 'present'
+
+# Explicitly specify arch=amd64 and signed-by to use modern keyring
+# For ARM support, change arch=amd64 to arch=amd64,arm64
+- name: Add Chromium PPA repository with modern keyring
   ansible.builtin.apt_repository:
-    repo: ppa:xtradeb/apps
+    repo: "deb [arch=amd64 signed-by=/usr/share/keyrings/xtradeb-apps.gpg] https://ppa.launchpadcontent.net/xtradeb/apps/ubuntu noble main"
+    filename: chromium-ppa
     state: present
-    update_cache: false
   become: true
   when: app_states['chromium'] | default('present') == 'present'
 
@@ -70,25 +103,17 @@
   become: true
   when: app_states['chromium'] | default('present') == 'present'
 
-- name: Add chromium to 1Password allowed browsers
-  ansible.builtin.lineinfile:
+- name: Add Chromium to 1Password allowed browsers
+  ansible.builtin.blockinfile:
     path: /etc/1password/custom_allowed_browsers
-    line: chromium
+    block: |
+      chromium
+      chromium-browser
     create: true
     owner: root
     group: root
     mode: "0755"
-  become: true
-  when: app_states['chromium'] | default('present') == 'present'
-
-- name: Add chromium-browser to 1Password allowed browsers
-  ansible.builtin.lineinfile:
-    path: /etc/1password/custom_allowed_browsers
-    line: chromium-browser
-    create: true
-    owner: root
-    group: root
-    mode: "0755"
+    marker: "# {mark} ANSIBLE MANAGED BLOCK - Chromium"
   become: true
   when: app_states['chromium'] | default('present') == 'present'
 
@@ -101,9 +126,31 @@
   become: true
   when: app_states['chromium'] | default('present') == 'absent'
 
-- name: Remove Chromium PPA when absent
+- name: Remove Chromium PPA repository when absent
   ansible.builtin.apt_repository:
-    repo: ppa:xtradeb/apps
+    repo: "deb [arch=amd64 signed-by=/usr/share/keyrings/xtradeb-apps.gpg] https://ppa.launchpadcontent.net/xtradeb/apps/ubuntu noble main"
+    filename: chromium-ppa
+    state: absent
+  become: true
+  when: app_states['chromium'] | default('present') == 'absent'
+
+- name: Remove Chromium PPA GPG key when absent
+  ansible.builtin.file:
+    path: /usr/share/keyrings/xtradeb-apps.gpg
+    state: absent
+  become: true
+  when: app_states['chromium'] | default('present') == 'absent'
+
+- name: Remove legacy Chromium PPA GPG key when absent
+  ansible.builtin.file:
+    path: /etc/apt/trusted.gpg.d/xtradeb_ubuntu_apps.gpg
+    state: absent
+  become: true
+  when: app_states['chromium'] | default('present') == 'absent'
+
+- name: Remove old Chromium PPA repository file when absent
+  ansible.builtin.file:
+    path: /etc/apt/sources.list.d/ppa_xtradeb_apps_noble.list
     state: absent
   become: true
   when: app_states['chromium'] | default('present') == 'absent'
@@ -115,20 +162,12 @@
   become: true
   when: app_states['chromium'] | default('present') == 'absent'
 
-- name: Remove chromium from 1Password allowed browsers when absent
-  ansible.builtin.lineinfile:
+- name: Remove Chromium from 1Password allowed browsers when absent
+  ansible.builtin.blockinfile:
     path: /etc/1password/custom_allowed_browsers
-    line: chromium
+    block: ""
     state: absent
-  become: true
-  when: app_states['chromium'] | default('present') == 'absent'
-  failed_when: false
-
-- name: Remove chromium-browser from 1Password allowed browsers when absent
-  ansible.builtin.lineinfile:
-    path: /etc/1password/custom_allowed_browsers
-    line: chromium-browser
-    state: absent
+    marker: "# {mark} ANSIBLE MANAGED BLOCK - Chromium"
   become: true
   when: app_states['chromium'] | default('present') == 'absent'
   failed_when: false
