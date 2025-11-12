@@ -9,6 +9,10 @@ host_specific_apps: []
 # Host-specific app states
 app_states:
   zed: present
+  chromium: absent
+  chrome: absent
+  firefox: absent
+  vivaldi: absent
 # SiteMCP scheduled tasks configuration
 sitemcp_enable_scheduled_tasks: true
 

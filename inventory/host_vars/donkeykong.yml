@@ -9,6 +9,10 @@ host_specific_apps: []
 # Host-specific app states
 app_states:
   zed: absent
+  chromium: absent
+  chrome: absent
+  firefox: absent
+  vivaldi: absent
 # Libvirt configuration
 libvirt_install_gui_tools: true
 
