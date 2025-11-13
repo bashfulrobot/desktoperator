@@ -49,25 +49,53 @@
   become: true
   when: app_states['spotify'] | default('present') == 'present'
 
-# ncspot terminal client installation (Flatpak)
-- name: Install ncspot terminal Spotify client
-  community.general.flatpak:
-    name: io.github.hrkfdn.ncspot
+# ncspot terminal client installation (GitHub release)
+- name: Install ncspot runtime dependencies
+  ansible.builtin.apt:
+    name:
+      - dbus                # D-Bus system
+      - libdbus-1-3         # D-Bus library for MPRIS support
+      - libncursesw6        # NCurses library (wide character support)
+      - libssl3t64          # SSL library (time64 variant for Ubuntu 24.04)
+      - libpulse0           # PulseAudio client library
+      - libxcb1             # X11 clipboard support
+      - ueberzug            # Album cover art display
+      - netcat-openbsd      # For IPC socket communication with -W flag
+      - jq                  # For JSON parsing
+      - curl                # For downloading album art
+      - libnotify-bin       # For desktop notifications
     state: present
-    remote: flathub
   become: true
   when: app_states['spotify'] | default('present') == 'present'
 
-# ncspot dependencies for IPC scripting
-- name: Install ncspot script dependencies
-  ansible.builtin.apt:
-    name:
-      - netcat-openbsd  # For IPC socket communication with -W flag
-      - jq              # For JSON parsing
-      - curl            # For downloading album art
-      - libnotify-bin   # For desktop notifications
-    state: present
-  become: true
+- name: Create ncspot installation directory
+  ansible.builtin.file:
+    path: "{{ ncspot_install_dir }}"
+    state: directory
+    owner: "{{ user.name }}"
+    group: "{{ user.name }}"
+    mode: "0755"
+  when: app_states['spotify'] | default('present') == 'present'
+
+- name: Download ncspot from GitHub releases
+  ansible.builtin.get_url:
+    url: "https://github.com/hrkfdn/ncspot/releases/download/{{ ncspot_version }}/ncspot-{{ ncspot_version }}-linux-{{ ncspot_arch }}.tar.gz"
+    dest: "/tmp/ncspot-{{ ncspot_version }}-linux-{{ ncspot_arch }}.tar.gz"
+    mode: "0644"
+  when: app_states['spotify'] | default('present') == 'present'
+
+- name: Extract ncspot binary
+  ansible.builtin.unarchive:
+    src: "/tmp/ncspot-{{ ncspot_version }}-linux-{{ ncspot_arch }}.tar.gz"
+    dest: "{{ ncspot_install_dir }}"
+    remote_src: true
+    mode: "0755"
+  when: app_states['spotify'] | default('present') == 'present'
+
+- name: Clean up ncspot download
+  ansible.builtin.file:
+    path: "/tmp/ncspot-{{ ncspot_version }}-linux-{{ ncspot_arch }}.tar.gz"
+    state: absent
   when: app_states['spotify'] | default('present') == 'present'
 
 # ncspot configuration
@@ -106,6 +134,33 @@
     owner: "{{ user.name }}"
     group: "{{ user.name }}"
     mode: "0755"
+  when: app_states['spotify'] | default('present') == 'present'
+
+- name: Deploy ncspot-session script
+  ansible.builtin.template:
+    src: ncspot-session.sh.j2
+    dest: "{{ user.home }}/.local/bin/ncspot-session"
+    owner: "{{ user.name }}"
+    group: "{{ user.name }}"
+    mode: "0755"
+  when: app_states['spotify'] | default('present') == 'present'
+
+- name: Create zellij layouts directory
+  ansible.builtin.file:
+    path: "{{ user.home }}/.config/zellij/layouts"
+    state: directory
+    owner: "{{ user.name }}"
+    group: "{{ user.name }}"
+    mode: "0755"
+  when: app_states['spotify'] | default('present') == 'present'
+
+- name: Deploy ncspot zellij layout
+  ansible.builtin.template:
+    src: ncspot-layout.kdl.j2
+    dest: "{{ user.home }}/.config/zellij/layouts/ncspot.kdl"
+    owner: "{{ user.name }}"
+    group: "{{ user.name }}"
+    mode: "0644"
   when: app_states['spotify'] | default('present') == 'present'
 
 # Fish shell integration
@@ -151,11 +206,10 @@
   become: true
   when: app_states['spotify'] | default('present') == 'absent'
 
-- name: Remove ncspot when absent
-  community.general.flatpak:
-    name: io.github.hrkfdn.ncspot
+- name: Remove ncspot binary when absent
+  ansible.builtin.file:
+    path: "{{ ncspot_install_dir }}/ncspot"
     state: absent
-  become: true
   when: app_states['spotify'] | default('present') == 'absent'
 
 - name: Remove fish alias for ncspot when absent
@@ -175,3 +229,31 @@
     path: "{{ user.home }}/.local/bin/ncspot-save"
     state: absent
   when: app_states['spotify'] | default('present') == 'absent'
+
+- name: Remove ncspot-session script when absent
+  ansible.builtin.file:
+    path: "{{ user.home }}/.local/bin/ncspot-session"
+    state: absent
+  when: app_states['spotify'] | default('present') == 'absent'
+
+- name: Remove ncspot zellij layout when absent
+  ansible.builtin.file:
+    path: "{{ user.home }}/.config/zellij/layouts/ncspot.kdl"
+    state: absent
+  when: app_states['spotify'] | default('present') == 'absent'
+
+# Migration: Clean up old Flatpak installation
+- name: Remove old Flatpak ncspot installation (migration)
+  community.general.flatpak:
+    name: io.github.hrkfdn.ncspot
+    state: absent
+  become: true
+  failed_when: false
+  when: app_states['spotify'] | default('present') == 'present'
+
+- name: Remove old Flatpak ncspot config (migration)
+  ansible.builtin.file:
+    path: "{{ user.home }}/.var/app/io.github.hrkfdn.ncspot/config/ncspot"
+    state: absent
+  failed_when: false
+  when: app_states['spotify'] | default('present') == 'present'

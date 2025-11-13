@@ -1,0 +1,11 @@
+---
+# Spotify role defaults
+
+# ncspot version to install from GitHub releases
+ncspot_version: "v1.3.2"
+
+# ncspot architecture
+ncspot_arch: "x86_64"
+
+# ncspot installation directory
+ncspot_install_dir: "{{ user.home }}/.local/bin"
