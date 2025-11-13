@@ -1,0 +1,8 @@
+# ncspot alias for Flatpak installation
+# Managed by Ansible - spotify role
+
+# Check if flatpak is available
+if type -q flatpak
+    # ncspot terminal Spotify client via Flatpak
+    alias ncspot="flatpak run io.github.hrkfdn.ncspot"
+end

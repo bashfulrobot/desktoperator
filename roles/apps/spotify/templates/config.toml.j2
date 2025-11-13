@@ -1,0 +1,80 @@
+# ncspot configuration
+# Managed by Ansible - spotify role
+# Synced with COSMIC theme colors
+
+# Use Nerd Font glyphs (matches terminal font: JetBrainsMono Nerd Font Mono)
+use_nerdfont = true
+
+# Enable desktop notifications for track changes
+notify = true
+
+# Enable volume normalization
+volnorm = true
+
+# Enable shuffle by default
+shuffle = true
+
+# Library tabs (all except podcasts)
+library_tabs = ["tracks", "albums", "artists", "playlists", "browse"]
+
+# Command key for opening command prompt
+command_key = ":"
+
+# Initial screen on startup
+initial_screen = "library"
+
+# Enable default keybindings
+default_keybindings = true
+
+# Theme configuration - COSMIC dark theme colors
+[theme]
+# Main background
+background = "{{ theme_colors_dark.colors.background.hex }}"
+
+# Primary text color
+primary = "{{ theme_colors_dark.colors.text_primary.hex }}"
+
+# Secondary text color
+secondary = "{{ theme_colors_dark.colors.text_secondary.hex }}"
+
+# Title text
+title = "{{ theme_colors_dark.colors.text_primary.hex }}"
+
+# Highlighted item text
+highlight = "{{ theme_colors_dark.colors.accent.hex }}"
+
+# Highlighted item background
+highlight_bg = "{{ theme_colors_dark.colors.primary.hex }}"
+
+# Currently playing track (success green)
+playing = "{{ theme_colors_dark.colors.success.hex }}"
+
+# Selected playing track
+playing_selected = "{{ theme_colors_dark.colors.success.hex }}"
+
+# Playing track background
+playing_bg = "{{ theme_colors_dark.colors.primary.hex }}"
+
+# Status bar text
+statusbar = "{{ theme_colors_dark.colors.text_primary.hex }}"
+
+# Progress indicator (accent)
+statusbar_progress = "{{ theme_colors_dark.colors.accent.hex }}"
+
+# Status bar background
+statusbar_bg = "{{ theme_colors_dark.colors.secondary.hex }}"
+
+# Command line text
+cmdline = "{{ theme_colors_dark.colors.text_primary.hex }}"
+
+# Command line background
+cmdline_bg = "{{ theme_colors_dark.colors.secondary.hex }}"
+
+# Error message text
+error = "{{ theme_colors_dark.colors.destructive.hex }}"
+
+# Error message background
+error_bg = "{{ theme_colors_dark.colors.background.hex }}"
+
+# Search result highlight
+search_match = "{{ theme_colors_dark.colors.warning.hex }}"

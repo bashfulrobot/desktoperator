@@ -1,0 +1,40 @@
+#!/usr/bin/env bash
+# ncspot-save - Save currently playing track and show notification
+# Managed by Ansible - spotify role
+
+# Get the ncspot socket path from user runtime directory
+# Use XDG_RUNTIME_DIR if available, otherwise construct from UID
+if [ -n "$XDG_RUNTIME_DIR" ]; then
+    SOCKET_PATH="$XDG_RUNTIME_DIR/ncspot/ncspot.sock"
+else
+    SOCKET_PATH="/run/user/$(id -u)/ncspot/ncspot.sock"
+fi
+
+# Check if socket exists
+if [ ! -S "$SOCKET_PATH" ]; then
+    notify-send --app-name="ncspot" "Error" "ncspot is not running or socket not found"
+    exit 1
+fi
+
+# Send save command to ncspot
+echo "save" | nc -W 1 -U "$SOCKET_PATH"
+
+# Get current track info
+response=$(nc -W 1 -U "$SOCKET_PATH")
+
+# Parse track metadata
+title=$(echo "$response" | jq -r '.playable.title')
+artist=$(echo "$response" | jq -r '.playable.artists[0]')
+cover_url=$(echo "$response" | jq -r '.playable.cover_url')
+
+# Download album art to temporary location
+cover_path="/tmp/ncspot_album_cover_$$.jpg"
+curl -s -o "$cover_path" "$cover_url"
+
+# Send notification with album art
+notify-send --app-name="ncspot" -i "$cover_path" "Song Saved" "$title - $artist"
+
+# Clean up temporary cover art after a delay (in background)
+(sleep 5 && rm -f "$cover_path") &
+
+exit 0

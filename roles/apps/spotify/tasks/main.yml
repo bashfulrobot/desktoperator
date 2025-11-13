@@ -58,6 +58,75 @@
   become: true
   when: app_states['spotify'] | default('present') == 'present'
 
+# ncspot dependencies for IPC scripting
+- name: Install ncspot script dependencies
+  ansible.builtin.apt:
+    name:
+      - netcat-openbsd  # For IPC socket communication with -W flag
+      - jq              # For JSON parsing
+      - curl            # For downloading album art
+      - libnotify-bin   # For desktop notifications
+    state: present
+  become: true
+  when: app_states['spotify'] | default('present') == 'present'
+
+# ncspot configuration
+- name: Create ncspot config directory
+  ansible.builtin.file:
+    path: "{{ user.home }}/.config/ncspot"
+    state: directory
+    owner: "{{ user.name }}"
+    group: "{{ user.name }}"
+    mode: "0755"
+  when: app_states['spotify'] | default('present') == 'present'
+
+- name: Deploy ncspot configuration file
+  ansible.builtin.template:
+    src: config.toml.j2
+    dest: "{{ user.home }}/.config/ncspot/config.toml"
+    owner: "{{ user.name }}"
+    group: "{{ user.name }}"
+    mode: "0644"
+  when: app_states['spotify'] | default('present') == 'present'
+
+# ncspot save script
+- name: Create user bin directory
+  ansible.builtin.file:
+    path: "{{ user.home }}/.local/bin"
+    state: directory
+    owner: "{{ user.name }}"
+    group: "{{ user.name }}"
+    mode: "0755"
+  when: app_states['spotify'] | default('present') == 'present'
+
+- name: Deploy ncspot-save script
+  ansible.builtin.template:
+    src: ncspot-save.sh.j2
+    dest: "{{ user.home }}/.local/bin/ncspot-save"
+    owner: "{{ user.name }}"
+    group: "{{ user.name }}"
+    mode: "0755"
+  when: app_states['spotify'] | default('present') == 'present'
+
+# Fish shell integration
+- name: Create fish conf.d directory
+  ansible.builtin.file:
+    path: "{{ user.home }}/.config/fish/conf.d"
+    state: directory
+    owner: "{{ user.name }}"
+    group: "{{ user.name }}"
+    mode: "0755"
+  when: app_states['spotify'] | default('present') == 'present'
+
+- name: Deploy fish alias for ncspot
+  ansible.builtin.template:
+    src: ncspot.fish.j2
+    dest: "{{ user.home }}/.config/fish/conf.d/ncspot.fish"
+    owner: "{{ user.name }}"
+    group: "{{ user.name }}"
+    mode: "0644"
+  when: app_states['spotify'] | default('present') == 'present'
+
 # Cleanup when absent
 - name: Remove Spotify client when absent
   ansible.builtin.apt:
@@ -87,4 +156,22 @@
     name: io.github.hrkfdn.ncspot
     state: absent
   become: true
+  when: app_states['spotify'] | default('present') == 'absent'
+
+- name: Remove fish alias for ncspot when absent
+  ansible.builtin.file:
+    path: "{{ user.home }}/.config/fish/conf.d/ncspot.fish"
+    state: absent
+  when: app_states['spotify'] | default('present') == 'absent'
+
+- name: Remove ncspot configuration directory when absent
+  ansible.builtin.file:
+    path: "{{ user.home }}/.config/ncspot"
+    state: absent
+  when: app_states['spotify'] | default('present') == 'absent'
+
+- name: Remove ncspot-save script when absent
+  ansible.builtin.file:
+    path: "{{ user.home }}/.local/bin/ncspot-save"
+    state: absent
   when: app_states['spotify'] | default('present') == 'absent'
