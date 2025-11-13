@@ -20,7 +20,7 @@ zellij_scroll_buffer_size: 50000
 zellij_mouse_mode: false
 zellij_default_mode: "normal"
 zellij_show_startup_tips: false
-zellij_default_layout: "compact"
+zellij_default_layout: "default"
 zellij_pane_frames: false
 
 # UI settings
