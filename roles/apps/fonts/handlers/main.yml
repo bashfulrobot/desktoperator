@@ -1,0 +1,17 @@
+---
+# Font cache update handlers
+# Can be notified by any task that installs/removes fonts
+# Usage: notify: "Rebuild font caches"
+
+- name: Rebuild font caches
+  ansible.builtin.command: fc-cache -f -v
+  become: true
+  changed_when: true
+  listen: "Rebuild font caches"
+
+- name: Rebuild font caches
+  ansible.builtin.command: fc-cache -f -v
+  become: false
+  become_user: "{{ user.name }}"
+  changed_when: true
+  listen: "Rebuild font caches"

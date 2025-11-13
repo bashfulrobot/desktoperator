@@ -120,13 +120,46 @@
     loop_var: font
   when: app_states['fonts'] | default('present') == 'present'
 
-- name: Update font cache
+- name: Update system font cache
   ansible.builtin.command: fc-cache -f -v
   become: true
   changed_when: true
   when:
     - app_states['fonts'] | default('present') == 'present'
     - fonts_were_updated | default(false)
+
+- name: Update user font cache
+  ansible.builtin.command: fc-cache -f -v
+  become: false
+  become_user: "{{ user.name }}"
+  changed_when: true
+  when:
+    - app_states['fonts'] | default('present') == 'present'
+    - fonts_were_updated | default(false)
+
+- name: Verify fonts are available in font cache
+  ansible.builtin.command: fc-list | grep -i "{{ item.name }}"
+  loop:
+    - "{{ github_fonts | selectattr('name', 'equalto', 'OperatorMonoLig') | first }}"
+  loop_control:
+    label: "{{ item.name }}"
+  register: font_verification
+  failed_when: false
+  changed_when: false
+  when:
+    - app_states['fonts'] | default('present') == 'present'
+    - fonts_were_updated | default(false)
+
+- name: Show font verification results
+  ansible.builtin.debug:
+    msg: "{{ item.item.name }} is {{ 'available' if item.rc == 0 else 'NOT FOUND in cache' }}"
+  loop: "{{ font_verification.results }}"
+  loop_control:
+    label: "{{ item.item.name }}"
+  when:
+    - app_states['fonts'] | default('present') == 'present'
+    - fonts_were_updated | default(false)
+    - font_verification.results is defined
 
 # Cleanup when absent
 - name: Remove Nerd Fonts directory when absent
@@ -185,8 +218,15 @@
   become: true
   when: app_states['fonts'] | default('present') == 'absent'
 
-- name: Update font cache after removal
+- name: Update system font cache after removal
   ansible.builtin.command: fc-cache -f -v
   become: true
+  changed_when: true
+  when: app_states['fonts'] | default('present') == 'absent'
+
+- name: Update user font cache after removal
+  ansible.builtin.command: fc-cache -f -v
+  become: false
+  become_user: "{{ user.name }}"
   changed_when: true
   when: app_states['fonts'] | default('present') == 'absent'

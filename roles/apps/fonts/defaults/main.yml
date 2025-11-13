@@ -14,6 +14,12 @@ nerd_fonts_default_version: "latest"
 # Nerd Fonts to install from GitHub releases
 # Each font can override the default version if needed
 nerd_fonts:
+  - name: "Iosevka"
+    version: "{{ nerd_fonts_default_version }}"
+  - name: "IosevkaTerm"
+    version: "{{ nerd_fonts_default_version }}"
+  - name: "FiraCode"
+    version: "{{ nerd_fonts_default_version }}"
   - name: "JetBrainsMono"
     version: "{{ nerd_fonts_default_version }}"
   - name: "Ubuntu"
@@ -71,6 +77,15 @@ github_fonts:
       - "Helvetica.ttf"
       - "Helvetica-Bold.ttf"
       - "Helvetica-Light.ttf"
+  - name: "OperatorMonoLig"
+    repo: "willfore/vscode_operator_mono_lig"
+    branch: "master"
+    base_path: "fonts"
+    files:
+      - "OperatorMonoLig-Book.otf"
+      - "OperatorMonoLig-BookItalic.otf"
+      - "OperatorMonoLig-Light.otf"
+      - "OperatorMonoLig-LightItalic.otf"
 
 # System font directories
 system_fonts_dir: "/usr/local/share/fonts/nerd-fonts"
