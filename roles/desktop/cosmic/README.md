@@ -6,59 +6,77 @@ This Ansible role manages COSMIC desktop environment and application configurati
 
 COSMIC stores its configuration in `~/.config/cosmic/` with individual directories for each component (desktop, applications, themes, etc.). Each component has versioned config files under a `v1/` subdirectory with simple text values.
 
+## Font Configuration
+
+### Cosmic Terminal Font
+
+The terminal is configured to use **IosevkaTerm Nerd Font Mono**, which provides:
+- Optimized metrics for terminal emulators
+- Programming ligatures for code display
+- Nerd Font symbols for shell prompts (Starship, Powerlevel10k, etc.)
+- Narrow, space-efficient rendering
+
+Configuration file: `config/com.system76.CosmicTerm/v1/font_name`
+
+**Why IosevkaTerm?**
+- IosevkaTerm is specifically optimized for terminal emulators with adjusted spacing
+- Standard Iosevka is designed for code editors (VSCode, etc.)
+- Both support ligatures and Nerd Font symbols, but IosevkaTerm has better terminal metrics
+
+### Ligatures in Helix Editor
+
+When using Helix editor inside Cosmic Terminal:
+1. **Cosmic Terminal** controls font rendering (uses IosevkaTerm)
+2. **Ligatures are enabled** automatically via the font's `calt` feature
+3. **Helix displays ligatures** through the terminal's font rendering
+
+No additional Helix configuration needed - ligatures work out of the box!
+
 ## Directory Structure
 
 ```
 roles/desktop/cosmic/
+├── config/               # COSMIC configuration files (synced to ~/.config/cosmic)
+│   ├── com.system76.CosmicTerm/
+│   │   └── v1/
+│   │       ├── font_name        # Terminal font family
+│   │       ├── font_size        # Terminal font size
+│   │       └── ...
+│   ├── com.system76.CosmicPanel/
+│   ├── com.system76.CosmicTheme.Dark/
+│   └── ...
 ├── defaults/
 │   └── main.yml          # Default variables
 ├── tasks/
 │   └── main.yml          # Main tasks
-├── templates/            # Optional Jinja2 templates for dynamic configs
 └── README.md             # This file
 ```
 
 ## Usage
 
-### Option 1: Copy entire COSMIC config to repository (Recommended)
+### Standard Usage
 
-1. Copy your current COSMIC config to the repository:
-   ```bash
-   cp -r ~/.config/cosmic cosmic-config/
-   ```
+The role automatically syncs all configurations from `roles/desktop/cosmic/config/` to `~/.config/cosmic/`:
 
-2. Add the directory to your repository and commit it
+```bash
+ansible-playbook site.yml --tags cosmic
+# or
+just cosmic
+```
 
-3. Set this variable in your inventory or playbook:
-   ```yaml
-   cosmic_sync_from_repo: true
-   ```
+### Modifying Terminal Font
 
-4. The role will sync the entire `cosmic-config/` directory to `~/.config/cosmic/`
+To change the terminal font, edit:
+```
+roles/desktop/cosmic/config/com.system76.CosmicTerm/v1/font_name
+```
 
-### Option 2: Use templates for individual configs
+Then run:
+```bash
+ansible-playbook site.yml --tags cosmic
+```
 
-1. Create templates for specific config files in `templates/`:
-   ```
-   templates/
-   └── com.system76.CosmicTerm/
-       └── font_size.j2
-   ```
-
-2. Define custom configs in your variables:
-   ```yaml
-   cosmic_use_templates: true
-   cosmic_custom_configs:
-     - component: com.system76.CosmicTerm
-       file: font_size
-     - component: com.system76.CosmicPanel.Dock
-       file: size
-   ```
-
-3. Templates can use variables:
-   ```jinja2
-   {{ cosmic_term_font_size | default('14') }}
-   ```
+Restart Cosmic Terminal for changes to take effect.
 
 ## Variables
 
@@ -66,11 +84,8 @@ roles/desktop/cosmic/
 |----------|---------|-------------|
 | `cosmic_config_path` | `{{ user.home }}/.config/cosmic` | Path to COSMIC config directory |
 | `cosmic_components` | (see defaults/main.yml) | List of COSMIC components to manage |
-| `cosmic_backup_existing` | `true` | Whether to backup existing config before managing |
+| `cosmic_backup_existing` | `false` | Whether to backup existing config before managing |
 | `cosmic_backup_dir` | `~/.config/cosmic-backup-<timestamp>` | Backup directory path |
-| `cosmic_sync_from_repo` | `false` | Sync entire config from repository |
-| `cosmic_use_templates` | `true` | Use templates for individual configs |
-| `cosmic_custom_configs` | `[]` | List of custom configs to template |
 
 ## COSMIC Components
 
@@ -115,7 +130,6 @@ The role manages these COSMIC components by default:
 ```yaml
 - hosts: desktops
   vars:
-    cosmic_sync_from_repo: true
     cosmic_backup_existing: true
   roles:
     - role: desktop/cosmic
@@ -125,7 +139,17 @@ The role manages these COSMIC components by default:
 
 - COSMIC config files are simple text files with single values (no JSON/YAML)
 - Each component stores config in versioned directories (v1/)
-- Most config files are just plain text values like "17" or "Bottom"
+- Most config files are just plain text values like "17" or "IosevkaTerm Nerd Font Mono"
 - The role can backup your existing config before managing it
-- Use the sync approach for full configuration management
-- Use templates for selective/dynamic configuration
+- Configuration is synced using rsync with delete option (removes stale files)
+- Changes typically require restarting the affected application or COSMIC session
+
+## Integration with Other Roles
+
+### Fonts Role
+The [fonts role](../../apps/fonts/) installs IosevkaTerm Nerd Font, which is referenced in the terminal configuration.
+
+### VSCode Role
+The [VSCode role](../../apps/vscode/) uses regular Iosevka Nerd Font (optimized for editors, not terminals).
+
+Both Iosevka variants provide ligatures and Nerd Font symbols, but with different spacing optimized for their use case.
