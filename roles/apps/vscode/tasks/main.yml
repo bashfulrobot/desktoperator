@@ -180,6 +180,32 @@
     mode: "0644"
   when: app_states['vscode'] | default('present') == 'present'
 
+# Operator Mono Lig font custom CSS for vscode-custom-css extension
+- name: Create VSCode custom CSS directory
+  ansible.builtin.file:
+    path: "{{ user.home }}/.config/Code/User/custom-css"
+    state: directory
+    owner: "{{ user.name }}"
+    mode: "0755"
+  when: app_states['vscode'] | default('present') == 'present'
+
+- name: Copy Operator Mono Lig custom CSS file
+  ansible.builtin.copy:
+    src: operator_mono_lig_style.css
+    dest: "{{ user.home }}/.config/Code/User/custom-css/operator_mono_lig_style.css"
+    owner: "{{ user.name }}"
+    mode: "0644"
+  when: app_states['vscode'] | default('present') == 'present'
+
+- name: Fix VSCode permissions for custom CSS extension
+  ansible.builtin.file:
+    path: /usr/share/code/resources/app
+    owner: "{{ user.name }}"
+    group: "{{ user.name }}"
+    recurse: true
+  become: true
+  when: app_states['vscode'] | default('present') == 'present'
+
 # COSMIC Theme Integration
 # Theme VSIX files are generated manually with: just generate-theme-files
 # Ansible only checks that they exist
@@ -240,9 +266,20 @@
   loop:
     - "{{ user.home }}/.vscode/argv.json"
     - "{{ user.home }}/.config/code-flags.conf"
+    - "{{ user.home }}/.config/Code/User/custom-css"
     - "{{ user.home }}/.vscode"
     - "{{ user.home }}/.config/Code"
   when: app_states['vscode'] | default('present') == 'absent'
+
+- name: Restore VSCode permissions when absent
+  ansible.builtin.file:
+    path: /usr/share/code/resources/app
+    owner: root
+    group: root
+    recurse: true
+  become: true
+  when: app_states['vscode'] | default('present') == 'absent'
+  failed_when: false
 
 - name: Update icon cache after VSCode removal
   ansible.builtin.command: gtk-update-icon-cache -f -t /usr/share/icons/hicolor
