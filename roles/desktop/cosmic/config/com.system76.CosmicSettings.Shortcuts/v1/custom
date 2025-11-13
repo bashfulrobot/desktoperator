@@ -1,20 +1,6 @@
 {
     (
         modifiers: [
-            Super,
-        ],
-        key: "e",
-        description: Some("Editor"),
-    ): Spawn("code"),
-    (
-        modifiers: [
-            Ctrl,
-            Alt,
-        ],
-        key: "p",
-    ): System(Screenshot),
-    (
-        modifiers: [
             Ctrl,
             Shift,
         ],
@@ -33,17 +19,39 @@
     (
         modifiers: [
             Ctrl,
-            Shift,
-        ],
-        key: "f",
-    ): Fullscreen,
-    (
-        modifiers: [
-            Ctrl,
             Alt,
             Shift,
         ],
         key: "s",
         description: Some("suspect until 7:15"),
     ): Spawn("/usr/local/bin/rtc-sleep-wake"),
+    (
+        modifiers: [
+            Ctrl,
+            Alt,
+        ],
+        key: "p",
+    ): System(Screenshot),
+    (
+        modifiers: [
+            Ctrl,
+            Shift,
+        ],
+        key: "f",
+    ): Fullscreen,
+    (
+        modifiers: [
+            Super,
+            Shift,
+        ],
+        key: "s",
+        description: Some("ncspot-save (Current Song)"),
+    ): Spawn("ncspot-save"),
+    (
+        modifiers: [
+            Super,
+        ],
+        key: "e",
+        description: Some("Editor"),
+    ): Spawn("code"),
 }
