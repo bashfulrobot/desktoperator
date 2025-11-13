@@ -1,8 +1,6 @@
-# ncspot alias for Flatpak installation
+# ncspot configuration for native installation
 # Managed by Ansible - spotify role
 
-# Check if flatpak is available
-if type -q flatpak
-    # ncspot terminal Spotify client via Flatpak
-    alias ncspot="flatpak run io.github.hrkfdn.ncspot"
-end
+# ncspot terminal Spotify client (GitHub release)
+# Binary installed to {{ ncspot_install_dir }}/ncspot
+# Config located at ~/.config/ncspot/config.toml
