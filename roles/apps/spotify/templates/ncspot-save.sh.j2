@@ -16,16 +16,24 @@ if [ ! -S "$SOCKET_PATH" ]; then
     exit 1
 fi
 
-# Send save command to ncspot
-echo "save" | nc -W 1 -U "$SOCKET_PATH"
-
-# Get current track info
+# Get currently playing track info FIRST, then send save command
+# The IPC 'save' command saves the currently playing track (not selected)
 response=$(nc -W 1 -U "$SOCKET_PATH")
 
-# Parse track metadata
+# Parse track metadata from currently playing track
 title=$(echo "$response" | jq -r '.playable.title')
 artist=$(echo "$response" | jq -r '.playable.artists[0]')
 cover_url=$(echo "$response" | jq -r '.playable.cover_url')
+
+# Check if we got valid track info
+if [ "$title" = "null" ] || [ -z "$title" ]; then
+    notify-send --app-name="ncspot" "Error" "No track currently playing"
+    exit 1
+fi
+
+# Now save the currently playing track via IPC
+# Use "save current" to save the playing track (not the selected one)
+echo "save current" | nc -W 1 -U "$SOCKET_PATH" > /dev/null
 
 # Download album art to temporary location
 cover_path="/tmp/ncspot_album_cover_$$.jpg"
