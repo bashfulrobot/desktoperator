@@ -83,6 +83,30 @@
   become: true
   when: app_states['terminal-experience'] | default('present') == 'present'
 
+# wl-clipboard - Wayland clipboard utilities
+- name: Install wl-clipboard
+  ansible.builtin.apt:
+    name: wl-clipboard
+    state: present
+  become: true
+  when: app_states['terminal-experience'] | default('present') == 'present'
+
+# btop - interactive process viewer
+- name: Install btop
+  ansible.builtin.apt:
+    name: btop
+    state: present
+  become: true
+  when: app_states['terminal-experience'] | default('present') == 'present'
+
+# jq - JSON processor
+- name: Install jq
+  ansible.builtin.apt:
+    name: jq
+    state: present
+  become: true
+  when: app_states['terminal-experience'] | default('present') == 'present'
+
 # bat-extras - additional bat utilities (batgrep, batman, etc.)
 - name: Clone bat-extras repository
   ansible.builtin.git:
@@ -164,6 +188,9 @@
       - tree
       - fzf
       - fd-find
+      - wl-clipboard
+      - btop
+      - jq
     state: absent
     purge: true
   become: true
