@@ -1,16 +1,14 @@
 {
     (
         modifiers: [
-            Ctrl,
-            Shift,
+            Super,
         ],
         key: "p",
         description: Some("1password"),
     ): Spawn("1password --toggle"),
     (
         modifiers: [
-            Ctrl,
-            Alt,
+            Super,
             Shift,
         ],
         key: "p",
