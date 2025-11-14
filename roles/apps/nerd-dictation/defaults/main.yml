@@ -1,0 +1,28 @@
+---
+# nerd-dictation configuration defaults
+
+# Binary symlink location (must be in PATH)
+# nerd-dictation installs to ~/.local/bin by default via pip
+nerd_dictation_bin_dir: /usr/local/bin
+
+# Force update dotool (set to true to rebuild from latest source)
+dotool_force_update: false
+
+# Model configuration
+# Available models: vosk-model-small-en-us-0.15 (40M, 9.85% WER)
+#                   vosk-model-en-us-0.22 (1.8G, 5.69% WER) - recommended
+#                   vosk-model-en-us-0.42-gigaspeech (2.3G, 5.64% WER) - for podcasts
+nerd_dictation_model_name: vosk-model-en-us-0.22
+nerd_dictation_model_url: https://alphacephei.com/vosk/models/vosk-model-en-us-0.22.zip
+
+# Config directory for nerd-dictation
+nerd_dictation_config_dir: "{{ user.home }}/.config/nerd-dictation"
+
+# Wayland input simulation tool
+# Options: dotool, ydotool, wtype
+# dotool is recommended as it works across X11/Wayland/TTYs
+nerd_dictation_input_tool: dotool
+
+# Audio recording tool (auto-detected based on what's available)
+# Options: parec (PulseAudio), pw-cat (PipeWire), sox
+nerd_dictation_audio_tool: auto

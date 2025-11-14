@@ -52,4 +52,20 @@
         key: "e",
         description: Some("Editor"),
     ): Spawn("code"),
+    (
+        modifiers: [
+            Super,
+            Shift,
+        ],
+        key: "d",
+        description: Some("Start dictation"),
+    ): Spawn("nerd-dictation begin --simulate-input-tool=DOTOOL"),
+    (
+        modifiers: [
+            Super,
+            Alt,
+        ],
+        key: "d",
+        description: Some("Stop dictation"),
+    ): Spawn("nerd-dictation end"),
 }
