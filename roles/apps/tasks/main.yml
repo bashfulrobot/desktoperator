@@ -251,6 +251,11 @@
     name: apps/kong-docs-pake
   tags: [kong-docs, pake]
 
+- name: Include Kong CLI tools (deck and kongctl)
+  ansible.builtin.import_role:
+    name: apps/kong-cli
+  tags: [kong-cli, deck, kongctl]
+
 - name: Include Omni Pake App
   ansible.builtin.import_role:
     name: apps/omni-pake
