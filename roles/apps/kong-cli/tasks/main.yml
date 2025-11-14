@@ -1,0 +1,166 @@
+---
+# deck installation
+- name: Check if deck is already installed
+  ansible.builtin.stat:
+    path: /usr/local/bin/deck
+  register: deck_binary
+  when: app_states['kong-cli'] | default('present') == 'present'
+  tags: [kong-cli, deck]
+
+- name: Get installed deck version
+  ansible.builtin.command: /usr/local/bin/deck version
+  register: deck_current_version
+  failed_when: false
+  changed_when: false
+  when: app_states['kong-cli'] | default('present') == 'present' and deck_binary.stat.exists | default(false)
+  tags: [kong-cli, deck]
+
+- name: Get latest deck release info
+  ansible.builtin.uri:
+    url: https://api.github.com/repos/Kong/deck/releases/latest
+    return_content: true
+  register: deck_release_info
+  when: app_states['kong-cli'] | default('present') == 'present'
+  tags: [kong-cli, deck]
+
+- name: Set deck version facts
+  ansible.builtin.set_fact:
+    deck_latest_version: "{{ deck_release_info.json.tag_name }}"
+    deck_version_number: "{{ deck_release_info.json.tag_name | regex_replace('^v', '') }}"
+  when: app_states['kong-cli'] | default('present') == 'present'
+  tags: [kong-cli, deck]
+
+- name: Download and install deck
+  when:
+    - app_states['kong-cli'] | default('present') == 'present'
+    - not deck_binary.stat.exists | default(false) or (deck_latest_version not in deck_current_version.stdout | default(''))
+  tags: [kong-cli, deck]
+  block:
+    - name: Download deck tarball
+      ansible.builtin.get_url:
+        url: "https://github.com/Kong/deck/releases/download/{{ deck_latest_version }}/deck_{{ deck_version_number }}_linux_amd64.tar.gz"
+        dest: "/tmp/deck_{{ deck_version_number }}.tar.gz"
+        mode: "0644"
+
+    - name: Extract deck tarball
+      ansible.builtin.unarchive:
+        src: "/tmp/deck_{{ deck_version_number }}.tar.gz"
+        dest: /tmp
+        remote_src: true
+
+    - name: Install deck binary
+      ansible.builtin.copy:
+        src: /tmp/deck
+        dest: /usr/local/bin/deck
+        owner: root
+        group: root
+        mode: "0755"
+        remote_src: true
+      become: true
+
+    - name: Clean up deck temporary files
+      ansible.builtin.file:
+        path: "{{ item }}"
+        state: absent
+      loop:
+        - "/tmp/deck_{{ deck_version_number }}.tar.gz"
+        - /tmp/deck
+        - /tmp/LICENSE
+        - /tmp/README.md
+
+- name: Verify deck installation
+  ansible.builtin.command: /usr/local/bin/deck version
+  register: deck_verify
+  changed_when: false
+  when: app_states['kong-cli'] | default('present') == 'present'
+  tags: [kong-cli, deck]
+
+# kongctl installation
+- name: Check if kongctl is already installed
+  ansible.builtin.stat:
+    path: /usr/local/bin/kongctl
+  register: kongctl_binary
+  when: app_states['kong-cli'] | default('present') == 'present'
+  tags: [kong-cli, kongctl]
+
+- name: Get installed kongctl version
+  ansible.builtin.command: /usr/local/bin/kongctl version --full
+  register: kongctl_current_version
+  failed_when: false
+  changed_when: false
+  when: app_states['kong-cli'] | default('present') == 'present' and kongctl_binary.stat.exists | default(false)
+  tags: [kong-cli, kongctl]
+
+- name: Get latest kongctl release info
+  ansible.builtin.uri:
+    url: https://api.github.com/repos/Kong/kongctl/releases/latest
+    return_content: true
+  register: kongctl_release_info
+  when: app_states['kong-cli'] | default('present') == 'present'
+  tags: [kong-cli, kongctl]
+
+- name: Set kongctl version facts
+  ansible.builtin.set_fact:
+    kongctl_latest_version: "{{ kongctl_release_info.json.tag_name }}"
+  when: app_states['kong-cli'] | default('present') == 'present'
+  tags: [kong-cli, kongctl]
+
+- name: Download and install kongctl
+  when:
+    - app_states['kong-cli'] | default('present') == 'present'
+    - not kongctl_binary.stat.exists | default(false) or (kongctl_latest_version not in kongctl_current_version.stdout | default(''))
+  tags: [kong-cli, kongctl]
+  block:
+    - name: Download kongctl zip
+      ansible.builtin.get_url:
+        url: "https://github.com/Kong/kongctl/releases/download/{{ kongctl_latest_version }}/kongctl_linux_amd64.zip"
+        dest: "/tmp/kongctl_{{ kongctl_latest_version }}.zip"
+        mode: "0644"
+
+    - name: Extract kongctl zip
+      ansible.builtin.unarchive:
+        src: "/tmp/kongctl_{{ kongctl_latest_version }}.zip"
+        dest: /tmp
+        remote_src: true
+
+    - name: Install kongctl binary
+      ansible.builtin.copy:
+        src: /tmp/kongctl
+        dest: /usr/local/bin/kongctl
+        owner: root
+        group: root
+        mode: "0755"
+        remote_src: true
+      become: true
+
+    - name: Clean up kongctl temporary files
+      ansible.builtin.file:
+        path: "{{ item }}"
+        state: absent
+      loop:
+        - "/tmp/kongctl_{{ kongctl_latest_version }}.zip"
+        - /tmp/kongctl
+
+- name: Verify kongctl installation
+  ansible.builtin.command: /usr/local/bin/kongctl version --full
+  register: kongctl_verify
+  changed_when: false
+  when: app_states['kong-cli'] | default('present') == 'present'
+  tags: [kong-cli, kongctl]
+
+# Cleanup when state is absent
+- name: Remove deck when state is absent
+  ansible.builtin.file:
+    path: /usr/local/bin/deck
+    state: absent
+  become: true
+  when: app_states['kong-cli'] | default('present') == 'absent'
+  tags: [kong-cli, deck]
+
+- name: Remove kongctl when state is absent
+  ansible.builtin.file:
+    path: /usr/local/bin/kongctl
+    state: absent
+  become: true
+  when: app_states['kong-cli'] | default('present') == 'absent'
+  tags: [kong-cli, kongctl]

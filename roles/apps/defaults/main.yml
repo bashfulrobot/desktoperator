@@ -67,4 +67,5 @@ app_states:
   workday: present
   konnect: present
   kong-docs: present
+  kong-cli: present
   zns: present
