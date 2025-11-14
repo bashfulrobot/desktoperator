@@ -21,7 +21,7 @@
             Shift,
         ],
         key: "s",
-        description: Some("suspect until 7:15"),
+        description: Some("suspend until 7:15"),
     ): Spawn("/usr/local/bin/rtc-sleep-wake"),
     (
         modifiers: [
