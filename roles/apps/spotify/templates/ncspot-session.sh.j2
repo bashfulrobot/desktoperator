@@ -5,32 +5,5 @@
 SESSION_NAME="music"
 LAYOUT_FILE="{{ user.home }}/.config/zellij/layouts/ncspot.kdl"
 
-# Check if we're already inside a zellij session
-if [ -n "$ZELLIJ" ]; then
-    # Already in zellij - check if we're in the target session
-    CURRENT_SESSION=$(zellij list-sessions 2>/dev/null | sed 's/\x1b\[[0-9;]*m//g' | grep "(current)" | awk '{print $1}')
-
-    if [ "$CURRENT_SESSION" = "$SESSION_NAME" ]; then
-        # Already in the music session, nothing to do
-        echo "Already in the $SESSION_NAME session"
-        exit 0
-    fi
-
-    # In a different session - switch to music session
-    if zellij list-sessions 2>/dev/null | sed 's/\x1b\[[0-9;]*m//g' | grep -q "^${SESSION_NAME} "; then
-        # Session exists, switch to it
-        exec zellij action switch-session "$SESSION_NAME"
-    else
-        # Session doesn't exist, create it in background and switch to it
-        zellij action new-session --name "$SESSION_NAME" --layout "$LAYOUT_FILE"
-    fi
-else
-    # Not in zellij - create or attach normally
-    if zellij list-sessions 2>/dev/null | sed 's/\x1b\[[0-9;]*m//g' | grep -q "^${SESSION_NAME} "; then
-        # Session exists, attach to it
-        exec zellij attach "$SESSION_NAME"
-    else
-        # Session doesn't exist, create it with ncspot layout
-        exec zellij --session "$SESSION_NAME" --layout "$LAYOUT_FILE"
-    fi
-fi
+# Attach to session if it exists, create with layout if it doesn't
+exec zellij --layout "$LAYOUT_FILE" attach --create "$SESSION_NAME"
