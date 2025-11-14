@@ -79,6 +79,7 @@
     src: /usr/local/bin/insync-wrapper
     dest: /usr/bin/insync
     state: link
+    force: true
   become: true
   when: app_states['insync'] | default('present') == 'present'
 
