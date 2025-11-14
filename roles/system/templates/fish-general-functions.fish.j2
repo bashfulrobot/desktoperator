@@ -26,3 +26,55 @@ end
 
 # Quick navigation shortcuts
 alias goa='cd ~/dev/iac/desktoperator'
+
+# gow - Go to Worktree using fzf
+# Interactive two-level navigation to worktrees
+function gow --description "Navigate to worktrees using fzf"
+    set -l worktree_base "$HOME/dev/worktrees"
+
+    # Check if worktree base directory exists
+    if not test -d "$worktree_base"
+        echo "Error: Worktree directory does not exist: $worktree_base"
+        return 1
+    end
+
+    # Get list of repository directories
+    set -l repos (find "$worktree_base" -mindepth 1 -maxdepth 1 -type d 2>/dev/null)
+
+    if test -z "$repos"
+        echo "No worktrees found in $worktree_base"
+        return 1
+    end
+
+    # First level: Select repository
+    set -l selected_repo (printf '%s\n' $repos | sed "s|$worktree_base/||" | fzf --prompt="Select repository > " --height=40% --reverse)
+
+    if test -z "$selected_repo"
+        # User cancelled selection
+        return 0
+    end
+
+    set -l repo_path "$worktree_base/$selected_repo"
+
+    # Get list of worktree directories in the selected repository
+    set -l worktrees (find "$repo_path" -mindepth 1 -maxdepth 1 -type d 2>/dev/null)
+
+    if test -z "$worktrees"
+        echo "No worktrees found in $selected_repo"
+        return 1
+    end
+
+    # Second level: Select worktree
+    set -l selected_worktree (printf '%s\n' $worktrees | sed "s|$repo_path/||" | fzf --prompt="Select worktree ($selected_repo) > " --height=40% --reverse)
+
+    if test -z "$selected_worktree"
+        # User cancelled selection
+        return 0
+    end
+
+    set -l target_path "$repo_path/$selected_worktree"
+
+    # Change to the selected directory
+    cd "$target_path"
+    echo "Changed to: $target_path"
+end
