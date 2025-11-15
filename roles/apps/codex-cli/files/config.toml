@@ -47,6 +47,12 @@ require_network_approval = false
 # ]
 servers = []
 
+# MCP stdio server configuration (Codex CLI native format)
+# Keep definitions here in sync with other AI tools.
+[mcp_servers.sequential-thinking]
+command = "npx"
+args = ["-y", "@modelcontextprotocol/server-sequential-thinking"]
+
 [project]
 # Fallback names for project documentation files
 # Codex will look for these in addition to AGENTS.md

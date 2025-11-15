@@ -17,6 +17,14 @@
     mode: "0755"
   when: app_states['gemini-cli'] | default('present') == 'present'
 
+- name: Deploy Gemini CLI settings
+  ansible.builtin.copy:
+    src: settings.json
+    dest: "{{ user.home }}/.gemini/settings.json"
+    owner: "{{ user.name }}"
+    mode: "0600"
+  when: app_states['gemini-cli'] | default('present') == 'present'
+
 - name: Create .gemini/commands directory
   ansible.builtin.file:
     path: "{{ user.home }}/.gemini/commands"
