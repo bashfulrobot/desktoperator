@@ -78,3 +78,100 @@ function gow --description "Navigate to worktrees using fzf"
     cd "$target_path"
     echo "Changed to: $target_path"
 end
+
+# mdopen - Pick a Documents subdirectory and open it in Typora (gum drill-down or gum filter, fzf fallback)
+function mdopen --description "Open Typora in a selected Documents subdirectory"
+    set -l base "$HOME/Documents"
+    set -l mode "drill"  # drill (gum choose) or fuzzy (gum filter)
+
+    if test (count $argv) -gt 0
+        if test "$argv[1]" = "--fuzzy"
+            set mode "fuzzy"
+            if test (count $argv) -gt 1
+                set base "$argv[2]"
+            end
+        else
+            set base "$argv[1]"
+        end
+    end
+
+    if not type -q typora
+        echo "Error: typora is not installed or not on PATH" >&2
+        return 1
+    end
+
+    if not test -d "$base"
+        echo "Error: Base directory does not exist: $base" >&2
+        return 1
+    end
+
+    # Gum drill-down selector (preferred)
+    if test "$mode" = "drill" -a (type -q gum)
+        set -l current "$base"
+        while true
+            set -l entries (find "$current" -maxdepth 1 -mindepth 1 -type d -printf '%f\n' 2>/dev/null | sort)
+            set -l options "." "Open current" $entries
+            if test "$current" != "$base"
+                set options ".." $options
+            end
+
+            set -l choice (printf '%s\n' $options | gum choose --header "mdopen · Current: $current" --cursor "› " --height 12 --limit 1)
+
+            if test -z "$choice"
+                return 0  # cancelled
+            end
+
+            switch "$choice"
+                case "Open current" "."
+                    typora "$current"
+                    return $status
+                case ".."
+                    set current (dirname "$current")
+                case "*"
+                    set current "$current/$choice"
+            end
+        end
+    end
+
+    # Gum fuzzy filter (flat)
+    if test "$mode" = "fuzzy" -a (type -q gum)
+        set -l selection (find "$base" -type d -printf '%P\n' 2>/dev/null | sed 's/^$/./' | gum filter --header "mdopen · fuzzy · $base" --prompt "› " --height 15)
+        if test -z "$selection"
+            return 0
+        end
+        set -l target "$base"
+        if test "$selection" != "."
+            set target "$base/$selection"
+        end
+        if not test -d "$target"
+            echo "Error: Selected path is not a directory: $target" >&2
+            return 1
+        end
+        typora "$target"
+        return $status
+    end
+
+    # fzf fallback: fuzzy-pick any descendant directory
+    if not type -q fzf
+        echo "Error: No selection UI available (gum or fzf) for mdopen" >&2
+        return 1
+    end
+
+    set -l selection (find "$base" -type d -printf '%P\n' 2>/dev/null | sed 's/^$/./' | fzf --prompt="Typora directory > " --header="Type to filter; Enter opens in Typora" --height=70% --reverse --preview "ls -a \"$base/{}\"" --preview-window=down:10:wrap)
+
+    if test -z "$selection"
+        return 0
+    end
+
+    set -l target "$base"
+    if test "$selection" != "."
+        set target "$base/$selection"
+    end
+
+    if not test -d "$target"
+        echo "Error: Selected path is not a directory: $target" >&2
+        return 1
+    end
+
+    typora "$target"
+end
