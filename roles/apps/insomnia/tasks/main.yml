@@ -23,11 +23,25 @@
     state: present
   become: true
 
-- name: Add Insomnia repository
-  ansible.builtin.apt_repository:
-    repo: "deb [arch=amd64 signed-by=/usr/share/keyrings/kong-insomnia-archive-keyring.gpg] https://packages.konghq.com/public/insomnia/deb/ubuntu {{ insomnia_codename
-      }} main"
-    filename: kong-insomnia
+# Remove old .list format file (cleanup from apt_repository to deb822_repository migration)
+- name: Remove old Insomnia .list file
+  ansible.builtin.file:
+    path: /etc/apt/sources.list.d/kong-insomnia.list
+    state: absent
+  become: true
+  when: app_states['insomnia'] | default('present') == 'present'
+
+# Use deb822 format to prevent duplicate repository entries
+# For ARM support, change architectures to: amd64,arm64
+- name: Add Insomnia repository (deb822)
+  ansible.builtin.deb822_repository:
+    name: kong-insomnia
+    types: [deb]
+    uris: https://packages.konghq.com/public/insomnia/deb/ubuntu
+    suites: "{{ insomnia_codename }}"
+    components: [main]
+    architectures: amd64
+    signed_by: /usr/share/keyrings/kong-insomnia-archive-keyring.gpg
     state: "{{ app_states['insomnia'] | default('present') }}"
   become: true
   notify: Update apt cache
@@ -42,10 +56,8 @@
   become: true
 
 - name: Remove Insomnia repository when absent
-  ansible.builtin.apt_repository:
-    repo: "deb [arch=amd64 signed-by=/usr/share/keyrings/kong-insomnia-archive-keyring.gpg] https://packages.konghq.com/public/insomnia/deb/ubuntu {{ insomnia_codename
-      }} main"
-    filename: kong-insomnia
+  ansible.builtin.deb822_repository:
+    name: kong-insomnia
     state: absent
   become: true
   when: app_states['insomnia'] | default('present') == 'absent'

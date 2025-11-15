@@ -2,18 +2,50 @@
 # Trippy network diagnostic tool installation
 # https://github.com/fujiapple852/trippy
 
-- name: Install software-properties-common for add-apt-repository
-  ansible.builtin.apt:
-    name: software-properties-common
-    state: present
+- name: Download Trippy PPA GPG key
+  ansible.builtin.get_url:
+    url: https://keyserver.ubuntu.com/pks/lookup?op=get&search=0x01642700D01F6E34D33B3F37B349F7D0D8B11530
+    dest: /tmp/trippy-ppa.asc
+    mode: "0644"
   become: true
   when: app_states['trippy'] | default('present') == 'present'
 
-- name: Add Trippy PPA
-  ansible.builtin.apt_repository:
-    repo: ppa:fujiapple/trippy
+- name: Add Trippy PPA GPG key to keyrings
+  ansible.builtin.shell: |
+    gpg --dearmor < /tmp/trippy-ppa.asc > /usr/share/keyrings/trippy-ppa.gpg
+    chmod 644 /usr/share/keyrings/trippy-ppa.gpg
+  args:
+    creates: /usr/share/keyrings/trippy-ppa.gpg
+  become: true
+  when: app_states['trippy'] | default('present') == 'present'
+
+- name: Clean up temporary Trippy GPG key file
+  ansible.builtin.file:
+    path: /tmp/trippy-ppa.asc
+    state: absent
+  become: true
+  when: app_states['trippy'] | default('present') == 'present'
+
+# Remove old .list format file (cleanup from apt_repository to deb822_repository migration)
+- name: Remove old Trippy PPA .list file
+  ansible.builtin.file:
+    path: /etc/apt/sources.list.d/ppa_fujiapple_trippy_noble.list
+    state: absent
+  become: true
+  when: app_states['trippy'] | default('present') == 'present'
+
+# Use deb822 format to prevent duplicate repository entries
+# For ARM support, change architectures to: amd64,arm64
+- name: Add Trippy PPA (deb822)
+  ansible.builtin.deb822_repository:
+    name: trippy-ppa
+    types: [deb]
+    uris: https://ppa.launchpadcontent.net/fujiapple/trippy/ubuntu
+    suites: "{{ ansible_distribution_release }}"
+    components: [main]
+    architectures: amd64
+    signed_by: /usr/share/keyrings/trippy-ppa.gpg
     state: present
-    update_cache: false
   become: true
   when: app_states['trippy'] | default('present') == 'present'
 
@@ -117,8 +149,15 @@
   when: app_states['trippy'] | default('present') == 'absent'
 
 - name: Remove Trippy PPA when absent
-  ansible.builtin.apt_repository:
-    repo: ppa:fujiapple/trippy
+  ansible.builtin.deb822_repository:
+    name: trippy-ppa
+    state: absent
+  become: true
+  when: app_states['trippy'] | default('present') == 'absent'
+
+- name: Remove Trippy GPG key when absent
+  ansible.builtin.file:
+    path: /usr/share/keyrings/trippy-ppa.gpg
     state: absent
   become: true
   when: app_states['trippy'] | default('present') == 'absent'

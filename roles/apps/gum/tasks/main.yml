@@ -26,12 +26,25 @@
   become: true
   when: app_states['gum'] | default('present') == 'present'
 
-# Explicitly specify arch=amd64 to prevent i386 package lookup warnings
-# For ARM support, change arch=amd64 to arch=amd64,arm64
-- name: Add Charm APT repository
-  ansible.builtin.apt_repository:
-    repo: "deb [arch=amd64 signed-by=/etc/apt/keyrings/charm.gpg] https://repo.charm.sh/apt/ * *"
-    filename: charm
+# Remove old .list format file (cleanup from apt_repository to deb822_repository migration)
+- name: Remove old Charm .list file
+  ansible.builtin.file:
+    path: /etc/apt/sources.list.d/charm.list
+    state: absent
+  become: true
+  when: app_states['gum'] | default('present') == 'present'
+
+# Use deb822 format to prevent duplicate repository entries
+# For ARM support, change architectures to: amd64,arm64
+- name: Add Charm APT repository (deb822)
+  ansible.builtin.deb822_repository:
+    name: charm
+    types: [deb]
+    uris: https://repo.charm.sh/apt/
+    suites: "*"
+    components: ["*"]
+    architectures: amd64
+    signed_by: /etc/apt/keyrings/charm.gpg
     state: present
   become: true
   when: app_states['gum'] | default('present') == 'present'
@@ -65,9 +78,8 @@
   when: app_states['gum'] | default('present') == 'absent'
 
 - name: Remove Charm repository when absent
-  ansible.builtin.apt_repository:
-    repo: "deb [arch=amd64 signed-by=/etc/apt/keyrings/charm.gpg] https://repo.charm.sh/apt/ * *"
-    filename: charm
+  ansible.builtin.deb822_repository:
+    name: charm
     state: absent
   become: true
   when: app_states['gum'] | default('present') == 'absent'

@@ -35,12 +35,25 @@
   when: app_states['chrome'] | default('present') == 'present'
   failed_when: false
 
-# Explicitly specify arch=amd64 to prevent i386 package lookup warnings
-# For ARM support, change arch=amd64 to arch=amd64,arm64
-- name: Add Google Chrome APT repository
-  ansible.builtin.apt_repository:
-    repo: "deb [arch=amd64 signed-by=/usr/share/keyrings/google-chrome.gpg] https://dl.google.com/linux/chrome/deb/ stable main"
-    filename: google-chrome
+# Remove old .list format file (cleanup from apt_repository to deb822_repository migration)
+- name: Remove old Google Chrome .list file
+  ansible.builtin.file:
+    path: /etc/apt/sources.list.d/google-chrome.list
+    state: absent
+  become: true
+  when: app_states['chrome'] | default('present') == 'present'
+
+# Use deb822 format to prevent duplicate repository entries
+# For ARM support, change architectures to: amd64,arm64
+- name: Add Google Chrome APT repository (deb822)
+  ansible.builtin.deb822_repository:
+    name: google-chrome
+    types: [deb]
+    uris: https://dl.google.com/linux/chrome/deb/
+    suites: stable
+    components: [main]
+    architectures: amd64
+    signed_by: /usr/share/keyrings/google-chrome.gpg
     state: present
   become: true
   when: app_states['chrome'] | default('present') == 'present'
@@ -118,9 +131,8 @@
   when: app_states['chrome'] | default('present') == 'absent'
 
 - name: Remove Google Chrome repository when absent
-  ansible.builtin.apt_repository:
-    repo: "deb [arch=amd64 signed-by=/usr/share/keyrings/google-chrome.gpg] https://dl.google.com/linux/chrome/deb/ stable main"
-    filename: google-chrome
+  ansible.builtin.deb822_repository:
+    name: google-chrome
     state: absent
   become: true
   when: app_states['chrome'] | default('present') == 'absent'

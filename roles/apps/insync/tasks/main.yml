@@ -24,12 +24,25 @@
   changed_when: false
   when: app_states['insync'] | default('present') == 'present'
 
-# Explicitly specify arch=amd64 to prevent i386 package lookup warnings
-# For ARM support, change arch=amd64 to arch=amd64,arm64
-- name: Add Insync APT repository
-  ansible.builtin.apt_repository:
-    repo: "deb [arch=amd64 signed-by=/usr/share/keyrings/insynchq.gpg] http://apt.insync.io/ubuntu {{ ubuntu_codename.stdout }} non-free contrib"
-    filename: insync
+# Remove old .list format file (cleanup from apt_repository to deb822_repository migration)
+- name: Remove old Insync .list file
+  ansible.builtin.file:
+    path: /etc/apt/sources.list.d/insync.list
+    state: absent
+  become: true
+  when: app_states['insync'] | default('present') == 'present'
+
+# Use deb822 format to prevent duplicate repository entries
+# For ARM support, change architectures to: amd64,arm64
+- name: Add Insync APT repository (deb822)
+  ansible.builtin.deb822_repository:
+    name: insync
+    types: [deb]
+    uris: http://apt.insync.io/ubuntu
+    suites: "{{ ubuntu_codename.stdout }}"
+    components: [non-free, contrib]
+    architectures: amd64
+    signed_by: /usr/share/keyrings/insynchq.gpg
     state: present
   become: true
   when: app_states['insync'] | default('present') == 'present'
@@ -133,9 +146,8 @@
   when: app_states['insync'] | default('present') == 'absent'
 
 - name: Remove Insync repository when absent
-  ansible.builtin.apt_repository:
-    repo: "deb [arch=amd64 signed-by=/usr/share/keyrings/insynchq.gpg] http://apt.insync.io/ubuntu {{ ubuntu_codename.stdout }} non-free contrib"
-    filename: insync
+  ansible.builtin.deb822_repository:
+    name: insync
     state: absent
   become: true
   when: app_states['insync'] | default('present') == 'absent'

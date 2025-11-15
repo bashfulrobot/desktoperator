@@ -11,12 +11,12 @@
     mode: "0644"
   when: app_states['spotify'] | default('present') == 'present'
 
-- name: Add Spotify GPG key to trusted keyring
+- name: Add Spotify GPG key to modern keyring location
   ansible.builtin.shell: |
-    gpg --dearmor < /tmp/spotify.gpg > /etc/apt/trusted.gpg.d/spotify.gpg
-    chmod 644 /etc/apt/trusted.gpg.d/spotify.gpg
+    gpg --dearmor < /tmp/spotify.gpg > /usr/share/keyrings/spotify.gpg
+    chmod 644 /usr/share/keyrings/spotify.gpg
   args:
-    creates: /etc/apt/trusted.gpg.d/spotify.gpg
+    creates: /usr/share/keyrings/spotify.gpg
   become: true
   when: app_states['spotify'] | default('present') == 'present'
 
@@ -26,12 +26,25 @@
     state: absent
   when: app_states['spotify'] | default('present') == 'present'
 
-# Explicitly specify arch=amd64 to prevent i386 package lookup warnings
-# For ARM support, change arch=amd64 to arch=amd64,arm64
-- name: Add Spotify APT repository
-  ansible.builtin.apt_repository:
-    repo: "deb [arch=amd64] https://repository.spotify.com stable non-free"
-    filename: spotify
+# Remove old .list format file (cleanup from apt_repository to deb822_repository migration)
+- name: Remove old Spotify .list file
+  ansible.builtin.file:
+    path: /etc/apt/sources.list.d/spotify.list
+    state: absent
+  become: true
+  when: app_states['spotify'] | default('present') == 'present'
+
+# Use deb822 format to prevent duplicate repository entries
+# For ARM support, change architectures to: amd64,arm64
+- name: Add Spotify APT repository (deb822)
+  ansible.builtin.deb822_repository:
+    name: spotify
+    types: [deb]
+    uris: https://repository.spotify.com
+    suites: stable
+    components: [non-free]
+    architectures: amd64
+    signed_by: /usr/share/keyrings/spotify.gpg
     state: present
   become: true
   when: app_states['spotify'] | default('present') == 'present'
@@ -192,16 +205,15 @@
   when: app_states['spotify'] | default('present') == 'absent'
 
 - name: Remove Spotify repository when absent
-  ansible.builtin.apt_repository:
-    repo: "deb [arch=amd64] https://repository.spotify.com stable non-free"
-    filename: spotify
+  ansible.builtin.deb822_repository:
+    name: spotify
     state: absent
   become: true
   when: app_states['spotify'] | default('present') == 'absent'
 
 - name: Remove Spotify GPG key when absent
   ansible.builtin.file:
-    path: /etc/apt/trusted.gpg.d/spotify.gpg
+    path: /usr/share/keyrings/spotify.gpg
     state: absent
   become: true
   when: app_states['spotify'] | default('present') == 'absent'

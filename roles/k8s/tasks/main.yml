@@ -204,12 +204,25 @@
   become: true
   when: k8s_kubectl_enabled | default(true)
 
-# Explicitly specify arch=amd64 to prevent i386 package lookup warnings
-# For ARM support, change arch=amd64 to arch=amd64,arm64
-- name: Add Kubernetes APT repository
-  ansible.builtin.apt_repository:
-    repo: "deb [arch=amd64 signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/{{ k8s_kubectl_repo_version }}/deb/ /"
-    filename: kubernetes
+# Remove old .list format file (cleanup from apt_repository to deb822_repository migration)
+- name: Remove old Kubernetes .list file
+  ansible.builtin.file:
+    path: /etc/apt/sources.list.d/kubernetes.list
+    state: absent
+  become: true
+  when: k8s_kubectl_enabled | default(true)
+
+# Use deb822 format to prevent duplicate repository entries
+# For ARM support, change architectures to: amd64,arm64
+- name: Add Kubernetes APT repository (deb822)
+  ansible.builtin.deb822_repository:
+    name: kubernetes
+    types: [deb]
+    uris: "https://pkgs.k8s.io/core:/stable:/{{ k8s_kubectl_repo_version }}/deb/"
+    suites: "/"
+    components: []
+    architectures: amd64
+    signed_by: /etc/apt/keyrings/kubernetes-apt-keyring.gpg
     state: present
   become: true
   when: k8s_kubectl_enabled | default(true)
@@ -270,12 +283,25 @@
   become: true
   when: k8s_helm_enabled | default(true)
 
-# Explicitly specify arch=amd64 to prevent i386 package lookup warnings
-# For ARM support, change arch=amd64 to arch=amd64,arm64
-- name: Add Helm APT repository
-  ansible.builtin.apt_repository:
-    repo: "deb [arch=amd64 signed-by=/usr/share/keyrings/helm.gpg] https://packages.buildkite.com/helm-linux/helm-debian/any/ any main"
-    filename: helm-stable-debian
+# Remove old .list format file (cleanup from apt_repository to deb822_repository migration)
+- name: Remove old Helm .list file
+  ansible.builtin.file:
+    path: /etc/apt/sources.list.d/helm-stable-debian.list
+    state: absent
+  become: true
+  when: k8s_helm_enabled | default(true)
+
+# Use deb822 format to prevent duplicate repository entries
+# For ARM support, change architectures to: amd64,arm64
+- name: Add Helm APT repository (deb822)
+  ansible.builtin.deb822_repository:
+    name: helm-stable-debian
+    types: [deb]
+    uris: https://packages.buildkite.com/helm-linux/helm-debian/any/
+    suites: any
+    components: [main]
+    architectures: amd64
+    signed_by: /usr/share/keyrings/helm.gpg
     state: present
   become: true
   when: k8s_helm_enabled | default(true)
@@ -359,12 +385,25 @@
   become: true
   when: k8s_gke_auth_plugin_enabled | default(true)
 
-# Explicitly specify arch=amd64 to prevent i386 package lookup warnings
-# For ARM support, change arch=amd64 to arch=amd64,arm64
-- name: Add Google Cloud SDK APT repository
-  ansible.builtin.apt_repository:
-    repo: "deb [arch=amd64 signed-by=/etc/apt/keyrings/cloud.google.gpg] https://packages.cloud.google.com/apt cloud-sdk main"
-    filename: google-cloud-sdk
+# Remove old .list format file (cleanup from apt_repository to deb822_repository migration)
+- name: Remove old Google Cloud SDK .list file
+  ansible.builtin.file:
+    path: /etc/apt/sources.list.d/google-cloud-sdk.list
+    state: absent
+  become: true
+  when: k8s_gke_auth_plugin_enabled | default(true)
+
+# Use deb822 format to prevent duplicate repository entries
+# For ARM support, change architectures to: amd64,arm64
+- name: Add Google Cloud SDK APT repository (deb822)
+  ansible.builtin.deb822_repository:
+    name: google-cloud-sdk
+    types: [deb]
+    uris: https://packages.cloud.google.com/apt
+    suites: cloud-sdk
+    components: [main]
+    architectures: amd64
+    signed_by: /etc/apt/keyrings/cloud.google.gpg
     state: present
   become: true
   when: k8s_gke_auth_plugin_enabled | default(true)
@@ -467,9 +506,8 @@
   when: not (k8s_kubectl_enabled | default(true))
 
 - name: Remove Kubernetes APT repository when disabled
-  ansible.builtin.apt_repository:
-    repo: "deb [arch=amd64 signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/{{ k8s_kubectl_repo_version }}/deb/ /"
-    filename: kubernetes
+  ansible.builtin.deb822_repository:
+    name: kubernetes
     state: absent
   become: true
   when: not (k8s_kubectl_enabled | default(true))
@@ -489,9 +527,8 @@
   when: not (k8s_helm_enabled | default(true))
 
 - name: Remove Helm APT repository when disabled
-  ansible.builtin.apt_repository:
-    repo: "deb [arch=amd64 signed-by=/usr/share/keyrings/helm.gpg] https://packages.buildkite.com/helm-linux/helm-debian/any/ any main"
-    filename: helm-stable-debian
+  ansible.builtin.deb822_repository:
+    name: helm-stable-debian
     state: absent
   become: true
   when: not (k8s_helm_enabled | default(true))

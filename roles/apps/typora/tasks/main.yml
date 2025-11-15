@@ -17,12 +17,25 @@
   become: true
   when: app_states.typora | default('present') == 'present'
 
-# Explicitly specify arch=amd64 to prevent i386 package lookup warnings
-# For ARM support, change arch=amd64 to arch=amd64,arm64
-- name: Add Typora APT repository
-  ansible.builtin.apt_repository:
-    repo: "deb [arch=amd64 signed-by=/etc/apt/keyrings/typora.gpg] https://downloads.typora.io/linux ./"
-    filename: typora
+# Remove old .list format file (cleanup from apt_repository to deb822_repository migration)
+- name: Remove old Typora .list file
+  ansible.builtin.file:
+    path: /etc/apt/sources.list.d/typora.list
+    state: absent
+  become: true
+  when: app_states.typora | default('present') == 'present'
+
+# Use deb822 format to prevent duplicate repository entries
+# For ARM support, change architectures to: amd64,arm64
+- name: Add Typora APT repository (deb822)
+  ansible.builtin.deb822_repository:
+    name: typora
+    types: [deb]
+    uris: https://downloads.typora.io/linux
+    suites: "./"
+    components: []
+    architectures: amd64
+    signed_by: /etc/apt/keyrings/typora.gpg
     state: present
   become: true
   when: app_states.typora | default('present') == 'present'
@@ -49,9 +62,8 @@
 
 # Cleanup when absent
 - name: Remove Typora APT repository when absent
-  ansible.builtin.apt_repository:
-    repo: "deb [arch=amd64 signed-by=/etc/apt/keyrings/typora.gpg] https://downloads.typora.io/linux ./"
-    filename: typora
+  ansible.builtin.deb822_repository:
+    name: typora
     state: absent
   become: true
   when: app_states.typora | default('present') == 'absent'

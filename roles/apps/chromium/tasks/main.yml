@@ -40,12 +40,25 @@
   become: true
   when: app_states['chromium'] | default('present') == 'present'
 
-# Explicitly specify arch=amd64 and signed-by to use modern keyring
-# For ARM support, change arch=amd64 to arch=amd64,arm64
-- name: Add Chromium PPA repository with modern keyring
-  ansible.builtin.apt_repository:
-    repo: "deb [arch=amd64 signed-by=/usr/share/keyrings/xtradeb-apps.gpg] https://ppa.launchpadcontent.net/xtradeb/apps/ubuntu noble main"
-    filename: chromium-ppa
+# Remove old .list format file (cleanup from apt_repository to deb822_repository migration)
+- name: Remove old Chromium PPA .list file
+  ansible.builtin.file:
+    path: /etc/apt/sources.list.d/chromium-ppa.list
+    state: absent
+  become: true
+  when: app_states['chromium'] | default('present') == 'present'
+
+# Use deb822 format to prevent duplicate repository entries
+# For ARM support, change architectures to: amd64,arm64
+- name: Add Chromium PPA repository (deb822)
+  ansible.builtin.deb822_repository:
+    name: chromium-ppa
+    types: [deb]
+    uris: https://ppa.launchpadcontent.net/xtradeb/apps/ubuntu
+    suites: noble
+    components: [main]
+    architectures: amd64
+    signed_by: /usr/share/keyrings/xtradeb-apps.gpg
     state: present
   become: true
   when: app_states['chromium'] | default('present') == 'present'
@@ -127,9 +140,8 @@
   when: app_states['chromium'] | default('present') == 'absent'
 
 - name: Remove Chromium PPA repository when absent
-  ansible.builtin.apt_repository:
-    repo: "deb [arch=amd64 signed-by=/usr/share/keyrings/xtradeb-apps.gpg] https://ppa.launchpadcontent.net/xtradeb/apps/ubuntu noble main"
-    filename: chromium-ppa
+  ansible.builtin.deb822_repository:
+    name: chromium-ppa
     state: absent
   become: true
   when: app_states['chromium'] | default('present') == 'absent'

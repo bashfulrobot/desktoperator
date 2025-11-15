@@ -34,13 +34,25 @@
   become: true
   when: app_states.helix | default('present') == 'present'
 
-# Explicitly specify arch=amd64 to prevent i386 package lookup warnings
-# For ARM support, change arch=amd64 to arch=amd64,arm64
-- name: Add Helix PPA with modern signed-by keyring
-  ansible.builtin.apt_repository:
-    repo: "deb [arch=amd64 signed-by=/usr/share/keyrings/helix-ppa.gpg] https://ppa.launchpadcontent.net/maveonair/helix-editor/ubuntu {{ ansible_distribution_release
-      }} main"
-    filename: helix-ppa
+# Remove old .list format file (cleanup from apt_repository to deb822_repository migration)
+- name: Remove old Helix PPA .list file
+  ansible.builtin.file:
+    path: /etc/apt/sources.list.d/helix-ppa.list
+    state: absent
+  become: true
+  when: app_states.helix | default('present') == 'present'
+
+# Use deb822 format to prevent duplicate repository entries
+# For ARM support, change architectures to: amd64,arm64
+- name: Add Helix PPA (deb822)
+  ansible.builtin.deb822_repository:
+    name: helix-ppa
+    types: [deb]
+    uris: https://ppa.launchpadcontent.net/maveonair/helix-editor/ubuntu
+    suites: "{{ ansible_distribution_release }}"
+    components: [main]
+    architectures: amd64
+    signed_by: /usr/share/keyrings/helix-ppa.gpg
     state: present
   become: true
   when: app_states.helix | default('present') == 'present'
@@ -150,10 +162,8 @@
   when: app_states.helix | default('present') == 'absent'
 
 - name: Remove Helix PPA when absent
-  ansible.builtin.apt_repository:
-    repo: "deb [arch=amd64 signed-by=/usr/share/keyrings/helix-ppa.gpg] https://ppa.launchpadcontent.net/maveonair/helix-editor/ubuntu {{ ansible_distribution_release
-      }} main"
-    filename: helix-ppa
+  ansible.builtin.deb822_repository:
+    name: helix-ppa
     state: absent
   become: true
   when: app_states.helix | default('present') == 'absent'

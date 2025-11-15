@@ -78,10 +78,25 @@
   become: true
   when: app_states['vscode'] | default('present') == 'present'
 
-- name: Add VSCode repository
-  ansible.builtin.apt_repository:
-    repo: "deb [arch=amd64 signed-by=/usr/share/keyrings/packages.microsoft.gpg] https://packages.microsoft.com/repos/code stable main"
-    filename: vscode
+# Remove old .list format file (cleanup from apt_repository to deb822_repository migration)
+- name: Remove old VSCode .list file
+  ansible.builtin.file:
+    path: /etc/apt/sources.list.d/vscode.list
+    state: absent
+  become: true
+  when: app_states['vscode'] | default('present') == 'present'
+
+# Use deb822 format to prevent duplicate repository entries
+# For ARM support, change architectures to: amd64,arm64
+- name: Add VSCode repository (deb822)
+  ansible.builtin.deb822_repository:
+    name: vscode
+    types: [deb]
+    uris: https://packages.microsoft.com/repos/code
+    suites: stable
+    components: [main]
+    architectures: amd64
+    signed_by: /usr/share/keyrings/packages.microsoft.gpg
     state: present
   become: true
   when: app_states['vscode'] | default('present') == 'present'
@@ -238,9 +253,8 @@
 
 # Cleanup when absent
 - name: Remove VSCode repository when absent
-  ansible.builtin.apt_repository:
-    repo: "deb [arch=amd64 signed-by=/usr/share/keyrings/packages.microsoft.gpg] https://packages.microsoft.com/repos/code stable main"
-    filename: vscode
+  ansible.builtin.deb822_repository:
+    name: vscode
     state: absent
   become: true
   when: app_states['vscode'] | default('present') == 'absent'
