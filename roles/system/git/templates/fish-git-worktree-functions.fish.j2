@@ -48,27 +48,7 @@ end
 # Main command dispatcher for worktree operations
 function gtr --description "Git worktree helper for Claude Code parallel development"
     if test (count $argv) -lt 1
-        echo "Usage: gtr {create|finish|done|cd|claude|list|rm|prune} [args...]"
-        echo ""
-        echo "Primary Workflow:"
-        echo "  create <name>     Create worktree and cd into it"
-        echo "  finish            Commit, merge to main, cleanup (run from worktree)"
-        echo ""
-        echo "Other Commands:"
-        echo "  done [name]       Cleanup after external merge (auto-detects current worktree)"
-        echo "  cd <name>         Change directory to a worktree"
-        echo "  claude <name>     Launch Claude Code in a worktree"
-        echo "  list              List all worktrees"
-        echo "  rm <name...>      Remove one or more worktrees"
-        echo "  prune             Clean up stale worktree references"
-        echo ""
-        echo "Simple Workflow Example:"
-        echo "  gtr create my-feature    # Create and enter worktree"
-        echo "  # ... do your work ..."
-        echo "  /commit                  # Commit changes (in Claude Code)"
-        echo "  gtr finish               # Merge, cleanup - done!"
-        echo ""
-        echo "Path: \$HOME/dev/worktrees/<repo-name>/<worktree-name>"
+        _gtr_help
         return 1
     end
 
@@ -92,6 +72,8 @@ function gtr --description "Git worktree helper for Claude Code parallel develop
             _gtr_list
         case prune
             _gtr_prune
+        case help
+            _gtr_help
         case '*'
             echo "Unknown command: $cmd"
             echo "Run 'gtr' without arguments for usage help"
@@ -112,7 +94,7 @@ function _gtr_create --description "Create git worktrees"
         set -l worktree_path (_gtr_get_worktree_path $name)
         or return 1
 
-        set -l branch_name "claude/$name"
+        set -l branch_name "$name"
 
         if test -d "$worktree_path"
             echo "Worktree already exists: $worktree_path"
@@ -213,7 +195,7 @@ function _gtr_claude --description "Launch Claude Code in a worktree"
                     mkdir -p "$repo_dir"
                 end
 
-                set -l branch_name "claude/$name"
+                set -l branch_name "$name"
                 git worktree add -b "$branch_name" "$worktree_path"
 
                 if test $status -ne 0
@@ -243,6 +225,31 @@ function _gtr_prune --description "Clean up stale worktree references"
     git worktree prune -v
 end
 
+function _gtr_help --description "Show help for gtr command"
+    echo "Usage: gtr {create|finish|done|cd|claude|list|rm|prune|help} [args...]"
+    echo ""
+    echo "Primary Workflow:"
+    echo "  create <name>     Create worktree and cd into it"
+    echo "  finish            Commit, merge to main, cleanup (run from worktree)"
+    echo ""
+    echo "Other Commands:"
+    echo "  done [name]       Cleanup after external merge (auto-detects current worktree)"
+    echo "  cd <name>         Change directory to a worktree"
+    echo "  claude <name>     Launch Claude Code in a worktree"
+    echo "  list              List all worktrees"
+    echo "  rm <name...>      Remove one or more worktrees"
+    echo "  prune             Clean up stale worktree references"
+    echo "  help              Show this help message"
+    echo ""
+    echo "Simple Workflow Example:"
+    echo "  gtr create my-feature    # Create and enter worktree"
+    echo "  # ... do your work ..."
+    echo "  /commit                  # Commit changes (in Claude Code)"
+    echo "  gtr finish               # Merge, cleanup - done!"
+    echo ""
+    echo "Path: \$HOME/dev/worktrees/<repo-name>/<worktree-name>"
+end
+
 # Internal: Finish workflow - commit, merge to main, cleanup, all from worktree
 function _gtr_finish --description "Complete workflow: commit, merge to main, cleanup from worktree"
     # Auto-detect current worktree
@@ -259,7 +266,7 @@ function _gtr_finish --description "Complete workflow: commit, merge to main, cl
 
     # Extract worktree name from path
     set -l name (string replace "$repo_dir/" "" $current_path | cut -d'/' -f1)
-    set -l branch_name "claude/$name"
+    set -l branch_name "$name"
     # Get main repo location (first entry in worktree list is always the main repo)
     set -l main_worktree (git worktree list | head -1 | awk '{print $1}')
 
@@ -404,7 +411,7 @@ function _gtr_done --description "Clean up worktree after PR merge and return to
         return 1
     end
 
-    set -l branch_name "claude/$name"
+    set -l branch_name "$name"
     set -l current_path (pwd)
     # Get main repo location (first entry in worktree list is always the main repo)
     set -l main_worktree (git worktree list | head -1 | awk '{print $1}')
@@ -475,10 +482,10 @@ function gwt-cleanup-merged --description "Remove worktrees for merged branches"
     echo "Finding worktrees for merged branches..."
 
     set -l default_branch (git remote show (git remote) | awk '/HEAD branch/ {print $NF}')
-    set -l merged_branches (git branch --merged $default_branch | string trim | grep -v "^\\*" | grep "claude/")
+    set -l merged_branches (git branch --merged $default_branch | string trim | grep -v "^\\*" | grep -v " -> ")
 
     if test -z "$merged_branches"
-        echo "No merged 'claude/*' branches found."
+        echo "No merged branches found."
         return 0
     end
 
@@ -498,7 +505,7 @@ function gwt-cleanup-merged --description "Remove worktrees for merged branches"
 
             # Check if we're in any of the worktrees being removed
             for branch in $merged_branches
-                set -l branch_name (string replace "claude/" "" $branch)
+                set -l branch_name $branch
                 set -l worktree_path (_gtr_get_worktree_path $branch_name)
 
                 if test -d "$worktree_path"; and string match -q "$worktree_path*" "$current_path"
@@ -513,7 +520,7 @@ function gwt-cleanup-merged --description "Remove worktrees for merged branches"
 
             # Remove all merged worktrees
             for branch in $merged_branches
-                set -l branch_name (string replace "claude/" "" $branch)
+                set -l branch_name $branch
                 set -l worktree_path (_gtr_get_worktree_path $branch_name)
 
                 if test -d "$worktree_path"
@@ -577,7 +584,7 @@ function gwt-branch-from-current --description "Create a worktree for a new bran
     end
 
     echo "Creating worktree '$new_branch' from current branch '$current_branch'..."
-    git worktree add -b "claude/$new_branch" "$worktree_path" "$current_branch"
+    git worktree add -b "$new_branch" "$worktree_path" "$current_branch"
 
     if test $status -eq 0
         echo "✓ Worktree created at: $worktree_path"
