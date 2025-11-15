@@ -1,0 +1,85 @@
+# Codex CLI Global Configuration
+# Deployed to ~/.codex/config.toml
+
+[general]
+# Default model for Codex operations
+# Available models:
+#   gpt-5.1-codex       - Optimized for codex (current default)
+#   gpt-5.1-codex-mini  - Cheaper, faster, but less capable
+#   gpt-5.1             - Broad world knowledge with strong general reasoning
+model = "gpt-5.1-codex"
+
+# Reasoning level (for gpt-5.1-codex and compatible models)
+# Options:
+#   "low"    - Fastest responses with limited reasoning
+#   "medium" - Dynamically adjusts reasoning based on the task (default)
+#   "high"   - Maximizes reasoning depth for complex or ambiguous problems
+# Recommendation: Use "high" for Phase 1 planning, "medium" or "low" for Phase 2/4 implementation
+model_reasoning_effort = "high"
+
+[sandbox]
+# Filesystem access controls
+# Options: "full", "limited", "none"
+filesystem_access = "full"
+
+# Network access during code execution
+# Options: "full", "limited", "none"
+network_access = "limited"
+
+[approval]
+# When to pause and ask before running generated commands
+# Options: "always", "destructive", "never"
+command_approval = "destructive"
+
+# Require approval for file modifications
+require_file_approval = false
+
+# Require approval for network requests
+require_network_approval = false
+
+[mcp]
+# Model Context Protocol servers
+# Add MCP servers that Codex should have access to
+# Example:
+# servers = [
+#   { name = "github", url = "http://localhost:3000" },
+#   { name = "jira", url = "http://localhost:3001" }
+# ]
+servers = []
+
+[project]
+# Fallback names for project documentation files
+# Codex will look for these in addition to AGENTS.md
+project_doc_fallback_filenames = ["README.md", "CLAUDE.md", "GEMINI.md"]
+
+# Directory to ignore during code analysis
+ignore_dirs = [
+    ".git",
+    "node_modules",
+    "venv",
+    ".venv",
+    "__pycache__",
+    ".pytest_cache",
+    "dist",
+    "build",
+    ".codex",
+    ".next",
+    ".nuxt"
+]
+
+[git]
+# Auto-detect git repository root
+auto_detect_repo = true
+
+# Respect .gitignore when analyzing files
+respect_gitignore = true
+
+[performance]
+# Maximum file size to analyze (in MB)
+max_file_size_mb = 10
+
+# Maximum number of files to include in context
+max_context_files = 100
+
+# Cache analysis results
+enable_caching = true
