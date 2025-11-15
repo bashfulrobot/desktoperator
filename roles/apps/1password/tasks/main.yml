@@ -9,10 +9,25 @@
     state: present
   become: true
 
-- name: Add 1Password repository
-  ansible.builtin.apt_repository:
-    repo: "deb [arch=amd64 signed-by=/usr/share/keyrings/1password-archive-keyring.gpg] https://downloads.1password.com/linux/debian/amd64 stable main"
-    filename: 1password
+# Remove old .list format file (cleanup from apt_repository to deb822_repository migration)
+- name: Remove old 1Password .list file
+  ansible.builtin.file:
+    path: /etc/apt/sources.list.d/1password.list
+    state: absent
+  become: true
+  when: app_states['1password'] | default('present') == 'present'
+
+# Use deb822 format to prevent duplicate repository entries
+# For ARM support, change architectures to: amd64,arm64
+- name: Add 1Password repository (deb822)
+  ansible.builtin.deb822_repository:
+    name: 1password
+    types: [deb]
+    uris: https://downloads.1password.com/linux/debian/amd64
+    suites: stable
+    components: [main]
+    architectures: amd64
+    signed_by: /usr/share/keyrings/1password-archive-keyring.gpg
     state: "{{ app_states['1password'] | default('present') }}"
   become: true
   notify: Update apt cache
@@ -91,9 +106,8 @@
   when: app_states['1password'] | default('present') == 'present'
 
 - name: Remove 1Password repository when absent
-  ansible.builtin.apt_repository:
-    repo: "deb [arch=amd64 signed-by=/usr/share/keyrings/1password-archive-keyring.gpg] https://downloads.1password.com/linux/debian/amd64 stable main"
-    filename: 1password
+  ansible.builtin.deb822_repository:
+    name: 1password
     state: absent
   become: true
   when: app_states['1password'] | default('present') == 'absent'

@@ -16,10 +16,25 @@
   become: true
   when: app_states['vivaldi'] | default('present') == 'present'
 
-- name: Add Vivaldi APT repository
-  ansible.builtin.apt_repository:
-    repo: "deb [arch=amd64 signed-by=/usr/share/keyrings/vivaldi.gpg] https://repo.vivaldi.com/archive/deb/ stable main"
-    filename: vivaldi
+# Remove old .list format file (cleanup from apt_repository to deb822_repository migration)
+- name: Remove old Vivaldi .list file
+  ansible.builtin.file:
+    path: /etc/apt/sources.list.d/vivaldi.list
+    state: absent
+  become: true
+  when: app_states['vivaldi'] | default('present') == 'present'
+
+# Use deb822 format to prevent duplicate repository entries
+# For ARM support, change architectures to: amd64,arm64
+- name: Add Vivaldi APT repository (deb822)
+  ansible.builtin.deb822_repository:
+    name: vivaldi
+    types: [deb]
+    uris: https://repo.vivaldi.com/archive/deb/
+    suites: stable
+    components: [main]
+    architectures: amd64
+    signed_by: /usr/share/keyrings/vivaldi.gpg
     state: present
   become: true
   when: app_states['vivaldi'] | default('present') == 'present'
@@ -129,9 +144,8 @@
   when: app_states['vivaldi'] | default('present') == 'absent'
 
 - name: Remove Vivaldi repository when absent
-  ansible.builtin.apt_repository:
-    repo: "deb [arch=amd64 signed-by=/usr/share/keyrings/vivaldi.gpg] https://repo.vivaldi.com/archive/deb/ stable main"
-    filename: vivaldi
+  ansible.builtin.deb822_repository:
+    name: vivaldi
     state: absent
   become: true
   when: app_states['vivaldi'] | default('present') == 'absent'

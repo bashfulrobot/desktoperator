@@ -385,12 +385,25 @@
   become: true
   when: k8s_gke_auth_plugin_enabled | default(true)
 
-# Explicitly specify arch=amd64 to prevent i386 package lookup warnings
-# For ARM support, change arch=amd64 to arch=amd64,arm64
-- name: Add Google Cloud SDK APT repository
-  ansible.builtin.apt_repository:
-    repo: "deb [arch=amd64 signed-by=/etc/apt/keyrings/cloud.google.gpg] https://packages.cloud.google.com/apt cloud-sdk main"
-    filename: google-cloud-sdk
+# Remove old .list format file (cleanup from apt_repository to deb822_repository migration)
+- name: Remove old Google Cloud SDK .list file
+  ansible.builtin.file:
+    path: /etc/apt/sources.list.d/google-cloud-sdk.list
+    state: absent
+  become: true
+  when: k8s_gke_auth_plugin_enabled | default(true)
+
+# Use deb822 format to prevent duplicate repository entries
+# For ARM support, change architectures to: amd64,arm64
+- name: Add Google Cloud SDK APT repository (deb822)
+  ansible.builtin.deb822_repository:
+    name: google-cloud-sdk
+    types: [deb]
+    uris: https://packages.cloud.google.com/apt
+    suites: cloud-sdk
+    components: [main]
+    architectures: amd64
+    signed_by: /etc/apt/keyrings/cloud.google.gpg
     state: present
   become: true
   when: k8s_gke_auth_plugin_enabled | default(true)
