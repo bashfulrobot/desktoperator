@@ -1,0 +1,32 @@
+---
+# GitHub Copilot CLI installation tasks
+
+- name: Install copilot-cli globally via npm
+  ansible.builtin.command: npm install -g @github/copilot
+  become: true
+  when: app_states['copilot-cli'] | default('present') == 'present'
+  register: copilot_cli_install
+  failed_when: false
+  changed_when: copilot_cli_install.rc == 0
+
+- name: Create .copilot directory
+  ansible.builtin.file:
+    path: "{{ user.home }}/.copilot"
+    state: directory
+    owner: "{{ user.name }}"
+    mode: "0755"
+  when: app_states['copilot-cli'] | default('present') == 'present'
+
+- name: Uninstall copilot-cli globally via npm
+  ansible.builtin.command: npm uninstall -g @github/copilot
+  become: true
+  when: app_states['copilot-cli'] | default('present') == 'absent'
+  register: copilot_cli_uninstall
+  failed_when: false
+  changed_when: copilot_cli_uninstall.rc == 0
+
+- name: Remove copilot-cli configuration directory
+  ansible.builtin.file:
+    path: "{{ user.home }}/.copilot"
+    state: absent
+  when: app_states['copilot-cli'] | default('present') == 'absent'

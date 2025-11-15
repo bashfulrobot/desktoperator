@@ -1,0 +1,5 @@
+---
+# GitHub Copilot CLI default variables
+
+# Installation state (present/absent)
+copilot_cli_state: present
