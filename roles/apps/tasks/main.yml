@@ -111,6 +111,11 @@
     name: apps/codex-cli
   tags: [codex-cli]
 
+- name: Include Copilot CLI
+  ansible.builtin.import_role:
+    name: apps/copilot-cli
+  tags: [copilot-cli]
+
 - name: Include SiteMCP
   ansible.builtin.import_role:
     name: apps/sitemcp

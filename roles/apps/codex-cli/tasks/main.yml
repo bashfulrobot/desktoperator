@@ -33,6 +33,68 @@
     mode: "0644"
   when: app_states['codex-cli'] | default('present') == 'present'
 
+- name: Create Codex CLI prompts directory
+  ansible.builtin.file:
+    path: "{{ codex_cli_config_dir }}/prompts"
+    state: directory
+    owner: "{{ user.name }}"
+    mode: "0755"
+  when: app_states['codex-cli'] | default('present') == 'present'
+
+- name: Deploy commit command prompt
+  ansible.builtin.copy:
+    src: prompts/commit.md
+    dest: "{{ codex_cli_config_dir }}/prompts/commit.md"
+    owner: "{{ user.name }}"
+    mode: "0644"
+  when: app_states['codex-cli'] | default('present') == 'present'
+
+- name: Create MCP cache log directory
+  ansible.builtin.file:
+    path: /var/log/mcp-cache
+    state: directory
+    owner: "{{ user.name }}"
+    group: "{{ user.name }}"
+    mode: "0755"
+  become: true
+  when:
+    - app_states['codex-cli'] | default('present') == 'present'
+    - codex_cli_cache_update_enabled | default(true)
+
+- name: Deploy MCP cache update systemd service
+  ansible.builtin.template:
+    src: mcp-cache-update.service.j2
+    dest: "{{ user.home }}/.config/systemd/user/mcp-cache-update.service"
+    owner: "{{ user.name }}"
+    mode: "0644"
+  when:
+    - app_states['codex-cli'] | default('present') == 'present'
+    - codex_cli_cache_update_enabled | default(true)
+  notify: Reload systemd user daemon
+
+- name: Deploy MCP cache update systemd timer
+  ansible.builtin.template:
+    src: mcp-cache-update.timer.j2
+    dest: "{{ user.home }}/.config/systemd/user/mcp-cache-update.timer"
+    owner: "{{ user.name }}"
+    mode: "0644"
+  when:
+    - app_states['codex-cli'] | default('present') == 'present'
+    - codex_cli_cache_update_enabled | default(true)
+  notify: Reload systemd user daemon
+
+- name: Enable and start MCP cache update timer
+  ansible.builtin.systemd:
+    name: mcp-cache-update.timer
+    enabled: true
+    state: started
+    scope: user
+  become: true
+  become_user: "{{ user.name }}"
+  when:
+    - app_states['codex-cli'] | default('present') == 'present'
+    - codex_cli_cache_update_enabled | default(true)
+
 - name: Uninstall Codex CLI globally via npm
   ansible.builtin.command: npm uninstall -g @openai/codex
   become: true
@@ -44,5 +106,46 @@
 - name: Remove .codex configuration directory
   ansible.builtin.file:
     path: "{{ user.home }}/.codex"
+    state: absent
+  when: app_states['codex-cli'] | default('present') == 'absent'
+
+- name: Remove Fish completions for Codex CLI when absent
+  ansible.builtin.file:
+    path: "{{ user.home }}/.config/fish/conf.d/codex-cli.fish"
+    state: absent
+  when: app_states['codex-cli'] | default('present') == 'absent'
+
+- name: Remove Codex CLI config when absent
+  ansible.builtin.file:
+    path: "{{ codex_cli_config_file }}"
+    state: absent
+  when: app_states['codex-cli'] | default('present') == 'absent'
+
+- name: Remove Codex CLI prompts directory when absent
+  ansible.builtin.file:
+    path: "{{ codex_cli_config_dir }}/prompts"
+    state: absent
+  when: app_states['codex-cli'] | default('present') == 'absent'
+
+- name: Stop and disable MCP cache update timer when absent
+  ansible.builtin.systemd:
+    name: mcp-cache-update.timer
+    enabled: false
+    state: stopped
+    scope: user
+  become: true
+  become_user: "{{ user.name }}"
+  when: app_states['codex-cli'] | default('present') == 'absent'
+  failed_when: false
+
+- name: Remove MCP cache update systemd timer when absent
+  ansible.builtin.file:
+    path: "{{ user.home }}/.config/systemd/user/mcp-cache-update.timer"
+    state: absent
+  when: app_states['codex-cli'] | default('present') == 'absent'
+
+- name: Remove MCP cache update systemd service when absent
+  ansible.builtin.file:
+    path: "{{ user.home }}/.config/systemd/user/mcp-cache-update.service"
     state: absent
   when: app_states['codex-cli'] | default('present') == 'absent'

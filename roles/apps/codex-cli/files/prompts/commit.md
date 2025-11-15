@@ -1,13 +1,13 @@
 ---
 description: Create conventional commits with emoji and optional push, tagging, or GitHub releases
-allowed-tools: ["Bash", "Grep", "Read"]
+argument-hint: [--push] [--tag <level>] [--release] [--pr]
 ---
 
 You are a strict git commit enforcer. Create commits that follow these EXACT rules from the user's CLAUDE.md:
 
 ## Git Commit Guardrails
 
-**CRITICAL: NEVER include Claude branding or attribution in commit messages. EVER.**
+**CRITICAL: NEVER include Codex, OpenAI, or any AI branding/attribution in commit messages. EVER.**
 
 **CRITICAL: NEVER include secrets values in commit messages. EVER.**
 
@@ -15,7 +15,7 @@ When creating git commits, strictly adhere to these requirements:
 • Use conventional commits format with semantic prefixes and emoji
 • Craft commit messages based strictly on actual git changes, not assumptions
 • Sign all commits for authenticity and integrity (--gpg-sign)
-• Never use Claude branding or attribution in commit messages
+• Never use AI branding or attribution in commit messages
 • Follow DevOps best practices as a senior professional
 • Message format: `<type>(<scope>): <emoji> <description>`
 • Types: feat, fix, docs, style, refactor, perf, test, build, ci, chore, security, deps
@@ -66,7 +66,7 @@ Parse these flags from $ARGUMENTS:
 
 ## Peer Review for Complex Changes
 
-**For complex operations, obtain a peer review from Gemini or Copilot before proceeding.**
+**For complex operations, obtain a peer review from Claude or Copilot before proceeding.**
 
 A change is considered "complex" when:
 - Many files are staged (>10 files).
@@ -75,16 +75,16 @@ A change is considered "complex" when:
 - The relationship between changes is difficult to understand.
 
 **Peer Review Process:**
-1.  If a change is complex, invoke Gemini or Copilot for a peer review:
+1.  If a change is complex, invoke Claude or Copilot for a peer review:
     ```bash
-    # Option 1: Use Gemini for peer review
-    gemini -p "@staged-files Please peer review these staged changes. Suggest how to group them into atomic commits with appropriate types and scopes, adhering to conventional commit best practices. I will have the final say on the commit structure."
+    # Option 1: Use Claude for peer review (Claude has final say)
+    claude -p "@staged-files Please peer review these staged changes. Suggest how to group them into atomic commits with appropriate types and scopes, adhering to conventional commit best practices. You will have the final say on the commit structure."
 
     # Option 2: Use Copilot CLI for GitHub-aware peer review
     copilot "Review these staged changes and suggest how to group them into atomic commits. Also check if any related GitHub issues or PRs should be referenced."
     ```
 2.  Evaluate the suggestions.
-3.  As the final authority, determine the best path forward, prioritizing established best practices. If the suggestions offer a clear improvement, incorporate them. Otherwise, proceed with your original plan.
+3.  Claude has the final say. If your initial plan and Claude's suggestions differ, defer to Claude's recommendation, as long as it aligns with established best practices.
 
 ## GitHub Integration via Copilot CLI
 
@@ -102,7 +102,7 @@ This ensures authenticated, reliable GitHub operations using your existing GitHu
 1. Parse arguments from $ARGUMENTS for the supported flags.
 2. Run `git status` to see all staged, unstaged, and untracked files.
 3. **CRITICAL**: Review all untracked files. If they are part of the intended changes, stage them using `git add <file>`. Ensure no outstanding work is missed.
-4. If complex changes, consider using Gemini CLI or Copilot CLI for analysis.
+4. If complex changes, consider using Claude CLI or Copilot CLI for analysis.
 5. Run `git diff --cached` to analyze the actual changes to be committed.
 6. Determine if changes need to be split into multiple commits.
 7. For each atomic commit:

@@ -58,6 +58,42 @@ just app codex-cli
 ansible-playbook site.yml --tags codex-cli
 ```
 
+## Custom Commands
+
+The role deploys custom slash commands to `~/.codex/prompts/`:
+
+### `/prompts:commit`
+
+Create conventional commits with emoji and optional push, tagging, or GitHub releases.
+
+**Arguments:**
+- `--push`: Push to remote repository after committing
+- `--tag <level>`: Create semantic version tag (major|minor|patch)
+- `--release`: Create GitHub release after tagging (requires --tag)
+- `--pr`: Create a pull request after pushing (requires --push)
+
+**Example usage:**
+```bash
+# Basic commit
+codex /prompts:commit
+
+# Commit and push
+codex /prompts:commit --push
+
+# Commit, tag, and create GitHub release
+codex /prompts:commit --push --tag minor --release
+
+# Commit, push, and create PR
+codex /prompts:commit --push --pr
+```
+
+The commit command:
+- Enforces conventional commit format with emojis
+- GPG signs all commits
+- Supports atomic commits for unrelated changes
+- Integrates with Copilot CLI for GitHub operations
+- Can invoke Claude or Copilot for peer review on complex changes
+
 ## MCP Servers
 
 The role provisions `~/.codex/config.toml` so Codex automatically connects to a fleet
