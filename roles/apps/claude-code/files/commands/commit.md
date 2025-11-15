@@ -63,40 +63,44 @@ Parse these flags from $ARGUMENTS:
 - `--tag <level>`: Create semantic version tag (major|minor|patch)
 - `--release`: Create GitHub release after tagging (requires --tag)
 
-## Gemini CLI Integration
+## Peer Review for Complex Changes
 
-**Use Gemini CLI for large codebase analysis when beneficial:**
+**For complex operations, obtain a peer review from Gemini before proceeding.**
 
-When you have complex staged changes that are difficult to analyze in a single context window, use:
-```bash
-gemini -p "@staged-files Analyze these staged changes and suggest how to group them into atomic commits with appropriate types and scopes"
-```
+A change is considered "complex" when:
+- Many files are staged (>10 files).
+- Changes span multiple directories or modules.
+- The optimal way to scope the changes into atomic commits is unclear.
+- The relationship between changes is difficult to understand.
 
-Consider using Gemini CLI when:
-- Many files are staged (>10 files)
-- Changes span multiple directories/modules
-- Unsure how to properly scope the changes
-- Need to understand the relationship between changes
+**Peer Review Process:**
+1.  If a change is complex, invoke Gemini for a peer review with the following prompt:
+    ```bash
+    gemini -p "@staged-files Please peer review these staged changes. Suggest how to group them into atomic commits with appropriate types and scopes, adhering to conventional commit best practices. I will have the final say on the commit structure."
+    ```
+2.  Evaluate Gemini's suggestions.
+3.  As the final authority, determine the best path forward, prioritizing established best practices. If Gemini's suggestions offer a clear improvement, incorporate them. Otherwise, proceed with your original plan.
 
 ## Process:
-1. Parse arguments from $ARGUMENTS for the 3 supported flags
-2. Run `git status` to see staged changes
-3. If complex changes, consider using Gemini CLI for analysis
-4. Run `git diff --cached` to analyze the actual changes
-5. Determine if changes need to be split into multiple commits
-6. For each atomic commit:
-   - Stage appropriate files with `git add`
-   - Create commit message: `<type>(<scope>): <emoji> <description>`
-   - Execute: `git commit -S -m "message"`
-7. If `--tag` specified on final commit:
-   - Get current version: `git describe --tags --abbrev=0` (default v0.0.0)
-   - Calculate next version based on level
-   - Create signed tag: `git tag -s v<version> -m "Release v<version>"`
-8. If `--push` specified:
-   - Push commits: `git push`
-   - Push tags if created: `git push --tags`
-9. If `--release` specified (requires tag):
-   - Create GitHub release: `gh release create v<version> --title "Release v<version>" --notes-from-tag`
+1. Parse arguments from $ARGUMENTS for the 3 supported flags.
+2. Run `git status` to see all staged, unstaged, and untracked files.
+3. **CRITICAL**: Review all untracked files. If they are part of the intended changes, stage them using `git add <file>`. Ensure no outstanding work is missed.
+4. If complex changes, consider using Gemini CLI for analysis.
+5. Run `git diff --cached` to analyze the actual changes to be committed.
+6. Determine if changes need to be split into multiple commits.
+7. For each atomic commit:
+   - Stage appropriate files with `git add`.
+   - Create commit message: `<type>(<scope>): <emoji> <description>`.
+   - Execute: `git commit -S -m "message"`.
+8. If `--tag` specified on the final commit:
+   - Get current version: `git describe --tags --abbrev=0` (default v0.0.0).
+   - Calculate next version based on level.
+   - Create signed tag: `git tag -s v<version> -m "Release v<version>"`.
+9. If `--push` specified:
+   - Push commits: `git push`.
+   - Push tags if created: `git push --tags`.
+10. If `--release` specified (requires tag):
+    - Create GitHub release: `gh release create v<version> --title "Release v<version>" --notes-from-tag`.
 
 Arguments: $ARGUMENTS
 
