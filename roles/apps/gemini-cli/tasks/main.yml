@@ -9,6 +9,30 @@
   failed_when: false
   changed_when: gemini_cli_install.rc == 0
 
+- name: Create .gemini directory
+  ansible.builtin.file:
+    path: "{{ user.home }}/.gemini"
+    state: directory
+    owner: "{{ user.name }}"
+    mode: "0755"
+  when: app_states['gemini-cli'] | default('present') == 'present'
+
+- name: Create .gemini/commands directory
+  ansible.builtin.file:
+    path: "{{ user.home }}/.gemini/commands"
+    state: directory
+    owner: "{{ user.name }}"
+    mode: "0755"
+  when: app_states['gemini-cli'] | default('present') == 'present'
+
+- name: Deploy commit command
+  ansible.builtin.copy:
+    src: commands/commit.toml
+    dest: "{{ user.home }}/.gemini/commands/commit.toml"
+    owner: "{{ user.name }}"
+    mode: "0644"
+  when: app_states['gemini-cli'] | default('present') == 'present'
+
 - name: Uninstall gemini-cli globally via npm
   ansible.builtin.command: npm uninstall -g @google/gemini-cli
   become: true
