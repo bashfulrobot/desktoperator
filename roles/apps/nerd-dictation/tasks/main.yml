@@ -1,0 +1,218 @@
+---
+# nerd-dictation installation and configuration
+
+# Install system dependencies
+- name: Install system dependencies
+  ansible.builtin.apt:
+    name:
+      - python3-pip
+      - pipx  # For isolated Python app installations (PEP 668 compliant)
+      - git
+      - unzip
+      - pipewire  # For pw-cat audio recording
+      - golang-go  # Required to build dotool
+      - scdoc  # Required to build dotool man pages
+      - libxkbcommon-dev  # Required to build dotool
+    state: present
+    update_cache: true
+  become: true
+  when: app_states['nerd-dictation'] | default('present') == 'present'
+
+- name: Ensure pipx path is configured for user
+  ansible.builtin.command: pipx ensurepath
+  become: true
+  become_user: "{{ user.name }}"
+  when: app_states['nerd-dictation'] | default('present') == 'present'
+  changed_when: false
+
+# Install dotool from source (Wayland input simulation tool)
+- name: Check if dotool is already installed
+  ansible.builtin.stat:
+    path: /usr/local/bin/dotool
+  register: dotool_binary
+  when: app_states['nerd-dictation'] | default('present') == 'present'
+
+- name: Remove old dotool source directory
+  ansible.builtin.file:
+    path: /tmp/dotool
+    state: absent
+  when:
+    - app_states['nerd-dictation'] | default('present') == 'present'
+    - not dotool_binary.stat.exists or dotool_force_update | bool
+
+- name: Clone dotool repository
+  ansible.builtin.git:
+    repo: https://git.sr.ht/~geb/dotool
+    dest: /tmp/dotool
+    version: master
+    depth: 1
+  when:
+    - app_states['nerd-dictation'] | default('present') == 'present'
+    - not dotool_binary.stat.exists or dotool_force_update | bool
+  register: dotool_clone
+
+- name: Build and install dotool
+  ansible.builtin.shell: |
+    cd /tmp/dotool
+    ./build.sh && ./build.sh install
+  become: true
+  when:
+    - app_states['nerd-dictation'] | default('present') == 'present'
+    - not dotool_binary.stat.exists or dotool_force_update | bool
+    - dotool_clone is changed
+  register: dotool_build
+
+- name: Trigger udev rules for dotool
+  ansible.builtin.shell: |
+    udevadm control --reload && udevadm trigger
+  become: true
+  when:
+    - app_states['nerd-dictation'] | default('present') == 'present'
+    - dotool_build is changed
+
+- name: Clean up dotool source
+  ansible.builtin.file:
+    path: /tmp/dotool
+    state: absent
+  when:
+    - app_states['nerd-dictation'] | default('present') == 'present'
+    - dotool_build is changed
+
+- name: Ensure user is in input group for dotool
+  ansible.builtin.user:
+    name: "{{ user.name }}"
+    groups: input
+    append: true
+  become: true
+  when: app_states['nerd-dictation'] | default('present') == 'present'
+
+# Clone nerd-dictation repository (temporary for pipx installation)
+- name: Clone nerd-dictation repository
+  ansible.builtin.git:
+    repo: https://github.com/ideasman42/nerd-dictation.git
+    dest: "/tmp/nerd-dictation-{{ user.name }}"
+    version: main
+    force: true
+  become: true
+  become_user: "{{ user.name }}"
+  when: app_states['nerd-dictation'] | default('present') == 'present'
+
+# Install nerd-dictation via pipx (includes vosk dependency)
+- name: Install nerd-dictation via pipx
+  ansible.builtin.command:
+    cmd: "pipx install /tmp/nerd-dictation-{{ user.name }}/package/python --force"
+  become: true
+  become_user: "{{ user.name }}"
+  when: app_states['nerd-dictation'] | default('present') == 'present'
+  register: nerd_dictation_install
+  changed_when: "'installed package' in nerd_dictation_install.stdout or 'Installed package' in nerd_dictation_install.stdout"
+
+- name: Clean up temporary nerd-dictation clone
+  ansible.builtin.file:
+    path: "/tmp/nerd-dictation-{{ user.name }}"
+    state: absent
+  when: app_states['nerd-dictation'] | default('present') == 'present'
+
+# Create config directory
+- name: Create nerd-dictation config directory
+  ansible.builtin.file:
+    path: "{{ nerd_dictation_config_dir }}"
+    state: directory
+    owner: "{{ user.name }}"
+    mode: "0755"
+  when: app_states['nerd-dictation'] | default('present') == 'present'
+
+# Download and extract VOSK model
+- name: Check if VOSK model already exists
+  ansible.builtin.stat:
+    path: "{{ nerd_dictation_config_dir }}/model"
+  register: vosk_model_dir
+  when: app_states['nerd-dictation'] | default('present') == 'present'
+
+- name: Display model download status
+  ansible.builtin.debug:
+    msg: "VOSK model already exists at {{ nerd_dictation_config_dir }}/model, skipping download"
+  when:
+    - app_states['nerd-dictation'] | default('present') == 'present'
+    - vosk_model_dir.stat.exists
+
+- name: Download VOSK model ({{ nerd_dictation_model_name }}, ~1.8GB)
+  ansible.builtin.get_url:
+    url: "{{ nerd_dictation_model_url }}"
+    dest: "/tmp/{{ nerd_dictation_model_name }}.zip"
+    mode: "0644"
+  when:
+    - app_states['nerd-dictation'] | default('present') == 'present'
+    - not vosk_model_dir.stat.exists
+  register: model_download
+
+- name: Extract VOSK model
+  ansible.builtin.unarchive:
+    src: "/tmp/{{ nerd_dictation_model_name }}.zip"
+    dest: "/tmp/"
+    remote_src: true
+  when:
+    - app_states['nerd-dictation'] | default('present') == 'present'
+    - not vosk_model_dir.stat.exists
+    - model_download is changed
+
+- name: Move VOSK model to config directory
+  ansible.builtin.command:
+    cmd: "mv /tmp/{{ nerd_dictation_model_name }} {{ nerd_dictation_config_dir }}/model"
+    creates: "{{ nerd_dictation_config_dir }}/model"
+  when:
+    - app_states['nerd-dictation'] | default('present') == 'present'
+    - not vosk_model_dir.stat.exists
+    - model_download is changed
+
+- name: Set ownership of VOSK model
+  ansible.builtin.file:
+    path: "{{ nerd_dictation_config_dir }}/model"
+    owner: "{{ user.name }}"
+    group: "{{ user.name }}"
+    recurse: true
+  become: true
+  when:
+    - app_states['nerd-dictation'] | default('present') == 'present'
+    - not vosk_model_dir.stat.exists
+    - model_download is changed
+
+- name: Clean up VOSK model zip file
+  ansible.builtin.file:
+    path: "/tmp/{{ nerd_dictation_model_name }}.zip"
+    state: absent
+  when:
+    - app_states['nerd-dictation'] | default('present') == 'present'
+    - model_download is changed
+
+# pipx installs to ~/.local/bin by default, which should be in PATH
+# No symlink needed as pipx handles PATH automatically
+
+# Cleanup when absent
+- name: Uninstall nerd-dictation via pipx when absent
+  ansible.builtin.command:
+    cmd: pipx uninstall nerd-dictation
+  become: true
+  become_user: "{{ user.name }}"
+  when: app_states['nerd-dictation'] | default('present') == 'absent'
+  failed_when: false
+
+- name: Remove dotool when absent
+  ansible.builtin.file:
+    path: /usr/local/bin/dotool
+    state: absent
+  become: true
+  when: app_states['nerd-dictation'] | default('present') == 'absent'
+
+- name: Remove dotool man pages when absent
+  ansible.builtin.file:
+    path: /usr/local/share/man/man1/dotool.1
+    state: absent
+  become: true
+  when: app_states['nerd-dictation'] | default('present') == 'absent'
+
+- name: Remove nerd-dictation config when absent
+  ansible.builtin.file:
+    path: "{{ nerd_dictation_config_dir }}"
+    state: absent
+  when: app_states['nerd-dictation'] | default('present') == 'absent'

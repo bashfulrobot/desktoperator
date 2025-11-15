@@ -305,3 +305,8 @@
   ansible.builtin.import_role:
     name: apps/typora
   tags: [typora]
+
+- name: Include nerd-dictation voice input
+  ansible.builtin.import_role:
+    name: apps/nerd-dictation
+  tags: [nerd-dictation]

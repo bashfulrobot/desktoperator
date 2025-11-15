@@ -52,4 +52,20 @@
         key: "e",
         description: Some("Editor"),
     ): Spawn("code"),
+    (
+        modifiers: [
+            Super,
+            Alt,
+        ],
+        key: "d",
+        description: Some("Resume dictation"),
+    ): Spawn("sh -c 'notify-send \"🎤 Dictation\" \"Listening...\" --urgency=low && nerd-dictation resume'"),
+    (
+        modifiers: [
+            Super,
+            Ctrl,
+        ],
+        key: "d",
+        description: Some("Suspend dictation"),
+    ): Spawn("sh -c 'nerd-dictation suspend && notify-send \"🎤 Dictation\" \"Paused\" --urgency=low'"),
 }
