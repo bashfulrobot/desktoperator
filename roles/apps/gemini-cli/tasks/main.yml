@@ -33,6 +33,14 @@
     mode: "0644"
   when: app_states['gemini-cli'] | default('present') == 'present'
 
+- name: Deploy review command
+  ansible.builtin.copy:
+    src: commands/review.toml
+    dest: "{{ user.home }}/.gemini/commands/review.toml"
+    owner: "{{ user.name }}"
+    mode: "0644"
+  when: app_states['gemini-cli'] | default('present') == 'present'
+
 - name: Uninstall gemini-cli globally via npm
   ansible.builtin.command: npm uninstall -g @google/gemini-cli
   become: true
