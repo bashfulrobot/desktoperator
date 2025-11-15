@@ -55,17 +55,17 @@
     (
         modifiers: [
             Super,
-            Shift,
-        ],
-        key: "d",
-        description: Some("Start dictation"),
-    ): Spawn("nerd-dictation begin --simulate-input-tool=DOTOOL"),
-    (
-        modifiers: [
-            Super,
             Alt,
         ],
         key: "d",
-        description: Some("Stop dictation"),
-    ): Spawn("nerd-dictation end"),
+        description: Some("Resume dictation"),
+    ): Spawn("sh -c 'notify-send \"🎤 Dictation\" \"Listening...\" --urgency=low && nerd-dictation resume'"),
+    (
+        modifiers: [
+            Super,
+            Ctrl,
+        ],
+        key: "d",
+        description: Some("Suspend dictation"),
+    ): Spawn("sh -c 'nerd-dictation suspend && notify-send \"🎤 Dictation\" \"Paused\" --urgency=low'"),
 }

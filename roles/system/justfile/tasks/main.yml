@@ -34,6 +34,7 @@
     - modules/maintenance.just.j2
     - modules/generators.just.j2
     - modules/info.just.j2
+    - modules/dictation.just.j2
   tags: [always]
 
 - name: Deploy main system justfile

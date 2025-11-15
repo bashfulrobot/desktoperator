@@ -1,0 +1,116 @@
+# Dictation Module
+# Voice dictation management with nerd-dictation
+
+{% raw %}
+# ============================================================================
+# DICTATION
+# ============================================================================
+
+# Start nerd-dictation (loads model, starts suspended)
+[group('dictation')]
+dictation-start:
+    #!/usr/bin/env bash
+    {{ header_msg }}
+
+    header "Starting nerd-dictation"
+
+    # Check if already running
+    if pgrep -f "nerd-dictation begin" > /dev/null; then
+        echo "✓ nerd-dictation is already running"
+        notify-send "🎤 Dictation" "Already running" --urgency=low 2>/dev/null || true
+        exit 0
+    fi
+
+    # Start nerd-dictation in background (suspended, model loaded)
+    nohup nerd-dictation begin \
+        --simulate-input-tool=DOTOOL \
+        --full-sentence \
+        --numbers-as-digits \
+        --numbers-min-value 10 \
+        --continuous \
+        --suspend-on-start \
+        > /tmp/nerd-dictation.log 2>&1 &
+
+    # Wait for startup
+    echo "Loading VOSK model (this may take 5-10 seconds)..."
+    sleep 8
+
+    if pgrep -f "nerd-dictation begin" > /dev/null; then
+        echo "✓ nerd-dictation started successfully (suspended, ready for use)"
+        echo "  Use Super+Alt+D to resume dictation"
+        echo "  Use Super+Ctrl+D to suspend dictation"
+        notify-send "🎤 Dictation" "Ready (suspended)" --urgency=low 2>/dev/null || true
+    else
+        echo "✗ Failed to start nerd-dictation"
+        echo "Check logs: tail /tmp/nerd-dictation.log"
+        notify-send "🎤 Dictation" "Failed to start" --urgency=critical 2>/dev/null || true
+        exit 1
+    fi
+
+# Stop nerd-dictation (unloads model, frees memory)
+[group('dictation')]
+dictation-stop:
+    #!/usr/bin/env bash
+    {{ header_msg }}
+
+    header "Stopping nerd-dictation"
+
+    # Check if running
+    if ! pgrep -f "nerd-dictation begin" > /dev/null; then
+        echo "✓ nerd-dictation is not running"
+        notify-send "🎤 Dictation" "Not running" --urgency=low 2>/dev/null || true
+        exit 0
+    fi
+
+    # End dictation gracefully
+    nerd-dictation end
+
+    sleep 2
+
+    if ! pgrep -f "nerd-dictation begin" > /dev/null; then
+        echo "✓ nerd-dictation stopped successfully (~2GB RAM freed)"
+        notify-send "🎤 Dictation" "Stopped" --urgency=low 2>/dev/null || true
+    else
+        echo "✗ Failed to stop nerd-dictation gracefully, force killing..."
+        pkill -f "nerd-dictation begin"
+        sleep 1
+        if ! pgrep -f "nerd-dictation begin" > /dev/null; then
+            echo "✓ nerd-dictation force stopped"
+            notify-send "🎤 Dictation" "Stopped (forced)" --urgency=normal 2>/dev/null || true
+        else
+            echo "✗ Could not stop nerd-dictation"
+            notify-send "🎤 Dictation" "Failed to stop" --urgency=critical 2>/dev/null || true
+            exit 1
+        fi
+    fi
+
+# Show nerd-dictation status
+[group('dictation')]
+dictation-status:
+    #!/usr/bin/env bash
+    {{ header_msg }}
+
+    header "Dictation Status"
+
+    if pgrep -f "nerd-dictation begin" > /dev/null; then
+        echo "Status: Running"
+        echo "PID:    $(pgrep -f 'nerd-dictation begin')"
+        echo ""
+        echo "Memory usage:"
+        ps aux | grep "[n]erd-dictation begin" | awk '{print "  RSS: " $6/1024 " MB"}'
+        echo ""
+        echo "Logs: tail -f /tmp/nerd-dictation.log"
+        echo ""
+        echo "Shortcuts:"
+        echo "  Super+Alt+D     - Resume dictation"
+        echo "  Super+Ctrl+D    - Suspend dictation"
+        echo ""
+        echo "Commands:"
+        echo "  jsys dictation-stop - Stop and free memory"
+    else
+        echo "Status: Not running"
+        echo ""
+        echo "Commands:"
+        echo "  jsys dictation-start - Start and load model"
+    fi
+{% endraw %}
