@@ -41,6 +41,22 @@
     mode: "0644"
   when: app_states['codex-cli'] | default('present') == 'present'
 
+- name: Create Codex CLI prompts directory
+  ansible.builtin.file:
+    path: "{{ codex_cli_config_dir }}/prompts"
+    state: directory
+    owner: "{{ user.name }}"
+    mode: "0755"
+  when: app_states['codex-cli'] | default('present') == 'present'
+
+- name: Deploy commit command prompt
+  ansible.builtin.copy:
+    src: prompts/commit.md
+    dest: "{{ codex_cli_config_dir }}/prompts/commit.md"
+    owner: "{{ user.name }}"
+    mode: "0644"
+  when: app_states['codex-cli'] | default('present') == 'present'
+
 - name: Create MCP cache log directory
   ansible.builtin.file:
     path: /var/log/mcp-cache
@@ -104,6 +120,12 @@
 - name: Remove Codex CLI config when absent
   ansible.builtin.file:
     path: "{{ codex_cli_config_file }}"
+    state: absent
+  when: app_states['codex-cli'] | default('present') == 'absent'
+
+- name: Remove Codex CLI prompts directory when absent
+  ansible.builtin.file:
+    path: "{{ codex_cli_config_dir }}/prompts"
     state: absent
   when: app_states['codex-cli'] | default('present') == 'absent'
 
