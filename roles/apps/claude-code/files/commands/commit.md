@@ -62,10 +62,11 @@ Parse these flags from $ARGUMENTS:
 - `--push`: Push to remote repository after committing
 - `--tag <level>`: Create semantic version tag (major|minor|patch)
 - `--release`: Create GitHub release after tagging (requires --tag)
+- `--pr`: Create a pull request after pushing (requires --push)
 
 ## Peer Review for Complex Changes
 
-**For complex operations, obtain a peer review from Gemini before proceeding.**
+**For complex operations, obtain a peer review from Gemini or Copilot before proceeding.**
 
 A change is considered "complex" when:
 - Many files are staged (>10 files).
@@ -74,18 +75,34 @@ A change is considered "complex" when:
 - The relationship between changes is difficult to understand.
 
 **Peer Review Process:**
-1.  If a change is complex, invoke Gemini for a peer review with the following prompt:
+1.  If a change is complex, invoke Gemini or Copilot for a peer review:
     ```bash
+    # Option 1: Use Gemini for peer review
     gemini -p "@staged-files Please peer review these staged changes. Suggest how to group them into atomic commits with appropriate types and scopes, adhering to conventional commit best practices. I will have the final say on the commit structure."
+
+    # Option 2: Use Copilot CLI for GitHub-aware peer review
+    copilot "Review these staged changes and suggest how to group them into atomic commits. Also check if any related GitHub issues or PRs should be referenced."
     ```
-2.  Evaluate Gemini's suggestions.
-3.  As the final authority, determine the best path forward, prioritizing established best practices. If Gemini's suggestions offer a clear improvement, incorporate them. Otherwise, proceed with your original plan.
+2.  Evaluate the suggestions.
+3.  As the final authority, determine the best path forward, prioritizing established best practices. If the suggestions offer a clear improvement, incorporate them. Otherwise, proceed with your original plan.
+
+## GitHub Integration via Copilot CLI
+
+**IMPORTANT: Use Copilot CLI for all GitHub-specific operations.**
+
+Copilot CLI has native GitHub integration and MCP-powered extensibility. Use it for:
+- Creating GitHub releases
+- Creating pull requests
+- Querying GitHub issues and PRs
+- Any GitHub API operations
+
+This ensures authenticated, reliable GitHub operations using your existing GitHub account.
 
 ## Process:
-1. Parse arguments from $ARGUMENTS for the 3 supported flags.
+1. Parse arguments from $ARGUMENTS for the supported flags.
 2. Run `git status` to see all staged, unstaged, and untracked files.
 3. **CRITICAL**: Review all untracked files. If they are part of the intended changes, stage them using `git add <file>`. Ensure no outstanding work is missed.
-4. If complex changes, consider using Gemini CLI for analysis.
+4. If complex changes, consider using Gemini CLI or Copilot CLI for analysis.
 5. Run `git diff --cached` to analyze the actual changes to be committed.
 6. Determine if changes need to be split into multiple commits.
 7. For each atomic commit:
@@ -100,8 +117,10 @@ A change is considered "complex" when:
    - Push commits: `git push`.
    - Push tags if created: `git push --tags`.
 10. If `--release` specified (requires tag):
-    - Create GitHub release: `gh release create v<version> --title "Release v<version>" --notes-from-tag`.
+    - **Use Copilot CLI**: `copilot "Create a GitHub release for tag v<version> with title 'Release v<version>' and generate release notes from the tag and recent commits"`.
+11. If `--pr` specified (requires push):
+    - **Use Copilot CLI**: `copilot "Create a pull request for the current branch with an appropriate title and description based on the commits"`.
 
 Arguments: $ARGUMENTS
 
-Always analyze staged changes first, split into atomic commits if needed, then apply the 3 supported argument flags.
+Always analyze staged changes first, split into atomic commits if needed, then apply the supported argument flags.
