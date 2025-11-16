@@ -4,7 +4,7 @@
 # Source the fixed function
 source roles/apps/brave-web-apps/templates/brave-web-apps.fish.j2
 
-set -l apps aha asana avanti br-calendar br-drive br-email kong-calendar kong-docs kong-drive kong-email konnect lucid-chart omni sfdc workday
+set -l apps aha asana avanti br-calendar br-drive br-email codex kong-calendar kong-docs kong-drive kong-email konnect lucid-chart omni sfdc workday
 
 for app in $apps
     set -l role_path "roles/apps/$app-brave"
