@@ -41,5 +41,26 @@
   ansible.builtin.apt:
     name: br-calendar
     state: absent
+    purge: true
   become: true
   when: app_states['br_calendar'] | default('present') == 'absent'
+
+- name: Remove custom desktop file and icons
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: absent
+  loop:
+    - /usr/share/applications/pake-br-calendar.desktop
+    - /usr/share/applications/br-calendar.desktop
+    - /usr/share/applications/com.pake.br-calendar.desktop
+    - /usr/share/icons/hicolor/16x16/apps/pake-br-calendar.png
+    - /usr/share/icons/hicolor/32x32/apps/pake-br-calendar.png
+    - /usr/share/icons/hicolor/48x48/apps/pake-br-calendar.png
+    - /usr/share/icons/hicolor/64x64/apps/pake-br-calendar.png
+    - /usr/share/icons/hicolor/128x128/apps/pake-br-calendar.png
+    - /usr/share/icons/hicolor/256x256/apps/pake-br-calendar.png
+    - /usr/share/icons/hicolor/512x512/apps/pake-br-calendar.png
+    - /usr/share/icons/hicolor/scalable/apps/pake-br-calendar.png
+  become: true
+  when: app_states['br_calendar'] | default('present') == 'absent'
+  notify: Update icon cache

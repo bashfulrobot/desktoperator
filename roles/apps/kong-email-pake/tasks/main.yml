@@ -41,5 +41,26 @@
   ansible.builtin.apt:
     name: kong-email
     state: absent
+    purge: true
   become: true
   when: app_states['kong_email'] | default('present') == 'absent'
+
+- name: Remove custom desktop file and icons
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: absent
+  loop:
+    - /usr/share/applications/pake-kong-email.desktop
+    - /usr/share/applications/kong-email.desktop
+    - /usr/share/applications/com.pake.kong-email.desktop
+    - /usr/share/icons/hicolor/16x16/apps/pake-kong-email.png
+    - /usr/share/icons/hicolor/32x32/apps/pake-kong-email.png
+    - /usr/share/icons/hicolor/48x48/apps/pake-kong-email.png
+    - /usr/share/icons/hicolor/64x64/apps/pake-kong-email.png
+    - /usr/share/icons/hicolor/128x128/apps/pake-kong-email.png
+    - /usr/share/icons/hicolor/256x256/apps/pake-kong-email.png
+    - /usr/share/icons/hicolor/512x512/apps/pake-kong-email.png
+    - /usr/share/icons/hicolor/scalable/apps/pake-kong-email.png
+  become: true
+  when: app_states['kong_email'] | default('present') == 'absent'
+  notify: Update icon cache
