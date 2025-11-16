@@ -210,18 +210,18 @@ end
 function _brave_detect_window_class --description 'Detect actual window class by spawning Brave temporarily'
     set -l url $argv[1]
 
-    echo "Detecting window class for $url..."
+    echo "Detecting window class for $url..." >&2
 
     # Check dependencies
     if not command -v lswt &>/dev/null
-        echo "✗ Error: lswt is required for window class detection"
-        echo "  Please install lswt first"
+        echo "✗ Error: lswt is required for window class detection" >&2
+        echo "  Please install lswt first" >&2
         return 1
     end
 
     if not command -v jq &>/dev/null
-        echo "✗ Error: jq is required for JSON parsing"
-        echo "  Please install jq first"
+        echo "✗ Error: jq is required for JSON parsing" >&2
+        echo "  Please install jq first" >&2
         return 1
     end
 
@@ -229,7 +229,7 @@ function _brave_detect_window_class --description 'Detect actual window class by
     set -l ids_before (lswt -j 2>/dev/null | grep -o '"identifier": [^,}]*' | cut -d' ' -f2 | sort)
 
     # Launch Brave in app mode (in background)
-    echo "  Launching Brave to detect window class..."
+    echo "  Launching Brave to detect window class..." >&2
     brave-browser --app="$url" &>/dev/null &
 
     # Wait for window to appear
@@ -248,8 +248,8 @@ function _brave_detect_window_class --description 'Detect actual window class by
     end
 
     if test -z "$new_id"
-        echo "✗ Error: Could not detect new window"
-        echo "  Please close any test windows and try again"
+        echo "✗ Error: Could not detect new window" >&2
+        echo "  Please close any test windows and try again" >&2
         return 1
     end
 
@@ -257,14 +257,14 @@ function _brave_detect_window_class --description 'Detect actual window class by
     set -l detected_class (lswt -j 2>/dev/null | grep -A2 "\"identifier\": $new_id" | grep '"app-id"' | cut -d'"' -f4)
 
     if test -z "$detected_class"
-        echo "✗ Error: Could not detect window class"
+        echo "✗ Error: Could not detect window class" >&2
         return 1
     end
 
-    echo "✓ Detected window class: $detected_class"
-    echo ""
-    echo "⚠  Please close the test Brave window manually"
-    echo ""
+    echo "✓ Detected window class: $detected_class" >&2
+    echo "" >&2
+    echo "⚠  Please close the test Brave window manually" >&2
+    echo "" >&2
 
     # Return the detected class
     echo $detected_class
