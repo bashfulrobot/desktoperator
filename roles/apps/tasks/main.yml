@@ -26,10 +26,10 @@
     name: apps/zellij
   tags: [zellij]
 
-- name: Include Zen Browser
-  ansible.builtin.import_role:
-    name: apps/zen-browser
-  tags: [zen-browser]
+# - name: Include Zen Browser
+#   ansible.builtin.import_role:
+#     name: apps/zen-browser
+#   tags: [zen-browser]
 
 - name: Include Slack
   ansible.builtin.import_role:
