@@ -249,16 +249,22 @@ function pfind --description 'Interactive file search with pattern matching and 
             set abs_path "$file_path"
         end
 
-        # Add line number to paths if available
+        # Build choice list (copy relative always default/first)
+        # Display shows line numbers for context, but copy action excludes them
+        set -l rel_display "$rel_path"
+        set -l abs_display "$abs_path"
         if test -n "$line_num"
-            set rel_path "$rel_path:$line_num"
-            set abs_path "$abs_path:$line_num"
+            set rel_display "$rel_path:$line_num"
+            set abs_display "$abs_path:$line_num"
         end
 
-        # Build choice list (copy relative always default/first)
-        set -l choices "📍 Copy relative: $rel_path"
-        set choices $choices "🌐 Copy absolute: $abs_path"
-        set choices $choices "📂 Open in \$EDITOR"
+        set -l choices "📍 Copy relative: $rel_display"
+        set choices $choices "🌐 Copy absolute: $abs_display"
+        if test -n "$line_num"
+            set choices $choices "📂 Open in \$EDITOR (line $line_num)"
+        else
+            set choices $choices "📂 Open in \$EDITOR"
+        end
 
         # Show action prompt (default is first item, just press Enter)
         set -l action (printf '%s\n' $choices | gum choose --header="Select action (Enter for default):")
@@ -282,7 +288,7 @@ function pfind --description 'Interactive file search with pattern matching and 
                 gum style --foreground 82 --bold "✓ Copied: $abs_path"
                 echo ""
 
-            case "📂 Open in \$EDITOR"
+            case "📂 Open in \$EDITOR*"
                 if not set -q EDITOR
                     gum style --foreground 196 "✗ Error: \$EDITOR not set"
                     echo ""
@@ -292,10 +298,6 @@ function pfind --description 'Interactive file search with pattern matching and 
                 set -l open_path "$file_path"
                 if test "$path_mode" = "absolute"
                     set open_path "$abs_path"
-                    if test -n "$line_num"
-                        # Remove :line from abs_path for opening
-                        set open_path (string split -m 1 ":" "$abs_path")[1]
-                    end
                 end
 
                 if test -n "$line_num"
