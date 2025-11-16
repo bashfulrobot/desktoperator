@@ -227,7 +227,7 @@ function pfind --description 'Interactive file search with pattern matching and 
         end
 
         # Parse the selection
-        set -l copy_path "$selected"
+        set -l file_path "$selected"
         set -l line_num ""
 
         if test $has_line_numbers -eq 1
@@ -235,56 +235,84 @@ function pfind --description 'Interactive file search with pattern matching and 
             # Split on first two colons only (content might have colons)
             set -l parts (string split -m 2 ":" "$selected")
             if test (count $parts) -ge 2
-                set copy_path $parts[1]
+                set file_path $parts[1]
                 set line_num $parts[2]
             end
         end
 
-        # Convert to absolute path if needed
-        if test "$path_mode" = "absolute"
-            if test -e "$copy_path"
-                set copy_path (realpath "$copy_path")
-            end
+        # Build action choices
+        set -l rel_path "$file_path"
+        set -l abs_path
+        if test -e "$file_path"
+            set abs_path (realpath "$file_path")
+        else
+            set abs_path "$file_path"
         end
 
-        # Perform action based on mode
-        if test "$action_mode" = "open"
-            # Open in editor
-            if not set -q EDITOR
-                gum style --foreground 196 "✗ Error: \$EDITOR not set"
+        # Add line number to paths if available
+        if test -n "$line_num"
+            set rel_path "$rel_path:$line_num"
+            set abs_path "$abs_path:$line_num"
+        end
+
+        # Build choice list (copy relative always default/first)
+        set -l choices "📍 Copy relative: $rel_path"
+        set choices $choices "🌐 Copy absolute: $abs_path"
+        set choices $choices "📂 Open in \$EDITOR"
+
+        # Show action prompt (default is first item, just press Enter)
+        set -l action (printf '%s\n' $choices | gum choose --header="Select action (Enter for default):")
+
+        # Handle cancellation
+        if test $status -ne 0
+            gum style --foreground 214 "⏭  Cancelled"
+            echo ""
+            continue
+        end
+
+        # Perform selected action
+        switch "$action"
+            case "📍 Copy relative:*"
+                echo -n $rel_path | wl-copy
+                gum style --foreground 82 --bold "✓ Copied: $rel_path"
                 echo ""
-                continue
-            end
 
-            if test -n "$line_num"
-                # Open at specific line (works with vim, nvim, nano, emacs, etc.)
-                $EDITOR +$line_num $copy_path &
-            else
-                # Just open file
-                $EDITOR $copy_path &
-            end
+            case "🌐 Copy absolute:*"
+                echo -n $abs_path | wl-copy
+                gum style --foreground 82 --bold "✓ Copied: $abs_path"
+                echo ""
 
-            gum style \
-                --foreground 82 \
-                --bold \
-                "✓ Opened in \$EDITOR: $copy_path"
-            if test -n "$line_num"
-                gum style --foreground 86 "  (at line $line_num)"
-            end
-            echo ""
-        else
-            # Copy to clipboard
-            # Append line number if available (for editor jumping)
-            if test -n "$line_num"
-                set copy_path "$copy_path:$line_num"
-            end
+            case "📂 Open in \$EDITOR"
+                if not set -q EDITOR
+                    gum style --foreground 196 "✗ Error: \$EDITOR not set"
+                    echo ""
+                    continue
+                end
 
-            echo -n $copy_path | wl-copy
-            gum style \
-                --foreground 82 \
-                --bold \
-                "✓ Copied to clipboard: $copy_path"
-            echo ""
+                set -l open_path "$file_path"
+                if test "$path_mode" = "absolute"
+                    set open_path "$abs_path"
+                    if test -n "$line_num"
+                        # Remove :line from abs_path for opening
+                        set open_path (string split -m 1 ":" "$abs_path")[1]
+                    end
+                end
+
+                if test -n "$line_num"
+                    $EDITOR +$line_num $open_path &
+                else
+                    $EDITOR $open_path &
+                end
+
+                gum style --foreground 82 --bold "✓ Opened: $open_path"
+                if test -n "$line_num"
+                    gum style --foreground 86 "  (at line $line_num)"
+                end
+                echo ""
+
+            case "*"
+                gum style --foreground 214 "⏭  No action selected"
+                echo ""
         end
     end
 end
