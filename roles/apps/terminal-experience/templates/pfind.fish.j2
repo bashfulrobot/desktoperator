@@ -26,6 +26,7 @@ function pfind --description 'Interactive file search with pattern matching and 
     # State variables
     set -l search_mode "content"  # content or names
     set -l path_mode "relative"   # relative or absolute
+    set -l action_mode "copy"     # copy or open
 
     # Header
     gum style \
@@ -34,9 +35,9 @@ function pfind --description 'Interactive file search with pattern matching and 
         --padding "1 2" \
         --margin "1" \
         "📁 Interactive File Search" \
-        "Search → Select → Copy path to clipboard" \
+        "Search → Select → Copy or Open" \
         "" \
-        "Commands: :m (toggle mode) :p (toggle path) :h (help) :q (quit)"
+        "Commands: :m (mode) :p (path) :a (action) :h (help) :q (quit)"
 
     echo ""
 
@@ -56,12 +57,19 @@ function pfind --description 'Interactive file search with pattern matching and 
             set path_icon "🌐"
         end
 
+        set -l action_icon "📋"
+        set -l action_label "copy"
+        if test "$action_mode" = "open"
+            set action_icon "📂"
+            set action_label "open"
+        end
+
         # Show current mode
-        gum style --foreground 86 "$search_icon Search: $search_label $search_detail | $path_icon Path: $path_mode"
+        gum style --foreground 86 "$search_icon Search: $search_label $search_detail | $path_icon Path: $path_mode | $action_icon Action: $action_label"
 
         # Get search pattern
         set -l pattern (gum input \
-            --placeholder "Enter pattern or command (:m :p :h :q)..." \
+            --placeholder "Enter pattern or command (:m :p :a :h :q)..." \
             --prompt "🔍 " \
             --width 60)
 
@@ -103,6 +111,18 @@ function pfind --description 'Interactive file search with pattern matching and 
                 echo ""
                 continue
 
+            case ":a" ":action"
+                # Toggle action mode
+                if test "$action_mode" = "copy"
+                    set action_mode "open"
+                    gum style --foreground 82 --bold "→ Switched to: Open in \$EDITOR"
+                else
+                    set action_mode "copy"
+                    gum style --foreground 82 --bold "→ Switched to: Copy to clipboard"
+                end
+                echo ""
+                continue
+
             case ":h" ":help"
                 # Show help
                 gum style \
@@ -120,12 +140,17 @@ function pfind --description 'Interactive file search with pattern matching and 
                     "             Copies: filename" \
                     "" \
                     "Path Modes:" \
-                    "  relative - Copy relative path from current directory" \
-                    "  absolute - Copy full absolute path" \
+                    "  relative - Use relative path from current directory" \
+                    "  absolute - Use full absolute path" \
+                    "" \
+                    "Action Modes:" \
+                    "  copy     - Copy path to clipboard (default)" \
+                    "  open     - Open file in \$EDITOR" \
                     "" \
                     "Commands:" \
                     "  :m       - Toggle search mode (content ↔ names)" \
                     "  :p       - Toggle path mode (relative ↔ absolute)" \
+                    "  :a       - Toggle action mode (copy ↔ open)" \
                     "  :h       - Show this help" \
                     "  :q       - Quit (or empty pattern / Ctrl+C)" \
                     "" \
@@ -222,17 +247,44 @@ function pfind --description 'Interactive file search with pattern matching and 
             end
         end
 
-        # Append line number if available (for editor jumping)
-        if test -n "$line_num"
-            set copy_path "$copy_path:$line_num"
-        end
+        # Perform action based on mode
+        if test "$action_mode" = "open"
+            # Open in editor
+            if not set -q EDITOR
+                gum style --foreground 196 "✗ Error: \$EDITOR not set"
+                echo ""
+                continue
+            end
 
-        # Copy to clipboard
-        echo -n $copy_path | wl-copy
-        gum style \
-            --foreground 82 \
-            --bold \
-            "✓ Copied to clipboard: $copy_path"
-        echo ""
+            if test -n "$line_num"
+                # Open at specific line (works with vim, nvim, nano, emacs, etc.)
+                $EDITOR +$line_num $copy_path &
+            else
+                # Just open file
+                $EDITOR $copy_path &
+            end
+
+            gum style \
+                --foreground 82 \
+                --bold \
+                "✓ Opened in \$EDITOR: $copy_path"
+            if test -n "$line_num"
+                gum style --foreground 86 "  (at line $line_num)"
+            end
+            echo ""
+        else
+            # Copy to clipboard
+            # Append line number if available (for editor jumping)
+            if test -n "$line_num"
+                set copy_path "$copy_path:$line_num"
+            end
+
+            echo -n $copy_path | wl-copy
+            gum style \
+                --foreground 82 \
+                --bold \
+                "✓ Copied to clipboard: $copy_path"
+            echo ""
+        end
     end
 end
