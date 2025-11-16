@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=sfdc
+Comment=Open sfdc in Brave app mode
+Exec=/usr/local/bin/brave-sfdc
+StartupWMClass=brave-sfdc
+Icon=brave-sfdc
+Terminal=false

@@ -51,21 +51,41 @@ app_states:
   lswt: present
   oq: present
   pake: present
-  github: present
-  avanti: present
-  sfdc: present
+  brave-web-apps: present
+  # Pake apps (set to absent, replaced by brave equivalents)
+  github: absent
+  avanti: absent
+  sfdc: absent
+  lucid-chart: absent
+  br-email: absent
+  kong-email: absent
+  kong-calendar: absent
+  br-calendar: absent
+  kong-drive: absent
+  br-drive: absent
+  aha: absent
+  workday: absent
+  konnect: absent
+  kong-docs: absent
+  omni: absent
+  # Brave web apps (replacements for pake)
+  github-brave: present
+  avanti-brave: present
+  sfdc-brave: present
   salesforce: present # alias for sfdc
-  lucid-chart: present
+  lucid-chart-brave: present
   lucidchart: present # alias for lucid-chart
-  br-email: present
-  kong-email: present
-  kong-calendar: present
-  br-calendar: present
-  kong-drive: present
-  br-drive: present
-  aha: present
-  workday: present
-  konnect: present
-  kong-docs: present
+  br-email-brave: present
+  kong-email-brave: present
+  kong-calendar-brave: present
+  br-calendar-brave: present
+  kong-drive-brave: present
+  br-drive-brave: present
+  aha-brave: present
+  workday-brave: present
+  konnect-brave: present
+  kong-docs-brave: present
+  omni-brave: present
+  asana-brave: present
   kong-cli: present
   zns: present

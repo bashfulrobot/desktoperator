@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=lucid chart
+Comment=Open lucid chart in Brave app mode
+Exec=/usr/local/bin/brave-lucid-chart
+StartupWMClass=brave-lucid-chart
+Icon=brave-lucid-chart
+Terminal=false

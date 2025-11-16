@@ -1,0 +1,73 @@
+---
+- name: Install Brave web app "kong-email" launcher
+  ansible.builtin.copy:
+    src: "brave-kong-email-launcher.sh"
+    dest: "/usr/local/bin/brave-kong-email"
+    mode: "0755"
+    owner: root
+    group: root
+  become: true
+  when: app_states['kong-email'] | default('present') == 'present'
+
+- name: Install Brave web app "kong-email" desktop entry
+  ansible.builtin.copy:
+    src: "brave-kong-email.desktop"
+    dest: "/usr/share/applications/brave-kong-email.desktop"
+    mode: "0644"
+    owner: root
+    group: root
+  become: true
+  when: app_states['kong-email'] | default('present') == 'present'
+
+- name: Install Brave web app icons
+  ansible.builtin.copy:
+    src: '{{ item.src }}'
+    dest: '{{ item.dest }}'
+    mode: "0644"
+    owner: root
+    group: root
+  loop:
+    - { src: "brave-kong-email-icon-16.png", dest: "/usr/share/icons/hicolor/16x16/apps/brave-kong-email.png" }
+    - { src: "brave-kong-email-icon-32.png", dest: "/usr/share/icons/hicolor/32x32/apps/brave-kong-email.png" }
+    - { src: "brave-kong-email-icon-48.png", dest: "/usr/share/icons/hicolor/48x48/apps/brave-kong-email.png" }
+    - { src: "brave-kong-email-icon-64.png", dest: "/usr/share/icons/hicolor/64x64/apps/brave-kong-email.png" }
+    - { src: "brave-kong-email-icon-128.png", dest: "/usr/share/icons/hicolor/128x128/apps/brave-kong-email.png" }
+    - { src: "brave-kong-email-icon-256.png", dest: "/usr/share/icons/hicolor/256x256/apps/brave-kong-email.png" }
+    - { src: "brave-kong-email-icon-512.png", dest: "/usr/share/icons/hicolor/512x512/apps/brave-kong-email.png" }
+    - { src: "brave-kong-email-icon-800.png", dest: "/usr/share/icons/hicolor/scalable/apps/brave-kong-email.png" }
+  become: true
+  when: app_states['kong-email'] | default('present') == 'present'
+  notify: Update icon cache
+
+- name: Remove Brave web app launcher when absent
+  ansible.builtin.file:
+    path: "/usr/local/bin/brave-kong-email"
+    state: absent
+  become: true
+  when: app_states['kong-email'] | default('present') == 'absent'
+
+- name: Remove Brave web app desktop entry when absent
+  ansible.builtin.file:
+    path: "/usr/share/applications/brave-kong-email.desktop"
+    state: absent
+  become: true
+  when: app_states['kong-email'] | default('present') == 'absent'
+
+- name: Remove Brave web app icons when absent
+  ansible.builtin.file:
+    path: '{{ item }}'
+    state: absent
+    owner: root
+    group: root
+  loop:
+    - /usr/share/icons/hicolor/16x16/apps/brave-kong-email.png
+    - /usr/share/icons/hicolor/32x32/apps/brave-kong-email.png
+    - /usr/share/icons/hicolor/48x48/apps/brave-kong-email.png
+    - /usr/share/icons/hicolor/64x64/apps/brave-kong-email.png
+    - /usr/share/icons/hicolor/128x128/apps/brave-kong-email.png
+    - /usr/share/icons/hicolor/256x256/apps/brave-kong-email.png
+    - /usr/share/icons/hicolor/512x512/apps/brave-kong-email.png
+    - /usr/share/icons/hicolor/scalable/apps/brave-kong-email.png
+  become: true
+  when: app_states['kong-email'] | default('present') == 'absent'
+

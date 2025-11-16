@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=kong docs
+Comment=Open kong docs in Brave app mode
+Exec=/usr/local/bin/brave-kong-docs
+StartupWMClass=brave-kong-docs
+Icon=brave-kong-docs
+Terminal=false

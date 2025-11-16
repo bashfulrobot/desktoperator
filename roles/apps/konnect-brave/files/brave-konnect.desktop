@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=konnect
+Comment=Open konnect in Brave app mode
+Exec=/usr/local/bin/brave-konnect
+StartupWMClass=brave-konnect
+Icon=brave-konnect
+Terminal=false

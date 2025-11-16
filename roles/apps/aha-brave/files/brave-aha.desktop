@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=aha
+Comment=Open aha in Brave app mode
+Exec=/usr/local/bin/brave-aha
+StartupWMClass=brave-aha
+Icon=brave-aha
+Terminal=false

@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=br calendar
+Comment=Open br calendar in Brave app mode
+Exec=/usr/local/bin/brave-br-calendar
+StartupWMClass=brave-br-calendar
+Icon=brave-br-calendar
+Terminal=false
