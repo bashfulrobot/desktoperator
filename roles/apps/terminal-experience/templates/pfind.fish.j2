@@ -6,6 +6,12 @@ function pfind --description 'Interactive file search with pattern matching and 
         return 1
     end
 
+    if not command -v fd &>/dev/null
+        gum style --foreground 196 "✗ Error: fd is required"
+        echo "Install: cargo install fd-find or use your package manager"
+        return 1
+    end
+
     if not command -v gum &>/dev/null
         echo "✗ Error: gum is required"
         echo "Install: https://github.com/charmbracelet/gum"
@@ -17,6 +23,10 @@ function pfind --description 'Interactive file search with pattern matching and 
         return 1
     end
 
+    # State variables
+    set -l search_mode "content"  # content or names
+    set -l path_mode "relative"   # relative or absolute
+
     # Header
     gum style \
         --border double \
@@ -24,39 +34,124 @@ function pfind --description 'Interactive file search with pattern matching and 
         --padding "1 2" \
         --margin "1" \
         "📁 Interactive File Search" \
-        "Search for patterns → Select file → Copy path to clipboard"
+        "Search → Select → Copy path to clipboard" \
+        "" \
+        "Commands: :m (toggle mode) :p (toggle path) :h (help) :q (quit)"
 
     echo ""
 
     while true
+        # Build status indicator
+        set -l search_icon "📄"
+        set -l search_label "content"
+        if test "$search_mode" = "names"
+            set search_icon "📁"
+            set search_label "names"
+        end
+
+        set -l path_icon "📍"
+        if test "$path_mode" = "absolute"
+            set path_icon "🌐"
+        end
+
+        # Show current mode
+        gum style --foreground 86 "$search_icon Search: $search_label | $path_icon Path: $path_mode"
+
         # Get search pattern
         set -l pattern (gum input \
-            --placeholder "Enter search pattern (Ctrl+C to exit)..." \
+            --placeholder "Enter pattern or command (:m :p :h :q)..." \
             --prompt "🔍 " \
             --width 60)
 
-        # Exit if cancelled or empty
+        # Exit if cancelled
         if test $status -ne 0
             echo ""
             gum style --foreground 214 "👋 Goodbye!"
             break
         end
 
-        if test -z "$pattern"
-            echo ""
-            gum style --foreground 214 "👋 Goodbye!"
-            break
+        # Handle commands
+        switch "$pattern"
+            case ""
+                echo ""
+                gum style --foreground 214 "👋 Goodbye!"
+                break
+
+            case ":m" ":mode"
+                # Toggle search mode
+                if test "$search_mode" = "content"
+                    set search_mode "names"
+                    gum style --foreground 82 --bold "→ Switched to: Search file/folder names"
+                else
+                    set search_mode "content"
+                    gum style --foreground 82 --bold "→ Switched to: Search file contents"
+                end
+                echo ""
+                continue
+
+            case ":p" ":path"
+                # Toggle path mode
+                if test "$path_mode" = "relative"
+                    set path_mode "absolute"
+                    gum style --foreground 82 --bold "→ Switched to: Copy absolute paths"
+                else
+                    set path_mode "relative"
+                    gum style --foreground 82 --bold "→ Switched to: Copy relative paths"
+                end
+                echo ""
+                continue
+
+            case ":h" ":help"
+                # Show help
+                gum style \
+                    --border normal \
+                    --border-foreground 86 \
+                    --padding "1 2" \
+                    "📖 Help" \
+                    "" \
+                    "Search Modes:" \
+                    "  content  - Search within file contents (ripgrep)" \
+                    "  names    - Search file/folder names (fd)" \
+                    "" \
+                    "Path Modes:" \
+                    "  relative - Copy relative path from current directory" \
+                    "  absolute - Copy full absolute path" \
+                    "" \
+                    "Commands:" \
+                    "  :m       - Toggle search mode (content ↔ names)" \
+                    "  :p       - Toggle path mode (relative ↔ absolute)" \
+                    "  :h       - Show this help" \
+                    "  :q       - Quit (or empty pattern / Ctrl+C)" \
+                    "" \
+                    "Workflow:" \
+                    "  1. Enter search pattern" \
+                    "  2. Select file from fuzzy list (Esc to cancel)" \
+                    "  3. Path copied to clipboard automatically"
+                echo ""
+                continue
+
+            case ":q" ":quit" ":exit"
+                echo ""
+                gum style --foreground 214 "👋 Goodbye!"
+                break
         end
 
-        # Search for files (recursive from current directory)
-        set -l files (rg -l --hidden --glob '!.git/' "$pattern" 2>/dev/null)
+        # Search based on mode
+        set -l files
+        if test "$search_mode" = "content"
+            # Search file contents with ripgrep
+            set files (rg -l --hidden --glob '!.git/' "$pattern" 2>/dev/null)
+        else
+            # Search file/folder names with fd
+            set files (fd --hidden --exclude .git --type f --type d "$pattern" 2>/dev/null)
+        end
 
         # Check results
         if test (count $files) -eq 0
             gum style \
                 --foreground 196 \
                 --bold \
-                "✗ No files found matching '$pattern'"
+                "✗ No results found for '$pattern'"
             echo ""
             continue
         end
@@ -64,15 +159,15 @@ function pfind --description 'Interactive file search with pattern matching and 
         # Show count
         set -l count (count $files)
         if test $count -eq 1
-            gum style --foreground 86 --bold "✓ Found 1 file"
+            gum style --foreground 86 --bold "✓ Found 1 result"
         else
-            gum style --foreground 86 --bold "✓ Found $count files"
+            gum style --foreground 86 --bold "✓ Found $count results"
         end
         echo ""
 
         # Let user select with fuzzy filter
         set -l selected (printf '%s\n' $files | gum filter \
-            --placeholder "Fuzzy search to select file (Esc to search again)..." \
+            --placeholder "Fuzzy search to select (Esc to search again)..." \
             --height 15 \
             --prompt "→ ")
 
@@ -90,12 +185,18 @@ function pfind --description 'Interactive file search with pattern matching and 
             continue
         end
 
+        # Convert to absolute path if needed
+        set -l copy_path "$selected"
+        if test "$path_mode" = "absolute"
+            set copy_path (realpath "$selected")
+        end
+
         # Copy to clipboard
-        echo -n $selected | wl-copy
+        echo -n $copy_path | wl-copy
         gum style \
             --foreground 82 \
             --bold \
-            "✓ Copied to clipboard: $selected"
+            "✓ Copied to clipboard: $copy_path"
         echo ""
     end
 end
