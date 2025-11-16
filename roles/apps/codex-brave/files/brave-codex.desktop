@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=codex
+Comment=Open codex in Brave app mode
+Exec=/usr/local/bin/brave-codex
+StartupWMClass=brave-codex
+Icon=brave-codex
+Terminal=false
