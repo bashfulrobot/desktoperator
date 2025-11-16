@@ -3,6 +3,6 @@ Type=Application
 Name=avanti
 Comment=Open avanti in Brave app mode
 Exec=/usr/local/bin/brave-avanti
-StartupWMClass=brave-avanti
+StartupWMClass=brave-avanti.letter.ai__-Default
 Icon=brave-avanti
 Terminal=false

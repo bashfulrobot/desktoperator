@@ -3,6 +3,6 @@ Type=Application
 Name=kong docs
 Comment=Open kong docs in Brave app mode
 Exec=/usr/local/bin/brave-kong-docs
-StartupWMClass=brave-kong-docs
+StartupWMClass=brave-developer.konghq.com__-Default
 Icon=brave-kong-docs
 Terminal=false

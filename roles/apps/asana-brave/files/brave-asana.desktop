@@ -3,6 +3,6 @@ Type=Application
 Name=asana
 Comment=Open asana in Brave app mode
 Exec=/usr/local/bin/brave-asana
-StartupWMClass=brave-asana
+StartupWMClass=brave-app.asana.com__-Default
 Icon=brave-asana
 Terminal=false

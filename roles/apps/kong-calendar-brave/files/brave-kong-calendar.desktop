@@ -3,6 +3,6 @@ Type=Application
 Name=kong calendar
 Comment=Open kong calendar in Brave app mode
 Exec=/usr/local/bin/brave-kong-calendar
-StartupWMClass=brave-kong-calendar
+StartupWMClass=brave-calendar.google.com__calendar_u_1_r-Default
 Icon=brave-kong-calendar
 Terminal=false

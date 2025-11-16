@@ -3,6 +3,6 @@ Type=Application
 Name=kong email
 Comment=Open kong email in Brave app mode
 Exec=/usr/local/bin/brave-kong-email
-StartupWMClass=brave-kong-email
+StartupWMClass=brave-mail.google.com__mail_u_1_-Default
 Icon=brave-kong-email
 Terminal=false
