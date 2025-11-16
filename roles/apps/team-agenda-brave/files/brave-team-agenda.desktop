@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=team agenda
+Comment=Open team agenda in Brave app mode
+Exec=/usr/local/bin/brave-team-agenda
+StartupWMClass=brave-docs.google.com__document_d_1VyhPZPHQofpooPC3Shz70evrlCxG-jBToJ21vYWF0Ho-Default
+Icon=brave-team-agenda
+Terminal=false
