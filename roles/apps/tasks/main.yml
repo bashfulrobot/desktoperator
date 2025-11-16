@@ -111,6 +111,11 @@
     name: apps/codex-cli
   tags: [codex-cli]
 
+- name: Include Codex Brave
+  ansible.builtin.import_role:
+    name: apps/codex-brave
+  tags: [codex-brave]
+
 - name: Include Copilot CLI
   ansible.builtin.import_role:
     name: apps/copilot-cli
