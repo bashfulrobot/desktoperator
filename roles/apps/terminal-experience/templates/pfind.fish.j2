@@ -44,9 +44,11 @@ function pfind --description 'Interactive file search with pattern matching and 
         # Build status indicator
         set -l search_icon "📄"
         set -l search_label "content"
+        set -l search_detail "(shows matching lines)"
         if test "$search_mode" = "names"
             set search_icon "📁"
             set search_label "names"
+            set search_detail "(shows files/folders)"
         end
 
         set -l path_icon "📍"
@@ -55,7 +57,7 @@ function pfind --description 'Interactive file search with pattern matching and 
         end
 
         # Show current mode
-        gum style --foreground 86 "$search_icon Search: $search_label | $path_icon Path: $path_mode"
+        gum style --foreground 86 "$search_icon Search: $search_label $search_detail | $path_icon Path: $path_mode"
 
         # Get search pattern
         set -l pattern (gum input \
@@ -84,7 +86,7 @@ function pfind --description 'Interactive file search with pattern matching and 
                     gum style --foreground 82 --bold "→ Switched to: Search file/folder names"
                 else
                     set search_mode "content"
-                    gum style --foreground 82 --bold "→ Switched to: Search file contents"
+                    gum style --foreground 82 --bold "→ Switched to: Search file contents (with line context)"
                 end
                 echo ""
                 continue
@@ -111,7 +113,11 @@ function pfind --description 'Interactive file search with pattern matching and 
                     "" \
                     "Search Modes:" \
                     "  content  - Search within file contents (ripgrep)" \
+                    "             Shows: filename:line:matching_content" \
+                    "             Copies: filename:line (editor-friendly)" \
                     "  names    - Search file/folder names (fd)" \
+                    "             Shows: filename" \
+                    "             Copies: filename" \
                     "" \
                     "Path Modes:" \
                     "  relative - Copy relative path from current directory" \
@@ -125,8 +131,12 @@ function pfind --description 'Interactive file search with pattern matching and 
                     "" \
                     "Workflow:" \
                     "  1. Enter search pattern" \
-                    "  2. Select file from fuzzy list (Esc to cancel)" \
-                    "  3. Path copied to clipboard automatically"
+                    "  2. Select match from fuzzy list (Esc to cancel)" \
+                    "  3. Path (with line number in content mode) copied to clipboard" \
+                    "" \
+                    "Examples:" \
+                    "  content mode: copies 'src/main.rs:42'" \
+                    "  names mode:   copies 'src/main.rs'"
                 echo ""
                 continue
 
@@ -137,17 +147,22 @@ function pfind --description 'Interactive file search with pattern matching and 
         end
 
         # Search based on mode
-        set -l files
+        set -l results
+        set -l has_line_numbers 0
+
         if test "$search_mode" = "content"
-            # Search file contents with ripgrep
-            set files (rg -l --hidden --glob '!.git/' "$pattern" 2>/dev/null)
+            # Search file contents with ripgrep, show each matching line
+            # Format: filename:line_number:matching_content
+            # --color=always highlights the matching pattern
+            set results (rg -n --no-heading --hidden --glob '!.git/' --color=always "$pattern" 2>/dev/null)
+            set has_line_numbers 1
         else
             # Search file/folder names with fd
-            set files (fd --hidden --exclude .git --type f --type d "$pattern" 2>/dev/null)
+            set results (fd --hidden --exclude .git --type f --type d --color=always "$pattern" 2>/dev/null)
         end
 
         # Check results
-        if test (count $files) -eq 0
+        if test (count $results) -eq 0
             gum style \
                 --foreground 196 \
                 --bold \
@@ -157,7 +172,7 @@ function pfind --description 'Interactive file search with pattern matching and 
         end
 
         # Show count
-        set -l count (count $files)
+        set -l count (count $results)
         if test $count -eq 1
             gum style --foreground 86 --bold "✓ Found 1 result"
         else
@@ -166,7 +181,7 @@ function pfind --description 'Interactive file search with pattern matching and 
         echo ""
 
         # Let user select with fuzzy filter
-        set -l selected (printf '%s\n' $files | gum filter \
+        set -l selected (printf '%s\n' $results | gum filter \
             --placeholder "Fuzzy search to select (Esc to search again)..." \
             --height 15 \
             --prompt "→ ")
@@ -185,10 +200,30 @@ function pfind --description 'Interactive file search with pattern matching and 
             continue
         end
 
-        # Convert to absolute path if needed
+        # Parse the selection
         set -l copy_path "$selected"
+        set -l line_num ""
+
+        if test $has_line_numbers -eq 1
+            # Parse filename:line:content format
+            # Split on first two colons only (content might have colons)
+            set -l parts (string split -m 2 ":" "$selected")
+            if test (count $parts) -ge 2
+                set copy_path $parts[1]
+                set line_num $parts[2]
+            end
+        end
+
+        # Convert to absolute path if needed
         if test "$path_mode" = "absolute"
-            set copy_path (realpath "$selected")
+            if test -e "$copy_path"
+                set copy_path (realpath "$copy_path")
+            end
+        end
+
+        # Append line number if available (for editor jumping)
+        if test -n "$line_num"
+            set copy_path "$copy_path:$line_num"
         end
 
         # Copy to clipboard
