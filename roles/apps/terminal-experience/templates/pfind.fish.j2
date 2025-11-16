@@ -180,10 +180,11 @@ function pfind --description 'Interactive file search with pattern matching and 
         end
         echo ""
 
-        # Let user select with fuzzy filter
+        # Let user select with filter (substring matching, not character-by-character fuzzy)
         set -l selected (printf '%s\n' $results | gum filter \
-            --placeholder "Fuzzy search to select (Esc to search again)..." \
+            --placeholder "Filter results (substring match, Esc to search again)..." \
             --height 15 \
+            --fuzzy=false \
             --prompt "→ ")
 
         # Handle selection
