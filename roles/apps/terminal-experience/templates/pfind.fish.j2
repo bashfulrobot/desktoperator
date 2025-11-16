@@ -308,14 +308,17 @@ function pfind --description 'Interactive file search with pattern matching and 
                 if test -n "$line_num"
                     # Different editors use different line number syntax
                     switch $editor_name
-                        case "hx" "helix" "code" "code-insiders" "vscode" "cursor" "subl" "sublime" "sublime_text" "atom" "zed"
-                            # Helix, VSCode, Cursor, Sublime, Atom, Zed: file:line syntax
+                        case "code" "code-insiders" "vscode" "cursor"
+                            # VSCode/Cursor: needs -g flag for goto
+                            $EDITOR -g "$open_path:$line_num" &
+                        case "hx" "helix" "subl" "sublime" "sublime_text" "atom" "zed"
+                            # Helix, Sublime, Atom, Zed: file:line syntax (no flag)
                             $EDITOR "$open_path:$line_num" &
                         case "vi" "vim" "nvim" "neovim" "nano" "emacs" "emacsclient" "kak" "kakoune" "micro"
                             # Vim, Nano, Emacs, Kakoune, Micro: +line file syntax
                             $EDITOR +$line_num "$open_path" &
                         case "*"
-                            # Unknown editor: try colon syntax (most modern editors use this)
+                            # Unknown editor: try colon syntax (most modern editors)
                             $EDITOR "$open_path:$line_num" &
                     end
                 else
