@@ -1,0 +1,101 @@
+function pfind --description 'Interactive file search with pattern matching and clipboard copy'
+    # Check dependencies
+    if not command -v rg &>/dev/null
+        gum style --foreground 196 "✗ Error: ripgrep (rg) is required"
+        echo "Install: cargo install ripgrep or use your package manager"
+        return 1
+    end
+
+    if not command -v gum &>/dev/null
+        echo "✗ Error: gum is required"
+        echo "Install: https://github.com/charmbracelet/gum"
+        return 1
+    end
+
+    if not command -v wl-copy &>/dev/null
+        gum style --foreground 196 "✗ Error: wl-copy (wl-clipboard) is required"
+        return 1
+    end
+
+    # Header
+    gum style \
+        --border double \
+        --border-foreground 212 \
+        --padding "1 2" \
+        --margin "1" \
+        "📁 Interactive File Search" \
+        "Search for patterns → Select file → Copy path to clipboard"
+
+    echo ""
+
+    while true
+        # Get search pattern
+        set -l pattern (gum input \
+            --placeholder "Enter search pattern (Ctrl+C to exit)..." \
+            --prompt "🔍 " \
+            --width 60)
+
+        # Exit if cancelled or empty
+        if test $status -ne 0
+            echo ""
+            gum style --foreground 214 "👋 Goodbye!"
+            break
+        end
+
+        if test -z "$pattern"
+            echo ""
+            gum style --foreground 214 "👋 Goodbye!"
+            break
+        end
+
+        # Search for files (recursive from current directory)
+        set -l files (rg -l --hidden --glob '!.git/' "$pattern" 2>/dev/null)
+
+        # Check results
+        if test (count $files) -eq 0
+            gum style \
+                --foreground 196 \
+                --bold \
+                "✗ No files found matching '$pattern'"
+            echo ""
+            continue
+        end
+
+        # Show count
+        set -l count (count $files)
+        if test $count -eq 1
+            gum style --foreground 86 --bold "✓ Found 1 file"
+        else
+            gum style --foreground 86 --bold "✓ Found $count files"
+        end
+        echo ""
+
+        # Let user select with fuzzy filter
+        set -l selected (printf '%s\n' $files | gum filter \
+            --placeholder "Fuzzy search to select file (Esc to search again)..." \
+            --height 15 \
+            --prompt "→ ")
+
+        # Handle selection
+        if test $status -ne 0
+            # User cancelled (Esc)
+            gum style --foreground 214 "⏭  Cancelled, back to search"
+            echo ""
+            continue
+        end
+
+        if test -z "$selected"
+            gum style --foreground 214 "⏭  No selection, back to search"
+            echo ""
+            continue
+        end
+
+        # Copy to clipboard
+        echo -n $selected | wl-copy
+        gum style \
+            --foreground 82 \
+            --bold \
+            "✓ Copied to clipboard: $selected"
+        echo ""
+    end
+end

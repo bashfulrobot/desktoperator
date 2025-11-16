@@ -107,6 +107,39 @@
   become: true
   when: app_states['terminal-experience'] | default('present') == 'present'
 
+# gum - glamorous shell utilities for interactive CLI
+- name: Get latest gum release info from GitHub API
+  ansible.builtin.uri:
+    url: "https://api.github.com/repos/charmbracelet/gum/releases/latest"
+    return_content: true
+  register: gum_release_data
+  when: app_states['terminal-experience'] | default('present') == 'present'
+
+- name: Filter gum amd64 .deb asset
+  ansible.builtin.set_fact:
+    gum_deb_asset: "{{ gum_release_data.json.assets | selectattr('name', 'search', 'amd64\\.deb$') | list | first }}"
+  when: app_states['terminal-experience'] | default('present') == 'present'
+
+- name: Download gum .deb package
+  ansible.builtin.get_url:
+    url: "{{ gum_deb_asset.browser_download_url }}"
+    dest: "/tmp/gum.deb"
+    mode: "0644"
+  when: app_states['terminal-experience'] | default('present') == 'present'
+
+- name: Install gum from .deb
+  ansible.builtin.apt:
+    deb: "/tmp/gum.deb"
+    state: present
+  become: true
+  when: app_states['terminal-experience'] | default('present') == 'present'
+
+- name: Clean up gum .deb file
+  ansible.builtin.file:
+    path: "/tmp/gum.deb"
+    state: absent
+  when: app_states['terminal-experience'] | default('present') == 'present'
+
 # bat-extras - additional bat utilities (batgrep, batman, etc.)
 - name: Clone bat-extras repository
   ansible.builtin.git:
@@ -162,6 +195,23 @@
     mode: "0644"
   when: app_states['terminal-experience'] | default('present') == 'present'
 
+# Fish functions
+- name: Ensure Fish functions directory exists
+  ansible.builtin.file:
+    path: "{{ user.home }}/.config/fish/functions"
+    state: directory
+    owner: "{{ user.name }}"
+    mode: "0755"
+  when: app_states['terminal-experience'] | default('present') == 'present'
+
+- name: Deploy pfind function (interactive pattern search)
+  ansible.builtin.template:
+    src: pfind.fish.j2
+    dest: "{{ user.home }}/.config/fish/functions/pfind.fish"
+    owner: "{{ user.name }}"
+    mode: "0644"
+  when: app_states['terminal-experience'] | default('present') == 'present'
+
 # just command runner completions
 - name: Ensure Fish completions directory exists
   ansible.builtin.file:
@@ -191,6 +241,7 @@
       - wl-clipboard
       - btop
       - jq
+      - gum
     state: absent
     purge: true
   become: true
@@ -238,5 +289,11 @@
 - name: Remove just Fish completion when absent
   ansible.builtin.file:
     path: "{{ user.home }}/.config/fish/completions/just.fish"
+    state: absent
+  when: app_states['terminal-experience'] | default('present') == 'absent'
+
+- name: Remove pfind Fish function when absent
+  ansible.builtin.file:
+    path: "{{ user.home }}/.config/fish/functions/pfind.fish"
     state: absent
   when: app_states['terminal-experience'] | default('present') == 'absent'
