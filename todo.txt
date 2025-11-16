@@ -1,16 +1,27 @@
-Next Steps:
+3. Reduce Repetition in `github-brave/tasks/main.yml`:
+       * Issue: The when: app_states['github-brave'] | default('present') == 'present' condition is repeated on multiple tasks.
+       * Suggestion: You can group these tasks using a block to apply the condition only once. This makes the tasks file cleaner and easier to read. This pattern is common in the Ansible community and would be a good addition here.
 
-1.  **Deploy Updated Functions:** Run your Ansible playbook to deploy the latest version of `pake-wrapper.fish`:
-    ```bash
-    ansible-playbook site.yml --tags pake
-    ```
-    This deploys the fixed template with Brandfetch API key from vault.
+      Example:
 
-2.  **Restart Terminal:** Close and reopen your terminal to load the updated functions.
-
-3.  **Run Icon Regeneration:** Execute the icon regeneration script:
-    ```bash
-    cd ~/dev/iac/desktoperator
-    ./scripts/regenerate-pake-icons.fish
-    ```
-    Icons will be fetched from both direct URLs and the Brandfetch API.
+    1     - name: Manage GitHub Brave web app (present)
+    2       block:
+    3         - name: Install GitHub Brave launcher
+    4           # ...
+    5         - name: Install GitHub Brave desktop entry
+    6           # ...
+    7         - name: Install GitHub Brave icons
+    8           # ...
+    9       when: app_states['github-brave'] | default('present') == 'present'
+   10
+   11     - name: Manage GitHub Brave web app (absent)
+   12       block:
+   13         - name: Remove GitHub Brave launcher when absent                                                                                                                                                                                                                                                                                                                           ▄
+   14           # ...                                                                                                                                                                                                                                                                                                                                                                    █
+   15         - name: Remove GitHub Brave desktop entry when absent                                                                                                                                                                                                                                                                                                                      █
+   16           # ...                                                                                                                                                                                                                                                                                                                                                                    █
+   17         - name: Remove GitHub Brave icons when absent                                                                                                                                                                                                                                                                                                                              █
+   18           # ...                                                                                                                                                                                                                                                                                                                                                                    █
+   19       when: app_states['github-brave'] | default('present') == 'absent'                                                                                                                                                                                                                                                                                                            █
+                                                                                                                                                                                                                                                                                                                                                                                         █
+  These suggestions are aimed at making your new automation even more resilient and maintainable. The core concept is excellent. Let me know if you'd like me to elaborate on any of these points or proceed with applying any of them.
