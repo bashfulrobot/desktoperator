@@ -1,0 +1,73 @@
+---
+- name: Install GitHub Brave launcher
+  ansible.builtin.copy:
+    src: brave-github-launcher.sh
+    dest: /usr/local/bin/brave-github
+    mode: "0755"
+    owner: root
+    group: root
+  become: true
+  when: app_states['github-brave'] | default('present') == 'present'
+
+- name: Install GitHub Brave desktop entry
+  ansible.builtin.copy:
+    src: brave-github.desktop
+    dest: /usr/share/applications/brave-github.desktop
+    mode: "0644"
+    owner: root
+    group: root
+  become: true
+  when: app_states['github-brave'] | default('present') == 'present'
+
+- name: Install GitHub Brave icons
+  ansible.builtin.copy:
+    src: '{{ item.src }}'
+    dest: '{{ item.dest }}'
+    mode: "0644"
+    owner: root
+    group: root
+  loop:
+    - { src: "brave-github-icon-16.png", dest: "/usr/share/icons/hicolor/16x16/apps/brave-github.png" }
+    - { src: "brave-github-icon-32.png", dest: "/usr/share/icons/hicolor/32x32/apps/brave-github.png" }
+    - { src: "brave-github-icon-48.png", dest: "/usr/share/icons/hicolor/48x48/apps/brave-github.png" }
+    - { src: "brave-github-icon-64.png", dest: "/usr/share/icons/hicolor/64x64/apps/brave-github.png" }
+    - { src: "brave-github-icon-128.png", dest: "/usr/share/icons/hicolor/128x128/apps/brave-github.png" }
+    - { src: "brave-github-icon-256.png", dest: "/usr/share/icons/hicolor/256x256/apps/brave-github.png" }
+    - { src: "brave-github-icon-512.png", dest: "/usr/share/icons/hicolor/512x512/apps/brave-github.png" }
+    - { src: "brave-github-icon-800.png", dest: "/usr/share/icons/hicolor/scalable/apps/brave-github.png" }
+  become: true
+  when: app_states['github-brave'] | default('present') == 'present'
+  notify: Update icon cache
+
+- name: Remove GitHub Brave launcher when absent
+  ansible.builtin.file:
+    path: /usr/local/bin/brave-github
+    state: absent
+  become: true
+  when: app_states['github-brave'] | default('present') == 'absent'
+
+- name: Remove GitHub Brave desktop entry when absent
+  ansible.builtin.file:
+    path: /usr/share/applications/brave-github.desktop
+    state: absent
+  become: true
+  when: app_states['github-brave'] | default('present') == 'absent'
+
+- name: Remove GitHub Brave icons when absent
+  ansible.builtin.file:
+    path: '{{ item }}'
+    state: absent
+    owner: root
+    group: root
+  loop:
+    - /usr/share/icons/hicolor/16x16/apps/brave-github.png
+    - /usr/share/icons/hicolor/32x32/apps/brave-github.png
+    - /usr/share/icons/hicolor/48x48/apps/brave-github.png
+    - /usr/share/icons/hicolor/64x64/apps/brave-github.png
+    - /usr/share/icons/hicolor/128x128/apps/brave-github.png
+    - /usr/share/icons/hicolor/256x256/apps/brave-github.png
+    - /usr/share/icons/hicolor/512x512/apps/brave-github.png
+    - /usr/share/icons/hicolor/scalable/apps/brave-github.png
+  notify: Update icon cache
+  become: true
+  when: app_states['github-brave'] | default('present') == 'absent'

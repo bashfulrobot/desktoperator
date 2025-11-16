@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=kong drive
+Comment=Open kong drive in Brave app mode
+Exec=/usr/local/bin/brave-kong-drive
+StartupWMClass=brave-kong-drive
+Icon=brave-kong-drive
+Terminal=false

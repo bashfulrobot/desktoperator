@@ -1,0 +1,73 @@
+---
+- name: Install Brave web app "br-calendar" launcher
+  ansible.builtin.copy:
+    src: "brave-br-calendar-launcher.sh"
+    dest: "/usr/local/bin/brave-br-calendar"
+    mode: "0755"
+    owner: root
+    group: root
+  become: true
+  when: app_states['br-calendar'] | default('present') == 'present'
+
+- name: Install Brave web app "br-calendar" desktop entry
+  ansible.builtin.copy:
+    src: "brave-br-calendar.desktop"
+    dest: "/usr/share/applications/brave-br-calendar.desktop"
+    mode: "0644"
+    owner: root
+    group: root
+  become: true
+  when: app_states['br-calendar'] | default('present') == 'present'
+
+- name: Install Brave web app icons
+  ansible.builtin.copy:
+    src: '{{ item.src }}'
+    dest: '{{ item.dest }}'
+    mode: "0644"
+    owner: root
+    group: root
+  loop:
+    - { src: "brave-br-calendar-icon-16.png", dest: "/usr/share/icons/hicolor/16x16/apps/brave-br-calendar.png" }
+    - { src: "brave-br-calendar-icon-32.png", dest: "/usr/share/icons/hicolor/32x32/apps/brave-br-calendar.png" }
+    - { src: "brave-br-calendar-icon-48.png", dest: "/usr/share/icons/hicolor/48x48/apps/brave-br-calendar.png" }
+    - { src: "brave-br-calendar-icon-64.png", dest: "/usr/share/icons/hicolor/64x64/apps/brave-br-calendar.png" }
+    - { src: "brave-br-calendar-icon-128.png", dest: "/usr/share/icons/hicolor/128x128/apps/brave-br-calendar.png" }
+    - { src: "brave-br-calendar-icon-256.png", dest: "/usr/share/icons/hicolor/256x256/apps/brave-br-calendar.png" }
+    - { src: "brave-br-calendar-icon-512.png", dest: "/usr/share/icons/hicolor/512x512/apps/brave-br-calendar.png" }
+    - { src: "brave-br-calendar-icon-800.png", dest: "/usr/share/icons/hicolor/scalable/apps/brave-br-calendar.png" }
+  become: true
+  when: app_states['br-calendar'] | default('present') == 'present'
+  notify: Update icon cache
+
+- name: Remove Brave web app launcher when absent
+  ansible.builtin.file:
+    path: "/usr/local/bin/brave-br-calendar"
+    state: absent
+  become: true
+  when: app_states['br-calendar'] | default('present') == 'absent'
+
+- name: Remove Brave web app desktop entry when absent
+  ansible.builtin.file:
+    path: "/usr/share/applications/brave-br-calendar.desktop"
+    state: absent
+  become: true
+  when: app_states['br-calendar'] | default('present') == 'absent'
+
+- name: Remove Brave web app icons when absent
+  ansible.builtin.file:
+    path: '{{ item }}'
+    state: absent
+    owner: root
+    group: root
+  loop:
+    - /usr/share/icons/hicolor/16x16/apps/brave-br-calendar.png
+    - /usr/share/icons/hicolor/32x32/apps/brave-br-calendar.png
+    - /usr/share/icons/hicolor/48x48/apps/brave-br-calendar.png
+    - /usr/share/icons/hicolor/64x64/apps/brave-br-calendar.png
+    - /usr/share/icons/hicolor/128x128/apps/brave-br-calendar.png
+    - /usr/share/icons/hicolor/256x256/apps/brave-br-calendar.png
+    - /usr/share/icons/hicolor/512x512/apps/brave-br-calendar.png
+    - /usr/share/icons/hicolor/scalable/apps/brave-br-calendar.png
+  become: true
+  when: app_states['br-calendar'] | default('present') == 'absent'
+

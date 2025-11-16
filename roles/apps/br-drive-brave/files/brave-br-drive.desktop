@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=br drive
+Comment=Open br drive in Brave app mode
+Exec=/usr/local/bin/brave-br-drive
+StartupWMClass=brave-br-drive
+Icon=brave-br-drive
+Terminal=false

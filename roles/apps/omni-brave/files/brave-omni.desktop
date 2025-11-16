@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=omni
+Comment=Open omni in Brave app mode
+Exec=/usr/local/bin/brave-omni
+StartupWMClass=brave-omni
+Icon=brave-omni
+Terminal=false

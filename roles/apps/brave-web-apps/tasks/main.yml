@@ -1,0 +1,38 @@
+---
+- name: Check if Brave Browser CLI is available
+  ansible.builtin.command: which brave-browser
+  register: brave_browser_check
+  changed_when: false
+  failed_when: false
+  when: app_states['brave-web-apps'] | default('present') == 'present'
+
+- name: Fail if Brave Browser is missing
+  ansible.builtin.fail:
+    msg: >
+      Brave Browser is required for the Brave web-app helper. Install it via the
+      `brave-browser` role (already in this repo) before running `brave-web-apps`.
+  when:
+    - app_states['brave-web-apps'] | default('present') == 'present'
+    - brave_browser_check.rc != 0
+
+- name: Ensure Fish conf.d directory exists
+  ansible.builtin.file:
+    path: "{{ user.home }}/.config/fish/conf.d"
+    state: directory
+    owner: "{{ user.name }}"
+    mode: "0755"
+  when: app_states['brave-web-apps'] | default('present') == 'present'
+
+- name: Deploy Brave web-app helper to Fish
+  ansible.builtin.template:
+    src: brave-web-apps.fish.j2
+    dest: "{{ user.home }}/.config/fish/conf.d/brave-web-apps.fish"
+    owner: "{{ user.name }}"
+    mode: "0644"
+  when: app_states['brave-web-apps'] | default('present') == 'present'
+
+- name: Remove Brave web-app helper from Fish
+  ansible.builtin.file:
+    path: "{{ user.home }}/.config/fish/conf.d/brave-web-apps.fish"
+    state: absent
+  when: app_states['brave-web-apps'] | default('present') == 'absent'

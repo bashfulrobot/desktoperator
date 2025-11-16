@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=GitHub
+Comment=GitHub as a Brave web app
+Exec=/usr/local/bin/brave-github
+StartupWMClass=brave-github
+Icon=brave-github
+Terminal=false
+Categories=Network;Development;

@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=avanti
+Comment=Open avanti in Brave app mode
+Exec=/usr/local/bin/brave-avanti
+StartupWMClass=brave-avanti
+Icon=brave-avanti
+Terminal=false

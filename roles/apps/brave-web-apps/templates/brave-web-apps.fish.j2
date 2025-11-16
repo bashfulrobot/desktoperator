@@ -1,0 +1,338 @@
+# Brave web-app helper functions
+# Intended usage: generate icons via `generate-brave-icon-set`, then run
+# `create-brave-web-app <url> <name> [extra Brave flags...]` to scaffold a
+# Goal: generate icons, build desktop files, and write Ansible tasks/handlers for a
+# Wayland-friendly Brave launch wrapper.
+
+function generate-brave-icon-set --description 'Download/process icon and generate multi-sized variants for Brave web apps'
+    # Parse arguments
+    if test (count $argv) -lt 2
+        echo "Usage: generate-brave-icon-set <icon_source> <name> [--output <path>] [--add-background]"
+        echo ""
+        echo "Arguments:"
+        echo "  icon_source  - URL or local file path (supports SVG, PNG, JPG)"
+        echo "  name         - App name for output filenames"
+        echo "  --output     - Custom output directory (default: Ansible repo)"
+        echo "  --add-background - Add gray rounded background"
+        echo ""
+        echo "Examples:"
+        echo "  generate-brave-icon-set 'https://github.../logo.svg' github"
+        echo "  generate-brave-icon-set './my-icon.png' myapp --output ~/Downloads"
+        echo "  generate-brave-icon-set 'https://...' app --add-background"
+        echo ""
+        echo "Output (default): ~/dev/iac/desktoperator/roles/apps/<name>-brave/files/"
+        echo "Output (custom):  <output-path>/<name>/"
+        return 1
+    end
+
+    set -l icon_source $argv[1]
+    set -l name $argv[2]
+    set -l custom_output ""
+    set -l add_background 0
+
+    # Parse optional flags
+    set -l i 3
+    while test $i -le (count $argv)
+        switch $argv[$i]
+            case '--output'
+                set i (math $i + 1)
+                if test $i -le (count $argv)
+                    set custom_output $argv[$i]
+                end
+            case '--add-background'
+                set add_background 1
+        end
+        set i (math $i + 1)
+    end
+
+    # Determine output directory and filename patterns
+    set -l output_dir ""
+    set -l master_filename ""
+    set -l size_filename_pattern ""
+    set -l role_path ""
+
+    if test -n "$custom_output"
+        # Custom output (e.g., Downloads): use simple names
+        set output_dir "$custom_output/$name"
+        set master_filename "$name.png"
+        set size_filename_pattern "$name"
+    else
+        # Default (Ansible repo): use brave-{name}-icon pattern and create full structure
+        set role_path "$HOME/dev/iac/desktoperator/roles/apps/$name-brave"
+        set output_dir "$role_path/files"
+        set master_filename "brave-$name-icon.png"
+        set size_filename_pattern "brave-$name-icon"
+
+        # Create full Ansible role directory structure
+        echo "Creating Ansible role structure..."
+        mkdir -p "$role_path"/{files,tasks,handlers}
+        echo "✓ Created role directories: files/, tasks/, handlers/"
+    end
+
+    # Create output directory (also works for custom paths)
+    mkdir -p "$output_dir"
+    set -l temp_dir (mktemp -d)
+
+    echo "Generating Brave icon set for '$name'..."
+    echo "Output directory: $output_dir"
+
+    # Download or read icon source
+    set -l master_icon ""
+    # Clean the input: remove quotes, newlines, and trim whitespace
+    set -l icon_source_cleaned (string replace -a '\n' '' -- $icon_source | string trim -c '\'"' | string trim)
+
+    if string match -q "http*://" "$icon_source_cleaned"
+        # Download from URL
+        echo "Downloading icon from URL..."
+        set -l temp_download "$temp_dir/downloaded-icon"
+        if curl -L -f -s -S --max-redirs 5 \
+            -A "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36" \
+            -o "$temp_download" "$icon_source_cleaned"
+            if test (stat -f%z "$temp_download" 2>/dev/null || stat -c%s "$temp_download" 2>/dev/null) -gt 0
+                echo "✓ Icon downloaded successfully"
+                set master_icon "$temp_download"
+            else
+                echo "✗ Error: Downloaded icon file is empty"
+                rm -rf "$temp_dir"
+                return 1
+            end
+        else
+            echo "✗ Error: Failed to download icon from $icon_source_cleaned"
+            rm -rf "$temp_dir"
+            return 1
+        end
+    else
+        # Local file path
+        if test -f "$icon_source_cleaned"
+            echo "Using local icon file: $icon_source_cleaned"
+            set master_icon "$icon_source_cleaned"
+        else
+            echo "✗ Error: Icon file not found at $icon_source_cleaned"
+            rm -rf "$temp_dir"
+            return 1
+        end
+    end
+
+    # Convert to high-quality PNG
+    set -l file_type (file -b --mime-type "$master_icon" 2>/dev/null)
+    set -l master_png "$temp_dir/master.png"
+    echo "Converting to PNG..."
+
+    if string match -q "image/svg+xml" "$file_type"
+        # SVG: Try rsvg-convert first (more robust for well-formed SVGs)
+        rsvg-convert -w 1024 -h 1024 -f png "$master_icon" -o "$master_png" 2>/dev/null
+
+        # If rsvg-convert fails, fall back to ImageMagick (more forgiving with malformed SVGs)
+        if test $status -ne 0 -o ! -f "$master_png"
+            echo "  ⚠ rsvg-convert failed, trying ImageMagick fallback..."
+            convert -background none -density 1228.8 -resize 1024x1024 "$master_icon" -alpha on -define png:color-type=6 PNG32:"$master_png" 2>/dev/null
+        end
+    else
+        # Raster format (PNG, JPG, etc.) - use ImageMagick
+        convert "$master_icon" -alpha on -define png:color-type=6 PNG32:"$master_png"
+    end
+
+    if test $status -ne 0 -o ! -f "$master_png"
+        echo "✗ Error: Failed to convert icon to PNG (tried all available methods)"
+        rm -rf "$temp_dir"
+        return 1
+    end
+
+    echo "✓ Icon converted to PNG"
+
+    # Apply background if requested
+    set -l source_icon "$master_png"
+    set -l resize_mode "aspect"
+
+    if test "$add_background" -eq 1
+        echo "Adding gray rounded background..."
+        set -l processed_icon "$temp_dir/with-background.png"
+        set -l bg_color "#636363"
+        set -l canvas_size 1024
+        set -l logo_padded_size (math $canvas_size \* 0.85)
+
+        convert -size "$canvas_size"x"$canvas_size" xc:none \
+            -draw "roundrectangle 0,0,$canvas_size,$canvas_size,100,100" "$temp_dir/mask.png"
+        convert -size "$canvas_size"x"$canvas_size" xc:"$bg_color" "$temp_dir/mask.png" \
+            -compose copy-opacity -composite "$temp_dir/background.png"
+        convert "$temp_dir/background.png" \
+            \( "$master_png" -filter Lanczos -resize "$logo_padded_size"x"$logo_padded_size" \) \
+            -gravity center -compose over -composite \
+            -define png:color-type=6 PNG32:"$processed_icon"
+
+        if test $status -eq 0 -a -f "$processed_icon"
+            echo "✓ Background added"
+            set source_icon "$processed_icon"
+            set resize_mode "exact"
+        else
+            echo "✗ Warning: Failed to add background, using original"
+        end
+    end
+
+    # Save master icon with proper naming
+    cp "$source_icon" "$output_dir/$master_filename"
+    echo "✓ Saved master icon: $master_filename"
+
+    # Generate multi-sized icons
+    set -l icon_sizes 16 32 48 64 128 256 512 800
+    echo "Generating multi-sized icons..."
+
+    for size in $icon_sizes
+        set -l sized_icon "$output_dir/$size_filename_pattern-$size.png"
+
+        if test "$resize_mode" = "exact"
+            convert "$source_icon" -filter Lanczos -resize "$size"x"$size"! \
+                -strip PNG32:"$sized_icon"
+        else
+            convert "$source_icon" -filter Lanczos -resize "$size"x"$size" \
+                -background none -gravity center -extent "$size"x"$size" \
+                -strip PNG32:"$sized_icon"
+        end
+
+        if test $status -ne 0
+            echo "✗ Error: Failed to create "$size"x"$size" icon"
+            rm -rf "$temp_dir"
+            return 1
+        end
+        echo "  ✓ "$size"x"$size
+    end
+
+    # Cleanup
+    rm -rf "$temp_dir"
+
+    echo ""
+    echo "✅ Brave icon set generated successfully!"
+    echo "   Master: $output_dir/$master_filename"
+    echo "   Sizes: 16, 32, 48, 64, 128, 256, 512, 800"
+    return 0
+end
+
+function _brave_check_icons --description 'Check if Brave icons exist, optionally copy from Pake as fallback'
+    set -l name $argv[1]
+    set -l role_path $argv[2]
+    set -l repo_path ~/dev/iac/desktoperator
+    set -l dest_dir "$role_path/files"
+    set -l prefix "brave-$name-icon"
+
+    if not test -d "$dest_dir"
+        mkdir -p "$dest_dir"
+    end
+
+    # Check if Brave icons already exist
+    if test -f "$dest_dir/$prefix.png"
+        echo "✓ Brave icon set already exists at $dest_dir/$prefix.png"
+        return 0
+    end
+
+    # Try to copy from Pake as fallback (optional)
+    set -l src_dir "$repo_path/roles/apps/$name-pake/files"
+    if test -d "$src_dir" -a -f "$src_dir/pake-$name-icon.png"
+        echo "Brave icons not found, copying from Pake role as fallback..."
+
+        cp "$src_dir/pake-$name-icon.png" "$dest_dir/$prefix.png"
+        set -l sizes 16 32 48 64 128 256 512 800
+        for size in $sizes
+            set -l source_icon "$src_dir/pake-$name-icon-$size.png"
+            if test -f "$source_icon"
+                cp "$source_icon" "$dest_dir/$prefix-$size.png"
+            end
+        end
+
+        echo "✓ Copied icons from $src_dir → $dest_dir (as $prefix*)"
+        return 0
+    end
+
+    # No icons found anywhere
+    echo "✗ Error: No icons found for '$name'"
+    echo "  Please run: generate-brave-icon-set <icon_url> $name"
+    echo "  Example: generate-brave-icon-set 'https://github.com/favicon.ico' $name"
+    return 1
+end
+
+function _brave_create_ansible_tasks --description 'Generate tasks/handlers scaffolding for Brave web app'
+    set -l name $argv[1]
+    set -l role_path $argv[2]
+    set -l display_name $name
+    if test (count $argv) -ge 3
+        set display_name $argv[3]
+    end
+
+    set -l desktop_path "$role_path/files/brave-$name.desktop"
+    set -l launcher_script "brave-$name-launcher.sh"
+    set -l desktop_entry "[Desktop Entry]\nType=Application\nName=$display_name\nComment=Open $display_name in Brave app mode\nExec=/usr/local/bin/brave-$name\nStartupWMClass=brave-$name\nIcon=brave-$name\nTerminal=false"
+
+    echo -e $desktop_entry > "$desktop_path"
+    echo "✓ Created desktop entry: $desktop_path"
+
+    set -l task_file "$role_path/tasks/main.yml"
+    set -l handler_file "$role_path/handlers/main.yml"
+
+{% raw %}
+    set -l tasks_content "---\n- name: Install Brave web app \"$name\" launcher\n  ansible.builtin.copy:\n    src: \"$launcher_script\"\n    dest: \"/usr/local/bin/brave-$name\"\n    mode: \"0755\"\n    owner: root\n    group: root\n  become: true\n  when: app_states['$name'] | default('present') == 'present'\n\n- name: Install Brave web app \"$name\" desktop entry\n  ansible.builtin.copy:\n    src: \"brave-$name.desktop\"\n    dest: \"/usr/share/applications/brave-$name.desktop\"\n    mode: \"0644\"\n    owner: root\n    group: root\n  become: true\n  when: app_states['$name'] | default('present') == 'present'\n\n- name: Install Brave web app icons\n  ansible.builtin.copy:\n    src: '{{ item.src }}'\n    dest: '{{ item.dest }}'\n    mode: \"0644\"\n    owner: root\n    group: root\n  loop:\n    - { src: \"brave-$name-icon-16.png\", dest: \"/usr/share/icons/hicolor/16x16/apps/brave-$name.png\" }\n    - { src: \"brave-$name-icon-32.png\", dest: \"/usr/share/icons/hicolor/32x32/apps/brave-$name.png\" }\n    - { src: \"brave-$name-icon-48.png\", dest: \"/usr/share/icons/hicolor/48x48/apps/brave-$name.png\" }\n    - { src: \"brave-$name-icon-64.png\", dest: \"/usr/share/icons/hicolor/64x64/apps/brave-$name.png\" }\n    - { src: \"brave-$name-icon-128.png\", dest: \"/usr/share/icons/hicolor/128x128/apps/brave-$name.png\" }\n    - { src: \"brave-$name-icon-256.png\", dest: \"/usr/share/icons/hicolor/256x256/apps/brave-$name.png\" }\n    - { src: \"brave-$name-icon-512.png\", dest: \"/usr/share/icons/hicolor/512x512/apps/brave-$name.png\" }\n    - { src: \"brave-$name-icon-800.png\", dest: \"/usr/share/icons/hicolor/scalable/apps/brave-$name.png\" }\n  become: true\n  when: app_states['$name'] | default('present') == 'present'\n  notify: Update icon cache\n\n- name: Remove Brave web app launcher when absent\n  ansible.builtin.file:\n    path: \"/usr/local/bin/brave-$name\"\n    state: absent\n  become: true\n  when: app_states['$name'] | default('present') == 'absent'\n\n- name: Remove Brave web app desktop entry when absent\n  ansible.builtin.file:\n    path: \"/usr/share/applications/brave-$name.desktop\"\n    state: absent\n  become: true\n  when: app_states['$name'] | default('present') == 'absent'\n\n- name: Remove Brave web app icons when absent\n  ansible.builtin.file:\n    path: '{{ item }}'\n    state: absent\n    owner: root\n    group: root\n  loop:\n    - /usr/share/icons/hicolor/16x16/apps/brave-$name.png\n    - /usr/share/icons/hicolor/32x32/apps/brave-$name.png\n    - /usr/share/icons/hicolor/48x48/apps/brave-$name.png\n    - /usr/share/icons/hicolor/64x64/apps/brave-$name.png\n    - /usr/share/icons/hicolor/128x128/apps/brave-$name.png\n    - /usr/share/icons/hicolor/256x256/apps/brave-$name.png\n    - /usr/share/icons/hicolor/512x512/apps/brave-$name.png\n    - /usr/share/icons/hicolor/scalable/apps/brave-$name.png\n  become: true\n  when: app_states['$name'] | default('present') == 'absent'\n"
+{% endraw %}
+
+    echo -e "$tasks_content" > "$task_file"
+    echo "✓ Wrote tasks/main.yml"
+
+    set handlers_content "---\n- name: Update icon cache\n  ansible.builtin.command: gtk-update-icon-cache -f /usr/share/icons/hicolor\n  become: true\n  changed_when: false\n"
+    echo -e "$handlers_content" > "$handler_file"
+    echo "✓ Wrote handlers/main.yml"
+    return 0
+end
+
+function create-brave-web-app --description 'Generate Brave web app scaffolding (desktop, icons, tasks)'
+    if test (count $argv) -lt 2
+        echo "Usage: create-brave-web-app <app_url> <name> [extra Brave flags...]"
+        return 1
+    end
+
+    set -l url $argv[1]
+    set -l name $argv[2]
+    set -l extra_flags $argv[3..-1]
+    set -l repo_path ~/dev/iac/desktoperator
+    set -l role_path "$repo_path/roles/apps/$name-brave"
+
+    mkdir -p "$role_path"/{files,tasks,handlers}
+
+    if not _brave_check_icons $name $role_path
+        return 1
+    end
+
+    set -l script_path "$role_path/files/brave-$name-launcher.sh"
+    set -l display_name (string replace '-' ' ' $name)
+    set -l extra_flags_str (string join ' ' $extra_flags)
+    set -l extra_flags_line ""
+    if test -n "$extra_flags_str"
+        set extra_flags_line "  $extra_flags_str \\"
+    end
+
+    # Generate launcher script using Fish syntax (not bash heredoc)
+    echo "#!/usr/bin/env bash" > "$script_path"
+    echo "set -euo pipefail" >> "$script_path"
+    echo "exec brave-browser \\" >> "$script_path"
+    echo "  --app=\"$url\" \\" >> "$script_path"
+    echo "  --class=brave-$name \\" >> "$script_path"
+    echo "  --name=\"$display_name\" \\" >> "$script_path"
+    echo "  --no-first-run \\" >> "$script_path"
+    echo "  --disable-features=TranslateUI,ExtensionsToolbarMenu \\" >> "$script_path"
+    echo "  --ozone-platform=wayland \\" >> "$script_path"
+    echo "  --ozone-platform-hint=auto \\" >> "$script_path"
+    if test -n "$extra_flags_str"
+        echo "  --enable-features=UseOzonePlatform,WaylandWindowDecorations \\" >> "$script_path"
+        echo "  $extra_flags_str \\" >> "$script_path"
+        echo "  \"\$@\"" >> "$script_path"
+    else
+        echo "  --enable-features=UseOzonePlatform,WaylandWindowDecorations \\" >> "$script_path"
+        echo "  \"\$@\"" >> "$script_path"
+    end
+
+    chmod 0755 "$script_path"
+    echo "✓ Created Brave launcher script: $script_path"
+
+    _brave_create_ansible_tasks $name $role_path "$display_name"
+    echo ""
+    echo "✅ Brave web app scaffolding for '$name' is ready."
+    echo "   Role path: $role_path"
+    echo "Next step: ansible-playbook site.yml --tags $name-brave"
+    return 0
+end

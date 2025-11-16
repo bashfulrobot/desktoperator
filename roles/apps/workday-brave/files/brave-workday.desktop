@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=workday
+Comment=Open workday in Brave app mode
+Exec=/usr/local/bin/brave-workday
+StartupWMClass=brave-workday
+Icon=brave-workday
+Terminal=false
