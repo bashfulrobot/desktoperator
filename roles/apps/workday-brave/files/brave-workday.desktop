@@ -3,6 +3,6 @@ Type=Application
 Name=workday
 Comment=Open workday in Brave app mode
 Exec=/usr/local/bin/brave-workday
-StartupWMClass=brave-workday
+StartupWMClass=brave-wd12.myworkday.com__kong_d_home.htmld-Default
 Icon=brave-workday
 Terminal=false

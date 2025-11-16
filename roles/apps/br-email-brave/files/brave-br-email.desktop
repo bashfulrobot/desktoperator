@@ -3,6 +3,6 @@ Type=Application
 Name=br email
 Comment=Open br email in Brave app mode
 Exec=/usr/local/bin/brave-br-email
-StartupWMClass=brave-br-email
+StartupWMClass=brave-mail.google.com__mail_u_0_-Default
 Icon=brave-br-email
 Terminal=false

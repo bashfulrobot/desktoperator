@@ -3,6 +3,6 @@ Type=Application
 Name=codex
 Comment=Open codex in Brave app mode
 Exec=/usr/local/bin/brave-codex
-StartupWMClass=brave-codex
+StartupWMClass=brave-chatgpt.com__codex-Default
 Icon=brave-codex
 Terminal=false

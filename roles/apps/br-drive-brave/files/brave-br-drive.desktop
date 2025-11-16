@@ -3,6 +3,6 @@ Type=Application
 Name=br drive
 Comment=Open br drive in Brave app mode
 Exec=/usr/local/bin/brave-br-drive
-StartupWMClass=brave-br-drive
+StartupWMClass=brave-drive.google.com__drive_u_0_my-drive-Default
 Icon=brave-br-drive
 Terminal=false

@@ -3,6 +3,6 @@ Type=Application
 Name=konnect
 Comment=Open konnect in Brave app mode
 Exec=/usr/local/bin/brave-konnect
-StartupWMClass=brave-konnect
+StartupWMClass=brave-cloud.konghq.com__us_overview_-Default
 Icon=brave-konnect
 Terminal=false

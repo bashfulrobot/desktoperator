@@ -207,6 +207,70 @@ function generate-brave-icon-set --description 'Download/process icon and genera
     return 0
 end
 
+function _brave_detect_window_class --description 'Detect actual window class by spawning Brave temporarily'
+    set -l url $argv[1]
+
+    echo "Detecting window class for $url..."
+
+    # Check dependencies
+    if not command -v lswt &>/dev/null
+        echo "✗ Error: lswt is required for window class detection"
+        echo "  Please install lswt first"
+        return 1
+    end
+
+    if not command -v jq &>/dev/null
+        echo "✗ Error: jq is required for JSON parsing"
+        echo "  Please install jq first"
+        return 1
+    end
+
+    # Capture window identifiers before launching
+    set -l ids_before (lswt -j 2>/dev/null | grep -o '"identifier": [^,}]*' | cut -d' ' -f2 | sort)
+
+    # Launch Brave in app mode (in background)
+    echo "  Launching Brave to detect window class..."
+    brave-browser --app="$url" &>/dev/null &
+
+    # Wait for window to appear
+    sleep 3
+
+    # Capture window identifiers after launching
+    set -l ids_after (lswt -j 2>/dev/null | grep -o '"identifier": [^,}]*' | cut -d' ' -f2 | sort)
+
+    # Find the new window identifier
+    set -l new_id ""
+    for id in (echo $ids_after | tr ' ' '\n')
+        if not contains $id (echo $ids_before | tr ' ' '\n')
+            set new_id $id
+            break
+        end
+    end
+
+    if test -z "$new_id"
+        echo "✗ Error: Could not detect new window"
+        echo "  Please close any test windows and try again"
+        return 1
+    end
+
+    # Get the app-id for the new window
+    set -l detected_class (lswt -j 2>/dev/null | grep -A2 "\"identifier\": $new_id" | grep '"app-id"' | cut -d'"' -f4)
+
+    if test -z "$detected_class"
+        echo "✗ Error: Could not detect window class"
+        return 1
+    end
+
+    echo "✓ Detected window class: $detected_class"
+    echo ""
+    echo "⚠  Please close the test Brave window manually"
+    echo ""
+
+    # Return the detected class
+    echo $detected_class
+    return 0
+end
+
 function _brave_check_icons --description 'Check if Brave icons exist, optionally copy from Pake as fallback'
     set -l name $argv[1]
     set -l role_path $argv[2]
@@ -252,14 +316,15 @@ end
 function _brave_create_ansible_tasks --description 'Generate tasks/handlers scaffolding for Brave web app'
     set -l name $argv[1]
     set -l role_path $argv[2]
+    set -l window_class $argv[3]
     set -l display_name $name
-    if test (count $argv) -ge 3
-        set display_name $argv[3]
+    if test (count $argv) -ge 4
+        set display_name $argv[4]
     end
 
     set -l desktop_path "$role_path/files/brave-$name.desktop"
     set -l launcher_script "brave-$name-launcher.sh"
-    set -l desktop_entry "[Desktop Entry]\nType=Application\nName=$display_name\nComment=Open $display_name in Brave app mode\nExec=/usr/local/bin/brave-$name\nStartupWMClass=brave-$name\nIcon=brave-$name\nTerminal=false"
+    set -l desktop_entry "[Desktop Entry]\nType=Application\nName=$display_name\nComment=Open $display_name in Brave app mode\nExec=/usr/local/bin/brave-$name\nStartupWMClass=$window_class\nIcon=brave-$name\nTerminal=false"
 
     echo -e $desktop_entry > "$desktop_path"
     echo "✓ Created desktop entry: $desktop_path"
@@ -298,6 +363,14 @@ function create-brave-web-app --description 'Generate Brave web app scaffolding 
         return 1
     end
 
+    # Detect the actual window class by launching Brave temporarily
+    echo ""
+    set -l window_class (_brave_detect_window_class $url)
+    if test $status -ne 0
+        echo "✗ Failed to detect window class"
+        return 1
+    end
+
     set -l script_path "$role_path/files/brave-$name-launcher.sh"
     set -l display_name (string replace '-' ' ' $name)
     set -l extra_flags_str (string join ' ' $extra_flags)
@@ -306,13 +379,13 @@ function create-brave-web-app --description 'Generate Brave web app scaffolding 
         set extra_flags_line "  $extra_flags_str \\"
     end
 
-    # Generate launcher script using Fish syntax (not bash heredoc)
+    # Generate launcher script
+    # Note: --class and --name flags are removed as they don't work properly in Brave's --app mode
+    # The window class is auto-detected and set in the desktop file's StartupWMClass instead
     echo "#!/usr/bin/env bash" > "$script_path"
     echo "set -euo pipefail" >> "$script_path"
     echo "exec brave-browser \\" >> "$script_path"
     echo "  --app=\"$url\" \\" >> "$script_path"
-    echo "  --class=brave-$name \\" >> "$script_path"
-    echo "  --name=\"$display_name\" \\" >> "$script_path"
     echo "  --no-first-run \\" >> "$script_path"
     echo "  --disable-features=TranslateUI,ExtensionsToolbarMenu \\" >> "$script_path"
     echo "  --ozone-platform=wayland \\" >> "$script_path"
@@ -329,10 +402,11 @@ function create-brave-web-app --description 'Generate Brave web app scaffolding 
     chmod 0755 "$script_path"
     echo "✓ Created Brave launcher script: $script_path"
 
-    _brave_create_ansible_tasks $name $role_path "$display_name"
+    _brave_create_ansible_tasks $name $role_path "$window_class" "$display_name"
     echo ""
     echo "✅ Brave web app scaffolding for '$name' is ready."
     echo "   Role path: $role_path"
+    echo "   Window class: $window_class"
     echo "Next step: ansible-playbook site.yml --tags $name-brave"
     return 0
 end

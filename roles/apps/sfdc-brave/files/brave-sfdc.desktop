@@ -3,6 +3,6 @@ Type=Application
 Name=sfdc
 Comment=Open sfdc in Brave app mode
 Exec=/usr/local/bin/brave-sfdc
-StartupWMClass=brave-sfdc
+StartupWMClass=brave-kong.lightning.force.com__lightning_page_home-Default
 Icon=brave-sfdc
 Terminal=false

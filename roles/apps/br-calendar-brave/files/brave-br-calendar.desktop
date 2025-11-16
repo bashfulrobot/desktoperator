@@ -3,6 +3,6 @@ Type=Application
 Name=br calendar
 Comment=Open br calendar in Brave app mode
 Exec=/usr/local/bin/brave-br-calendar
-StartupWMClass=brave-br-calendar
+StartupWMClass=brave-calendar.google.com__calendar_u_0_r-Default
 Icon=brave-br-calendar
 Terminal=false

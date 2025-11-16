@@ -3,6 +3,6 @@ Type=Application
 Name=aha
 Comment=Open aha in Brave app mode
 Exec=/usr/local/bin/brave-aha
-StartupWMClass=brave-aha
+StartupWMClass=brave-konghq.aha.io__products_AI_feature_cards-Default
 Icon=brave-aha
 Terminal=false

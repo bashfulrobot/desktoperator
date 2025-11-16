@@ -3,6 +3,6 @@ Type=Application
 Name=omni
 Comment=Open omni in Brave app mode
 Exec=/usr/local/bin/brave-omni
-StartupWMClass=brave-omni
+StartupWMClass=brave-bashfulrobot.omni.siderolabs.io__omni_-Default
 Icon=brave-omni
 Terminal=false
