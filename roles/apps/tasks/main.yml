@@ -199,7 +199,7 @@
 - name: Include GitHub Brave Web App
   ansible.builtin.import_role:
     name: apps/github-brave
-  tags: [github-brave, brave-web-apps]
+  tags: [github, brave-web-apps]
 
 - name: Include Asana Pake App
   ansible.builtin.import_role:
@@ -285,77 +285,82 @@
 - name: Include Asana Brave Web App
   ansible.builtin.import_role:
     name: apps/asana-brave
-  tags: [asana-brave, brave-web-apps]
+  tags: [asana, brave-web-apps]
 
 - name: Include Avanti Brave Web App
   ansible.builtin.import_role:
     name: apps/avanti-brave
-  tags: [avanti-brave, brave-web-apps]
+  tags: [avanti, brave-web-apps]
 
 - name: Include Salesforce Brave Web App
   ansible.builtin.import_role:
     name: apps/sfdc-brave
-  tags: [sfdc-brave, salesforce-brave, brave-web-apps]
+  tags: [sfdc, salesforce, brave-web-apps]
 
 - name: Include Lucidchart Brave Web App
   ansible.builtin.import_role:
     name: apps/lucid-chart-brave
-  tags: [lucid-chart-brave, lucidchart-brave, brave-web-apps]
+  tags: [lucid-chart, lucidchart, brave-web-apps]
 
 - name: Include BR Email Brave Web App
   ansible.builtin.import_role:
     name: apps/br-email-brave
-  tags: [br-email-brave, brave-web-apps]
+  tags: [br-email, brave-web-apps]
 
 - name: Include Kong Email Brave Web App
   ansible.builtin.import_role:
     name: apps/kong-email-brave
-  tags: [kong-email-brave, brave-web-apps]
+  tags: [kong-email, brave-web-apps]
 
 - name: Include Kong Calendar Brave Web App
   ansible.builtin.import_role:
     name: apps/kong-calendar-brave
-  tags: [kong-calendar-brave, brave-web-apps]
+  tags: [kong-calendar, brave-web-apps]
 
 - name: Include BR Calendar Brave Web App
   ansible.builtin.import_role:
     name: apps/br-calendar-brave
-  tags: [br-calendar-brave, brave-web-apps]
+  tags: [br-calendar, brave-web-apps]
 
 - name: Include Kong Drive Brave Web App
   ansible.builtin.import_role:
     name: apps/kong-drive-brave
-  tags: [kong-drive-brave, brave-web-apps]
+  tags: [kong-drive, brave-web-apps]
 
 - name: Include BR Drive Brave Web App
   ansible.builtin.import_role:
     name: apps/br-drive-brave
-  tags: [br-drive-brave, brave-web-apps]
+  tags: [br-drive, brave-web-apps]
 
 - name: Include Aha Brave Web App
   ansible.builtin.import_role:
     name: apps/aha-brave
-  tags: [aha-brave, brave-web-apps]
+  tags: [aha, brave-web-apps]
 
 - name: Include Workday Brave Web App
   ansible.builtin.import_role:
     name: apps/workday-brave
-  tags: [workday-brave, brave-web-apps]
+  tags: [workday, brave-web-apps]
 
 - name: Include Konnect Brave Web App
   ansible.builtin.import_role:
     name: apps/konnect-brave
-  tags: [konnect-brave, brave-web-apps]
+  tags: [konnect, brave-web-apps]
 
 - name: Include Kong Docs Brave Web App
   ansible.builtin.import_role:
     name: apps/kong-docs-brave
-  tags: [kong-docs-brave, brave-web-apps]
+  tags: [kong-docs, brave-web-apps]
 
 - name: Include Omni Brave Web App
   ansible.builtin.import_role:
     name: apps/omni-brave
-  tags: [omni-brave, brave-web-apps]
+  tags: [omni, brave-web-apps]
+
+- name: Include Team Agenda Brave Web App
+  ansible.builtin.import_role:
+    name: apps/team-agenda-brave
+  tags: [team-agenda, brave-web-apps]
 
 - name: Include zns DNS lookup tool
   ansible.builtin.import_role:
