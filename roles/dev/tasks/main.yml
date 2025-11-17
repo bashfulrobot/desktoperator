@@ -26,6 +26,11 @@
     name: dev/helix
   tags: [dev, helix]
 
+- name: Include Zed editor
+  ansible.builtin.include_role:
+    name: dev/zed
+  tags: [dev, zed]
+
 - name: Include Claude Code
   ansible.builtin.include_role:
     name: dev/claude-code

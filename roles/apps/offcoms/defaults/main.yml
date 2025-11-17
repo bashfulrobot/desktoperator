@@ -1,0 +1,20 @@
+---
+# Office Communications role defaults
+# Application state management (present/absent)
+# Tags control WHAT runs, state variables control HOW it runs
+# All apps default to 'present' via | default('present') in role tasks
+# Override in host_vars for host-specific control
+
+# Office Communications application states
+# Only explicitly managed apps are listed here
+# Apps not listed default to 'present' in role tasks
+app_states:
+  # Explicitly present apps
+  todoist: present
+  zoom: present
+  meetsum: present
+  obsidian: present
+  okular: present
+  signal: present
+  # typora: defaults to present
+  # nerd-dictation: defaults to present

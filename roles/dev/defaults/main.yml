@@ -1,0 +1,14 @@
+---
+# Dev role defaults
+# Development tools state management (present/absent)
+# Tags control WHAT runs, state variables control HOW it runs
+# All dev tools default to 'present' via | default('present') in role tasks
+# Override in host_vars for host-specific control
+
+# Dev tool application states
+# Only explicitly managed tools are listed here
+# Tools not listed default to 'present' in role tasks
+app_states:
+  # Explicitly present tools
+  zed: present
+  # All other dev tools default to present

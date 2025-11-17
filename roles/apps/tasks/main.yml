@@ -11,11 +11,6 @@
     name: apps/restic
   tags: [restic]
 
-- name: Include Zed editor installation
-  ansible.builtin.import_role:
-    name: apps/zed
-  tags: [zed]
-
 - name: Include Zellij terminal multiplexer
   ansible.builtin.import_role:
     name: apps/zellij
@@ -36,10 +31,10 @@
     name: apps/brave-builder
   tags: [brave-builder]
 
-- name: Include Zoom
+- name: Include Office Communications apps
   ansible.builtin.import_role:
-    name: apps/zoom
-  tags: [zoom]
+    name: apps/offcoms
+  tags: [offcoms]
 
 - name: Include Insync
   ansible.builtin.import_role:
@@ -55,16 +50,6 @@
   ansible.builtin.import_role:
     name: apps/glow
   tags: [glow]
-
-- name: Include Meetsum meeting summary generator
-  ansible.builtin.import_role:
-    name: apps/meetsum
-  tags: [meetsum]
-
-- name: Include Signal messenger
-  ansible.builtin.import_role:
-    name: apps/signal
-  tags: [signal]
 
 - name: Include Spotify music clients
   ansible.builtin.import_role:
@@ -267,25 +252,10 @@
     name: apps/zns
   tags: [zns]
 
-- name: Include Todoist
-  ansible.builtin.import_role:
-    name: apps/todoist
-  tags: [todoist]
-
 - name: Include Kooha screen recorder
   ansible.builtin.import_role:
     name: apps/kooha
   tags: [kooha]
-
-- name: Include Obsidian
-  ansible.builtin.import_role:
-    name: apps/obsidian
-  tags: [obsidian]
-
-- name: Include Okular PDF viewer
-  ansible.builtin.import_role:
-    name: apps/okular
-  tags: [okular]
 
 - name: Include Trippy network diagnostic tool
   ansible.builtin.import_role:
@@ -296,13 +266,3 @@
   ansible.builtin.import_role:
     name: apps/amber
   tags: [amber]
-
-- name: Include Typora markdown editor
-  ansible.builtin.import_role:
-    name: apps/typora
-  tags: [typora]
-
-- name: Include nerd-dictation voice input
-  ansible.builtin.import_role:
-    name: apps/nerd-dictation
-  tags: [nerd-dictation]

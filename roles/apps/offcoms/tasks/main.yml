@@ -1,0 +1,42 @@
+---
+# Office Communications role - productivity and communication apps
+
+- name: Include Zoom
+  ansible.builtin.import_role:
+    name: apps/offcoms/zoom
+  tags: [offcoms, zoom]
+
+- name: Include Meetsum meeting summary generator
+  ansible.builtin.import_role:
+    name: apps/offcoms/meetsum
+  tags: [offcoms, meetsum]
+
+- name: Include Signal messenger
+  ansible.builtin.import_role:
+    name: apps/offcoms/signal
+  tags: [offcoms, signal]
+
+- name: Include Todoist
+  ansible.builtin.import_role:
+    name: apps/offcoms/todoist
+  tags: [offcoms, todoist]
+
+- name: Include Obsidian
+  ansible.builtin.import_role:
+    name: apps/offcoms/obsidian
+  tags: [offcoms, obsidian]
+
+- name: Include Okular PDF viewer
+  ansible.builtin.import_role:
+    name: apps/offcoms/okular
+  tags: [offcoms, okular]
+
+- name: Include Typora markdown editor
+  ansible.builtin.import_role:
+    name: apps/offcoms/typora
+  tags: [offcoms, typora]
+
+- name: Include nerd-dictation voice input
+  ansible.builtin.import_role:
+    name: apps/offcoms/nerd-dictation
+  tags: [offcoms, nerd-dictation]
