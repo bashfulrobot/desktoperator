@@ -1,0 +1,6 @@
+---
+# Trippy default variables
+
+# Installation state (present/absent)
+app_states:
+  trippy: present
