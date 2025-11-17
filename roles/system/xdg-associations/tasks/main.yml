@@ -1,0 +1,165 @@
+---
+# XDG file associations configuration
+# Sets default applications for file types using XDG MIME type associations
+
+- name: Ensure XDG config directory exists
+  ansible.builtin.file:
+    path: "{{ xdg_config_dir }}"
+    state: directory
+    owner: "{{ user.name }}"
+    group: "{{ user.name }}"
+    mode: "0755"
+
+- name: Ensure XDG local share directory exists
+  ansible.builtin.file:
+    path: "{{ xdg_local_share_dir }}/applications"
+    state: directory
+    owner: "{{ user.name }}"
+    group: "{{ user.name }}"
+    mode: "0755"
+
+- name: Ensure MIME packages directory exists
+  ansible.builtin.file:
+    path: "{{ xdg_local_share_dir }}/mime/packages"
+    state: directory
+    owner: "{{ user.name }}"
+    group: "{{ user.name }}"
+    mode: "0755"
+
+- name: Create custom MIME types XML
+  ansible.builtin.template:
+    src: custom-mime-types.xml.j2
+    dest: "{{ xdg_local_share_dir }}/mime/packages/custom-file-types.xml"
+    owner: "{{ user.name }}"
+    group: "{{ user.name }}"
+    mode: "0644"
+  register: custom_mime_types
+
+- name: Update MIME database
+  ansible.builtin.command: update-mime-database "{{ xdg_local_share_dir }}/mime"
+  become: false
+  become_user: "{{ user.name }}"
+  changed_when: true
+  when: custom_mime_types.changed
+
+- name: Configure default applications via mimeapps.list
+  ansible.builtin.template:
+    src: mimeapps.list.j2
+    dest: "{{ xdg_mimeapps_list }}"
+    owner: "{{ user.name }}"
+    group: "{{ user.name }}"
+    mode: "0644"
+  register: mimeapps_config
+
+- name: Set default applications using xdg-mime (Markdown -> Typora)
+  ansible.builtin.command: "xdg-mime default {{ xdg_associations.markdown.desktop_file }} {{ mime_type }}"
+  become: false
+  become_user: "{{ user.name }}"
+  loop: "{{ xdg_associations.markdown.mime_types }}"
+  loop_control:
+    loop_var: mime_type
+  changed_when: true
+  when: mimeapps_config.changed
+
+- name: Set default applications using xdg-mime (Code files -> VS Code)
+  ansible.builtin.command: "xdg-mime default {{ xdg_associations.code_files.desktop_file }} {{ mime_type }}"
+  become: false
+  become_user: "{{ user.name }}"
+  loop: "{{ xdg_associations.code_files.mime_types }}"
+  loop_control:
+    loop_var: mime_type
+  changed_when: true
+  when: mimeapps_config.changed
+
+- name: Set default applications using xdg-mime (Browser files -> Brave)
+  ansible.builtin.command: "xdg-mime default {{ xdg_associations.browser_files.desktop_file }} {{ mime_type }}"
+  become: false
+  become_user: "{{ user.name }}"
+  loop: "{{ xdg_associations.browser_files.mime_types }}"
+  loop_control:
+    loop_var: mime_type
+  changed_when: true
+  when: mimeapps_config.changed
+
+- name: Set default applications using xdg-mime (PDF files -> Okular)
+  ansible.builtin.command: "xdg-mime default {{ xdg_associations.pdf_files.desktop_file }} {{ mime_type }}"
+  become: false
+  become_user: "{{ user.name }}"
+  loop: "{{ xdg_associations.pdf_files.mime_types }}"
+  loop_control:
+    loop_var: mime_type
+  changed_when: true
+  when: mimeapps_config.changed
+
+- name: Set default applications using xdg-mime (Video files -> VLC)
+  ansible.builtin.command: "xdg-mime default {{ xdg_associations.video_files.desktop_file }} {{ mime_type }}"
+  become: false
+  become_user: "{{ user.name }}"
+  loop: "{{ xdg_associations.video_files.mime_types }}"
+  loop_control:
+    loop_var: mime_type
+  changed_when: true
+  when: mimeapps_config.changed
+
+- name: Set default applications using xdg-mime (Archive files -> File Roller)
+  ansible.builtin.command: "xdg-mime default {{ xdg_associations.archive_files.desktop_file }} {{ mime_type }}"
+  become: false
+  become_user: "{{ user.name }}"
+  loop: "{{ xdg_associations.archive_files.mime_types }}"
+  loop_control:
+    loop_var: mime_type
+  changed_when: true
+  when: mimeapps_config.changed
+
+- name: Update desktop database
+  ansible.builtin.command: update-desktop-database "{{ xdg_local_share_dir }}/applications"
+  become: false
+  become_user: "{{ user.name }}"
+  changed_when: true
+  when: mimeapps_config.changed
+
+- name: Verify Typora desktop file exists
+  ansible.builtin.stat:
+    path: /usr/share/applications/typora.desktop
+  register: typora_desktop
+  failed_when: false
+
+- name: Verify VS Code desktop file exists
+  ansible.builtin.stat:
+    path: /usr/share/applications/code.desktop
+  register: vscode_desktop
+  failed_when: false
+
+- name: Verify Brave desktop file exists
+  ansible.builtin.stat:
+    path: /usr/share/applications/brave-browser.desktop
+  register: brave_desktop
+  failed_when: false
+
+- name: Verify Okular desktop file exists
+  ansible.builtin.stat:
+    path: /usr/share/applications/org.kde.okular.desktop
+  register: okular_desktop
+  failed_when: false
+
+- name: Verify VLC desktop file exists
+  ansible.builtin.stat:
+    path: /usr/share/applications/vlc.desktop
+  register: vlc_desktop
+  failed_when: false
+
+- name: Verify File Roller desktop file exists
+  ansible.builtin.stat:
+    path: /usr/share/applications/org.gnome.FileRoller.desktop
+  register: fileroller_desktop
+  failed_when: false
+
+- name: Show verification results
+  ansible.builtin.debug:
+    msg:
+      - "Typora desktop file: {{ 'Found' if typora_desktop.stat.exists else 'NOT FOUND' }}"
+      - "VS Code desktop file: {{ 'Found' if vscode_desktop.stat.exists else 'NOT FOUND' }}"
+      - "Brave desktop file: {{ 'Found' if brave_desktop.stat.exists else 'NOT FOUND' }}"
+      - "Okular desktop file: {{ 'Found' if okular_desktop.stat.exists else 'NOT FOUND' }}"
+      - "VLC desktop file: {{ 'Found' if vlc_desktop.stat.exists else 'NOT FOUND' }}"
+      - "File Roller desktop file: {{ 'Found' if fileroller_desktop.stat.exists else 'NOT FOUND' }}"
