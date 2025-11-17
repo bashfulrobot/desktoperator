@@ -14,3 +14,13 @@ user:
   name: dustin
   home: /home/dustin
   shell: /usr/bin/fish
+
+# Default application preferences for XDG file associations
+# Change these to switch default applications easily across all hosts
+xdg_preferred_apps:
+  markdown_editor: typora.desktop          # Alternatives: code.desktop, ghostwriter.desktop
+  code_editor: code.desktop                # Alternatives: helix.desktop, nvim.desktop
+  web_browser: brave-browser.desktop       # Alternatives: google-chrome.desktop, firefox.desktop, chromium.desktop
+  pdf_viewer: org.kde.okular.desktop       # Alternatives: evince.desktop, org.gnome.Evince.desktop
+  video_player: vlc.desktop                # Alternatives: mpv.desktop, org.gnome.Totem.desktop
+  archive_manager: org.gnome.FileRoller.desktop  # Alternatives: org.kde.ark.desktop, xarchiver.desktop
