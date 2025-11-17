@@ -1,0 +1,105 @@
+---
+# Broot installation - modern file tree explorer
+# https://github.com/Canop/broot
+
+# Use deb822 format for repository management
+- name: Add Azlux repository for broot (deb822)
+  ansible.builtin.deb822_repository:
+    name: azlux-broot
+    types: [deb]
+    uris: http://packages.azlux.fr/debian/
+    suites: stable
+    components: [main]
+    architectures: amd64
+    signed_by: https://azlux.fr/repo.gpg
+    state: present
+  become: true
+  when: app_states['broot'] | default('present') == 'present'
+
+- name: Update apt cache after adding Azlux repository
+  ansible.builtin.apt:
+    update_cache: true
+  become: true
+  when: app_states['broot'] | default('present') == 'present'
+
+- name: Install broot
+  ansible.builtin.apt:
+    name: broot
+    state: present
+  become: true
+  when: app_states['broot'] | default('present') == 'present'
+
+# Generate br shell function for fish
+- name: Create broot launcher directory
+  ansible.builtin.file:
+    path: "{{ user.home }}/.config/broot/launcher/fish"
+    state: directory
+    owner: "{{ user.name }}"
+    group: "{{ user.name }}"
+    mode: "0755"
+  when: app_states['broot'] | default('present') == 'present'
+
+- name: Generate br shell function for fish
+  ansible.builtin.shell: |
+    broot --print-shell-function fish > {{ user.home }}/.config/broot/launcher/fish/br.fish
+    chmod 644 {{ user.home }}/.config/broot/launcher/fish/br.fish
+    chown {{ user.name }}:{{ user.name }} {{ user.home }}/.config/broot/launcher/fish/br.fish
+  args:
+    creates: "{{ user.home }}/.config/broot/launcher/fish/br.fish"
+  become: true
+  become_user: "{{ user.name }}"
+  when: app_states['broot'] | default('present') == 'present'
+
+- name: Mark broot as installed
+  ansible.builtin.command: broot --set-install-state installed
+  become: true
+  become_user: "{{ user.name }}"
+  changed_when: false
+  when: app_states['broot'] | default('present') == 'present'
+
+# Fish shell integration
+- name: Create fish conf.d directory
+  ansible.builtin.file:
+    path: "{{ user.home }}/.config/fish/conf.d"
+    state: directory
+    owner: "{{ user.name }}"
+    group: "{{ user.name }}"
+    mode: "0755"
+  when: app_states['broot'] | default('present') == 'present'
+
+- name: Deploy fish configuration for broot
+  ansible.builtin.template:
+    src: broot.fish.j2
+    dest: "{{ user.home }}/.config/fish/conf.d/broot.fish"
+    owner: "{{ user.name }}"
+    group: "{{ user.name }}"
+    mode: "0644"
+  when: app_states['broot'] | default('present') == 'present'
+
+# Cleanup when absent
+- name: Remove broot when absent
+  ansible.builtin.apt:
+    name: broot
+    state: absent
+    purge: true
+  become: true
+  when: app_states['broot'] | default('present') == 'absent'
+
+- name: Remove Azlux repository when absent
+  ansible.builtin.deb822_repository:
+    name: azlux-broot
+    state: absent
+  become: true
+  when: app_states['broot'] | default('present') == 'absent'
+
+- name: Remove fish configuration for broot when absent
+  ansible.builtin.file:
+    path: "{{ user.home }}/.config/fish/conf.d/broot.fish"
+    state: absent
+  when: app_states['broot'] | default('present') == 'absent'
+
+- name: Remove broot configuration directory when absent
+  ansible.builtin.file:
+    path: "{{ user.home }}/.config/broot"
+    state: absent
+  when: app_states['broot'] | default('present') == 'absent'

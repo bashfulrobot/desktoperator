@@ -40,3 +40,8 @@
   ansible.builtin.import_role:
     name: terminal/trippy
   tags: [terminal, trippy]
+
+- name: Include broot file tree explorer
+  ansible.builtin.import_role:
+    name: terminal/broot
+  tags: [terminal, broot]

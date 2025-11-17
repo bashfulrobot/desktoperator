@@ -1,0 +1,15 @@
+# Broot shell integration for fish
+# Managed by Ansible - changes may be overwritten
+# File: ~/.config/fish/conf.d/broot.fish
+
+# Broot launcher function - enables cd on quit
+# This function is created by broot during first run with --install
+# We source it if it exists, otherwise broot will create it on first run
+if test -f {{ user.home }}/.config/broot/launcher/fish/br.fish
+    source {{ user.home }}/.config/broot/launcher/fish/br.fish
+end
+
+# Optional: Add br alias as fallback if launcher not yet installed
+if not type -q br
+    alias br='broot'
+end
