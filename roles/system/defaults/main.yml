@@ -36,6 +36,8 @@ core_packages:
   - jq # Required by spotify, pake roles for JSON parsing
   - libsecret-tools # Required for apps to access gnome-keyring (VSCode, etc.)
   - file-roller # GNOME archive manager for .zip, .tar.gz, .deb, etc.
+  - python3-apt # Required for ansible.builtin.apt module and APT operations
+  - python3-debian # Required for ansible.builtin.deb822_repository module (broot, trippy, etc.)
 
 # Development packages
 dev_packages:
