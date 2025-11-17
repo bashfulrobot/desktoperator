@@ -17,8 +17,10 @@ if type -q eza
     alias lt="eza --long --header --octal-permissions --group-directories-first --icons=auto --color=auto --git --git-repos --time-style='+%Y-%m-%d %H:%M' --tree"
     alias lta="eza --long --header --octal-permissions --group-directories-first --icons=auto --color=auto --git --git-repos --time-style='+%Y-%m-%d %H:%M' --tree --all"
 
-    # Reminder to use exa instead of ls
+    # Reminder to use exa instead of ls (but still runs)
     function ls
         echo "Note: Use 'exa' for directory listings (modern replacement for ls)"
+        echo
+        exa $argv
     end
 end

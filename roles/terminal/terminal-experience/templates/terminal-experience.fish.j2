@@ -26,3 +26,10 @@ if type -q fd
     set -x FZF_DEFAULT_COMMAND 'fd --type f --hidden --follow --exclude .git'
     set -x FZF_CTRL_T_COMMAND "$FZF_DEFAULT_COMMAND"
 end
+
+# grep reminder - suggest using ripgrep (rg) but still run
+function grep
+    echo "Note: Use 'rg' for faster searching (ripgrep)"
+    echo
+    command grep $argv
+end
