@@ -5,6 +5,11 @@
   ansible.builtin.import_tasks: nala.yml
   tags: [nala, packages]
 
+- name: Include Ubuntu repositories configuration
+  ansible.builtin.include_role:
+    name: system/repositories
+  tags: [repositories, repos, apt, restricted-extras]
+
 - name: Import core packages installation
   ansible.builtin.import_tasks: packages.yml
   tags: [packages]
