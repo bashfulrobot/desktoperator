@@ -20,7 +20,7 @@
   tags: [git, system]
 
 - name: Install difftastic from GitHub
-  ansible.builtin.include_tasks: ../../tasks/includes/github_release.yml
+  ansible.builtin.include_tasks: ../../../system/tasks/includes/github_release.yml
   vars:
     org: Wilfred
     repo: difftastic
@@ -30,7 +30,7 @@
   tags: [git, system]
 
 - name: Install lazygit from GitHub
-  ansible.builtin.include_tasks: ../../tasks/includes/github_release.yml
+  ansible.builtin.include_tasks: ../../../system/tasks/includes/github_release.yml
   vars:
     org: jesseduffield
     repo: lazygit
