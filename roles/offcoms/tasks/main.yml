@@ -3,40 +3,40 @@
 
 - name: Include Zoom
   ansible.builtin.import_role:
-    name: apps/offcoms/zoom
+    name: offcoms/zoom
   tags: [offcoms, zoom]
 
 - name: Include Meetsum meeting summary generator
   ansible.builtin.import_role:
-    name: apps/offcoms/meetsum
+    name: offcoms/meetsum
   tags: [offcoms, meetsum]
 
 - name: Include Signal messenger
   ansible.builtin.import_role:
-    name: apps/offcoms/signal
+    name: offcoms/signal
   tags: [offcoms, signal]
 
 - name: Include Todoist
   ansible.builtin.import_role:
-    name: apps/offcoms/todoist
+    name: offcoms/todoist
   tags: [offcoms, todoist]
 
 - name: Include Obsidian
   ansible.builtin.import_role:
-    name: apps/offcoms/obsidian
+    name: offcoms/obsidian
   tags: [offcoms, obsidian]
 
 - name: Include Okular PDF viewer
   ansible.builtin.import_role:
-    name: apps/offcoms/okular
+    name: offcoms/okular
   tags: [offcoms, okular]
 
 - name: Include Typora markdown editor
   ansible.builtin.import_role:
-    name: apps/offcoms/typora
+    name: offcoms/typora
   tags: [offcoms, typora]
 
 - name: Include nerd-dictation voice input
   ansible.builtin.import_role:
-    name: apps/offcoms/nerd-dictation
+    name: offcoms/nerd-dictation
   tags: [offcoms, nerd-dictation]

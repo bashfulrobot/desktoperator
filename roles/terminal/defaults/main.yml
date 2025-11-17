@@ -1,0 +1,14 @@
+---
+# Terminal role defaults
+# Terminal tools state management (present/absent)
+# Tags control WHAT runs, state variables control HOW it runs
+# All terminal tools default to 'present' via | default('present') in role tasks
+# Override in host_vars for host-specific control
+
+# Terminal tool application states
+# Only explicitly managed tools are listed here
+# Tools not listed default to 'present' in role tasks
+app_states:
+  # Explicitly present tools
+  starship: present
+  terminal-experience: present

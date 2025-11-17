@@ -1,0 +1,12 @@
+---
+# Terminal role - terminal and shell enhancement tools
+
+- name: Include Starship prompt
+  ansible.builtin.import_role:
+    name: terminal/starship
+  tags: [terminal, starship]
+
+- name: Include Terminal Experience
+  ansible.builtin.import_role:
+    name: terminal/terminal-experience
+  tags: [terminal, terminal-experience]

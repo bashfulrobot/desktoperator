@@ -21,6 +21,10 @@
     - role: infra
       tags: [infra]
 
+    # Terminal and shell enhancements
+    - role: terminal
+      tags: [terminal]
+
     # Desktop environment configuration
     - role: desktop
       tags: [cosmic, core]
@@ -28,6 +32,10 @@
     # User applications
     - role: apps
       tags: [apps]
+
+    # Office communications and productivity
+    - role: offcoms
+      tags: [offcoms]
 
     # Kong-related tools and collaboration
     - role: kong

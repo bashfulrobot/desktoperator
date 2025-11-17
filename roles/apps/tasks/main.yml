@@ -16,11 +16,6 @@
     name: apps/zellij
   tags: [zellij]
 
-- name: Include Starship prompt
-  ansible.builtin.import_role:
-    name: apps/starship
-  tags: [starship]
-
 - name: Include Web Browsers
   ansible.builtin.import_role:
     name: apps/browsers
@@ -30,11 +25,6 @@
   ansible.builtin.import_role:
     name: apps/brave-builder
   tags: [brave-builder]
-
-- name: Include Office Communications apps
-  ansible.builtin.import_role:
-    name: apps/offcoms
-  tags: [offcoms]
 
 - name: Include Insync
   ansible.builtin.import_role:
@@ -55,11 +45,6 @@
   ansible.builtin.import_role:
     name: apps/spotify
   tags: [spotify]
-
-- name: Include Terminal Experience
-  ansible.builtin.import_role:
-    name: apps/terminal-experience
-  tags: [terminal-experience]
 
 - name: Include eza modern ls replacement
   ansible.builtin.import_role:
