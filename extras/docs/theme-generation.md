@@ -83,7 +83,7 @@ Once colors are extracted, theme files are generated for each application.
    - `package.json.j2` → Extension manifest
 3. Packages with `vsce` → `cosmic-theme.vsix`
 
-**Templates**: `roles/apps/vscode/templates/`
+**Templates**: `roles/dev/vscode/templates/`
 - `cosmic-dark.json.j2` - Dark theme with hardcoded colors + selective COSMIC variables
 - `cosmic-light.json.j2` - Light theme with hardcoded colors + selective COSMIC variables
 - `package.json.j2` - VSCode extension metadata
@@ -139,7 +139,7 @@ jsys app vscode    # Installs cosmic-theme.vsix extension
 jsys app vivaldi   # Installs Vivaldi theme ZIPs
 ```
 
-**VSCode Deployment** (`roles/apps/vscode/tasks/main.yml`):
+**VSCode Deployment** (`roles/dev/vscode/tasks/main.yml`):
 - Checks if theme VSIX exists
 - Auto-generates if missing
 - Installs via VSCode CLI
@@ -196,7 +196,7 @@ jsys app vivaldi
 
 Edit the template files to adjust colors:
 
-**Location**: `roles/apps/vscode/templates/cosmic-{dark,light}.json.j2`
+**Location**: `roles/dev/vscode/templates/cosmic-{dark,light}.json.j2`
 
 **Examples**:
 
@@ -249,7 +249,7 @@ desktoperator/
 ├── group_vars/all/
 │   └── auto-colors.yml                # Auto-generated color variables
 │
-├── roles/apps/vscode/templates/
+├── roles/dev/vscode/templates/
 │   ├── cosmic-dark.json.j2            # Dark theme template
 │   ├── cosmic-light.json.j2           # Light theme template
 │   ├── package.json.j2                # Extension manifest

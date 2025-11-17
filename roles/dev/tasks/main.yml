@@ -65,3 +65,8 @@
   ansible.builtin.include_role:
     name: dev/tokei
   tags: [dev, tokei]
+
+- name: Include Visual Studio Code
+  ansible.builtin.include_role:
+    name: dev/vscode
+  tags: [dev, vscode]

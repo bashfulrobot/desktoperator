@@ -426,10 +426,10 @@ cd ~/dev/iac/desktoperator
    - Keeps only final VSIX
 
 **Templates used**:
-- `roles/apps/vscode/templates/cosmic-dark.json.j2` - Dark theme
-- `roles/apps/vscode/templates/cosmic-light.json.j2` - Light theme
-- `roles/apps/vscode/templates/package.json.j2` - Extension manifest
-- `roles/apps/vscode/templates/vscodeignore.j2` - Build exclusions
+- `roles/dev/vscode/templates/cosmic-dark.json.j2` - Dark theme
+- `roles/dev/vscode/templates/cosmic-light.json.j2` - Light theme
+- `roles/dev/vscode/templates/package.json.j2` - Extension manifest
+- `roles/dev/vscode/templates/vscodeignore.j2` - Build exclusions
 
 **Color usage**:
 Templates use a **hybrid approach**:

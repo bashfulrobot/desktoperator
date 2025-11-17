@@ -150,6 +150,6 @@ The role manages these COSMIC components by default:
 The [fonts role](../../apps/fonts/) installs IosevkaTerm Nerd Font, which is referenced in the terminal configuration.
 
 ### VSCode Role
-The [VSCode role](../../apps/vscode/) uses regular Iosevka Nerd Font (optimized for editors, not terminals).
+The [VSCode role](../../dev/vscode/) uses regular Iosevka Nerd Font (optimized for editors, not terminals).
 
 Both Iosevka variants provide ligatures and Nerd Font symbols, but with different spacing optimized for their use case.

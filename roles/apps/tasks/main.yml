@@ -41,11 +41,6 @@
     name: apps/vivaldi
   tags: [vivaldi]
 
-- name: Include Visual Studio Code
-  ansible.builtin.import_role:
-    name: apps/vscode
-  tags: [vscode]
-
 - name: Include Google Chrome
   ansible.builtin.import_role:
     name: apps/chrome

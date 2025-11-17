@@ -7,7 +7,7 @@ When using `include_role`, tags on the include statement don't automatically run
 ```yaml
 - name: Include Visual Studio Code
   include_role:
-    name: apps/vscode
+    name: dev/vscode
   tags: [vscode, editor, development]
 ```
 Running `ansible-playbook site.yml --tags vscode` only executes the include statement, not the tasks inside the vscode role.
@@ -71,13 +71,13 @@ Replace `include_role` with the `apply` keyword to ensure tags propagate:
 # BEFORE (broken)
 - name: Include Visual Studio Code
   include_role:
-    name: apps/vscode
+    name: dev/vscode
   tags: [vscode, editor, development]
 
 # AFTER (fixed)
 - name: Include Visual Studio Code
   include_role:
-    name: apps/vscode
+    name: dev/vscode
     apply:
       tags: [vscode, dev, theme-consumer]
   tags: [always]  # Always evaluate the include, tags apply to tasks inside
@@ -124,7 +124,7 @@ roles:
 ```yaml
 - name: Include Visual Studio Code
   include_role:
-    name: apps/vscode
+    name: dev/vscode
     apply:
       tags: [vscode, dev, theme-consumer]
   tags: [always]
@@ -148,7 +148,7 @@ roles:
 
 #### 4. **Add Dependency Tracking to Individual Roles**
 
-**In roles/apps/vscode/tasks/main.yml:**
+**In roles/dev/vscode/tasks/main.yml:**
 ```yaml
 # At the top of the file
 - name: Ensure COSMIC colors are available

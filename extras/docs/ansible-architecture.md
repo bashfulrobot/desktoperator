@@ -259,7 +259,7 @@ Variables can be defined in multiple places. Priority (low to high):
 Use `when:` to control what runs:
 ```yaml
 - include_role:
-    name: apps/vscode
+    name: dev/vscode
   when: "'vscode' in common_apps"
 ```
 

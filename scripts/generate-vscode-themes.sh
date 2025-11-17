@@ -50,25 +50,25 @@ ansible-playbook -i localhost, -c local /dev/stdin <<EOF
     # Deploy templates
     - name: Deploy COSMIC theme package.json
       template:
-        src: "{{ repo_root }}/roles/apps/vscode/templates/package.json.j2"
+        src: "{{ repo_root }}/roles/dev/vscode/templates/package.json.j2"
         dest: "{{ build_dir }}/package.json"
         mode: '0644'
 
     - name: Deploy COSMIC Dark theme JSON
       template:
-        src: "{{ repo_root }}/roles/apps/vscode/templates/cosmic-dark.json.j2"
+        src: "{{ repo_root }}/roles/dev/vscode/templates/cosmic-dark.json.j2"
         dest: "{{ build_dir }}/themes/cosmic-dark.json"
         mode: '0644'
 
     - name: Deploy COSMIC Light theme JSON
       template:
-        src: "{{ repo_root }}/roles/apps/vscode/templates/cosmic-light.json.j2"
+        src: "{{ repo_root }}/roles/dev/vscode/templates/cosmic-light.json.j2"
         dest: "{{ build_dir }}/themes/cosmic-light.json"
         mode: '0644'
 
     - name: Deploy COSMIC theme .vscodeignore
       template:
-        src: "{{ repo_root }}/roles/apps/vscode/templates/vscodeignore.j2"
+        src: "{{ repo_root }}/roles/dev/vscode/templates/vscodeignore.j2"
         dest: "{{ build_dir }}/.vscodeignore"
         mode: '0644'
 
