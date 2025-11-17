@@ -13,3 +13,4 @@ app_states:
   zellij: present
   starship: present
   terminal-experience: present
+  eza: present

@@ -15,3 +15,8 @@
   ansible.builtin.import_role:
     name: terminal/terminal-experience
   tags: [terminal, terminal-experience]
+
+- name: Include eza modern ls replacement
+  ansible.builtin.import_role:
+    name: terminal/eza
+  tags: [terminal, eza]

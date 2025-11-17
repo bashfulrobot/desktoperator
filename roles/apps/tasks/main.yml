@@ -41,11 +41,6 @@
     name: apps/spotify
   tags: [spotify]
 
-- name: Include eza modern ls replacement
-  ansible.builtin.import_role:
-    name: apps/eza
-  tags: [eza]
-
 - name: Include Fonts installation
   ansible.builtin.import_role:
     name: apps/fonts
