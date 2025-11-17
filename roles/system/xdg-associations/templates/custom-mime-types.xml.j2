@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mime-info xmlns="http://www.freedesktop.org/standards/shared-mime-info">
+{% for custom_type in xdg_custom_mime_types %}
+  <mime-type type="{{ custom_type.mime_type }}">
+    <comment>{{ custom_type.extension }} file</comment>
+    <glob pattern="*{{ custom_type.extension }}"/>
+  </mime-type>
+{% endfor %}
+</mime-info>

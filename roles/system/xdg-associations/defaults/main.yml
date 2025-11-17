@@ -1,0 +1,200 @@
+---
+# XDG file associations configuration
+# Maps MIME types to desktop applications
+#
+# NOTE: Application preferences (xdg_preferred_apps) are defined in:
+#       inventory/group_vars/all/settings.yml
+#
+# This allows easy customization per host/group without modifying the role.
+
+# File type associations
+# Each entry maps MIME types to a desktop file
+xdg_associations:
+  # Markdown files
+  markdown:
+    desktop_file: "{{ xdg_preferred_apps.markdown_editor }}"
+    mime_types:
+      - text/markdown
+      - text/x-markdown
+
+  # Code/config files
+  code_files:
+    desktop_file: "{{ xdg_preferred_apps.code_editor }}"
+    mime_types:
+      # Shell scripts
+      - application/x-shellscript
+      - text/x-shellscript
+      # YAML
+      - application/x-yaml
+      - text/yaml
+      - text/x-yaml
+      # JSON
+      - application/json
+      - text/json
+      # TOML
+      - application/toml
+      - text/x-toml
+      # Fish shell scripts
+      - application/x-fish
+      - text/x-fish
+      # JavaScript/TypeScript
+      - application/javascript
+      - text/javascript
+      - application/typescript
+      - text/typescript
+      - text/jsx
+      - text/tsx
+      # Go
+      - text/x-go
+      # Nix
+      - text/x-nix
+      # Python
+      - text/x-python
+      - text/x-python3
+      - application/x-python
+      # Terraform/HCL
+      - text/x-terraform
+      - text/x-hcl
+      # Rust
+      - text/rust
+      - text/x-rust
+      # Ruby
+      - application/x-ruby
+      - text/x-ruby
+      # C/C++
+      - text/x-c
+      - text/x-c++
+      - text/x-c++src
+      - text/x-chdr
+      - text/x-c++hdr
+      # C#
+      - text/x-csharp
+      # Java
+      - text/x-java
+      # PHP
+      - application/x-php
+      - text/x-php
+      # Lua
+      - text/x-lua
+      # Perl
+      - application/x-perl
+      - text/x-perl
+      # PowerShell
+      - application/x-powershell
+      # Config files
+      - text/x-ini
+      - application/x-wine-extension-ini
+      # Makefiles
+      - text/x-makefile
+      # Docker
+      - text/x-dockerfile
+      # CSS
+      - text/css
+      # Desktop entry files
+      - application/x-desktop
+      # Jinja2 templates
+      - text/x-jinja2
+      # Git config files
+      - text/plain # .gitignore, .gitattributes
+      # Ansible lint config
+      - application/x-yaml # .ansible-lint
+      # Plain text (no extension)
+      - text/plain
+      - application/octet-stream
+
+  # Browser-based files
+  browser_files:
+    desktop_file: "{{ xdg_preferred_apps.web_browser }}"
+    mime_types:
+      # HTML
+      - text/html
+      - application/xhtml+xml
+      # XML
+      - application/xml
+      - text/xml
+      # SVG
+      - image/svg+xml
+      # Web archives
+      - application/x-mimearchive
+      - message/rfc822
+      # Web images
+      - image/webp
+      # URLs
+      - x-scheme-handler/http
+      - x-scheme-handler/https
+      - x-scheme-handler/ftp
+
+  # PDF files
+  pdf_files:
+    desktop_file: "{{ xdg_preferred_apps.pdf_viewer }}"
+    mime_types:
+      - application/pdf
+
+  # Video files
+  video_files:
+    desktop_file: "{{ xdg_preferred_apps.video_player }}"
+    mime_types:
+      # Common video formats
+      - video/mp4
+      - video/x-matroska # .mkv
+      - video/x-msvideo # .avi
+      - video/quicktime # .mov
+      - video/x-ms-wmv # .wmv
+      - video/x-flv # .flv
+      - video/webm
+      - video/x-m4v
+      - video/mpeg
+      - video/3gpp
+      - video/ogg
+      - video/x-ogm
+      - video/mp2t # .ts
+
+  # Archive files
+  archive_files:
+    desktop_file: "{{ xdg_preferred_apps.archive_manager }}"
+    mime_types:
+      # Archive formats
+      - application/zip
+      - application/x-tar
+      - application/x-compressed-tar
+      - application/x-gzip
+      - application/x-bzip
+      - application/x-bzip2
+      - application/x-xz
+      - application/x-7z-compressed
+      - application/x-rar
+      - application/x-rar-compressed
+      # Debian/RPM packages
+      - application/vnd.debian.binary-package
+      - application/x-rpm
+
+# File extension to MIME type mapping
+# Used for custom MIME types that may not be in system
+xdg_custom_mime_types:
+  - extension: .fish
+    mime_type: application/x-fish
+  - extension: .nix
+    mime_type: text/x-nix
+  - extension: .tf
+    mime_type: text/x-terraform
+  - extension: .tfvars
+    mime_type: text/x-terraform
+  - extension: .hcl
+    mime_type: text/x-hcl
+  - extension: .tsx
+    mime_type: text/tsx
+  - extension: .jsx
+    mime_type: text/jsx
+  - extension: .ts
+    mime_type: application/typescript
+  - extension: .rs
+    mime_type: text/x-rust
+  - extension: .j2
+    mime_type: text/x-jinja2
+  - extension: .desktop
+    mime_type: application/x-desktop
+
+# Configuration directory for user-specific settings
+xdg_config_dir: "{{ user.home }}/.config"
+xdg_local_share_dir: "{{ user.home }}/.local/share"
+xdg_mimeapps_list: "{{ xdg_config_dir }}/mimeapps.list"

@@ -1,0 +1,21 @@
+# XDG MIME Type Associations
+# Managed by Ansible - changes may be overwritten
+# This file maps MIME types to default applications
+
+[Default Applications]
+{% for app_group, config in xdg_associations.items() %}
+# {{ app_group | replace('_', ' ') | title }}
+{% for mime_type in config.mime_types %}
+{{ mime_type }}={{ config.desktop_file }}
+{% endfor %}
+
+{% endfor %}
+
+[Added Associations]
+{% for app_group, config in xdg_associations.items() %}
+# {{ app_group | replace('_', ' ') | title }}
+{% for mime_type in config.mime_types %}
+{{ mime_type }}={{ config.desktop_file }};
+{% endfor %}
+
+{% endfor %}
