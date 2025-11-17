@@ -69,3 +69,13 @@
   ansible.builtin.include_role:
     name: system/fonts
   tags: [fonts, system]
+
+- name: Include VLC media player
+  ansible.builtin.include_role:
+    name: system/vlc
+  tags: [vlc, media, video]
+
+- name: Include XDG file associations
+  ansible.builtin.include_role:
+    name: system/xdg-associations
+  tags: [xdg, associations, file-types, mime]

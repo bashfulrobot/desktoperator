@@ -35,6 +35,7 @@ core_packages:
   - just
   - jq # Required by spotify, pake roles for JSON parsing
   - libsecret-tools # Required for apps to access gnome-keyring (VSCode, etc.)
+  - file-roller # GNOME archive manager for .zip, .tar.gz, .deb, etc.
 
 # Development packages
 dev_packages:
