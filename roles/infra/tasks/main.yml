@@ -1,0 +1,17 @@
+---
+# Infra role - infrastructure and orchestration tools
+
+- name: Include Ansible tooling installation
+  ansible.builtin.include_role:
+    name: infra/ansible
+  tags: [infra, ansible]
+
+- name: Include Docker installation
+  ansible.builtin.include_role:
+    name: infra/docker
+  tags: [infra, docker, containers]
+
+- name: Include Kubernetes tools
+  ansible.builtin.include_role:
+    name: infra/k8s
+  tags: [infra, k8s, kubernetes, infrastructure]

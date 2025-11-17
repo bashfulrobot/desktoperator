@@ -13,6 +13,14 @@
     - role: system
       tags: [system, core]
 
+    # Development tools and languages
+    - role: dev
+      tags: [dev]
+
+    # Infrastructure and orchestration tools
+    - role: infra
+      tags: [infra]
+
     # Desktop environment configuration
     - role: desktop
       tags: [cosmic, core]
@@ -21,9 +29,9 @@
     - role: apps
       tags: [apps]
 
-    # Kubernetes tools and services
-    - role: k8s
-      tags: [k8s, kubernetes, infrastructure]
+    # Kong-related tools and collaboration
+    - role: kong
+      tags: [kong]
 
     # Custom desktop launchers
     - role: custom_launchers

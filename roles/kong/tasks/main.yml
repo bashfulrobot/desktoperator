@@ -1,0 +1,27 @@
+---
+# Kong role - Kong-related tools and collaboration apps
+
+- name: Include Slack
+  ansible.builtin.import_role:
+    name: kong/slack
+  tags: [kong, slack]
+
+- name: Include Teams for Linux
+  ansible.builtin.import_role:
+    name: kong/teams-for-linux
+  tags: [kong, teams-for-linux, teams]
+
+- name: Include Kong CLI tools (deck and kongctl)
+  ansible.builtin.import_role:
+    name: kong/kong-cli
+  tags: [kong, kong-cli, deck, kongctl]
+
+- name: Include Insomnia
+  ansible.builtin.import_role:
+    name: kong/insomnia
+  tags: [kong, insomnia]
+
+- name: Include Instruqt CLI
+  ansible.builtin.import_role:
+    name: kong/instruqt-cli
+  tags: [kong, instruqt-cli]

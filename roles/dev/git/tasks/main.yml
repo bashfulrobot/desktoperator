@@ -127,6 +127,14 @@
     mode: "0644"
   tags: [git, system]
 
+- name: Deploy git aliases
+  ansible.builtin.template:
+    src: fish-git-aliases.fish.j2
+    dest: "{{ user.home }}/.config/fish/conf.d/git-aliases.fish"
+    owner: "{{ user.name }}"
+    mode: "0644"
+  tags: [git, system]
+
 - name: Deploy git worktree fish functions
   ansible.builtin.template:
     src: fish-git-worktree-functions.fish.j2

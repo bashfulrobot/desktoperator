@@ -21,30 +21,6 @@
   ansible.builtin.import_tasks: users.yml
   tags: [users]
 
-- name: Import Python packages installation
-  ansible.builtin.import_tasks: python.yml
-  tags: [python, dev]
-
-- name: Include Ansible tooling installation
-  ansible.builtin.include_role:
-    name: system/ansible
-  tags: [ansible, dev]
-
-- name: Include Go language installation
-  ansible.builtin.include_role:
-    name: system/go
-  tags: [go, dev, golang]
-
-- name: Include Node.js installation
-  ansible.builtin.include_role:
-    name: system/nodejs
-  tags: [nodejs, node, npm, dev]
-
-- name: Include Docker installation
-  ansible.builtin.include_role:
-    name: system/docker
-  tags: [docker, containers, dev]
-
 - name: Include libvirt virtualization
   ansible.builtin.include_role:
     name: system/libvirt
@@ -62,11 +38,6 @@
 - name: Import fish shell configuration
   ansible.builtin.import_tasks: fish.yml
   tags: [fish, shell]
-
-- name: Include git role
-  ansible.builtin.include_role:
-    name: system/git
-  tags: [git]
 
 - name: Import SSH configuration
   ansible.builtin.import_tasks: ssh.yml

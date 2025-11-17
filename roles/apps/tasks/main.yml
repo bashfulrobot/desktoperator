@@ -11,11 +11,6 @@
     name: apps/restic
   tags: [restic]
 
-- name: Include Helix editor installation
-  ansible.builtin.import_role:
-    name: apps/helix
-  tags: [helix]
-
 - name: Include Zed editor installation
   ansible.builtin.import_role:
     name: apps/zed
@@ -31,25 +26,10 @@
 #     name: apps/zen-browser
 #   tags: [zen-browser]
 
-- name: Include Slack
-  ansible.builtin.import_role:
-    name: apps/slack
-  tags: [slack]
-
-- name: Include Claude Code
-  ansible.builtin.import_role:
-    name: apps/claude-code
-  tags: [claude-code]
-
 - name: Include Starship prompt
   ansible.builtin.import_role:
     name: apps/starship
   tags: [starship]
-
-- name: Include Shadowenv directory-based env manager
-  ansible.builtin.import_role:
-    name: apps/shadowenv
-  tags: [shadowenv]
 
 - name: Include Firefox browser
   ansible.builtin.import_role:
@@ -83,8 +63,8 @@
 
 - name: Include Brave web-app helpers
   ansible.builtin.import_role:
-    name: apps/brave-web-apps
-  tags: [brave-web-apps, brave]
+    name: apps/brave-builder
+  tags: [brave-builder]
 
 - name: Include Ulaa Browser
   ansible.builtin.import_role:
@@ -101,45 +81,15 @@
     name: apps/insync
   tags: [insync]
 
-- name: Include Insomnia
-  ansible.builtin.import_role:
-    name: apps/insomnia
-  tags: [insomnia]
-
-- name: Include Gemini CLI
-  ansible.builtin.import_role:
-    name: apps/gemini-cli
-  tags: [gemini-cli]
-
-- name: Include Codex CLI
-  ansible.builtin.import_role:
-    name: apps/codex-cli
-  tags: [codex-cli]
-
 - name: Include Codex Brave
   ansible.builtin.import_role:
-    name: apps/codex-brave
-  tags: [codex-brave]
-
-- name: Include Copilot CLI
-  ansible.builtin.import_role:
-    name: apps/copilot-cli
-  tags: [copilot-cli]
-
-- name: Include SiteMCP
-  ansible.builtin.import_role:
-    name: apps/sitemcp
-  tags: [sitemcp]
+    name: apps/brave-apps/codex-brave
+  tags: [brave-apps, codex-brave]
 
 - name: Include Glow markdown reader
   ansible.builtin.import_role:
     name: apps/glow
   tags: [glow]
-
-- name: Include Gum shell scripts
-  ansible.builtin.import_role:
-    name: apps/gum
-  tags: [gum]
 
 - name: Include Meetsum meeting summary generator
   ansible.builtin.import_role:
@@ -171,16 +121,6 @@
     name: apps/fonts
   tags: [fonts]
 
-- name: Include Tokei code statistics
-  ansible.builtin.import_role:
-    name: apps/tokei
-  tags: [tokei]
-
-- name: Include Instruqt CLI
-  ansible.builtin.import_role:
-    name: apps/instruqt-cli
-  tags: [instruqt-cli]
-
 - name: Include oq performant jq alternative
   ansible.builtin.import_role:
     name: apps/oq
@@ -188,178 +128,173 @@
 
 - name: Include Pake CLI web-to-desktop app builder
   ansible.builtin.import_role:
-    name: apps/pake
-  tags: [pake-core, pake]
+    name: apps/pake-builder
+  tags: [pake-builder]
 
 - name: Include GitHub Pake App
   ansible.builtin.import_role:
-    name: apps/github-pake
+    name: apps/pake-apps/github-pake
   tags: [github, pake]
 
 - name: Include GitHub Brave Web App
   ansible.builtin.import_role:
-    name: apps/github-brave
+    name: apps/brave-apps/github-brave
   tags: [github, brave-web-apps]
 
 - name: Include Asana Pake App
   ansible.builtin.import_role:
-    name: apps/asana-pake
+    name: apps/pake-apps/asana-pake
   tags: [asana, pake]
 
 - name: Include Avanti Pake App
   ansible.builtin.import_role:
-    name: apps/avanti-pake
+    name: apps/pake-apps/avanti-pake
   tags: [avanti, pake]
 
 - name: Include Salesforce Pake App
   ansible.builtin.import_role:
-    name: apps/sfdc-pake
+    name: apps/pake-apps/sfdc-pake
   tags: [sfdc, salesforce, pake]
 
 - name: Include Lucidchart Pake App
   ansible.builtin.import_role:
-    name: apps/lucid-chart-pake
+    name: apps/pake-apps/lucid-chart-pake
   tags: [lucid-chart, lucidchart, pake]
 
 - name: Include BR Email Pake App
   ansible.builtin.import_role:
-    name: apps/br-email-pake
+    name: apps/pake-apps/br-email-pake
   tags: [br-email, pake]
 
 - name: Include Kong Email Pake App
   ansible.builtin.import_role:
-    name: apps/kong-email-pake
+    name: apps/pake-apps/kong-email-pake
   tags: [kong-email, pake]
 
 - name: Include Kong Calendar Pake App
   ansible.builtin.import_role:
-    name: apps/kong-calendar-pake
+    name: apps/pake-apps/kong-calendar-pake
   tags: [kong-calendar, pake]
 
 - name: Include BR Calendar Pake App
   ansible.builtin.import_role:
-    name: apps/br-calendar-pake
+    name: apps/pake-apps/br-calendar-pake
   tags: [br-calendar, pake]
 
 - name: Include Kong Drive Pake App
   ansible.builtin.import_role:
-    name: apps/kong-drive-pake
+    name: apps/pake-apps/kong-drive-pake
   tags: [kong-drive, pake]
 
 - name: Include BR Drive Pake App
   ansible.builtin.import_role:
-    name: apps/br-drive-pake
+    name: apps/pake-apps/br-drive-pake
   tags: [br-drive, pake]
 
 - name: Include Aha Pake App
   ansible.builtin.import_role:
-    name: apps/aha-pake
+    name: apps/pake-apps/aha-pake
   tags: [aha, pake]
 
 - name: Include Workday Pake App
   ansible.builtin.import_role:
-    name: apps/workday-pake
+    name: apps/pake-apps/workday-pake
   tags: [workday, pake]
 
 - name: Include Konnect Pake App
   ansible.builtin.import_role:
-    name: apps/konnect-pake
+    name: apps/pake-apps/konnect-pake
   tags: [konnect, pake]
 
 - name: Include Kong Docs Pake App
   ansible.builtin.import_role:
-    name: apps/kong-docs-pake
+    name: apps/pake-apps/kong-docs-pake
   tags: [kong-docs, pake]
-
-- name: Include Kong CLI tools (deck and kongctl)
-  ansible.builtin.import_role:
-    name: apps/kong-cli
-  tags: [kong-cli, deck, kongctl]
 
 - name: Include Omni Pake App
   ansible.builtin.import_role:
-    name: apps/omni-pake
+    name: apps/pake-apps/omni-pake
   tags: [omni, pake]
 
 # Brave Web Apps (replacements for Pake apps)
 - name: Include Asana Brave Web App
   ansible.builtin.import_role:
-    name: apps/asana-brave
+    name: apps/brave-apps/asana-brave
   tags: [asana, brave-web-apps]
 
 - name: Include Avanti Brave Web App
   ansible.builtin.import_role:
-    name: apps/avanti-brave
+    name: apps/brave-apps/avanti-brave
   tags: [avanti, brave-web-apps]
 
 - name: Include Salesforce Brave Web App
   ansible.builtin.import_role:
-    name: apps/sfdc-brave
+    name: apps/brave-apps/sfdc-brave
   tags: [sfdc, salesforce, brave-web-apps]
 
 - name: Include Lucidchart Brave Web App
   ansible.builtin.import_role:
-    name: apps/lucid-chart-brave
+    name: apps/brave-apps/lucid-chart-brave
   tags: [lucid-chart, lucidchart, brave-web-apps]
 
 - name: Include BR Email Brave Web App
   ansible.builtin.import_role:
-    name: apps/br-email-brave
+    name: apps/brave-apps/br-email-brave
   tags: [br-email, brave-web-apps]
 
 - name: Include Kong Email Brave Web App
   ansible.builtin.import_role:
-    name: apps/kong-email-brave
+    name: apps/brave-apps/kong-email-brave
   tags: [kong-email, brave-web-apps]
 
 - name: Include Kong Calendar Brave Web App
   ansible.builtin.import_role:
-    name: apps/kong-calendar-brave
+    name: apps/brave-apps/kong-calendar-brave
   tags: [kong-calendar, brave-web-apps]
 
 - name: Include BR Calendar Brave Web App
   ansible.builtin.import_role:
-    name: apps/br-calendar-brave
+    name: apps/brave-apps/br-calendar-brave
   tags: [br-calendar, brave-web-apps]
 
 - name: Include Kong Drive Brave Web App
   ansible.builtin.import_role:
-    name: apps/kong-drive-brave
+    name: apps/brave-apps/kong-drive-brave
   tags: [kong-drive, brave-web-apps]
 
 - name: Include BR Drive Brave Web App
   ansible.builtin.import_role:
-    name: apps/br-drive-brave
+    name: apps/brave-apps/br-drive-brave
   tags: [br-drive, brave-web-apps]
 
 - name: Include Aha Brave Web App
   ansible.builtin.import_role:
-    name: apps/aha-brave
+    name: apps/brave-apps/aha-brave
   tags: [aha, brave-web-apps]
 
 - name: Include Workday Brave Web App
   ansible.builtin.import_role:
-    name: apps/workday-brave
+    name: apps/brave-apps/workday-brave
   tags: [workday, brave-web-apps]
 
 - name: Include Konnect Brave Web App
   ansible.builtin.import_role:
-    name: apps/konnect-brave
+    name: apps/brave-apps/konnect-brave
   tags: [konnect, brave-web-apps]
 
 - name: Include Kong Docs Brave Web App
   ansible.builtin.import_role:
-    name: apps/kong-docs-brave
+    name: apps/brave-apps/kong-docs-brave
   tags: [kong-docs, brave-web-apps]
 
 - name: Include Omni Brave Web App
   ansible.builtin.import_role:
-    name: apps/omni-brave
+    name: apps/brave-apps/omni-brave
   tags: [omni, brave-web-apps]
 
 - name: Include Team Agenda Brave Web App
   ansible.builtin.import_role:
-    name: apps/team-agenda-brave
+    name: apps/brave-apps/team-agenda-brave
   tags: [team-agenda, brave-web-apps]
 
 - name: Include zns DNS lookup tool
@@ -371,11 +306,6 @@
   ansible.builtin.import_role:
     name: apps/todoist
   tags: [todoist]
-
-- name: Include Teams for Linux
-  ansible.builtin.import_role:
-    name: apps/teams-for-linux
-  tags: [teams-for-linux, teams]
 
 - name: Include Kooha screen recorder
   ansible.builtin.import_role:

@@ -56,3 +56,19 @@
   when: docker_add_user_to_group | bool
   failed_when: false
   tags: [docker, system]
+
+- name: Deploy docker aliases
+  ansible.builtin.template:
+    src: fish-docker-aliases.fish.j2
+    dest: "{{ user.home }}/.config/fish/conf.d/docker-aliases.fish"
+    owner: "{{ user.name }}"
+    mode: "0644"
+  when: docker_state == 'present'
+  tags: [docker, system]
+
+- name: Remove docker aliases when disabled
+  ansible.builtin.file:
+    path: "{{ user.home }}/.config/fish/conf.d/docker-aliases.fish"
+    state: absent
+  when: docker_state == 'absent'
+  tags: [docker, system]

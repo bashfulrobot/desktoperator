@@ -12,39 +12,143 @@ This document explains how tags work in this Ansible repository, how to use them
 
 ## Tag Hierarchy
 
-### Tier 1: Role-Level Tags (Broad Categories)
+**Tags match folder/file names exactly** - making them easy to discover and maintain.
 
-Defined in `site.yml` for entire roles:
+### Visual Hierarchy
+
+Use `just tags-tree` or `tree roles/ -d -L 2` to see the complete tag structure:
+
+```
+roles/
+├── apps/              # Tag: apps (user applications)
+│   ├── pake-builder/       # Tool: pake-builder
+│   ├── pake-apps/          # Group: pake-apps (16 generated apps)
+│   │   ├── br-email-pake/  # Specific: br-email-pake
+│   │   └── github-pake/    # Specific: github-pake
+│   ├── brave-builder/      # Tool: brave-builder
+│   ├── brave-apps/         # Group: brave-apps (18 generated apps)
+│   │   ├── br-email-brave/ # Specific: br-email-brave
+│   │   └── github-brave/   # Specific: github-brave
+│   ├── slack/              # Specific: slack
+│   └── vscode/             # Specific: vscode
+├── dev/               # Tag: dev (development tools)
+│   ├── python/             # Specific: python
+│   ├── git/                # Specific: git
+│   ├── nodejs/             # Specific: nodejs, node, npm
+│   ├── go/                 # Specific: go, golang
+│   ├── helix/              # Specific: helix
+│   ├── claude-code/        # Specific: claude-code
+│   └── sitemcp/            # Specific: sitemcp
+├── infra/             # Tag: infra (infrastructure tools)
+│   ├── ansible/            # Specific: ansible
+│   ├── docker/             # Specific: docker, containers
+│   └── k8s/                # Specific: k8s, kubernetes
+├── kong/              # Tag: kong (Kong & collaboration)
+│   ├── slack/              # Specific: slack
+│   ├── teams-for-linux/    # Specific: teams-for-linux, teams
+│   ├── kong-cli/           # Specific: kong-cli, deck, kongctl
+│   ├── insomnia/           # Specific: insomnia
+│   └── instruqt-cli/       # Specific: instruqt-cli
+├── desktop/           # Tag: desktop (desktop environment)
+│   └── cosmic/             # Specific: cosmic
+└── system/            # Tag: system (core system config)
+    ├── fonts/              # Specific: fonts
+    ├── iac/                # Specific: iac, terraform, gcloud
+    ├── justfile/           # Specific: justfile
+    └── libvirt/            # Specific: libvirt, virt
+```
+
+### Tier 1: Organizational Roles (Broad Scope)
+
+Defined in `site.yml` - run entire categories:
 
 ```yaml
 - role: apps
-  tags: [apps]
-- role: system
-  tags: [system, core]
+  tags: [apps]      # ALL user applications
+
+- role: dev
+  tags: [dev]       # ALL development tools
+
+- role: infra
+  tags: [infra]     # ALL infrastructure tools
+
+- role: kong
+  tags: [kong]      # ALL kong-related tools
+
 - role: desktop
-  tags: [desktop, core]
+  tags: [desktop]   # Desktop environment
+
+- role: system
+  tags: [system]    # Core system config
 ```
 
-### Tier 2: App-Level Tags (Individual Apps)
+### Tier 2: Sub-roles & Groups (Medium Scope)
 
-Defined in `roles/apps/tasks/main.yml` for each app:
+Sub-roles and grouped apps within organizational folders:
 
 ```yaml
-- import_role: {name: apps/slack}
-  tags: [slack]
+# Development tools (in dev/)
+- include_role: {name: dev/python}
+  tags: [dev, python]
 
-- import_role: {name: apps/vscode}
-  tags: [vscode]
+- include_role: {name: dev/git}
+  tags: [dev, git]
 
-- import_role: {name: apps/br-email-pake}
-  tags: [br-email]
+# Infrastructure tools (in infra/)
+- include_role: {name: infra/docker}
+  tags: [infra, docker]
+
+# Generated app groups (in apps/)
+- import_role: {name: apps/pake-apps/br-email-pake}
+  tags: [pake-apps, br-email-pake]  # Both group and specific tags
+
+- import_role: {name: apps/brave-apps/br-email-brave}
+  tags: [brave-apps, br-email-brave]
 ```
 
-**Tag Naming Rules:**
-- Primary tag = app name (lowercase, hyphenated)
-- No framework suffixes (e.g., `br-email` not `br-email-pake`)
-- Aliases where useful (e.g., `salesforce` and `sfdc` both work)
-- No category tags (removed: communication, browser, ai, etc.)
+### Tier 3: Specific Items (Targeted Scope)
+
+Individual apps, tools, or configurations:
+
+```yaml
+# Individual apps
+just tag slack             # Just Slack
+just tag vscode            # Just VS Code
+
+# Individual dev tools
+just tag python            # Just Python
+just tag git               # Just Git
+
+# Individual infra tools
+just tag docker            # Just Docker
+just tag k8s               # Just Kubernetes tools
+
+# Specific generated apps
+just tag br-email-pake     # Just pake version of br-email
+just tag br-email-brave    # Just brave version of br-email
+```
+
+### Tag Naming Rules
+
+1. **Tags match folder/file names exactly**
+   - Folder `roles/dev/python/` → tag `python`
+   - Folder `roles/apps/pake-apps/br-email-pake/` → tag `br-email-pake`
+   - File `roles/system/tasks/firewall.yml` → tag `firewall`
+
+2. **Builder vs Generated Apps**
+   - `pake-builder` = CLI tool to create pake apps
+   - `pake-apps` = Group tag for all generated pake apps
+   - `brave-builder` = CLI tool to create brave apps
+   - `brave-apps` = Group tag for all generated brave apps
+
+3. **Hierarchical Tags**
+   - Broad: `dev` runs ALL dev tools
+   - Medium: `pake-apps` runs ALL pake apps
+   - Specific: `python` runs just Python
+
+4. **Aliases**
+   - Some tools have convenience aliases (e.g., `node` → `nodejs`, `golang` → `go`)
+   - Salesforce apps: `salesforce` alias for `sfdc-pake` and `sfdc-brave`
 
 ## State Management
 
@@ -65,6 +169,15 @@ app_states:
 
 **Host-specific overrides:** Use `inventory/host_vars/<hostname>.yml`
 
+## Discovering Tags
+
+**Quick reference:**
+```bash
+just tags-tree          # Visual hierarchy using tree command
+just tags               # Flat list of all tags
+tree roles/ -d -L 2     # See folder structure = tag names
+```
+
 ## Usage Examples
 
 ### Install Single App
@@ -72,9 +185,9 @@ app_states:
 Run a complete app installation (install + config + icons):
 
 ```bash
-ansible-playbook site.yml --tags br-email
 ansible-playbook site.yml --tags slack
 ansible-playbook site.yml --tags vscode
+ansible-playbook site.yml --tags br-email-pake  # Tag matches folder name
 ```
 
 ### Install Multiple Specific Apps

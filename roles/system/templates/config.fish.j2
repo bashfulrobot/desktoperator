@@ -7,12 +7,6 @@ set -gx PATH $HOME/.local/bin $HOME/bin $PATH
 # Disable greeting
 set fish_greeting
 
-# Aliases
-alias ll 'ls -lah'
-alias g 'git'
-alias k 'kubectl'
-alias d 'docker'
-
 # Ansible environment
 if test -d $HOME/dev/iac/desktoperator
     set -gx ANSIBLE_CONFIG $HOME/dev/iac/desktoperator/ansible.cfg

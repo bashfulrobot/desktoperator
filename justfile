@@ -157,6 +157,32 @@ tasks:
 tags:
     @ansible-playbook site.yml --list-tags
 
+# Show tag hierarchy (based on folder structure)
+[group('dev')]
+tags-tree:
+    @echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    @echo "  Tag Hierarchy (tags match folder names)"
+    @echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    @echo ""
+    @echo "Organizational folders (broad scope):"
+    @tree roles/ -d -L 1 -I 'bootstrap|custom_launchers'
+    @echo ""
+    @echo "Apps (specific scope):"
+    @tree roles/apps/ -d -L 1 -I 'tasks|defaults|files|templates|handlers|vars'
+    @echo ""
+    @echo "System (sub-roles and tasks):"
+    @tree roles/system/ -d -L 1 -I 'tasks|defaults|files|templates|handlers|vars'
+    @echo ""
+    @echo "Desktop (sub-roles):"
+    @tree roles/desktop/ -d -L 1 -I 'tasks|defaults|files|templates|handlers|vars'
+    @echo ""
+    @echo "Usage:"
+    @echo "  just tag apps           # Broad: all apps"
+    @echo "  just tag system         # Broad: all system config"
+    @echo "  just tag slack          # Specific: just slack"
+    @echo "  just tag br-email-pake  # Specific: br-email pake implementation"
+    @echo ""
+
 # Run Ansible with specific tag(s) on current host
 [group('dev')]
 tag TAG:
