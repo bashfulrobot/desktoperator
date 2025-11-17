@@ -2,7 +2,7 @@
 # Tokei code statistics tool installation
 
 - name: Install tokei from GitHub
-  ansible.builtin.include_tasks: ../../system/tasks/includes/github_release.yml
+  ansible.builtin.include_tasks: ../../../system/tasks/includes/github_release.yml
   vars:
     org: XAMPPRocky
     repo: tokei
