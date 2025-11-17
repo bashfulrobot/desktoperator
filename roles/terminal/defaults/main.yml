@@ -10,5 +10,6 @@
 # Tools not listed default to 'present' in role tasks
 app_states:
   # Explicitly present tools
+  zellij: present
   starship: present
   terminal-experience: present

@@ -11,11 +11,6 @@
     name: apps/restic
   tags: [restic]
 
-- name: Include Zellij terminal multiplexer
-  ansible.builtin.import_role:
-    name: apps/zellij
-  tags: [zellij]
-
 - name: Include Web Browsers
   ansible.builtin.import_role:
     name: apps/browsers

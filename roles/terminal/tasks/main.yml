@@ -1,6 +1,11 @@
 ---
 # Terminal role - terminal and shell enhancement tools
 
+- name: Include Zellij terminal multiplexer
+  ansible.builtin.import_role:
+    name: terminal/zellij
+  tags: [terminal, zellij]
+
 - name: Include Starship prompt
   ansible.builtin.import_role:
     name: terminal/starship
