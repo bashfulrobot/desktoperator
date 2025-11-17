@@ -60,6 +60,83 @@
     purge: "{{ app_states.typora | default('present') == 'absent' }}"
   become: true
 
+# Typora Community Plugin Manager installation
+- name: Create Typora plugins directory
+  ansible.builtin.file:
+    path: "{{ typora_plugin_dir }}"
+    state: directory
+    owner: "{{ user.name }}"
+    group: "{{ user.name }}"
+    mode: "0755"
+  become: true
+  when: app_states.typora | default('present') == 'present'
+
+- name: Create temporary directory for plugin manager download
+  ansible.builtin.tempfile:
+    state: directory
+    suffix: typora_plugin
+  register: typora_plugin_temp
+  when: app_states.typora | default('present') == 'present'
+
+- name: Download Typora Community Plugin Manager
+  ansible.builtin.get_url:
+    url: "{{ typora_plugin_manager_url }}"
+    dest: "{{ typora_plugin_temp.path }}/typora-community-plugin.zip"
+    mode: "0644"
+  when: app_states.typora | default('present') == 'present'
+
+- name: Extract plugin manager to plugins directory
+  ansible.builtin.unarchive:
+    src: "{{ typora_plugin_temp.path }}/typora-community-plugin.zip"
+    dest: "{{ typora_plugin_dir }}"
+    remote_src: true
+    owner: "{{ user.name }}"
+    group: "{{ user.name }}"
+  become: true
+  when: app_states.typora | default('present') == 'present'
+
+- name: Clean up temporary directory
+  ansible.builtin.file:
+    path: "{{ typora_plugin_temp.path }}"
+    state: absent
+  when: app_states.typora | default('present') == 'present' and typora_plugin_temp.path is defined
+
+- name: Check if window.html backup exists
+  ansible.builtin.stat:
+    path: "{{ typora_window_html_backup }}"
+  register: typora_backup_stat
+  when: app_states.typora | default('present') == 'present'
+
+- name: Backup window.html
+  ansible.builtin.copy:
+    src: "{{ typora_window_html }}"
+    dest: "{{ typora_window_html_backup }}"
+    remote_src: true
+    mode: preserve
+  become: true
+  when:
+    - app_states.typora | default('present') == 'present'
+    - not typora_backup_stat.stat.exists
+
+- name: Check if window.html already has plugin loader
+  ansible.builtin.command:
+    cmd: grep -q "plugins/loader.js" "{{ typora_window_html }}"
+  register: typora_loader_check
+  failed_when: false
+  changed_when: false
+  become: true
+  when: app_states.typora | default('present') == 'present'
+
+- name: Modify window.html to load plugin manager
+  ansible.builtin.replace:
+    path: "{{ typora_window_html }}"
+    regexp: '</body></html>$'
+    replace: '<script src="typora://app/userData/plugins/loader.js" type="module"></script></body></html>'
+  become: true
+  when:
+    - app_states.typora | default('present') == 'present'
+    - typora_loader_check.rc != 0
+
 # Fish shell integration - mdopen function
 - name: Create fish conf.d directory
   ansible.builtin.file:
@@ -99,6 +176,31 @@
 - name: Remove mdopen fish function when absent
   ansible.builtin.file:
     path: "{{ user.home }}/.config/fish/conf.d/mdopen.fish"
+    state: absent
+  become: true
+  when: app_states.typora | default('present') == 'absent'
+
+- name: Restore window.html from backup when absent
+  ansible.builtin.copy:
+    src: "{{ typora_window_html_backup }}"
+    dest: "{{ typora_window_html }}"
+    remote_src: true
+    mode: preserve
+  become: true
+  when:
+    - app_states.typora | default('present') == 'absent'
+    - typora_backup_stat is defined and typora_backup_stat.stat.exists
+
+- name: Remove window.html backup when absent
+  ansible.builtin.file:
+    path: "{{ typora_window_html_backup }}"
+    state: absent
+  become: true
+  when: app_states.typora | default('present') == 'absent'
+
+- name: Remove Typora plugins directory when absent
+  ansible.builtin.file:
+    path: "{{ typora_plugin_dir }}"
     state: absent
   become: true
   when: app_states.typora | default('present') == 'absent'
