@@ -1,0 +1,6 @@
+---
+# Ubuntu restricted extras configuration
+
+# Ubuntu restricted extras package state
+# Set to 'present' to install, 'absent' to remove
+ubuntu_restricted_extras_state: present
