@@ -30,3 +30,8 @@
   ansible.builtin.import_role:
     name: terminal/lswt
   tags: [terminal, lswt]
+
+- name: Include Amber search and replace tool
+  ansible.builtin.import_role:
+    name: terminal/amber
+  tags: [terminal, amber]

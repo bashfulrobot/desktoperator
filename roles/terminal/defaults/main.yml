@@ -16,3 +16,4 @@ app_states:
   eza: present
   zns: present
   lswt: present
+  amber: present
