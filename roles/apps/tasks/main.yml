@@ -206,8 +206,3 @@
   ansible.builtin.import_role:
     name: apps/kooha
   tags: [kooha]
-
-- name: Include Trippy network diagnostic tool
-  ansible.builtin.import_role:
-    name: apps/trippy
-  tags: [trippy]

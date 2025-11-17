@@ -17,3 +17,4 @@ app_states:
   zns: present
   lswt: present
   amber: present
+  trippy: present

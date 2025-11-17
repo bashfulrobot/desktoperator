@@ -35,3 +35,8 @@
   ansible.builtin.import_role:
     name: terminal/amber
   tags: [terminal, amber]
+
+- name: Include Trippy network diagnostic tool
+  ansible.builtin.import_role:
+    name: terminal/trippy
+  tags: [terminal, trippy]
