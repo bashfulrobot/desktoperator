@@ -15,3 +15,8 @@
   ansible.builtin.include_role:
     name: infra/k8s
   tags: [infra, k8s, kubernetes, infrastructure]
+
+- name: Include restic/autorestic backup
+  ansible.builtin.include_role:
+    name: infra/restic
+  tags: [infra, restic, backup]

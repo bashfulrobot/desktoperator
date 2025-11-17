@@ -6,11 +6,6 @@
     name: apps/1password
   tags: [1password]
 
-- name: Include restic/autorestic installation
-  ansible.builtin.import_role:
-    name: apps/restic
-  tags: [restic]
-
 - name: Include Web Browsers
   ansible.builtin.import_role:
     name: apps/browsers
