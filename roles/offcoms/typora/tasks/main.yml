@@ -60,10 +60,10 @@
     purge: "{{ app_states.typora | default('present') == 'absent' }}"
   become: true
 
-# mdopen desktop file for launching Typora detached
-- name: Create local applications directory for desktop files
+# Fish shell integration - mdopen function
+- name: Create fish conf.d directory
   ansible.builtin.file:
-    path: "{{ user.home }}/.local/share/applications"
+    path: "{{ user.home }}/.config/fish/conf.d"
     state: directory
     owner: "{{ user.name }}"
     group: "{{ user.name }}"
@@ -71,10 +71,10 @@
   become: true
   when: app_states.typora | default('present') == 'present'
 
-- name: Deploy mdopen desktop file for Typora launcher
+- name: Deploy mdopen fish function
   ansible.builtin.template:
-    src: mdopen.desktop.j2
-    dest: "{{ user.home }}/.local/share/applications/mdopen.desktop"
+    src: mdopen.fish.j2
+    dest: "{{ user.home }}/.config/fish/conf.d/mdopen.fish"
     owner: "{{ user.name }}"
     group: "{{ user.name }}"
     mode: "0644"
@@ -96,9 +96,9 @@
   become: true
   when: app_states.typora | default('present') == 'absent'
 
-- name: Remove mdopen desktop file when absent
+- name: Remove mdopen fish function when absent
   ansible.builtin.file:
-    path: "{{ user.home }}/.local/share/applications/mdopen.desktop"
+    path: "{{ user.home }}/.config/fish/conf.d/mdopen.fish"
     state: absent
   become: true
   when: app_states.typora | default('present') == 'absent'
