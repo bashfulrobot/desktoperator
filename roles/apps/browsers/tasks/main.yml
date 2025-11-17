@@ -1,0 +1,37 @@
+---
+# Browsers role - web browser installations
+
+- name: Include Firefox browser
+  ansible.builtin.import_role:
+    name: apps/browsers/firefox
+  tags: [browsers, firefox]
+
+- name: Include Vivaldi browser
+  ansible.builtin.import_role:
+    name: apps/browsers/vivaldi
+  tags: [browsers, vivaldi]
+
+- name: Include Google Chrome
+  ansible.builtin.import_role:
+    name: apps/browsers/chrome
+  tags: [browsers, chrome]
+
+- name: Include Chromium
+  ansible.builtin.import_role:
+    name: apps/browsers/chromium
+  tags: [browsers, chromium]
+
+- name: Include Brave Browser
+  ansible.builtin.import_role:
+    name: apps/browsers/brave-browser
+  tags: [browsers, brave-browser, brave]
+
+- name: Include Ulaa Browser
+  ansible.builtin.import_role:
+    name: apps/browsers/ulaa-browser
+  tags: [browsers, ulaa-browser, ulaa]
+
+# - name: Include Zen Browser
+#   ansible.builtin.import_role:
+#     name: apps/browsers/zen-browser
+#   tags: [browsers, zen-browser]

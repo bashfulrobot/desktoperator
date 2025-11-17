@@ -21,50 +21,20 @@
     name: apps/zellij
   tags: [zellij]
 
-# - name: Include Zen Browser
-#   ansible.builtin.import_role:
-#     name: apps/zen-browser
-#   tags: [zen-browser]
-
 - name: Include Starship prompt
   ansible.builtin.import_role:
     name: apps/starship
   tags: [starship]
 
-- name: Include Firefox browser
+- name: Include Web Browsers
   ansible.builtin.import_role:
-    name: apps/firefox
-  tags: [firefox]
-
-- name: Include Vivaldi browser
-  ansible.builtin.import_role:
-    name: apps/vivaldi
-  tags: [vivaldi]
-
-- name: Include Google Chrome
-  ansible.builtin.import_role:
-    name: apps/chrome
-  tags: [chrome]
-
-- name: Include Chromium
-  ansible.builtin.import_role:
-    name: apps/chromium
-  tags: [chromium]
-
-- name: Include Brave Browser
-  ansible.builtin.import_role:
-    name: apps/brave-browser
-  tags: [brave-browser, brave]
+    name: apps/browsers
+  tags: [browsers]
 
 - name: Include Brave web-app helpers
   ansible.builtin.import_role:
     name: apps/brave-builder
   tags: [brave-builder]
-
-- name: Include Ulaa Browser
-  ansible.builtin.import_role:
-    name: apps/ulaa-browser
-  tags: [ulaa-browser, ulaa]
 
 - name: Include Zoom
   ansible.builtin.import_role:

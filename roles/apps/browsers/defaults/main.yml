@@ -1,0 +1,21 @@
+---
+# Browsers role defaults
+# Browser state management (present/absent)
+# Tags control WHAT runs, state variables control HOW it runs
+# All browsers default to 'present' via | default('present') in role tasks
+# Override in host_vars for host-specific control
+
+# Browser application states
+# Only explicitly managed browsers are listed here
+# Browsers not listed default to 'present' in role tasks
+app_states:
+  # Explicitly absent browsers
+  vivaldi: absent
+
+  # Explicitly present browsers
+  firefox: present
+  chrome: present
+  zen-browser: present
+  # brave-browser: defaults to present
+  # chromium: defaults to present
+  # ulaa-browser: defaults to present
