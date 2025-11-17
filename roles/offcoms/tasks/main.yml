@@ -1,6 +1,11 @@
 ---
 # Office Communications role - productivity and communication apps
 
+- name: Include Glow markdown reader
+  ansible.builtin.import_role:
+    name: offcoms/glow
+  tags: [offcoms, glow]
+
 - name: Include Zoom
   ansible.builtin.import_role:
     name: offcoms/zoom

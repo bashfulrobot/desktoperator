@@ -64,3 +64,8 @@
   ansible.builtin.include_role:
     name: system/justfile
   tags: [justfile, system-admin]
+
+- name: Include fonts installation
+  ansible.builtin.include_role:
+    name: system/fonts
+  tags: [fonts, system]

@@ -1,0 +1,14 @@
+---
+# Kong role defaults
+# Kong-related tools state management (present/absent)
+# Tags control WHAT runs, state variables control HOW it runs
+# All kong tools default to 'present' via | default('present') in role tasks
+# Override in host_vars for host-specific control
+
+# Kong tool application states
+# Only explicitly managed tools are listed here
+# Tools not listed default to 'present' in role tasks
+app_states:
+  # Explicitly present tools
+  oq: present
+  # slack, teams-for-linux, kong-cli, insomnia, instruqt-cli default to present

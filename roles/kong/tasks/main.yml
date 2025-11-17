@@ -25,3 +25,8 @@
   ansible.builtin.import_role:
     name: kong/instruqt-cli
   tags: [kong, instruqt-cli]
+
+- name: Include oq performant jq alternative
+  ansible.builtin.import_role:
+    name: kong/oq
+  tags: [kong, oq]

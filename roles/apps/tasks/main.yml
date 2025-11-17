@@ -31,25 +31,10 @@
     name: apps/brave-apps/codex-brave
   tags: [brave-apps, codex-brave]
 
-- name: Include Glow markdown reader
-  ansible.builtin.import_role:
-    name: apps/glow
-  tags: [glow]
-
 - name: Include Spotify music clients
   ansible.builtin.import_role:
     name: apps/spotify
   tags: [spotify]
-
-- name: Include Fonts installation
-  ansible.builtin.import_role:
-    name: apps/fonts
-  tags: [fonts]
-
-- name: Include oq performant jq alternative
-  ansible.builtin.import_role:
-    name: apps/oq
-  tags: [oq]
 
 - name: Include Pake CLI web-to-desktop app builder
   ansible.builtin.import_role:
@@ -221,11 +206,6 @@
   ansible.builtin.import_role:
     name: apps/brave-apps/team-agenda-brave
   tags: [team-agenda, brave-web-apps]
-
-- name: Include zns DNS lookup tool
-  ansible.builtin.import_role:
-    name: apps/zns
-  tags: [zns]
 
 - name: Include Kooha screen recorder
   ansible.builtin.import_role:

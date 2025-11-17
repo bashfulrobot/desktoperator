@@ -20,3 +20,13 @@
   ansible.builtin.import_role:
     name: terminal/eza
   tags: [terminal, eza]
+
+- name: Include zns DNS lookup tool
+  ansible.builtin.import_role:
+    name: terminal/zns
+  tags: [terminal, zns]
+
+- name: Include lswt Wayland window switcher
+  ansible.builtin.import_role:
+    name: terminal/lswt
+  tags: [terminal, lswt]

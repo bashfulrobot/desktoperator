@@ -10,6 +10,7 @@
 # Apps not listed default to 'present' in role tasks
 app_states:
   # Explicitly present apps
+  glow: present
   todoist: present
   zoom: present
   meetsum: present
