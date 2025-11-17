@@ -1,0 +1,15 @@
+---
+# Typora Community Plugin Manager configuration
+
+# Plugin manager version
+typora_plugin_manager_version: "2.5.35"
+
+# Download URL for the plugin manager
+typora_plugin_manager_url: "https://github.com/typora-community-plugin/typora-community-plugin/releases/download/{{ typora_plugin_manager_version }}/typora-community-plugin.zip"
+
+# Installation directory
+typora_plugin_dir: "{{ user.home }}/.config/Typora/plugins"
+
+# Window HTML file to modify
+typora_window_html: "/usr/share/typora/resources/window.html"
+typora_window_html_backup: "/usr/share/typora/resources/window.html.backup"
