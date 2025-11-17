@@ -60,6 +60,27 @@
     purge: "{{ app_states.typora | default('present') == 'absent' }}"
   become: true
 
+# mdopen desktop file for launching Typora detached
+- name: Create local applications directory for desktop files
+  ansible.builtin.file:
+    path: "{{ user.home }}/.local/share/applications"
+    state: directory
+    owner: "{{ user.name }}"
+    group: "{{ user.name }}"
+    mode: "0755"
+  become: true
+  when: app_states.typora | default('present') == 'present'
+
+- name: Deploy mdopen desktop file for Typora launcher
+  ansible.builtin.template:
+    src: mdopen.desktop.j2
+    dest: "{{ user.home }}/.local/share/applications/mdopen.desktop"
+    owner: "{{ user.name }}"
+    group: "{{ user.name }}"
+    mode: "0644"
+  become: true
+  when: app_states.typora | default('present') == 'present'
+
 # Cleanup when absent
 - name: Remove Typora APT repository when absent
   ansible.builtin.deb822_repository:
@@ -71,6 +92,13 @@
 - name: Remove Typora GPG key when absent
   ansible.builtin.file:
     path: /etc/apt/keyrings/typora.gpg
+    state: absent
+  become: true
+  when: app_states.typora | default('present') == 'absent'
+
+- name: Remove mdopen desktop file when absent
+  ansible.builtin.file:
+    path: "{{ user.home }}/.local/share/applications/mdopen.desktop"
     state: absent
   become: true
   when: app_states.typora | default('present') == 'absent'

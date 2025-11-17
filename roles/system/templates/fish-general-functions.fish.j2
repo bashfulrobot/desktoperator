@@ -123,8 +123,8 @@ function mdopen --description "Open Typora in a selected Documents subdirectory"
 
             switch "$choice"
                 case "Open current" "."
-                    typora "$current"
-                    return $status
+                    dex {{ user.home }}/.local/share/applications/mdopen.desktop "$current"
+                    return 0
                 case ".."
                     set current (dirname "$current")
                 case "*"
@@ -147,8 +147,8 @@ function mdopen --description "Open Typora in a selected Documents subdirectory"
             echo "Error: Selected path is not a directory: $target" >&2
             return 1
         end
-        typora "$target"
-        return $status
+        dex {{ user.home }}/.local/share/applications/mdopen.desktop "$target"
+        return 0
     end
 
     # fzf fallback: fuzzy-pick any descendant directory
@@ -173,5 +173,6 @@ function mdopen --description "Open Typora in a selected Documents subdirectory"
         return 1
     end
 
-    typora "$target"
+    dex {{ user.home }}/.local/share/applications/mdopen.desktop "$target"
+    return 0
 end
