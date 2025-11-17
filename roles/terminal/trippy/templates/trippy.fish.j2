@@ -20,6 +20,13 @@ function trip
     end
 end
 
+# Alias for trippy -> trip (the binary is called 'trip', not 'trippy')
+function trippy
+    echo "Note: The command is 'trip' (not 'trippy')"
+    echo
+    trip $argv
+end
+
 # Override standard traceroute commands
 function traceroute
     echo "Using trippy..."
