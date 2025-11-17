@@ -1,0 +1,19 @@
+---
+# VLC media player configuration
+
+# VLC packages to install
+vlc_packages:
+  - vlc # VLC media player
+  - vlc-plugin-access-extra # Extra access plugins
+  - vlc-plugin-base # Base plugins
+  - vlc-plugin-video-output # Video output plugins
+
+# DVD playback support
+vlc_dvd_support: true
+
+# DVD playback packages
+vlc_dvd_packages:
+  - libdvd-pkg # DVD playback support (installs libdvdcss2)
+
+# VLC state
+vlc_state: present # or 'absent' to remove

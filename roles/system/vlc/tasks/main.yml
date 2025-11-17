@@ -1,0 +1,49 @@
+---
+# VLC media player installation and configuration
+
+- name: Install VLC media player
+  ansible.builtin.apt:
+    name: "{{ vlc_packages }}"
+    state: "{{ vlc_state }}"
+  become: true
+  when: vlc_state == 'present'
+
+- name: Install DVD playback support packages
+  ansible.builtin.apt:
+    name: "{{ vlc_dvd_packages }}"
+    state: "{{ vlc_state }}"
+  become: true
+  when:
+    - vlc_state == 'present'
+    - vlc_dvd_support | bool
+
+- name: Configure libdvd-pkg for DVD playback
+  ansible.builtin.command: dpkg-reconfigure -f noninteractive libdvd-pkg
+  become: true
+  changed_when: true
+  when:
+    - vlc_state == 'present'
+    - vlc_dvd_support | bool
+  register: dvd_config
+  # This downloads and installs libdvdcss2 for encrypted DVD playback
+
+- name: Verify VLC installation
+  ansible.builtin.command: vlc --version
+  register: vlc_version_output
+  changed_when: false
+  failed_when: false
+  when: vlc_state == 'present'
+
+- name: Show VLC version
+  ansible.builtin.debug:
+    msg: "VLC installed: {{ vlc_version_output.stdout_lines[0] if vlc_version_output.rc == 0 else 'NOT FOUND' }}"
+  when: vlc_state == 'present'
+
+# Cleanup when absent
+- name: Remove VLC packages when absent
+  ansible.builtin.apt:
+    name: "{{ vlc_packages + vlc_dvd_packages }}"
+    state: absent
+    purge: true
+  become: true
+  when: vlc_state == 'absent'
