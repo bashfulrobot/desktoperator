@@ -11,4 +11,5 @@
 app_states:
   # Explicitly present tools
   zed: present
+  httpie: present
   # All other dev tools default to present

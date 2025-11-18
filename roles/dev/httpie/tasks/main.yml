@@ -1,0 +1,92 @@
+---
+# HTTPie installation via APT repository
+# Modern, user-friendly HTTP client for the API era
+# https://httpie.io/
+
+- name: Create APT keyrings directory
+  ansible.builtin.file:
+    path: /etc/apt/keyrings
+    state: directory
+    mode: "0755"
+  become: true
+  when: app_states['httpie'] | default('present') == 'present'
+
+- name: Download HTTPie GPG key
+  ansible.builtin.get_url:
+    url: https://packages.httpie.io/deb/KEY.gpg
+    dest: /tmp/httpie.gpg
+    mode: "0644"
+  when: app_states['httpie'] | default('present') == 'present'
+
+- name: Import HTTPie GPG key to modern keyring location
+  ansible.builtin.shell: |
+    gpg --dearmor < /tmp/httpie.gpg > /etc/apt/keyrings/httpie.gpg
+    chmod 644 /etc/apt/keyrings/httpie.gpg
+  args:
+    creates: /etc/apt/keyrings/httpie.gpg
+  become: true
+  when: app_states['httpie'] | default('present') == 'present'
+
+# Remove old .list format file (cleanup from legacy installation to deb822_repository migration)
+- name: Remove old HTTPie .list file
+  ansible.builtin.file:
+    path: /etc/apt/sources.list.d/httpie.list
+    state: absent
+  become: true
+  when: app_states['httpie'] | default('present') == 'present'
+
+# Use deb822 format to prevent duplicate repository entries
+# For ARM support, change architectures to: amd64,arm64
+- name: Add HTTPie APT repository (deb822)
+  ansible.builtin.deb822_repository:
+    name: httpie
+    types: [deb]
+    uris: https://packages.httpie.io/deb
+    suites: "./"
+    architectures: amd64
+    signed_by: /etc/apt/keyrings/httpie.gpg
+    state: present
+  become: true
+  when: app_states['httpie'] | default('present') == 'present'
+
+- name: Update APT cache
+  ansible.builtin.apt:
+    update_cache: true
+  become: true
+  when: app_states['httpie'] | default('present') == 'present'
+
+- name: Install HTTPie
+  ansible.builtin.apt:
+    name: httpie
+    state: present
+  become: true
+  when: app_states['httpie'] | default('present') == 'present'
+
+- name: Clean up GPG key file
+  ansible.builtin.file:
+    path: /tmp/httpie.gpg
+    state: absent
+  when: app_states['httpie'] | default('present') == 'present'
+
+# Cleanup when absent
+- name: Remove HTTPie when absent
+  ansible.builtin.apt:
+    name: httpie
+    state: absent
+    purge: true
+  become: true
+  when: app_states['httpie'] | default('present') == 'absent'
+
+- name: Remove HTTPie repository when absent
+  ansible.builtin.deb822_repository:
+    name: httpie
+    state: absent
+  become: true
+  when: app_states['httpie'] | default('present') == 'absent'
+
+- name: Remove HTTPie GPG key when absent
+  ansible.builtin.file:
+    path: /etc/apt/keyrings/httpie.gpg
+    state: absent
+  become: true
+  when: app_states['httpie'] | default('present') == 'absent'
