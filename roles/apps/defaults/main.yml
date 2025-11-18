@@ -84,6 +84,7 @@ app_states:
   workday-brave: present
   konnect-brave: present
   kong-docs-brave: present
+  kong-academy-brave: present
   omni-brave: present
   asana-brave: present
   kong-cli: present

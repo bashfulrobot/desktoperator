@@ -192,6 +192,11 @@
     name: apps/brave-apps/kong-docs-brave
   tags: [kong-docs, brave-web-apps]
 
+- name: Include Kong Academy Brave Web App
+  ansible.builtin.import_role:
+    name: apps/kong-academy-brave
+  tags: [kong-academy-brave, brave-web-apps]
+
 - name: Include Omni Brave Web App
   ansible.builtin.import_role:
     name: apps/brave-apps/omni-brave

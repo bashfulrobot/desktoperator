@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=kong academy
+Comment=Open kong academy in Brave app mode
+Exec=/usr/local/bin/brave-kong-academy
+StartupWMClass=Note: Use 'rg' for faster searching (ripgrep)  brave-education.konghq.com__-Default
+Icon=brave-kong-academy
+Terminal=false
