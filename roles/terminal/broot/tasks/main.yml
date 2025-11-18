@@ -57,6 +57,25 @@
   changed_when: false
   when: app_states['broot'] | default('present') == 'present'
 
+# Configuration management
+- name: Deploy broot main configuration
+  ansible.builtin.template:
+    src: conf.hjson.j2
+    dest: "{{ user.home }}/.config/broot/conf.hjson"
+    owner: "{{ user.name }}"
+    group: "{{ user.name }}"
+    mode: "0644"
+  when: app_states['broot'] | default('present') == 'present'
+
+- name: Deploy broot verbs configuration
+  ansible.builtin.template:
+    src: verbs.hjson.j2
+    dest: "{{ user.home }}/.config/broot/verbs.hjson"
+    owner: "{{ user.name }}"
+    group: "{{ user.name }}"
+    mode: "0644"
+  when: app_states['broot'] | default('present') == 'present'
+
 # Fish shell integration
 - name: Create fish conf.d directory
   ansible.builtin.file:

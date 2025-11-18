@@ -1,0 +1,190 @@
+###############################################################
+# Broot configuration
+# Managed by Ansible - changes may be overwritten
+#
+# Configuration documentation is available at
+#     https://dystroy.org/broot
+#
+# This file's format is Hjson ( https://hjson.github.io/ )
+###############################################################
+
+###############################################################
+# Default flags
+# Start broot with these flags by default
+# g: show git status
+# h: show hidden files
+default_flags: "gh"
+
+###############################################################
+# Modal mode (vim-like)
+# Read https://dystroy.org/broot/modal/ for details
+modal: true
+initial_mode: command
+
+###############################################################
+# Terminal's title
+# Update terminal title when changing directory
+# terminal_title: "[broot] {git-name}"
+# reset_terminal_title_on_exit: false
+
+###############################################################
+# Date/Time format
+# Format according to https://docs.rs/chrono/latest/chrono/format/strftime/index.html
+# date_time_format: %Y/%m/%d %R
+
+###############################################################
+# Whether to mark the selected line with a triangle
+show_selection_mark: true
+
+###############################################################
+# Column order
+# Must be a permutation of: mark, git, size, permission, date, count, branch, name
+# Keep name at the end as it has variable length
+# cols_order: [
+#     mark
+#     git
+#     size
+#     permission
+#     date
+#     count
+#     branch
+#     name
+# ]
+
+###############################################################
+# True Colors
+# Auto-detected by default. Set explicitly if colors are off
+# true_colors: false
+
+###############################################################
+# Icons
+# Uncomment to enable (requires nerd font)
+# icon_theme: vscode
+
+###############################################################
+# Special paths
+# Configure how broot handles specific paths
+# - list: "never" prevents searching children (unless selected root)
+# - sum: "never" prevents including in size/count calculations
+# - show: "always" makes visible even if name starts with dot
+# - list: "always" useful for links to directories
+special_paths: {
+    "/media": {
+        list: "never"
+        sum: "never"
+    }
+    "~/.config": {
+        show: "always"
+    }
+    "trav": {
+        show: "always"
+        list: "always"
+        sum: "never"
+    }
+}
+
+###############################################################
+# Quit on last cancel
+# Makes escape key quit broot when there's nothing to cancel
+# quit_on_last_cancel: true
+
+###############################################################
+# Search modes
+# Configure search mode prefixes
+# More information: https://dystroy.org/broot/input/#the-filtering-pattern
+# search_modes: {
+#     <empty>: fuzzy name
+#     /: regex name
+# }
+
+###############################################################
+# File Extension Colors
+# Color file names by extension
+# ext_colors: {
+#     png: rgb(255, 128, 75)
+#     rs: yellow
+# }
+
+###############################################################
+# Max file size for content search
+# Bigger files ignored when searching content
+content_search_max_file_size: 10MB
+
+###############################################################
+# Max Panels Count
+# Increase if you want more than 2 panels open
+# max_panels_count: 2
+
+###############################################################
+# Update work dir
+# Keep broot's work dir in sync with current panel root
+# update_work_dir: false
+
+###############################################################
+# Kitty Keyboard extension
+# Enable advanced keyboard shortcuts in Kitty/Wezterm
+enable_kitty_keyboard: false
+
+###############################################################
+# Lines around matching line in filtered preview
+# Show context around matches when searching file content
+lines_before_match_in_preview: 1
+lines_after_match_in_preview: 1
+
+###############################################################
+# Preview transformers
+# Define transformations before preview rendering
+preview_transformers: [
+    // # Use mutool to render PDFs as images
+    // {
+    //     input_extensions: [ "pdf" ]
+    //     output_extension: png
+    //     mode: image
+    //     command: [ "mutool", "draw", "-w", "1000", "-o", "{output-path}", "{input-path}" ]
+    // }
+
+    // # Use LibreOffice to render Office files
+    // {
+    //     input_extensions: [ "xls", "xlsx", "doc", "docx", "ppt", "pptx", "ods", "odt", "odp" ]
+    //     output_extension: png
+    //     mode: image
+    //     command: [
+    //         "libreoffice", "--headless",
+    //         "--convert-to", "png",
+    //         "--outdir", "{output-dir}",
+    //         "{input-path}"
+    //     ]
+    // }
+
+    // # Use jq to beautify JSON
+    // {
+    //     input_extensions: [ "json" ]
+    //     output_extension: json
+    //     mode: text
+    //     command: [ "jq" ]
+    // }
+]
+
+###############################################################
+# Imports
+# Split configuration into multiple files
+# Import different skins based on terminal luma (light/dark)
+imports: [
+    # Verbs are configured in verbs.hjson
+    verbs.hjson
+
+    # Dark terminal skin
+    {
+        luma: [
+            dark
+            unknown
+        ]
+        file: skins/dark-blue.hjson
+    }
+
+    # Light terminal skin
+    {
+        luma: light
+        file: skins/white.hjson
+    }
+]
