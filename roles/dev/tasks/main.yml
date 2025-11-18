@@ -2,76 +2,81 @@
 # Dev role - development tools and languages
 
 - name: Include Python installation and packages
-  ansible.builtin.include_role:
+  ansible.builtin.import_role:
     name: dev/python
   tags: [dev, python]
 
 - name: Include Git version control
-  ansible.builtin.include_role:
+  ansible.builtin.import_role:
     name: dev/git
   tags: [dev, git]
 
 - name: Include Node.js installation
-  ansible.builtin.include_role:
+  ansible.builtin.import_role:
     name: dev/nodejs
   tags: [dev, nodejs, node, npm]
 
 - name: Include Go language installation
-  ansible.builtin.include_role:
+  ansible.builtin.import_role:
     name: dev/go
   tags: [dev, go, golang]
 
 - name: Include Helix editor
-  ansible.builtin.include_role:
+  ansible.builtin.import_role:
     name: dev/helix
   tags: [dev, helix]
 
 - name: Include Zed editor
-  ansible.builtin.include_role:
+  ansible.builtin.import_role:
     name: dev/zed
   tags: [dev, zed]
 
 - name: Include Claude Code
-  ansible.builtin.include_role:
+  ansible.builtin.import_role:
     name: dev/claude-code
   tags: [dev, claude-code]
 
 - name: Include Codex CLI
-  ansible.builtin.include_role:
+  ansible.builtin.import_role:
     name: dev/codex-cli
   tags: [dev, codex-cli]
 
 - name: Include Copilot CLI
-  ansible.builtin.include_role:
+  ansible.builtin.import_role:
     name: dev/copilot-cli
   tags: [dev, copilot-cli]
 
 - name: Include Gemini CLI
-  ansible.builtin.include_role:
+  ansible.builtin.import_role:
     name: dev/gemini-cli
   tags: [dev, gemini-cli]
 
 - name: Include Gum (charming CLI components)
-  ansible.builtin.include_role:
+  ansible.builtin.import_role:
     name: dev/gum
   tags: [dev, gum]
 
+- name: Include HTTPie (modern HTTP client)
+  ansible.builtin.import_role:
+    name: dev/httpie
+  tags: [dev, httpie]
+
 - name: Include Shadowenv (directory-based env manager)
-  ansible.builtin.include_role:
+  ansible.builtin.import_role:
     name: dev/shadowenv
   tags: [dev, shadowenv]
 
 - name: Include SiteMCP (MCP server configuration)
-  ansible.builtin.include_role:
+  ansible.builtin.import_role:
     name: dev/sitemcp
   tags: [dev, sitemcp]
 
 - name: Include Tokei (code statistics)
-  ansible.builtin.include_role:
+  ansible.builtin.import_role:
     name: dev/tokei
   tags: [dev, tokei]
 
 - name: Include Visual Studio Code
-  ansible.builtin.include_role:
+  ansible.builtin.import_role:
     name: dev/vscode
   tags: [dev, vscode]
