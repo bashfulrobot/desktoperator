@@ -1,0 +1,19 @@
+---
+# yq installation - portable command-line YAML, JSON, XML, CSV, TOML and properties processor
+# https://github.com/mikefarah/yq
+
+- name: Install yq from GitHub
+  ansible.builtin.include_tasks: ../../system/tasks/includes/github_release.yml
+  vars:
+    org: mikefarah
+    repo: yq
+    binary_name: yq
+    filename_substring: linux_amd64.tar.gz
+  when: app_states.yq | default('present') == 'present'
+
+- name: Remove yq binary when absent
+  ansible.builtin.file:
+    path: /usr/local/bin/yq
+    state: absent
+  when: app_states.yq | default('present') == 'absent'
+  become: true

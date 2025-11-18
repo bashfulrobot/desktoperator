@@ -72,3 +72,4 @@ app_states:
   asana-brave: present
   kong-cli: present
   zns: present
+  yq: present

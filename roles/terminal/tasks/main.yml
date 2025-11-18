@@ -45,3 +45,8 @@
   ansible.builtin.import_role:
     name: terminal/broot
   tags: [terminal, broot]
+
+- name: Include yq YAML/JSON processor
+  ansible.builtin.import_role:
+    name: terminal/yq
+  tags: [terminal, yq]
