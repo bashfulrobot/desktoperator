@@ -21,10 +21,6 @@ Use `just tags-tree` or `tree roles/ -d -L 2` to see the complete tag structure:
 ```
 roles/
 ├── apps/              # Tag: apps (user applications)
-│   ├── pake-builder/       # Tool: pake-builder
-│   ├── pake-apps/          # Group: pake-apps (16 generated apps)
-│   │   ├── br-email-pake/  # Specific: br-email-pake
-│   │   └── github-pake/    # Specific: github-pake
 │   ├── brave-builder/      # Tool: brave-builder
 │   ├── brave-apps/         # Group: brave-apps (18 generated apps)
 │   │   ├── br-email-brave/ # Specific: br-email-brave
@@ -99,9 +95,6 @@ Sub-roles and grouped apps within organizational folders:
   tags: [infra, docker]
 
 # Generated app groups (in apps/)
-- import_role: {name: apps/pake-apps/br-email-pake}
-  tags: [pake-apps, br-email-pake]  # Both group and specific tags
-
 - import_role: {name: apps/brave-apps/br-email-brave}
   tags: [brave-apps, br-email-brave]
 ```
@@ -124,31 +117,28 @@ just tag docker            # Just Docker
 just tag k8s               # Just Kubernetes tools
 
 # Specific generated apps
-just tag br-email-pake     # Just pake version of br-email
-just tag br-email-brave    # Just brave version of br-email
+just tag br-email-brave    # Brave web app for br-email
 ```
 
 ### Tag Naming Rules
 
 1. **Tags match folder/file names exactly**
    - Folder `roles/dev/python/` → tag `python`
-   - Folder `roles/apps/pake-apps/br-email-pake/` → tag `br-email-pake`
+   - Folder `roles/apps/brave-apps/br-email-brave/` → tag `br-email-brave`
    - File `roles/system/tasks/firewall.yml` → tag `firewall`
 
 2. **Builder vs Generated Apps**
-   - `pake-builder` = CLI tool to create pake apps
-   - `pake-apps` = Group tag for all generated pake apps
    - `brave-builder` = CLI tool to create brave apps
    - `brave-apps` = Group tag for all generated brave apps
 
 3. **Hierarchical Tags**
    - Broad: `dev` runs ALL dev tools
-   - Medium: `pake-apps` runs ALL pake apps
+   - Medium: `brave-apps` runs ALL brave apps
    - Specific: `python` runs just Python
 
 4. **Aliases**
    - Some tools have convenience aliases (e.g., `node` → `nodejs`, `golang` → `go`)
-   - Salesforce apps: `salesforce` alias for `sfdc-pake` and `sfdc-brave`
+   - Salesforce apps: `salesforce` alias for `sfdc-brave`
 
 ## State Management
 
@@ -187,7 +177,7 @@ Run a complete app installation (install + config + icons):
 ```bash
 ansible-playbook site.yml --tags slack
 ansible-playbook site.yml --tags vscode
-ansible-playbook site.yml --tags br-email-pake  # Tag matches folder name
+ansible-playbook site.yml --tags br-email-brave  # Tag matches folder name
 ```
 
 ### Install Multiple Specific Apps
@@ -299,97 +289,6 @@ app_states:
 - No `when` conditions on `import_role` statements
 - State checks inside role tasks: `app_states['app'] | default('present')`
 - Default to `'present'` so tag-based runs work by default
-
-## Reinstalling Packages (Force Reinstall)
-
-### The Reinstall Tag
-
-Some packages (like Pake apps) don't include version numbers in their filenames, which means Ansible can't detect when they've been updated. For these cases, we've implemented a `reinstall` tag that forces a clean reinstall.
-
-**How it works:**
-- Tasks tagged with `["never", "reinstall"]` only run when explicitly requested
-- The uninstall task removes the package
-- The install task (tagged with `["always"]`) then installs the updated package
-- During normal runs, the uninstall is skipped and install only runs if package is missing
-
-### Usage
-
-**Force reinstall of a single Pake app:**
-```bash
-ansible-playbook site.yml --tags reinstall,br-email
-```
-
-**Force reinstall of multiple Pake apps:**
-```bash
-ansible-playbook site.yml --tags reinstall,br-email,github,asana
-```
-
-**Typical workflow after regenerating a .deb file:**
-```bash
-# 1. Regenerate the .deb file with updated content
-create-web-app https://github.com GitHub
-
-# 2. Force reinstall on target machine
-ansible-playbook site.yml --tags reinstall,github
-```
-
-### Which Apps Support Reinstall?
-
-Currently implemented for:
-- **All Pake apps** (br-email, github, asana, sfdc, etc.)
-- Any app role that includes tasks tagged with `["never", "reinstall"]`
-
-### Implementation Details
-
-Each Pake app role includes these tasks:
-
-```yaml
-# Uninstall task - only runs with --tags reinstall
-- name: Uninstall app-name for reinstall
-  apt:
-    name: app-name
-    state: absent
-  become: true
-  when: app_states['app-name'] | default('present') == 'present'
-  tags: ["never", "reinstall"]
-
-# Install task - always runs when included
-- name: Install app-name .deb package
-  apt:
-    deb: "{{ role_path }}/files/app-name.deb"
-    state: present
-  become: true
-  when: app_states['app-name'] | default('present') == 'present'
-  tags: ["always"]
-```
-
-**Tag behavior:**
-- `never` = Skip this task unless explicitly requested
-- `reinstall` = Run when `--tags reinstall` is specified
-- `always` = Run even during tag-filtered runs
-
-## Pake Apps (Web-to-Desktop Framework)
-
-Pake is just a framework for converting web apps to desktop apps. Tags use app names, not the framework:
-
-```bash
-# Correct (app name)
-ansible-playbook site.yml --tags br-email
-ansible-playbook site.yml --tags github
-ansible-playbook site.yml --tags asana
-
-# Wrong (don't include framework suffix)
-ansible-playbook site.yml --tags br-email-pake  # ❌
-```
-
-**Available Pake Apps:**
-- github, asana, avanti
-- sfdc, salesforce (aliases)
-- lucid-chart, lucidchart (aliases)
-- br-email, kong-email
-- br-calendar, kong-calendar
-- br-drive, kong-drive
-- aha, workday, konnect
 
 ## Flatpak Apps
 

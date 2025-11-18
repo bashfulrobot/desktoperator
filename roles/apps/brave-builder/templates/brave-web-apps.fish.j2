@@ -271,10 +271,9 @@ function _brave_detect_window_class --description 'Detect actual window class by
     return 0
 end
 
-function _brave_check_icons --description 'Check if Brave icons exist, optionally copy from Pake as fallback'
+function _brave_check_icons --description 'Check if Brave icons exist'
     set -l name $argv[1]
     set -l role_path $argv[2]
-    set -l repo_path ~/dev/iac/desktoperator
     set -l dest_dir "$role_path/files"
     set -l prefix "brave-$name-icon"
 
@@ -288,25 +287,7 @@ function _brave_check_icons --description 'Check if Brave icons exist, optionall
         return 0
     end
 
-    # Try to copy from Pake as fallback (optional)
-    set -l src_dir "$repo_path/roles/apps/$name-pake/files"
-    if test -d "$src_dir" -a -f "$src_dir/pake-$name-icon.png"
-        echo "Brave icons not found, copying from Pake role as fallback..."
-
-        cp "$src_dir/pake-$name-icon.png" "$dest_dir/$prefix.png"
-        set -l sizes 16 32 48 64 128 256 512 800
-        for size in $sizes
-            set -l source_icon "$src_dir/pake-$name-icon-$size.png"
-            if test -f "$source_icon"
-                cp "$source_icon" "$dest_dir/$prefix-$size.png"
-            end
-        end
-
-        echo "✓ Copied icons from $src_dir → $dest_dir (as $prefix*)"
-        return 0
-    end
-
-    # No icons found anywhere
+    # No icons found
     echo "✗ Error: No icons found for '$name'"
     echo "  Please run: generate-brave-icon-set <icon_url> $name"
     echo "  Example: generate-brave-icon-set 'https://github.com/favicon.ico' $name"

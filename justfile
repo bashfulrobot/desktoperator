@@ -180,7 +180,7 @@ tags-tree:
     @echo "  just tag apps           # Broad: all apps"
     @echo "  just tag system         # Broad: all system config"
     @echo "  just tag slack          # Specific: just slack"
-    @echo "  just tag br-email-pake  # Specific: br-email pake implementation"
+    @echo "  just tag br-email-brave # Specific: br-email brave web app"
     @echo ""
 
 # Run Ansible with specific tag(s) on current host
