@@ -127,7 +127,7 @@ if [ ${#MISSING_TOOLS[@]} -gt 0 ]; then
     done
 
     # Remove duplicates
-    INSTALL_PACKAGES=($(echo "${INSTALL_PACKAGES[@]}" | tr ' ' '\n' | sort -u | tr '\n' ' '))
+    readarray -t INSTALL_PACKAGES < <(printf '%s\n' "${INSTALL_PACKAGES[@]}" | sort -u)
 
     info "Installing: ${INSTALL_PACKAGES[*]}"
     echo ""
@@ -567,7 +567,7 @@ EOF
       error "debuild failed for $DISTRO"
       echo ""
       gum style --foreground 9 "Build log:"
-      tail -50 ../build-${DISTRO}.log
+      tail -50 "../build-${DISTRO}.log"
       exit 1
   fi
   cd ..
