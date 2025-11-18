@@ -33,7 +33,7 @@ core_packages:
   - fish
   - flatpak
   - just
-  - jq # Required by spotify, pake roles for JSON parsing
+  - jq # Required by spotify and other roles for JSON parsing
   - libsecret-tools # Required for apps to access gnome-keyring (VSCode, etc.)
   - file-roller # GNOME archive manager for .zip, .tar.gz, .deb, etc.
   - python3-apt # Required for ansible.builtin.apt module and APT operations

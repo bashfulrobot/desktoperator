@@ -13,23 +13,7 @@ app_states:
   chrome: absent
   firefox: absent
   vivaldi: absent
-  # Pake apps - all set to absent
-  aha: absent
-  asana: absent
-  avanti: absent
-  br_calendar: absent
-  br_drive: absent
-  br_email: absent
-  github: absent
-  kong_calendar: absent
-  kong_docs: absent
-  kong_drive: absent
-  kong_email: absent
-  konnect: absent
-  lucid_chart: absent
-  omni: absent
-  sfdc: absent
-  workday: absent
+
 # Libvirt configuration
 libvirt_install_gui_tools: true
 

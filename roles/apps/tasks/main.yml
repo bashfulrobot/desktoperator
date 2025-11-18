@@ -31,97 +31,13 @@
     name: apps/spotify
   tags: [spotify]
 
-- name: Include Pake CLI web-to-desktop app builder
-  ansible.builtin.import_role:
-    name: apps/pake-builder
-  tags: [pake-builder]
-
-- name: Include GitHub Pake App
-  ansible.builtin.import_role:
-    name: apps/pake-apps/github-pake
-  tags: [github, pake]
-
+# Brave Web Apps
 - name: Include GitHub Brave Web App
   ansible.builtin.import_role:
     name: apps/brave-apps/github-brave
   tags: [github, brave-web-apps]
 
-- name: Include Asana Pake App
-  ansible.builtin.import_role:
-    name: apps/pake-apps/asana-pake
-  tags: [asana, pake]
 
-- name: Include Avanti Pake App
-  ansible.builtin.import_role:
-    name: apps/pake-apps/avanti-pake
-  tags: [avanti, pake]
-
-- name: Include Salesforce Pake App
-  ansible.builtin.import_role:
-    name: apps/pake-apps/sfdc-pake
-  tags: [sfdc, salesforce, pake]
-
-- name: Include Lucidchart Pake App
-  ansible.builtin.import_role:
-    name: apps/pake-apps/lucid-chart-pake
-  tags: [lucid-chart, lucidchart, pake]
-
-- name: Include BR Email Pake App
-  ansible.builtin.import_role:
-    name: apps/pake-apps/br-email-pake
-  tags: [br-email, pake]
-
-- name: Include Kong Email Pake App
-  ansible.builtin.import_role:
-    name: apps/pake-apps/kong-email-pake
-  tags: [kong-email, pake]
-
-- name: Include Kong Calendar Pake App
-  ansible.builtin.import_role:
-    name: apps/pake-apps/kong-calendar-pake
-  tags: [kong-calendar, pake]
-
-- name: Include BR Calendar Pake App
-  ansible.builtin.import_role:
-    name: apps/pake-apps/br-calendar-pake
-  tags: [br-calendar, pake]
-
-- name: Include Kong Drive Pake App
-  ansible.builtin.import_role:
-    name: apps/pake-apps/kong-drive-pake
-  tags: [kong-drive, pake]
-
-- name: Include BR Drive Pake App
-  ansible.builtin.import_role:
-    name: apps/pake-apps/br-drive-pake
-  tags: [br-drive, pake]
-
-- name: Include Aha Pake App
-  ansible.builtin.import_role:
-    name: apps/pake-apps/aha-pake
-  tags: [aha, pake]
-
-- name: Include Workday Pake App
-  ansible.builtin.import_role:
-    name: apps/pake-apps/workday-pake
-  tags: [workday, pake]
-
-- name: Include Konnect Pake App
-  ansible.builtin.import_role:
-    name: apps/pake-apps/konnect-pake
-  tags: [konnect, pake]
-
-- name: Include Kong Docs Pake App
-  ansible.builtin.import_role:
-    name: apps/pake-apps/kong-docs-pake
-  tags: [kong-docs, pake]
-
-- name: Include Omni Pake App
-  ansible.builtin.import_role:
-    name: apps/pake-apps/omni-pake
-  tags: [omni, pake]
-
-# Brave Web Apps (replacements for Pake apps)
 - name: Include Asana Brave Web App
   ansible.builtin.import_role:
     name: apps/brave-apps/asana-brave

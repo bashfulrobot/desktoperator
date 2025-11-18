@@ -1,9 +1,0 @@
-[Desktop Entry]
-Categories=
-Comment=🤱🏻 Turn any webpage into a desktop app with Rust.
-Exec=pake-lucidchart
-StartupWMClass=pake-lucid-chart
-Icon=pake-lucid-chart
-Name=lucid-chart
-Terminal=false
-Type=Application

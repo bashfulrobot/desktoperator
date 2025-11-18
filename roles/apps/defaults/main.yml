@@ -49,25 +49,8 @@ app_states:
   instruqt-cli: present
   lswt: present
   oq: present
-  pake: present
   brave-web-apps: present
-  # Pake apps (set to absent, replaced by brave equivalents)
-  github: absent
-  avanti: absent
-  sfdc: absent
-  lucid-chart: absent
-  br-email: absent
-  kong-email: absent
-  kong-calendar: absent
-  br-calendar: absent
-  kong-drive: absent
-  br-drive: absent
-  aha: absent
-  workday: absent
-  konnect: absent
-  kong-docs: absent
-  omni: absent
-  # Brave web apps (replacements for pake)
+  # Brave web apps
   github-brave: present
   avanti-brave: present
   sfdc-brave: present
