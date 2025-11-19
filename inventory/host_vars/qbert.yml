@@ -26,6 +26,7 @@ libvirt_install_gui_tools: true
 # Network bridge configuration
 network_create_bridge: true
 network_bridge_name: "br0"
+network_bridge_interface: "enp34s0"
 network_bridge_type: "dhcp"
 
 # Libvirt bridged network (uses host bridge for direct LAN access)

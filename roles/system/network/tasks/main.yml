@@ -1,13 +1,36 @@
 ---
 # Network configuration tasks
 
+- name: Check if bridge already exists and is functional
+  ansible.builtin.shell: |
+    set -o pipefail
+    ip link show {{ network_bridge_name }} type bridge 2>/dev/null && \
+    ip addr show {{ network_bridge_name }} | grep -q 'inet '
+  args:
+    executable: /bin/bash
+  register: bridge_exists
+  changed_when: false
+  failed_when: false
+  become: true
+  tags: [network]
+  when: network_create_bridge | bool
+
+- name: Skip bridge creation if already configured
+  ansible.builtin.debug:
+    msg: "Bridge {{ network_bridge_name }} already exists and has an IP address. Skipping configuration."
+  when:
+    - network_create_bridge | bool
+    - bridge_exists.rc == 0
+
 - name: Check if netplan is available
   ansible.builtin.stat:
     path: /etc/netplan
   register: netplan_dir
   become: true
   tags: [network]
-  when: network_create_bridge | bool
+  when:
+    - network_create_bridge | bool
+    - bridge_exists.rc != 0
 
 - name: Ensure netplan directory exists
   ansible.builtin.file:
@@ -20,6 +43,7 @@
   tags: [network]
   when:
     - network_create_bridge | bool
+    - bridge_exists.rc != 0
     - not netplan_dir.stat.exists
 
 - name: Get current network interface information
@@ -45,7 +69,9 @@
       Ensure you have local access or IPMI/iDRAC available.
       ================================================================================
   tags: [network]
-  when: network_create_bridge | bool
+  when:
+    - network_create_bridge | bool
+    - bridge_exists.rc != 0
 
 - name: Find existing netplan configuration files
   ansible.builtin.find:
@@ -54,7 +80,9 @@
   register: existing_netplan_files
   become: true
   tags: [network]
-  when: network_create_bridge | bool
+  when:
+    - network_create_bridge | bool
+    - bridge_exists.rc != 0
 
 - name: Back up existing netplan configuration
   ansible.builtin.copy:
@@ -63,22 +91,24 @@
     remote_src: true
     mode: preserve
   become: true
-  loop: "{{ existing_netplan_files.files }}"
+  loop: "{{ existing_netplan_files.files | default([]) }}"
   tags: [network]
   when:
     - network_create_bridge | bool
-    - existing_netplan_files.matched > 0
+    - bridge_exists.rc != 0
+    - existing_netplan_files.matched | default(0) > 0
 
 - name: Remove existing netplan configuration files
   ansible.builtin.file:
     path: "{{ item.path }}"
     state: absent
   become: true
-  loop: "{{ existing_netplan_files.files }}"
+  loop: "{{ existing_netplan_files.files | default([]) }}"
   tags: [network]
   when:
     - network_create_bridge | bool
-    - existing_netplan_files.matched > 0
+    - bridge_exists.rc != 0
+    - existing_netplan_files.matched | default(0) > 0
 
 - name: Create bridge netplan configuration
   ansible.builtin.template:
@@ -91,7 +121,9 @@
   become: true
   notify: apply netplan
   tags: [network]
-  when: network_create_bridge | bool
+  when:
+    - network_create_bridge | bool
+    - bridge_exists.rc != 0
 
 - name: Display post-configuration instructions
   ansible.builtin.debug:
@@ -117,7 +149,9 @@
 
       ================================================================================
   tags: [network]
-  when: network_create_bridge | bool
+  when:
+    - network_create_bridge | bool
+    - bridge_exists.rc != 0
 
 - name: Remove bridge configuration (when disabled)
   ansible.builtin.file:
