@@ -86,6 +86,15 @@
   become: true
   when: app_states['brave-browser'] | default('present') == 'present'
 
+# Brave Browser configuration
+- name: Deploy Brave Browser flags configuration
+  ansible.builtin.copy:
+    src: brave-flags.conf
+    dest: "{{ ansible_env.HOME }}/.config/brave-flags.conf"
+    owner: "{{ ansible_user_id }}"
+    mode: "0644"
+  when: app_states['brave-browser'] | default('present') == 'present'
+
 # Cleanup when absent
 - name: Remove Brave Browser when absent
   ansible.builtin.apt:
@@ -125,3 +134,9 @@
   become: true
   when: app_states['brave-browser'] | default('present') == 'absent'
   failed_when: false
+
+- name: Remove Brave Browser flags configuration when absent
+  ansible.builtin.file:
+    path: "{{ ansible_env.HOME }}/.config/brave-flags.conf"
+    state: absent
+  when: app_states['brave-browser'] | default('present') == 'absent'
