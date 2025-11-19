@@ -8,6 +8,7 @@
     org: mikefarah
     repo: yq
     binary_name: yq
+    archive_binary_name: yq_linux_amd64
     filename_substring: linux_amd64.tar.gz
   when: app_states.yq | default('present') == 'present'
 

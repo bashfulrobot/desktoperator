@@ -11,12 +11,14 @@
 # Optional variables:
 #   version: Specific version or "latest" (default: "latest")
 #   install_dir: Where to install binary (default: /usr/local/bin)
+#   archive_binary_name: Name of binary inside archive if different from binary_name (e.g., "yq_linux_amd64")
 
 - name: "Set default values for {{ repo }}"
   ansible.builtin.set_fact:
     github_release_version: "{{ version | default('latest') }}"
     github_release_install_dir: "{{ install_dir | default('/usr/local/bin') }}"
     github_release_state_dir: "/var/lib/ansible/github_releases/{{ org }}/{{ repo }}"
+    github_release_archive_binary_name: "{{ archive_binary_name | default(binary_name) }}"
 
 - name: "Create state directory for {{ repo }}"
   ansible.builtin.file:
@@ -85,7 +87,7 @@
     - name: "Find extracted binary"
       ansible.builtin.find:
         paths: "{{ system_github_temp_dir.path }}"
-        patterns: "{{ binary_name }}"
+        patterns: "{{ github_release_archive_binary_name }}"
         recurse: true
       register: system_github_found_binary
 
