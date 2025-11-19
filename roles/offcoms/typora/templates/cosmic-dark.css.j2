@@ -1,0 +1,448 @@
+/* Cosmic Dark Theme for Typora
+ * Auto-generated from COSMIC Desktop colors
+ * Matches your desktop theme for a unified experience
+ */
+
+:root {
+    /* COSMIC colors */
+    --bg-color: {{ theme_colors_dark.colors.background.hex }};
+    --primary-bg-color: {{ theme_colors_dark.colors.primary.hex }};
+    --secondary-bg-color: {{ theme_colors_dark.colors.secondary.hex }};
+    --text-color: {{ theme_colors_dark.colors.text_primary.hex }};
+    --text-secondary-color: {{ theme_colors_dark.colors.text_secondary.hex }};
+    --text-tertiary-color: {{ theme_colors_dark.colors.text_tertiary.hex }};
+    --accent-color: {{ theme_colors_dark.colors.accent.hex }};
+    --success-color: {{ theme_colors_dark.colors.success.hex }};
+    --warning-color: {{ theme_colors_dark.colors.warning.hex }};
+    --destructive-color: {{ theme_colors_dark.colors.destructive.hex }};
+
+    /* Derived colors */
+    --side-bar-bg-color: var(--primary-bg-color);
+    --active-file-bg-color: var(--secondary-bg-color);
+    --active-file-border-color: var(--accent-color);
+    --active-file-text-color: var(--text-color);
+
+    --item-hover-bg-color: var(--secondary-bg-color);
+    --item-hover-text-color: var(--text-color);
+
+    --select-text-bg-color: var(--accent-color);
+    --select-text-font-color: var(--bg-color);
+
+    --search-select-bg-color: var(--accent-color);
+    --search-select-text-color: var(--bg-color);
+
+    --control-text-color: var(--text-secondary-color);
+    --control-text-hover-color: var(--text-color);
+
+    --window-border: 1px solid var(--secondary-bg-color);
+    --primary-color: var(--accent-color);
+
+    --rawblock-edit-panel-bd: var(--secondary-bg-color);
+
+    /* Code block colors */
+    --code-bg-color: var(--primary-bg-color);
+    --code-border-color: var(--secondary-bg-color);
+}
+
+/* Base styles */
+html {
+    font-size: 16px;
+    -webkit-font-smoothing: antialiased;
+}
+
+html,
+body {
+    -webkit-text-size-adjust: 100%;
+    -ms-text-size-adjust: 100%;
+    background: var(--bg-color);
+    fill: currentColor;
+    line-height: 1.625rem;
+}
+
+#write {
+    max-width: 914px;
+    padding: 2rem;
+}
+
+@media only screen and (min-width: 1400px) {
+    #write {
+        max-width: 1024px;
+    }
+}
+
+@media only screen and (min-width: 1800px) {
+    #write {
+        max-width: 1200px;
+    }
+}
+
+html,
+body,
+button,
+input,
+select,
+textarea,
+div.code-tooltip-content {
+    color: var(--text-color);
+    border-color: transparent;
+}
+
+div.code-tooltip,
+.md-hover-tip .md-arrow:after {
+    background: var(--primary-bg-color);
+}
+
+.native-window #md-notification {
+    border: 1px solid var(--secondary-bg-color);
+}
+
+.popover.bottom > .arrow:after {
+    border-bottom-color: var(--primary-bg-color);
+}
+
+/* Font families */
+html,
+body,
+button,
+input,
+select,
+textarea {
+    font-family: "Helvetica Neue", Helvetica, Arial, 'Segoe UI Emoji', 'SF Pro', sans-serif;
+}
+
+/* Typography */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    font-family: "Lucida Grande", "Corbel", sans-serif;
+    font-weight: normal;
+    clear: both;
+    -ms-word-wrap: break-word;
+    word-wrap: break-word;
+    margin: 0;
+    padding: 0;
+    color: var(--text-color);
+}
+
+h1 {
+    font-size: 2.5rem;
+    line-height: 2.75rem;
+    margin-bottom: 1.5rem;
+    letter-spacing: -1.5px;
+    border-bottom: 2px solid var(--accent-color);
+    padding-bottom: 0.5rem;
+}
+
+h2 {
+    font-size: 1.63rem;
+    line-height: 1.875rem;
+    margin-bottom: 1.5rem;
+    letter-spacing: -1px;
+    font-weight: bold;
+}
+
+h3 {
+    font-size: 1.17rem;
+    line-height: 1.5rem;
+    margin-bottom: 1.5rem;
+    letter-spacing: -1px;
+    font-weight: bold;
+}
+
+h4 {
+    font-size: 1.12rem;
+    line-height: 1.375rem;
+    margin-bottom: 1rem;
+}
+
+h5 {
+    font-size: 0.97rem;
+    line-height: 1.25rem;
+    margin-bottom: 1rem;
+}
+
+h6 {
+    font-size: 0.93rem;
+    line-height: 1.25rem;
+    margin-bottom: 1rem;
+    color: var(--text-secondary-color);
+}
+
+/* Paragraph and inline styles */
+p,
+pre,
+.md-fences {
+    margin-top: 0;
+    margin-bottom: 1.5rem;
+}
+
+hr {
+    height: 2px;
+    border: 0;
+    background-color: var(--secondary-bg-color);
+    margin: 24px 0 !important;
+}
+
+a {
+    color: var(--accent-color);
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+/* Lists */
+ul,
+ol {
+    padding-left: 1.875rem;
+}
+
+li {
+    margin-bottom: 0.5rem;
+}
+
+/* Blockquotes */
+blockquote {
+    border-left: 4px solid var(--accent-color);
+    padding: 0.5rem 1rem;
+    margin: 1.5rem 0;
+    background-color: var(--primary-bg-color);
+    color: var(--text-secondary-color);
+}
+
+/* Code blocks */
+code,
+.md-fences {
+    background-color: var(--code-bg-color);
+    border: 1px solid var(--code-border-color);
+    border-radius: 3px;
+    font-family: "SF Mono", Monaco, "Cascadia Code", "Roboto Mono", Consolas, "Courier New", monospace;
+}
+
+code {
+    padding: 0.2rem 0.4rem;
+    font-size: 0.9em;
+    color: var(--accent-color);
+}
+
+.md-fences {
+    padding: 1rem;
+    margin: 1.5rem 0;
+    font-size: 0.9rem;
+    line-height: 1.5;
+    color: var(--text-color);
+}
+
+/* Tables */
+table {
+    border-collapse: collapse;
+    margin: 1.5rem 0;
+    width: 100%;
+}
+
+table thead {
+    background-color: var(--primary-bg-color);
+}
+
+table th {
+    font-weight: bold;
+    text-align: left;
+    padding: 0.75rem;
+    border: 1px solid var(--secondary-bg-color);
+}
+
+table td {
+    padding: 0.75rem;
+    border: 1px solid var(--secondary-bg-color);
+}
+
+table tr:nth-child(even) {
+    background-color: var(--primary-bg-color);
+}
+
+table tr:hover {
+    background-color: var(--secondary-bg-color);
+}
+
+/* Task lists */
+.task-list-item {
+    list-style-type: none;
+}
+
+.task-list-item input[type="checkbox"] {
+    margin-right: 0.5rem;
+    accent-color: var(--accent-color);
+}
+
+.task-list-item input[type="checkbox"]:checked {
+    accent-color: var(--success-color);
+}
+
+/* Sidebar */
+#typora-sidebar {
+    background-color: var(--side-bar-bg-color);
+    border-right: 1px solid var(--secondary-bg-color);
+}
+
+.sidebar-tab {
+    color: var(--text-secondary-color);
+}
+
+.sidebar-tab.active,
+.sidebar-tab:hover {
+    color: var(--text-color);
+}
+
+.file-node-title {
+    color: var(--text-color);
+}
+
+.file-node-title:hover {
+    background-color: var(--item-hover-bg-color);
+}
+
+.file-tree-node.active > .file-node-background {
+    background-color: var(--active-file-bg-color);
+    border-left: 4px solid var(--accent-color);
+}
+
+/* Search */
+#md-searchpanel {
+    background-color: var(--primary-bg-color);
+    border: 1px solid var(--secondary-bg-color);
+}
+
+#md-searchpanel input {
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    border: 1px solid var(--secondary-bg-color);
+}
+
+#md-searchpanel .btn {
+    color: var(--text-color);
+}
+
+#md-searchpanel .btn:hover {
+    background-color: var(--secondary-bg-color);
+}
+
+/* Selection */
+::selection {
+    background-color: var(--select-text-bg-color);
+    color: var(--select-text-font-color);
+}
+
+/* Focus border */
+input:focus,
+textarea:focus,
+select:focus {
+    border-color: var(--accent-color);
+    outline: none;
+}
+
+/* Buttons */
+button,
+.btn {
+    background-color: var(--primary-bg-color);
+    color: var(--text-color);
+    border: 1px solid var(--secondary-bg-color);
+    border-radius: 3px;
+    padding: 0.5rem 1rem;
+    cursor: pointer;
+}
+
+button:hover,
+.btn:hover {
+    background-color: var(--secondary-bg-color);
+}
+
+button.primary,
+.btn-primary {
+    background-color: var(--accent-color);
+    color: var(--bg-color);
+    border-color: var(--accent-color);
+}
+
+button.primary:hover,
+.btn-primary:hover {
+    opacity: 0.9;
+}
+
+/* Tooltips */
+.md-tooltip {
+    background-color: var(--primary-bg-color);
+    color: var(--text-color);
+    border: 1px solid var(--secondary-bg-color);
+}
+
+/* Footnotes */
+.footnotes {
+    border-top: 2px solid var(--secondary-bg-color);
+    margin-top: 2rem;
+    padding-top: 1rem;
+    color: var(--text-secondary-color);
+    font-size: 0.9rem;
+}
+
+/* Syntax highlighting for code blocks */
+.cm-s-inner .cm-keyword {
+    color: var(--accent-color);
+}
+
+.cm-s-inner .cm-string {
+    color: var(--success-color);
+}
+
+.cm-s-inner .cm-comment {
+    color: var(--text-tertiary-color);
+    font-style: italic;
+}
+
+.cm-s-inner .cm-number {
+    color: var(--warning-color);
+}
+
+.cm-s-inner .cm-variable {
+    color: var(--text-color);
+}
+
+.cm-s-inner .cm-operator {
+    color: var(--text-color);
+}
+
+/* Mermaid diagrams */
+.md-diagram-panel {
+    background-color: var(--bg-color);
+}
+
+/* Image borders */
+img {
+    border-radius: 3px;
+}
+
+/* Mark/Highlight */
+mark {
+    background-color: var(--warning-color);
+    color: var(--bg-color);
+    padding: 0.1rem 0.3rem;
+    border-radius: 2px;
+}
+
+/* Emphasis */
+em {
+    font-style: italic;
+}
+
+strong {
+    font-weight: bold;
+    color: var(--text-color);
+}
+
+/* Strikethrough */
+del {
+    color: var(--text-tertiary-color);
+}

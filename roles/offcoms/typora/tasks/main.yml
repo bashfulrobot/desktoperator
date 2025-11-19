@@ -158,6 +158,61 @@
   become: true
   when: app_states.typora | default('present') == 'present'
 
+# COSMIC Theme Integration
+# Load color variables (auto-generate if missing)
+- name: Check if auto-colors.yml exists
+  ansible.builtin.stat:
+    path: "{{ playbook_dir }}/group_vars/all/auto-colors.yml"
+  register: auto_colors_file
+  delegate_to: localhost
+  become: false
+  when: app_states.typora | default('present') == 'present'
+
+- name: Generate color variables if missing
+  ansible.builtin.command: "{{ playbook_dir }}/scripts/generate-cosmic-colors.sh"
+  args:
+    chdir: "{{ playbook_dir }}"
+  delegate_to: localhost
+  become: false
+  when:
+    - app_states.typora | default('present') == 'present'
+    - not auto_colors_file.stat.exists
+
+- name: Load auto-generated color variables
+  ansible.builtin.include_vars:
+    file: "{{ playbook_dir }}/group_vars/all/auto-colors.yml"
+  when: app_states.typora | default('present') == 'present'
+
+- name: Create Typora themes directory
+  ansible.builtin.file:
+    path: "{{ user.home }}/.config/Typora/themes"
+    state: directory
+    owner: "{{ user.name }}"
+    group: "{{ user.name }}"
+    mode: "0755"
+  become: true
+  when: app_states.typora | default('present') == 'present'
+
+- name: Deploy Cosmic Dark theme
+  ansible.builtin.template:
+    src: cosmic-dark.css.j2
+    dest: "{{ user.home }}/.config/Typora/themes/cosmic-dark.css"
+    owner: "{{ user.name }}"
+    group: "{{ user.name }}"
+    mode: "0644"
+  become: true
+  when: app_states.typora | default('present') == 'present'
+
+- name: Deploy Cosmic Light theme
+  ansible.builtin.template:
+    src: cosmic-light.css.j2
+    dest: "{{ user.home }}/.config/Typora/themes/cosmic-light.css"
+    owner: "{{ user.name }}"
+    group: "{{ user.name }}"
+    mode: "0644"
+  become: true
+  when: app_states.typora | default('present') == 'present'
+
 # Cleanup when absent
 - name: Remove Typora APT repository when absent
   ansible.builtin.deb822_repository:
@@ -202,5 +257,15 @@
   ansible.builtin.file:
     path: "{{ typora_plugin_dir }}"
     state: absent
+  become: true
+  when: app_states.typora | default('present') == 'absent'
+
+- name: Remove Cosmic themes when absent
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: absent
+  loop:
+    - "{{ user.home }}/.config/Typora/themes/cosmic-dark.css"
+    - "{{ user.home }}/.config/Typora/themes/cosmic-light.css"
   become: true
   when: app_states.typora | default('present') == 'absent'
