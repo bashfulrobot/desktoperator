@@ -69,3 +69,12 @@ libvirt_configure_acls: true
 
 # Additional storage paths to configure (beyond default storage pool)
 libvirt_additional_storage_paths: []
+
+# Bridged networks (connects VMs directly to host's physical network)
+# Bridge device must be created on the host first (e.g., via netplan)
+libvirt_bridged_networks: []
+# Example:
+# libvirt_bridged_networks:
+#   - name: "host-bridge"
+#     bridge: "br0"
+#     autostart: true

@@ -23,6 +23,17 @@ morning_wake_enabled: true
 # Libvirt configuration
 libvirt_install_gui_tools: true
 
+# Network bridge configuration
+network_create_bridge: true
+network_bridge_name: "br0"
+network_bridge_type: "dhcp"
+
+# Libvirt bridged network (uses host bridge for direct LAN access)
+libvirt_bridged_networks:
+  - name: "host-bridge"
+    bridge: "br0"
+    autostart: true
+
 # Libvirt routed networks for qbert (6 networks)
 # Using obscure subnets in 172.29.x.x range to avoid common conflicts
 # qbert uses 172.29.10.0 - 172.29.14.0 range + 172.29.188.0 for Talos

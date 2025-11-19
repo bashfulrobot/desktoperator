@@ -416,6 +416,75 @@
     - app_states['libvirt'] | default('present') == 'present'
     - libvirt_routed_networks | length > 0
 
+# Bridged network configuration
+- name: Create bridged network XML configurations
+  ansible.builtin.template:
+    src: bridged-network.xml.j2
+    dest: "/tmp/{{ item.name }}.xml"
+    mode: "0644"
+  become: true
+  loop: "{{ libvirt_bridged_networks }}"
+  tags: [libvirt]
+  when:
+    - app_states['libvirt'] | default('present') == 'present'
+    - libvirt_bridged_networks | default([]) | length > 0
+
+- name: Check if bridged networks exist
+  ansible.builtin.command:
+    cmd: "virsh net-info {{ item.name }}"
+  become: true
+  register: bridged_networks_exist
+  failed_when: false
+  changed_when: false
+  loop: "{{ libvirt_bridged_networks }}"
+  tags: [libvirt]
+  when:
+    - app_states['libvirt'] | default('present') == 'present'
+    - libvirt_bridged_networks | default([]) | length > 0
+
+- name: Define bridged networks
+  ansible.builtin.command:
+    cmd: "virsh net-define /tmp/{{ item.item.name }}.xml"
+  become: true
+  loop: "{{ bridged_networks_exist.results }}"
+  tags: [libvirt]
+  when:
+    - app_states['libvirt'] | default('present') == 'present'
+    - libvirt_bridged_networks | default([]) | length > 0
+    - item.rc != 0
+
+- name: Start bridged networks
+  ansible.builtin.command:
+    cmd: "virsh net-start {{ item.name }}"
+  become: true
+  failed_when: false
+  loop: "{{ libvirt_bridged_networks }}"
+  tags: [libvirt]
+  when:
+    - app_states['libvirt'] | default('present') == 'present'
+    - libvirt_bridged_networks | default([]) | length > 0
+
+- name: Configure bridged network autostart
+  ansible.builtin.command:
+    cmd: "virsh net-autostart {{ item.name }} {{ '--disable' if not item.autostart else '' }}"
+  become: true
+  loop: "{{ libvirt_bridged_networks }}"
+  tags: [libvirt]
+  when:
+    - app_states['libvirt'] | default('present') == 'present'
+    - libvirt_bridged_networks | default([]) | length > 0
+
+- name: Clean up temporary bridged network XML files
+  ansible.builtin.file:
+    path: "/tmp/{{ item.name }}.xml"
+    state: absent
+  become: true
+  loop: "{{ libvirt_bridged_networks }}"
+  tags: [libvirt]
+  when:
+    - app_states['libvirt'] | default('present') == 'present'
+    - libvirt_bridged_networks | default([]) | length > 0
+
 - name: Check if UFW is installed
   ansible.builtin.stat:
     path: /etc/ufw/before.rules
