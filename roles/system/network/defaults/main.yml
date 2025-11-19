@@ -1,0 +1,24 @@
+---
+# Network configuration defaults
+
+# Bridge configuration
+# Enable bridge creation (requires netplan)
+network_create_bridge: false
+
+# Bridge name
+network_bridge_name: "br0"
+
+# Physical interface to attach to bridge (auto-detected if not specified)
+network_bridge_interface: "{{ ansible_default_ipv4.interface | default('eth0') }}"
+
+# Bridge configuration type
+# Options: dhcp (get IP from DHCP), static (use static IP)
+network_bridge_type: "dhcp"
+
+# Static IP configuration (only used if network_bridge_type is 'static')
+network_bridge_static_ip: ""
+network_bridge_static_gateway: ""
+network_bridge_static_nameservers: []
+
+# Netplan renderer (NetworkManager or networkd)
+network_netplan_renderer: "networkd"

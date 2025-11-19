@@ -1,0 +1,129 @@
+---
+# Network configuration tasks
+
+- name: Check if netplan is available
+  ansible.builtin.stat:
+    path: /etc/netplan
+  register: netplan_dir
+  become: true
+  tags: [network]
+  when: network_create_bridge | bool
+
+- name: Ensure netplan directory exists
+  ansible.builtin.file:
+    path: /etc/netplan
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+  become: true
+  tags: [network]
+  when:
+    - network_create_bridge | bool
+    - not netplan_dir.stat.exists
+
+- name: Get current network interface information
+  ansible.builtin.debug:
+    msg: |
+      ================================================================================
+      BRIDGE NETWORK CONFIGURATION - {{ inventory_hostname | upper }}
+      ================================================================================
+
+      Creating bridge: {{ network_bridge_name }}
+      Physical interface: {{ network_bridge_interface }}
+      Configuration type: {{ network_bridge_type }}
+
+      {% if network_bridge_type == 'static' %}
+      Static IP: {{ network_bridge_static_ip }}
+      Gateway: {{ network_bridge_static_gateway }}
+      Nameservers: {{ network_bridge_static_nameservers | join(', ') }}
+      {% else %}
+      IP will be obtained via DHCP
+      {% endif %}
+
+      WARNING: This will temporarily disconnect network during application.
+      Ensure you have local access or IPMI/iDRAC available.
+      ================================================================================
+  tags: [network]
+  when: network_create_bridge | bool
+
+- name: Find existing netplan configuration files
+  ansible.builtin.find:
+    paths: /etc/netplan
+    patterns: "*.yaml,*.yml"
+  register: existing_netplan_files
+  become: true
+  tags: [network]
+  when: network_create_bridge | bool
+
+- name: Back up existing netplan configuration
+  ansible.builtin.copy:
+    src: "{{ item.path }}"
+    dest: "{{ item.path }}.backup-{{ ansible_date_time.epoch }}"
+    remote_src: true
+    mode: preserve
+  become: true
+  loop: "{{ existing_netplan_files.files }}"
+  tags: [network]
+  when:
+    - network_create_bridge | bool
+    - existing_netplan_files.matched > 0
+
+- name: Remove existing netplan configuration files
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    state: absent
+  become: true
+  loop: "{{ existing_netplan_files.files }}"
+  tags: [network]
+  when:
+    - network_create_bridge | bool
+    - existing_netplan_files.matched > 0
+
+- name: Create bridge netplan configuration
+  ansible.builtin.template:
+    src: bridge-netplan.yaml.j2
+    dest: "/etc/netplan/01-bridge-{{ network_bridge_name }}.yaml"
+    owner: root
+    group: root
+    mode: "0600"
+    backup: true
+  become: true
+  notify: apply netplan
+  tags: [network]
+  when: network_create_bridge | bool
+
+- name: Display post-configuration instructions
+  ansible.builtin.debug:
+    msg: |
+      ================================================================================
+      BRIDGE CONFIGURATION COMPLETE
+      ================================================================================
+
+      Bridge {{ network_bridge_name }} has been configured successfully.
+
+      NEXT STEPS:
+      1. Network configuration will be applied automatically
+      2. If network disconnects, wait 30 seconds for reconnection
+      3. Verify bridge with: ip addr show {{ network_bridge_name }}
+      4. Check bridge status: brctl show {{ network_bridge_name }}
+      5. Configure libvirt to use this bridge
+
+      For libvirt, add to host_vars:
+      libvirt_bridged_networks:
+        - name: "host-bridge"
+          bridge: "{{ network_bridge_name }}"
+          autostart: true
+
+      ================================================================================
+  tags: [network]
+  when: network_create_bridge | bool
+
+- name: Remove bridge configuration (when disabled)
+  ansible.builtin.file:
+    path: "/etc/netplan/01-bridge-{{ network_bridge_name }}.yaml"
+    state: absent
+  become: true
+  notify: apply netplan
+  tags: [network]
+  when: not network_create_bridge | bool

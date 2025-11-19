@@ -1,0 +1,8 @@
+---
+# Network handlers
+
+- name: apply netplan
+  ansible.builtin.command:
+    cmd: netplan apply
+  become: true
+  listen: apply netplan

@@ -26,6 +26,11 @@
   ansible.builtin.import_tasks: users.yml
   tags: [users]
 
+- name: Include network configuration
+  ansible.builtin.include_role:
+    name: system/network
+  tags: [network, bridge, netplan]
+
 - name: Include libvirt virtualization
   ansible.builtin.include_role:
     name: system/libvirt

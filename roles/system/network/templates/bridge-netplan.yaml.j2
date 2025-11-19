@@ -1,0 +1,29 @@
+network:
+  version: 2
+  renderer: {{ network_netplan_renderer }}
+  ethernets:
+    {{ network_bridge_interface }}:
+      dhcp4: false
+      dhcp6: false
+  bridges:
+    {{ network_bridge_name }}:
+{% if network_bridge_type == 'dhcp' %}
+      dhcp4: true
+      dhcp6: false
+{% else %}
+      addresses:
+        - {{ network_bridge_static_ip }}
+      routes:
+        - to: default
+          via: {{ network_bridge_static_gateway }}
+      nameservers:
+        addresses:
+{% for ns in network_bridge_static_nameservers %}
+          - {{ ns }}
+{% endfor %}
+{% endif %}
+      interfaces:
+        - {{ network_bridge_interface }}
+      parameters:
+        stp: true
+        forward-delay: 4
