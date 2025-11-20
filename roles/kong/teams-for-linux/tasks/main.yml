@@ -24,6 +24,12 @@
   become: true
   when: app_states['teams-for-linux'] | default('present') == 'present'
 
+- name: Set Teams for Linux as default handler for msteams:// URLs
+  ansible.builtin.command:
+    cmd: xdg-mime default com.github.IsmaelMartinez.teams_for_linux.desktop x-scheme-handler/msteams
+  changed_when: false
+  when: app_states['teams-for-linux'] | default('present') == 'present'
+
 - name: Remove Teams for Linux
   community.general.flatpak:
     name: com.github.IsmaelMartinez.teams_for_linux
