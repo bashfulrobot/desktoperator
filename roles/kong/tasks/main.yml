@@ -6,11 +6,6 @@
     name: kong/slack
   tags: [kong, slack]
 
-- name: Include Teams for Linux
-  ansible.builtin.import_role:
-    name: kong/teams-for-linux
-  tags: [kong, teams-for-linux, teams]
-
 - name: Include Kong CLI tools (deck and kongctl)
   ansible.builtin.import_role:
     name: kong/kong-cli

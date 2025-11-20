@@ -123,6 +123,11 @@
     name: apps/brave-apps/team-agenda-brave
   tags: [team-agenda, brave-web-apps]
 
+- name: Include MS Teams Brave Web App
+  ansible.builtin.import_role:
+    name: apps/MS-Teams-brave
+  tags: [MS-Teams, teams, brave-web-apps]
+
 - name: Include Kooha screen recorder
   ansible.builtin.import_role:
     name: apps/kooha
