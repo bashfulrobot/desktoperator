@@ -1,11 +1,6 @@
 ---
 # Browsers role - web browser installations
 
-- name: Include Firefox browser
-  ansible.builtin.import_role:
-    name: apps/browsers/firefox
-  tags: [browsers, firefox]
-
 - name: Include Vivaldi browser
   ansible.builtin.import_role:
     name: apps/browsers/vivaldi
