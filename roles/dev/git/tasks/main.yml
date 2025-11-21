@@ -71,6 +71,35 @@
   become: true
   tags: [git, system]
 
+- name: Download GitHub Desktop GPG key
+  ansible.builtin.get_url:
+    url: https://mirror.mwt.me/shiftkey-desktop/gpgkey
+    dest: /usr/share/keyrings/shiftkey-packages.asc
+    mode: "0644"
+  become: true
+  tags: [git, system]
+
+- name: Add GitHub Desktop repository with GPG key
+  ansible.builtin.deb822_repository:
+    name: shiftkey-packages
+    types: [deb]
+    uris: https://mirror.mwt.me/shiftkey-desktop/deb/
+    suites: any
+    components: [main]
+    architectures: amd64
+    signed_by: /usr/share/keyrings/shiftkey-packages.asc
+    state: present
+  become: true
+  tags: [git, system]
+
+- name: Install GitHub Desktop
+  ansible.builtin.apt:
+    name: github-desktop
+    state: present
+    update_cache: true
+  become: true
+  tags: [git, system]
+
 - name: Create git config directory
   ansible.builtin.file:
     path: "{{ user.home }}/.config/git"
