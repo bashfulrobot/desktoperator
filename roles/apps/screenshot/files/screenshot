@@ -1,0 +1,27 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Screenshot capture script using cosmic-screenshot + satty
+# Captures with cosmic-screenshot, annotates in satty, removes temp file
+
+# Capture screenshot (interactive mode saves to ~/Pictures)
+cosmic-screenshot --notify=false --modal=false
+
+# Find the most recent screenshot
+latest=$(ls -t "$HOME/Pictures"/Screenshot_*.png 2>/dev/null | head -1)
+
+if [[ -z "$latest" ]]; then
+    echo "No screenshot found" >&2
+    exit 1
+fi
+
+# Open in satty for annotation
+satty --filename "$latest" \
+    --early-exit \
+    --copy-command wl-copy \
+    --output-filename "$HOME/Screenshots/%Y-%m-%d_%H-%M-%S.png" \
+    --initial-tool arrow \
+    --fullscreen || true
+
+# Remove the temp screenshot
+rm -f "$latest"

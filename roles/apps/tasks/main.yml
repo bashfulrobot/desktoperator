@@ -132,3 +132,8 @@
   ansible.builtin.import_role:
     name: apps/kooha
   tags: [kooha]
+
+- name: Include screenshot tools (grim, slurp, satty)
+  ansible.builtin.import_role:
+    name: apps/screenshot
+  tags: [screenshot]

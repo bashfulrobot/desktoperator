@@ -1,0 +1,43 @@
+---
+# Screenshot tools installation (cosmic-screenshot + satty)
+
+- name: Create Screenshots directory
+  ansible.builtin.file:
+    path: "{{ user.home }}/Screenshots"
+    state: directory
+    owner: "{{ user.name }}"
+    group: "{{ user.name }}"
+    mode: "0755"
+  become: true
+  when: app_states.screenshot | default('present') == 'present'
+
+- name: Install satty from GitHub
+  ansible.builtin.include_tasks: ../../../system/tasks/includes/github_release.yml
+  vars:
+    org: Satty-org
+    repo: Satty
+    binary_name: satty
+    filename_substring: x86_64-unknown-linux-gnu.tar.gz
+  when: app_states.screenshot | default('present') == 'present'
+
+- name: Install screenshot script
+  ansible.builtin.copy:
+    src: screenshot
+    dest: /usr/local/bin/screenshot
+    mode: "0755"
+  become: true
+  when: app_states.screenshot | default('present') == 'present'
+
+- name: Remove satty binary when absent
+  ansible.builtin.file:
+    path: /usr/local/bin/satty
+    state: absent
+  when: app_states.screenshot | default('present') == 'absent'
+  become: true
+
+- name: Remove screenshot script when absent
+  ansible.builtin.file:
+    path: /usr/local/bin/screenshot
+    state: absent
+  when: app_states.screenshot | default('present') == 'absent'
+  become: true
