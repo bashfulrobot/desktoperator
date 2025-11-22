@@ -2,6 +2,20 @@
 # Meetsum - Meeting summary generator CLI tool
 # GitHub: https://github.com/bashfulrobot/meetsum
 
+- name: Install clang dependency
+  ansible.builtin.apt:
+    name: clang
+    state: present
+  become: true
+  when: app_states.meetsum | default('present') == 'present'
+
+- name: Remove clang when meetsum absent
+  ansible.builtin.apt:
+    name: clang
+    state: absent
+  become: true
+  when: app_states.meetsum | default('present') == 'absent'
+
 - name: Create meetsum state directory
   ansible.builtin.file:
     path: /var/lib/ansible/github_releases/bashfulrobot/meetsum
