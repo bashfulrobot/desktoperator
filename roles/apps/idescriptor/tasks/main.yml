@@ -1,0 +1,206 @@
+---
+# iDescriptor - iDevice management tool installation via AppImage
+
+- name: Set iDescriptor version
+  ansible.builtin.set_fact:
+    idescriptor_version: "v0.1.0"
+    idescriptor_install_dir: /opt/idescriptor
+  when: app_states['idescriptor'] | default('present') == 'present'
+
+# FUSE is required for AppImages to work
+- name: Install FUSE library for AppImage support
+  ansible.builtin.apt:
+    name: libfuse2t64
+    state: present
+  become: true
+  when: app_states['idescriptor'] | default('present') == 'present'
+
+# udev rules for Apple device USB access
+- name: Create udev rules for Apple devices
+  ansible.builtin.copy:
+    dest: /etc/udev/rules.d/99-idevice.rules
+    mode: "0644"
+    content: |
+      # Allow access to Apple USB devices for iDescriptor
+      SUBSYSTEM=="usb", ATTR{idVendor}=="05ac", MODE="0666", GROUP="idevice"
+  become: true
+  register: udev_rules
+  when: app_states['idescriptor'] | default('present') == 'present'
+
+- name: Create idevice group
+  ansible.builtin.group:
+    name: idevice
+    state: present
+  become: true
+  when: app_states['idescriptor'] | default('present') == 'present'
+
+- name: Add user to idevice group
+  ansible.builtin.user:
+    name: "{{ ansible_user_id }}"
+    groups: idevice
+    append: true
+  become: true
+  when: app_states['idescriptor'] | default('present') == 'present'
+
+- name: Reload udev rules
+  ansible.builtin.shell: |
+    udevadm control --reload-rules
+    udevadm trigger
+  become: true
+  when:
+    - app_states['idescriptor'] | default('present') == 'present'
+    - udev_rules.changed
+  changed_when: true
+
+- name: Check if iDescriptor is installed
+  ansible.builtin.stat:
+    path: /opt/idescriptor/iDescriptor.AppImage
+  register: idescriptor_installed
+  when: app_states['idescriptor'] | default('present') == 'present'
+
+- name: Create iDescriptor installation directory
+  ansible.builtin.file:
+    path: "{{ idescriptor_install_dir }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+  become: true
+  when:
+    - app_states['idescriptor'] | default('present') == 'present'
+    - not idescriptor_installed.stat.exists | default(true)
+
+- name: Download iDescriptor AppImage zip
+  ansible.builtin.get_url:
+    url: "https://github.com/iDescriptor/iDescriptor/releases/download/{{ idescriptor_version }}/iDescriptor-{{ idescriptor_version }}-Linux_x86_64.AppImage.zip"
+    dest: "/tmp/iDescriptor-{{ idescriptor_version }}.zip"
+    mode: "0644"
+  when:
+    - app_states['idescriptor'] | default('present') == 'present'
+    - not idescriptor_installed.stat.exists | default(true)
+  become: true
+
+- name: Extract iDescriptor AppImage
+  ansible.builtin.unarchive:
+    src: "/tmp/iDescriptor-{{ idescriptor_version }}.zip"
+    dest: "{{ idescriptor_install_dir }}"
+    remote_src: true
+  become: true
+  when:
+    - app_states['idescriptor'] | default('present') == 'present'
+    - not idescriptor_installed.stat.exists | default(true)
+
+- name: Find AppImage file
+  ansible.builtin.find:
+    paths: "{{ idescriptor_install_dir }}"
+    patterns: "*.AppImage"
+  register: appimage_files
+  when:
+    - app_states['idescriptor'] | default('present') == 'present'
+    - not idescriptor_installed.stat.exists | default(true)
+
+- name: Rename AppImage to standard name
+  ansible.builtin.command:
+    cmd: "mv '{{ appimage_files.files[0].path }}' '{{ idescriptor_install_dir }}/iDescriptor.AppImage'"
+  become: true
+  when:
+    - app_states['idescriptor'] | default('present') == 'present'
+    - not idescriptor_installed.stat.exists | default(true)
+    - appimage_files.files | length > 0
+  changed_when: true
+
+- name: Make AppImage executable
+  ansible.builtin.file:
+    path: "{{ idescriptor_install_dir }}/iDescriptor.AppImage"
+    mode: "0755"
+  become: true
+  when: app_states['idescriptor'] | default('present') == 'present'
+
+- name: Extract AppImage icon
+  ansible.builtin.shell: |
+    set -o pipefail
+    cd {{ idescriptor_install_dir }}
+    ./iDescriptor.AppImage --appimage-extract '*.png' 2>/dev/null || true
+    if [ -d squashfs-root ]; then
+      find squashfs-root -name "*.png" -type f | head -1 | xargs -I {} cp {} {{ idescriptor_install_dir }}/icon.png
+      rm -rf squashfs-root
+    fi
+  args:
+    creates: "{{ idescriptor_install_dir }}/icon.png"
+    executable: /bin/bash
+  become: true
+  when: app_states['idescriptor'] | default('present') == 'present'
+
+- name: Create iDescriptor desktop entry
+  ansible.builtin.copy:
+    dest: /usr/share/applications/idescriptor.desktop
+    mode: "0644"
+    content: |
+      [Desktop Entry]
+      Version=1.0
+      Name=iDescriptor
+      Comment=iDevice management tool - connect and manage Apple devices
+      Exec={{ idescriptor_install_dir }}/iDescriptor.AppImage %u
+      Icon={{ idescriptor_install_dir }}/icon.png
+      Terminal=false
+      Type=Application
+      Categories=Utility;System;
+      StartupNotify=true
+      StartupWMClass=iDescriptor
+  become: true
+  when: app_states['idescriptor'] | default('present') == 'present'
+
+- name: Create iDescriptor symlink
+  ansible.builtin.file:
+    src: "{{ idescriptor_install_dir }}/iDescriptor.AppImage"
+    dest: /usr/local/bin/idescriptor
+    state: link
+  become: true
+  when: app_states['idescriptor'] | default('present') == 'present'
+
+- name: Clean up downloaded zip
+  ansible.builtin.file:
+    path: "/tmp/iDescriptor-{{ idescriptor_version }}.zip"
+    state: absent
+  become: true
+  when: app_states['idescriptor'] | default('present') == 'present'
+
+# Cleanup when absent
+- name: Remove iDescriptor symlink when absent
+  ansible.builtin.file:
+    path: /usr/local/bin/idescriptor
+    state: absent
+  become: true
+  when: app_states['idescriptor'] | default('present') == 'absent'
+
+- name: Remove iDescriptor desktop entry when absent
+  ansible.builtin.file:
+    path: /usr/share/applications/idescriptor.desktop
+    state: absent
+  become: true
+  when: app_states['idescriptor'] | default('present') == 'absent'
+
+- name: Remove iDescriptor installation when absent
+  ansible.builtin.file:
+    path: /opt/idescriptor
+    state: absent
+  become: true
+  when: app_states['idescriptor'] | default('present') == 'absent'
+
+- name: Remove udev rules when absent
+  ansible.builtin.file:
+    path: /etc/udev/rules.d/99-idevice.rules
+    state: absent
+  become: true
+  register: udev_rules_removed
+  when: app_states['idescriptor'] | default('present') == 'absent'
+
+- name: Reload udev rules after removal
+  ansible.builtin.shell: |
+    udevadm control --reload-rules
+    udevadm trigger
+  become: true
+  when:
+    - app_states['idescriptor'] | default('present') == 'absent'
+    - udev_rules_removed.changed
+  changed_when: true

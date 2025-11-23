@@ -137,3 +137,8 @@
   ansible.builtin.import_role:
     name: apps/screenshot
   tags: [screenshot]
+
+- name: Include iDescriptor iDevice management
+  ansible.builtin.import_role:
+    name: apps/idescriptor
+  tags: [idescriptor]
