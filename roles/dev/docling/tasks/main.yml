@@ -1,0 +1,134 @@
+---
+# Docling - Document parsing and understanding library
+# GitHub: https://github.com/docling-project/docling
+# Installs via uv tool (universal Python package installer)
+
+# Install system dependencies
+- name: Install Tesseract OCR system dependencies
+  ansible.builtin.apt:
+    name:
+      - tesseract-ocr
+      - tesseract-ocr-eng
+      - libtesseract-dev
+      - libleptonica-dev
+      - pkg-config
+    state: present
+  become: true
+  when:
+    - app_states['docling'] | default('present') == 'present'
+    - docling_install_tesseract | default(true)
+
+- name: Set TESSDATA_PREFIX environment variable in profile
+  ansible.builtin.lineinfile:
+    path: "{{ user.home }}/.profile"
+    line: 'export TESSDATA_PREFIX="{{ docling_tessdata_prefix }}"'
+    regexp: '^export TESSDATA_PREFIX='
+    state: present
+    create: true
+    owner: "{{ user.name }}"
+    mode: "0644"
+  when:
+    - app_states['docling'] | default('present') == 'present'
+    - docling_install_tesseract | default(true)
+
+# Install uv if not present
+- name: Check if uv is installed in .local/bin
+  ansible.builtin.stat:
+    path: "{{ user.home }}/.local/bin/uv"
+  register: uv_local_bin
+  when: app_states['docling'] | default('present') == 'present'
+
+- name: Check if uv is installed in .cargo/bin
+  ansible.builtin.stat:
+    path: "{{ user.home }}/.cargo/bin/uv"
+  register: uv_cargo_bin
+  when: app_states['docling'] | default('present') == 'present'
+
+- name: Install uv package installer
+  ansible.builtin.shell: |
+    set -o pipefail
+    curl -fsSL https://astral.sh/uv/install.sh | bash
+  args:
+    executable: /bin/bash
+  when:
+    - app_states['docling'] | default('present') == 'present'
+    - not uv_local_bin.stat.exists
+    - not uv_cargo_bin.stat.exists
+  environment:
+    HOME: "{{ user.home }}"
+  changed_when: true
+
+- name: Determine uv binary path
+  ansible.builtin.set_fact:
+    uv_bin_path: "{{ user.home }}/.local/bin/uv"
+  when:
+    - app_states['docling'] | default('present') == 'present'
+    - uv_local_bin.stat.exists or not uv_cargo_bin.stat.exists
+
+- name: Determine uv binary path (cargo fallback)
+  ansible.builtin.set_fact:
+    uv_bin_path: "{{ user.home }}/.cargo/bin/uv"
+  when:
+    - app_states['docling'] | default('present') == 'present'
+    - uv_cargo_bin.stat.exists
+    - not uv_local_bin.stat.exists
+
+# Install docling
+- name: Check if docling is installed
+  ansible.builtin.command: "{{ uv_bin_path }} tool list"
+  register: docling_tool_check
+  changed_when: false
+  failed_when: false
+  when: app_states['docling'] | default('present') == 'present'
+
+- name: Determine if docling needs installation
+  ansible.builtin.set_fact:
+    docling_needs_install: "{{ docling_tool_check.stdout is not defined or 'docling' not in docling_tool_check.stdout }}"
+  when: app_states['docling'] | default('present') == 'present'
+
+- name: Build docling package specification with extras
+  ansible.builtin.set_fact:
+    docling_package: "docling[{{ docling_extras | join(',') }}]"
+  when:
+    - app_states['docling'] | default('present') == 'present'
+    - docling_extras is defined
+    - docling_extras | length > 0
+
+- name: Build docling package specification without extras
+  ansible.builtin.set_fact:
+    docling_package: "docling"
+  when:
+    - app_states['docling'] | default('present') == 'present'
+    - docling_extras is not defined or docling_extras | length == 0
+
+- name: Install docling via uv tool
+  ansible.builtin.command: "{{ uv_bin_path }} tool install --force --python {{ docling_python_version }} {{ docling_package }}"
+  when:
+    - app_states['docling'] | default('present') == 'present'
+    - docling_needs_install | bool
+  environment:
+    HOME: "{{ user.home }}"
+    TESSDATA_PREFIX: "{{ docling_tessdata_prefix }}"
+  become: false
+  changed_when: true
+
+- name: Show docling installation status
+  ansible.builtin.debug:
+    msg: "Docling is {{ 'now installed' if docling_needs_install else 'already installed' }} with extras: {{ docling_extras | default([]) | join(', ') }}"
+  when: app_states['docling'] | default('present') == 'present'
+
+# Cleanup when absent
+- name: Remove docling via uv tool when absent
+  ansible.builtin.command: "{{ user.home }}/.local/bin/uv tool uninstall docling"
+  when:
+    - app_states['docling'] | default('present') == 'absent'
+  failed_when: false
+  changed_when: true
+
+- name: Remove TESSDATA_PREFIX from profile when absent
+  ansible.builtin.lineinfile:
+    path: "{{ user.home }}/.profile"
+    regexp: '^export TESSDATA_PREFIX='
+    state: absent
+  when:
+    - app_states['docling'] | default('present') == 'absent'

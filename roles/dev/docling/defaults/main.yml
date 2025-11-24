@@ -1,0 +1,18 @@
+---
+# Docling role defaults
+# Document parsing and understanding library
+# GitHub: https://github.com/docling-project/docling
+
+# Python version requirement for uv installation
+docling_python_version: "python3.12"
+
+# Optional extras to install (comma-separated list or list)
+# Available extras: asr, vlm, easyocr, tesserocr, ocrmac, rapidocr
+docling_extras:
+  - tesserocr
+
+# Install system dependencies (tesseract OCR)
+docling_install_tesseract: true
+
+# Tesseract data directory path
+docling_tessdata_prefix: "/usr/share/tesseract-ocr/5/tessdata"

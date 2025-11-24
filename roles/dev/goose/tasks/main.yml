@@ -1,0 +1,142 @@
+---
+# Goose - AI-powered development agent installation via official CLI installer
+# GitHub: https://github.com/block/goose
+# Supports both pinned versions and latest version from GitHub releases
+# Installs to ~/.local/bin and supports self-updates via 'goose update'
+
+- name: Ensure bzip2 is installed for extraction
+  ansible.builtin.apt:
+    name: bzip2
+    state: present
+  become: true
+  when: app_states['goose'] | default('present') == 'present'
+
+- name: Ensure ~/.local/bin directory exists
+  ansible.builtin.file:
+    path: "{{ user.home }}/.local/bin"
+    state: directory
+    owner: "{{ user.name }}"
+    mode: "0755"
+  when: app_states['goose'] | default('present') == 'present'
+
+- name: Check if Goose is already installed
+  ansible.builtin.stat:
+    path: "{{ user.home }}/.local/bin/goose"
+  register: goose_binary_exists
+  when: app_states['goose'] | default('present') == 'present'
+
+- name: Get currently installed Goose version
+  ansible.builtin.command: "{{ user.home }}/.local/bin/goose --version"
+  register: goose_current_version
+  changed_when: false
+  failed_when: false
+  when:
+    - app_states['goose'] | default('present') == 'present'
+    - goose_binary_exists.stat.exists
+
+# Get latest version from GitHub API (only if goose_use_latest is true)
+- name: Get latest Goose release from GitHub API
+  ansible.builtin.uri:
+    url: https://api.github.com/repos/block/goose/releases/latest
+    return_content: true
+  register: goose_release_data
+  changed_when: false
+  when:
+    - app_states['goose'] | default('present') == 'present'
+    - goose_use_latest | default(false)
+
+- name: Extract latest Goose version from GitHub release
+  ansible.builtin.set_fact:
+    goose_target_version: "{{ goose_release_data.json.tag_name }}"
+  when:
+    - app_states['goose'] | default('present') == 'present'
+    - goose_use_latest | default(false)
+
+# Use pinned version if goose_use_latest is false
+- name: Set target version to pinned version
+  ansible.builtin.set_fact:
+    goose_target_version: "v{{ goose_version }}"
+  when:
+    - app_states['goose'] | default('present') == 'present'
+    - not (goose_use_latest | default(false))
+
+- name: Determine architecture
+  ansible.builtin.set_fact:
+    goose_arch: "{{ 'aarch64' if ansible_architecture == 'aarch64' or ansible_architecture == 'arm64' else 'x86_64' }}"
+  when: app_states['goose'] | default('present') == 'present'
+
+- name: Set Goose download filename
+  ansible.builtin.set_fact:
+    goose_filename: "goose-{{ goose_arch }}-unknown-linux-gnu.tar.bz2"
+  when: app_states['goose'] | default('present') == 'present'
+
+- name: Determine if Goose needs installation or update
+  ansible.builtin.set_fact:
+    goose_needs_install: "{{ not goose_binary_exists.stat.exists or (goose_current_version.stdout is defined and goose_target_version not in goose_current_version.stdout) }}"
+  when: app_states['goose'] | default('present') == 'present'
+
+- name: Download Goose binary archive
+  ansible.builtin.get_url:
+    url: "https://github.com/block/goose/releases/download/{{ goose_target_version }}/{{ goose_filename }}"
+    dest: "/tmp/{{ goose_filename }}"
+    mode: "0644"
+  when:
+    - app_states['goose'] | default('present') == 'present'
+    - goose_needs_install | bool
+
+- name: Create temporary extraction directory
+  ansible.builtin.tempfile:
+    state: directory
+    suffix: _goose
+  register: goose_temp_dir
+  when:
+    - app_states['goose'] | default('present') == 'present'
+    - goose_needs_install | bool
+
+- name: Extract Goose archive to temp directory
+  ansible.builtin.unarchive:
+    src: "/tmp/{{ goose_filename }}"
+    dest: "{{ goose_temp_dir.path }}"
+    remote_src: true
+  when:
+    - app_states['goose'] | default('present') == 'present'
+    - goose_needs_install | bool
+
+- name: Copy Goose binary to ~/.local/bin
+  ansible.builtin.copy:
+    src: "{{ goose_temp_dir.path }}/goose"
+    dest: "{{ user.home }}/.local/bin/goose"
+    owner: "{{ user.name }}"
+    mode: "0755"
+    remote_src: true
+  when:
+    - app_states['goose'] | default('present') == 'present'
+    - goose_needs_install | bool
+
+- name: Clean up temporary extraction directory
+  ansible.builtin.file:
+    path: "{{ goose_temp_dir.path }}"
+    state: absent
+  when:
+    - app_states['goose'] | default('present') == 'present'
+    - goose_needs_install | bool
+
+- name: Clean up downloaded archive
+  ansible.builtin.file:
+    path: "/tmp/{{ goose_filename }}"
+    state: absent
+  when:
+    - app_states['goose'] | default('present') == 'present'
+    - goose_needs_install | bool
+
+- name: Show Goose installation status
+  ansible.builtin.debug:
+    msg: "Goose {{ goose_target_version }} is {{ 'now installed' if goose_needs_install else 'already up to date' }}"
+  when: app_states['goose'] | default('present') == 'present'
+
+# Cleanup when absent
+- name: Remove Goose binary when absent
+  ansible.builtin.file:
+    path: "{{ user.home }}/.local/bin/goose"
+    state: absent
+  when: app_states['goose'] | default('present') == 'absent'

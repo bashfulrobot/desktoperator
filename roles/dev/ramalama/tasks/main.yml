@@ -1,0 +1,109 @@
+---
+# RamaLama - AI inference tool for running LLMs
+# GitHub: https://github.com/containers/ramalama
+# Installs via uv tool (universal Python package installer)
+
+- name: Check if uv is installed in .local/bin
+  ansible.builtin.stat:
+    path: "{{ user.home }}/.local/bin/uv"
+  register: uv_local_bin
+  when: app_states['ramalama'] | default('present') == 'present'
+
+- name: Check if uv is installed in .cargo/bin
+  ansible.builtin.stat:
+    path: "{{ user.home }}/.cargo/bin/uv"
+  register: uv_cargo_bin
+  when: app_states['ramalama'] | default('present') == 'present'
+
+- name: Install uv package installer
+  ansible.builtin.shell: |
+    set -o pipefail
+    curl -fsSL https://astral.sh/uv/install.sh | bash
+  args:
+    executable: /bin/bash
+  when:
+    - app_states['ramalama'] | default('present') == 'present'
+    - not uv_local_bin.stat.exists
+    - not uv_cargo_bin.stat.exists
+  environment:
+    HOME: "{{ user.home }}"
+  changed_when: true
+
+- name: Determine uv binary path
+  ansible.builtin.set_fact:
+    uv_bin_path: "{{ user.home }}/.local/bin/uv"
+  when:
+    - app_states['ramalama'] | default('present') == 'present'
+    - uv_local_bin.stat.exists or not uv_cargo_bin.stat.exists
+
+- name: Determine uv binary path (cargo fallback)
+  ansible.builtin.set_fact:
+    uv_bin_path: "{{ user.home }}/.cargo/bin/uv"
+  when:
+    - app_states['ramalama'] | default('present') == 'present'
+    - uv_cargo_bin.stat.exists
+    - not uv_local_bin.stat.exists
+
+- name: Check if ramalama is installed
+  ansible.builtin.command: "{{ uv_bin_path }} tool list"
+  register: ramalama_tool_check
+  changed_when: false
+  failed_when: false
+  when: app_states['ramalama'] | default('present') == 'present'
+
+- name: Determine if ramalama needs installation
+  ansible.builtin.set_fact:
+    ramalama_needs_install: "{{ ramalama_tool_check.stdout is not defined or 'ramalama' not in ramalama_tool_check.stdout }}"
+  when: app_states['ramalama'] | default('present') == 'present'
+
+- name: Install ramalama via uv tool
+  ansible.builtin.command: "{{ uv_bin_path }} tool install --force --python {{ ramalama_python_version }} ramalama"
+  when:
+    - app_states['ramalama'] | default('present') == 'present'
+    - ramalama_needs_install | bool
+  environment:
+    HOME: "{{ user.home }}"
+  become: false
+  changed_when: true
+
+- name: Show ramalama installation status
+  ansible.builtin.debug:
+    msg: "RamaLama is {{ 'now installed' if ramalama_needs_install else 'already installed' }}"
+  when: app_states['ramalama'] | default('present') == 'present'
+
+- name: Ensure ramalama config directory exists
+  ansible.builtin.file:
+    path: "{{ ramalama_config_dir }}"
+    state: directory
+    owner: "{{ user.name }}"
+    mode: "0755"
+  when: app_states['ramalama'] | default('present') == 'present'
+
+- name: Ensure ramalama model storage directory exists
+  ansible.builtin.file:
+    path: "{{ ramalama_config.store }}"
+    state: directory
+    owner: "{{ user.name }}"
+    mode: "0755"
+  when: app_states['ramalama'] | default('present') == 'present'
+
+- name: Deploy ramalama configuration
+  ansible.builtin.template:
+    src: ramalama.conf.j2
+    dest: "{{ ramalama_config_file }}"
+    owner: "{{ user.name }}"
+    mode: "0644"
+  when: app_states['ramalama'] | default('present') == 'present'
+
+# Cleanup when absent
+- name: Remove ramalama config directory when absent
+  ansible.builtin.file:
+    path: "{{ ramalama_config_dir }}"
+    state: absent
+  when: app_states['ramalama'] | default('present') == 'absent'
+- name: Remove ramalama via uv tool when absent
+  ansible.builtin.command: "{{ user.home }}/.cargo/bin/uv tool uninstall ramalama"
+  when:
+    - app_states['ramalama'] | default('present') == 'absent'
+  failed_when: false
+  changed_when: true

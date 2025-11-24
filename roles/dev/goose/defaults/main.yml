@@ -1,0 +1,10 @@
+---
+# Goose role defaults
+# AI-powered development agent
+# GitHub: https://github.com/block/goose
+
+# Version to install - update this to upgrade
+goose_version: "1.15.0"
+
+# Use latest version from GitHub releases (overrides goose_version)
+goose_use_latest: false

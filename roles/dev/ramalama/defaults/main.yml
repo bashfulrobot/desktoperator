@@ -1,0 +1,21 @@
+---
+# RamaLama role defaults
+# AI inference tool for running LLMs with docker/podman
+# GitHub: https://github.com/containers/ramalama
+
+# Python version requirement for uv installation
+ramalama_python_version: "python3.12"
+
+# Configuration directory
+ramalama_config_dir: "{{ user.home }}/.config/ramalama"
+ramalama_config_file: "{{ ramalama_config_dir }}/ramalama.conf"
+
+# Configuration settings (TOML format)
+ramalama_config:
+  engine: "docker"  # docker or podman
+  runtime: "llama.cpp"  # llama.cpp, vllm, or mlx
+  ngl: 999  # GPU layers (0=CPU only, 999=max GPU, -1=auto)
+  threads: 8  # CPU threads for inference
+  temp: 0.8  # Temperature (lower=deterministic, higher=creative)
+  ctx_size: 8192  # Context window size
+  store: "{{ user.home }}/.local/share/ramalama"  # Model storage directory

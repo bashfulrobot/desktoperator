@@ -1,0 +1,25 @@
+# RamaLama Configuration
+# Managed by Ansible - Do not edit manually
+# See: https://ramalama.ai/docs/configuration/conf
+
+# Engine selection (docker or podman)
+engine = "{{ ramalama_config.engine }}"
+
+# Runtime selection (llama.cpp, vllm, or mlx)
+runtime = "{{ ramalama_config.runtime }}"
+
+# GPU layers to offload (0=CPU only, 999=max GPU, -1=auto)
+ngl = {{ ramalama_config.ngl }}
+
+# CPU threads for inference
+threads = {{ ramalama_config.threads }}
+
+# Temperature for response generation (0.0-2.0)
+# Lower values = more deterministic, Higher values = more creative
+temp = {{ ramalama_config.temp }}
+
+# Context window size
+ctx_size = {{ ramalama_config.ctx_size }}
+
+# Model storage directory
+store = "{{ ramalama_config.store }}"
