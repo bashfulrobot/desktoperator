@@ -187,31 +187,26 @@ build_rag_database() {
     # Ensure output directory exists
     mkdir -p "${OUTPUT_DIR}"
 
-    # Find all documentation files
-    local doc_files
-    doc_files=$(find_documentation_files)
+    # Verify documentation exists
+    find_documentation_files >/dev/null
 
     # Build ramalama rag command
-    # Format: ramalama rag <files/urls> <output-tag>
-    local rag_args=()
-    for file in ${doc_files}; do
-        rag_args+=("${file}")
-    done
-
-    # Add output path/tag
+    # Format: ramalama rag <directory> <output-tag>
+    # ramalama will recursively process all markdown files in the directory
+    local output_tag
     if [ -n "${REGISTRY_TAG}" ]; then
-        rag_args+=("${REGISTRY_TAG}")
+        output_tag="${REGISTRY_TAG}"
     else
         # Use local directory as output
-        rag_args+=("dir:${OUTPUT_DIR}")
+        output_tag="dir:${OUTPUT_DIR}"
     fi
 
-    log_info "Processing ${#rag_args[@]} files with ramalama rag..."
-    log_info "Output: ${rag_args[-1]}"
+    log_info "Processing documentation from: ${CLONE_DIR}"
+    log_info "Output: ${output_tag}"
 
-    # Run ramalama rag command
+    # Run ramalama rag command with the entire docs directory
     # Note: ramalama uses docling internally via doc2rag script
-    if ramalama rag "${rag_args[@]}"; then
+    if ramalama rag "${CLONE_DIR}" "${output_tag}"; then
         log_success "RAG vector database created successfully"
 
         if [ -n "${REGISTRY_TAG}" ]; then

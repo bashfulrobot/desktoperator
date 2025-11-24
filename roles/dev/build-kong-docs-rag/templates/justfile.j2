@@ -11,6 +11,8 @@ source_dir := justfile_directory() / "source"
 vector_dir := justfile_directory() / "vector-db"
 repo_url := "{{ build_kong_docs_rag_repo_url }}"
 mcp_config := env_var('HOME') / ".config/claude-code/claude_desktop_config.json"
+# Set your container registry here (e.g., ghcr.io/username/kong-docs-rag, quay.io/username/kong-docs-rag)
+registry_tag := env_var_or_default('KONG_DOCS_REGISTRY', "localhost/kong-docs-rag:latest")
 
 # Build RAG database from Kong docs
 build:
@@ -22,11 +24,51 @@ rebuild:
     @echo "Rebuilding from scratch..."
     build-kong-docs-rag --clean
 
+# Build and publish to container registry
+publish:
+    @echo "Building and publishing to registry: {{ "{{" }} registry_tag {{ "}}" }}"
+    @build-kong-docs-rag --registry {{ "{{" }} registry_tag {{ "}}" }}
+    @echo "Pushing to registry..."
+    @docker push {{ "{{" }} registry_tag {{ "}}" }}
+    @echo "✓ Published: {{ "{{" }} registry_tag {{ "}}" }}"
+    @echo "Share this tag with your team!"
+
+# Rebuild and republish
+republish:
+    @echo "Rebuilding and republishing..."
+    @build-kong-docs-rag --clean --registry {{ "{{" }} registry_tag {{ "}}" }}
+    @docker push {{ "{{" }} registry_tag {{ "}}" }}
+    @echo "✓ Republished: {{ "{{" }} registry_tag {{ "}}" }}"
+
+# Pull container image from registry (for team members)
+pull-image:
+    @echo "Pulling from registry: {{ "{{" }} registry_tag {{ "}}" }}"
+    @docker pull {{ "{{" }} registry_tag {{ "}}" }}
+    @echo "✓ Image pulled successfully"
+    @echo "Run 'just setup-from-image' to configure MCP"
+
+# Setup from pre-built container image (for team members who don't build)
+setup-from-image:
+    @echo "=== Setup from Pre-Built Container ==="
+    @echo "Registry: {{ "{{" }} registry_tag {{ "}}" }}"
+    @just pull-image
+    @just install-mcp
+    @just configure-mcp-container
+    @echo ""
+    @echo "✓ Setup complete! Restart Claude Code to use."
+    @echo "No build required - using shared container image."
+
 # Update documentation (incremental)
 update:
     @echo "Updating Kong documentation..."
     @cd {{ "{{" }} source_dir {{ "}}" }}/developer.konghq.com && git pull
     @just build
+
+# Update and republish
+update-publish:
+    @echo "Updating and republishing..."
+    @just update
+    @just publish
 
 # Clean all generated files
 clean:
@@ -80,9 +122,9 @@ install-mcp:
     npm install -g @qdrant/mcp-server-qdrant
     @echo "✓ MCP server installed"
 
-# Configure MCP server for Claude Code
-configure-mcp:
-    @echo "Configuring MCP server for Claude Code..."
+# Configure MCP server for Claude Code (local files)
+configure-mcp-local:
+    @echo "Configuring MCP server for LOCAL vector database..."
     @if [ ! -f "{{ "{{" }} mcp_config {{ "}}" }}" ]; then \
         echo "Creating Claude Code config..."; \
         mkdir -p "$$(dirname {{ "{{" }} mcp_config {{ "}}" }})"; \
@@ -102,19 +144,57 @@ configure-mcp:
     @echo ""
     @echo "Then restart Claude Code."
 
+# Configure MCP server for Claude Code (container-based)
+configure-mcp-container:
+    @echo "Configuring MCP server for CONTAINER-BASED vector database..."
+    @echo ""
+    @echo "Container registry: {{ "{{" }} registry_tag {{ "}}" }}"
+    @echo ""
+    @echo "Add this to {{ "{{" }} mcp_config {{ "}}" }}:"
+    @echo ""
+    @echo '  "kong-docs": {'
+    @echo '    "command": "docker",'
+    @echo '    "args": ['
+    @echo '      "run", "--rm", "-i",'
+    @echo '      "--mount", "type=bind,source={{ "{{" }} vector_dir {{ "}}" }},target=/data",'
+    @echo '      "{{ "{{" }} registry_tag {{ "}}" }}",'
+    @echo '      "npx", "@qdrant/mcp-server-qdrant"'
+    @echo '    ],'
+    @echo '    "env": {'
+    @echo '      "QDRANT_URL": "file:///data",'
+    @echo '      "COLLECTION_NAME": "kong-docs"'
+    @echo '    }'
+    @echo '  }'
+    @echo ""
+    @echo "Then restart Claude Code."
+
+# Legacy command (defaults to local)
+configure-mcp: configure-mcp-local
+
 # Show MCP server logs
 mcp-logs:
     @echo "MCP server logs:"
     @tail -f ~/.config/claude-code/logs/mcp-kong-docs.log 2>/dev/null || echo "No logs found yet"
 
-# Quick setup - install everything
+# Quick setup - local files
 setup:
-    @echo "=== Quick Setup ==="
+    @echo "=== Quick Setup (Local Files) ==="
     @just install-mcp
     @just build
-    @just configure-mcp
+    @just configure-mcp-local
     @echo ""
     @echo "✓ Setup complete! Restart Claude Code to use."
+
+# Quick setup - container-based (publish to registry)
+setup-container:
+    @echo "=== Quick Setup (Container-Based) ==="
+    @echo "Registry: {{ "{{" }} registry_tag {{ "}}" }}"
+    @just install-mcp
+    @just publish
+    @just configure-mcp-container
+    @echo ""
+    @echo "✓ Setup complete! Share registry tag with team."
+    @echo "✓ Restart Claude Code to use."
 
 # Watch for changes and rebuild (requires entr)
 watch:
