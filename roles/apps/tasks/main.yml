@@ -125,7 +125,7 @@
 
 - name: Include MS Teams Brave Web App
   ansible.builtin.import_role:
-    name: apps/MS-Teams-brave
+    name: apps/brave-apps/MS-Teams-brave
   tags: [MS-Teams, teams, brave-web-apps]
 
 - name: Include Kooha screen recorder

@@ -3,6 +3,6 @@ Type=Application
 Name=MS Teams
 Comment=Open MS Teams in Brave app mode
 Exec=/usr/local/bin/brave-MS-Teams
-StartupWMClass=Note: Use 'rg' for faster searching (ripgrep)  brave-teams.microsoft.com__v2_-Default
+StartupWMClass=brave-teams.microsoft.com__v2_-Default
 Icon=brave-MS-Teams
 Terminal=false

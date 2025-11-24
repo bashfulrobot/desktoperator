@@ -33,6 +33,7 @@ app_states:
   zoom: present
   insync: present
   gemini-cli: present
+  goose: present
   sitemcp: present
   glow: present
   gum: present
