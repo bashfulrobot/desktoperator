@@ -190,23 +190,46 @@ build_rag_database() {
     # Verify documentation exists
     find_documentation_files >/dev/null
 
-    # Determine the docs directory
-    # Jekyll sites typically have docs in 'app/' subdirectory
-    local docs_dir="${CLONE_DIR}"
+    # Create a temporary directory with only markdown files
+    # This avoids processing config files, redirects, etc.
+    local temp_docs_dir
+    temp_docs_dir=$(mktemp -d)
+    trap "rm -rf ${temp_docs_dir}" EXIT
+
+    # Determine source directory for docs
+    local source_dir="${CLONE_DIR}"
     if [ -d "${CLONE_DIR}/app" ]; then
-        docs_dir="${CLONE_DIR}/app"
-        log_info "Found Jekyll app/ directory, using: ${docs_dir}"
+        source_dir="${CLONE_DIR}/app"
+        log_info "Found Jekyll app/ directory"
     elif [ -d "${CLONE_DIR}/_docs" ]; then
-        docs_dir="${CLONE_DIR}/_docs"
-        log_info "Found _docs/ directory, using: ${docs_dir}"
+        source_dir="${CLONE_DIR}/_docs"
+        log_info "Found _docs/ directory"
     elif [ -d "${CLONE_DIR}/docs" ]; then
-        docs_dir="${CLONE_DIR}/docs"
-        log_info "Found docs/ directory, using: ${docs_dir}"
+        source_dir="${CLONE_DIR}/docs"
+        log_info "Found docs/ directory"
     fi
 
+    # Copy only markdown and HTML files to temp directory
+    log_info "Preparing documentation files from: ${source_dir}"
+
+    # Find and copy markdown files, preserving directory structure
+    cd "${source_dir}"
+    find . -type f \( -name "*.md" -o -name "*.markdown" -o -name "*.html" \) \
+        -not -path "*/_redirects" \
+        -not -path "*/node_modules/*" \
+        -not -path "*/.git/*" | while read -r file; do
+        # Create parent directory in temp location
+        mkdir -p "${temp_docs_dir}/$(dirname "$file")"
+        # Copy file
+        cp "$file" "${temp_docs_dir}/$file"
+    done
+    cd - > /dev/null
+
+    local file_count
+    file_count=$(find "${temp_docs_dir}" -type f | wc -l)
+    log_info "Prepared ${file_count} documentation files for processing"
+
     # Build ramalama rag command
-    # Format: ramalama rag <directory> <output-tag>
-    # ramalama will recursively process all markdown files in the directory
     local output_tag
     if [ -n "${REGISTRY_TAG}" ]; then
         output_tag="${REGISTRY_TAG}"
@@ -215,12 +238,12 @@ build_rag_database() {
         output_tag="dir:${OUTPUT_DIR}"
     fi
 
-    log_info "Processing documentation from: ${docs_dir}"
+    log_info "Processing documentation with ramalama..."
     log_info "Output: ${output_tag}"
 
-    # Run ramalama rag command with the docs directory
+    # Run ramalama rag command with the filtered docs directory
     # Note: ramalama uses docling internally via doc2rag script
-    if ramalama rag "${docs_dir}" "${output_tag}"; then
+    if ramalama rag "${temp_docs_dir}" "${output_tag}"; then
         log_success "RAG vector database created successfully"
 
         if [ -n "${REGISTRY_TAG}" ]; then
