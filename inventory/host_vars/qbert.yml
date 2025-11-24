@@ -13,6 +13,8 @@ app_states:
   chrome: absent
   firefox: absent
   vivaldi: absent
+  ramalama: present
+  docling: present
 
 # SiteMCP scheduled tasks configuration
 sitemcp_enable_scheduled_tasks: true

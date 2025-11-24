@@ -1,0 +1,21 @@
+---
+# build-kong-docs-rag script installation defaults
+
+# Script installation state
+build_kong_docs_rag_state: "{{ app_states['build-kong-docs-rag'] | default('present') }}"
+
+# Source script path (relative to playbook root)
+build_kong_docs_rag_source: "{{ playbook_dir }}/scripts/build-kong-docs-rag"
+
+# Destination path in user's local bin
+build_kong_docs_rag_dest: "{{ user.home }}/.local/bin/build-kong-docs-rag"
+
+# Working directory for RAG operations
+build_kong_docs_rag_work_dir: "{{ user.home }}/dev/kong/docs-rag"
+
+# Repository URL for Kong documentation
+build_kong_docs_rag_repo_url: "https://github.com/Kong/developer.konghq.com"
+
+# Justfile deployment
+build_kong_docs_rag_justfile_dest: "{{ build_kong_docs_rag_work_dir }}/justfile"
+

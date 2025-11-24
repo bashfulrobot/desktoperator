@@ -46,10 +46,20 @@
     name: dev/copilot-cli
   tags: [dev, copilot-cli]
 
+- name: Include Docling (document parsing library)
+  ansible.builtin.import_role:
+    name: dev/docling
+  tags: [dev, docling]
+
 - name: Include Gemini CLI
   ansible.builtin.import_role:
     name: dev/gemini-cli
   tags: [dev, gemini-cli]
+
+- name: Include Goose (AI-powered development agent)
+  ansible.builtin.import_role:
+    name: dev/goose
+  tags: [dev, goose]
 
 - name: Include Gum (charming CLI components)
   ansible.builtin.import_role:
@@ -60,6 +70,16 @@
   ansible.builtin.import_role:
     name: dev/httpie
   tags: [dev, httpie]
+
+- name: Include RamaLama (AI LLM runner)
+  ansible.builtin.import_role:
+    name: dev/ramalama
+  tags: [dev, ramalama]
+
+- name: Include build-kong-docs-rag script
+  ansible.builtin.import_role:
+    name: dev/build-kong-docs-rag
+  tags: [dev, build-kong-docs-rag, rag]
 
 - name: Include Shadowenv (directory-based env manager)
   ansible.builtin.import_role:

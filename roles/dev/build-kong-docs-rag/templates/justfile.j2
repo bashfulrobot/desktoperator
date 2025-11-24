@@ -1,0 +1,207 @@
+# Kong Documentation RAG Management
+# Requires: just, ramalama, docling, npm
+# Managed by Ansible - DO NOT EDIT DIRECTLY
+
+# Default recipe - show available commands
+default:
+    @just --list
+
+# Variables
+source_dir := justfile_directory() / "source"
+vector_dir := justfile_directory() / "vector-db"
+repo_url := "{{ build_kong_docs_rag_repo_url }}"
+mcp_config := env_var('HOME') / ".config/claude-code/claude_desktop_config.json"
+
+# Build RAG database from Kong docs
+build:
+    @echo "Building Kong docs RAG database..."
+    build-kong-docs-rag
+
+# Build with clean clone
+rebuild:
+    @echo "Rebuilding from scratch..."
+    build-kong-docs-rag --clean
+
+# Update documentation (incremental)
+update:
+    @echo "Updating Kong documentation..."
+    @cd {{ "{{" }} source_dir {{ "}}" }}/developer.konghq.com && git pull
+    @just build
+
+# Clean all generated files
+clean:
+    @echo "Cleaning generated files..."
+    rm -rf {{ "{{" }} vector_dir {{ "}}" }}
+
+# Deep clean (including cloned source)
+clean-all:
+    @echo "Deep cleaning (source + vector-db)..."
+    rm -rf {{ "{{" }} source_dir {{ "}}" }} {{ "{{" }} vector_dir {{ "}}" }}
+
+# Show current status
+status:
+    @echo "=== Kong Docs RAG Status ==="
+    @echo ""
+    @echo "Source directory:"
+    @if [ -d "{{ "{{" }} source_dir {{ "}}" }}/developer.konghq.com" ]; then \
+        echo "  ✓ Cloned at {{ "{{" }} source_dir {{ "}}" }}/developer.konghq.com"; \
+        cd {{ "{{" }} source_dir {{ "}}" }}/developer.konghq.com && echo "  Branch: $$(git branch --show-current)"; \
+        cd {{ "{{" }} source_dir {{ "}}" }}/developer.konghq.com && echo "  Commit: $$(git log -1 --oneline)"; \
+    else \
+        echo "  ✗ Not cloned yet"; \
+    fi
+    @echo ""
+    @echo "Vector database:"
+    @if [ -d "{{ "{{" }} vector_dir {{ "}}" }}" ]; then \
+        echo "  ✓ Exists at {{ "{{" }} vector_dir {{ "}}" }}"; \
+        echo "  Size: $$(du -sh {{ "{{" }} vector_dir {{ "}}" }} | cut -f1)"; \
+    else \
+        echo "  ✗ Not built yet"; \
+    fi
+    @echo ""
+    @echo "Dependencies:"
+    @command -v ramalama >/dev/null 2>&1 && echo "  ✓ ramalama" || echo "  ✗ ramalama"
+    @command -v docling >/dev/null 2>&1 && echo "  ✓ docling" || echo "  ✗ docling"
+    @command -v git >/dev/null 2>&1 && echo "  ✓ git" || echo "  ✗ git"
+    @command -v npm >/dev/null 2>&1 && echo "  ✓ npm" || echo "  ✗ npm"
+
+# Test RAG with interactive query
+test query="What is Kong Gateway rate limiting?":
+    @echo "Testing RAG with query: {{ "{{" }} query {{ "}}" }}"
+    @if [ ! -d "{{ "{{" }} vector_dir {{ "}}" }}" ]; then \
+        echo "Error: Vector database not found. Run 'just build' first."; \
+        exit 1; \
+    fi
+    ramalama run --rag dir:{{ "{{" }} vector_dir {{ "}}" }} llama3 "{{ "{{" }} query {{ "}}" }}"
+
+# Install Qdrant MCP server globally
+install-mcp:
+    @echo "Installing Qdrant MCP server..."
+    npm install -g @qdrant/mcp-server-qdrant
+    @echo "✓ MCP server installed"
+
+# Configure MCP server for Claude Code
+configure-mcp:
+    @echo "Configuring MCP server for Claude Code..."
+    @if [ ! -f "{{ "{{" }} mcp_config {{ "}}" }}" ]; then \
+        echo "Creating Claude Code config..."; \
+        mkdir -p "$$(dirname {{ "{{" }} mcp_config {{ "}}" }})"; \
+        echo '{"mcpServers": {}}' > {{ "{{" }} mcp_config {{ "}}" }}; \
+    fi
+    @echo ""
+    @echo "Add this to {{ "{{" }} mcp_config {{ "}}" }}:"
+    @echo ""
+    @echo '  "kong-docs": {'
+    @echo '    "command": "npx",'
+    @echo '    "args": ["@qdrant/mcp-server-qdrant"],'
+    @echo '    "env": {'
+    @echo '      "QDRANT_URL": "file://{{ "{{" }} vector_dir {{ "}}" }}",'
+    @echo '      "COLLECTION_NAME": "kong-docs"'
+    @echo '    }'
+    @echo '  }'
+    @echo ""
+    @echo "Then restart Claude Code."
+
+# Show MCP server logs
+mcp-logs:
+    @echo "MCP server logs:"
+    @tail -f ~/.config/claude-code/logs/mcp-kong-docs.log 2>/dev/null || echo "No logs found yet"
+
+# Quick setup - install everything
+setup:
+    @echo "=== Quick Setup ==="
+    @just install-mcp
+    @just build
+    @just configure-mcp
+    @echo ""
+    @echo "✓ Setup complete! Restart Claude Code to use."
+
+# Watch for changes and rebuild (requires entr)
+watch:
+    @if ! command -v entr >/dev/null 2>&1; then \
+        echo "Error: 'entr' not installed. Install with: sudo apt install entr"; \
+        exit 1; \
+    fi
+    @echo "Watching {{ "{{" }} source_dir {{ "}}" }}/developer.konghq.com for changes..."
+    @cd {{ "{{" }} source_dir {{ "}}" }}/developer.konghq.com && \
+        git ls-files | entr -s 'just build'
+
+# Show disk usage
+disk-usage:
+    @echo "Disk usage:"
+    @du -sh {{ "{{" }} source_dir {{ "}}" }} 2>/dev/null || echo "Source: not built"
+    @du -sh {{ "{{" }} vector_dir {{ "}}" }} 2>/dev/null || echo "Vector DB: not built"
+    @du -sh {{ "{{" }} justfile_directory() {{ "}}" }} || echo "Total: unknown"
+
+# Benchmark build time
+benchmark:
+    @echo "Benchmarking build time..."
+    @time just rebuild
+
+# Verify RAG quality with test queries
+verify:
+    @echo "Verifying RAG quality with test queries..."
+    @echo ""
+    @echo "Query 1: Rate limiting"
+    @just test "Explain Kong Gateway rate limiting plugin"
+    @echo ""
+    @echo "Query 2: Admin API"
+    @just test "Show me Admin API endpoints for services"
+    @echo ""
+    @echo "Query 3: Configuration"
+    @just test "How do I configure Kong Gateway?"
+
+# Export vector DB as container image
+export tag="localhost/kong-docs-rag:latest":
+    @echo "Exporting vector DB as container image: {{ "{{" }} tag {{ "}}" }}"
+    build-kong-docs-rag --registry {{ "{{" }} tag {{ "}}" }}
+    @echo "✓ Image built: {{ "{{" }} tag {{ "}}" }}"
+    @echo "Push with: podman push {{ "{{" }} tag {{ "}}" }}"
+
+# Show information about the cloned repo
+repo-info:
+    @if [ ! -d "{{ "{{" }} source_dir {{ "}}" }}/developer.konghq.com" ]; then \
+        echo "Repository not cloned yet. Run 'just build' first."; \
+        exit 1; \
+    fi
+    @cd {{ "{{" }} source_dir {{ "}}" }}/developer.konghq.com && \
+        echo "=== Repository Information ===" && \
+        echo "" && \
+        echo "Remote: $$(git remote get-url origin)" && \
+        echo "Branch: $$(git branch --show-current)" && \
+        echo "Latest commit: $$(git log -1 --oneline)" && \
+        echo "Last update: $$(git log -1 --format=%cd)" && \
+        echo "" && \
+        echo "File counts:" && \
+        echo "  Markdown files: $$(find . -name '*.md' | wc -l)" && \
+        echo "  Total files: $$(git ls-files | wc -l)"
+
+# Pull latest changes without rebuilding
+pull:
+    @echo "Pulling latest changes from {{ "{{" }} repo_url {{ "}}" }}..."
+    @if [ ! -d "{{ "{{" }} source_dir {{ "}}" }}/developer.konghq.com" ]; then \
+        echo "Repository not cloned yet. Run 'just build' first."; \
+        exit 1; \
+    fi
+    @cd {{ "{{" }} source_dir {{ "}}" }}/developer.konghq.com && git pull
+
+# Check if updates are available
+check-updates:
+    @echo "Checking for documentation updates..."
+    @if [ ! -d "{{ "{{" }} source_dir {{ "}}" }}/developer.konghq.com" ]; then \
+        echo "Repository not cloned yet. Run 'just build' first."; \
+        exit 1; \
+    fi
+    @cd {{ "{{" }} source_dir {{ "}}" }}/developer.konghq.com && \
+        git fetch origin && \
+        if [ "$$(git rev-parse HEAD)" != "$$(git rev-parse origin/main)" ]; then \
+            echo "✓ Updates available"; \
+            echo ""; \
+            echo "Changes:"; \
+            git log HEAD..origin/main --oneline; \
+            echo ""; \
+            echo "Run 'just update' to apply."; \
+        else \
+            echo "✓ Already up to date"; \
+        fi
+

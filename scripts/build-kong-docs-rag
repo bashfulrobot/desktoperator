@@ -1,0 +1,280 @@
+#!/usr/bin/env bash
+# build-kong-docs-rag - Clone Kong docs, process with docling, and build RAG vector database
+#
+# This script automates the creation of a RAG (Retrieval Augmented Generation) system
+# for the Kong Developer documentation using docling and ramalama.
+#
+# Usage:
+#   build-kong-docs-rag [options]
+#
+# Options:
+#   -r, --repo URL          Jekyll repository URL (default: Kong developer docs)
+#   -d, --work-dir PATH     Working directory for cloning and processing (default: ~/dev/kong/docs-rag/source)
+#   -o, --output PATH       Output vector database path (default: ~/dev/kong/docs-rag/vector-db)
+#   -t, --registry TAG      Container registry tag for RAG image (optional)
+#   -c, --clean             Clean existing clone before starting
+#   -h, --help              Show this help message
+#
+# Examples:
+#   # Build Kong docs RAG with defaults
+#   build-kong-docs-rag
+#
+#   # Build and push to registry
+#   build-kong-docs-rag --registry quay.io/myuser/kong-docs-rag
+#
+#   # Use different Jekyll repo
+#   build-kong-docs-rag --repo https://github.com/other/docs-repo
+#
+# Requirements:
+#   - ramalama (installed via uv)
+#   - docling (installed via uv, used by ramalama)
+#   - git
+
+set -euo pipefail
+
+# Color output helpers
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
+NC='\033[0m' # No Color
+
+log_info() {
+    echo -e "${BLUE}==>${NC} $*"
+}
+
+log_success() {
+    echo -e "${GREEN}==>${NC} $*"
+}
+
+log_warn() {
+    echo -e "${YELLOW}==>${NC} $*"
+}
+
+log_error() {
+    echo -e "${RED}ERROR:${NC} $*" >&2
+}
+
+# Default configuration
+REPO_URL="https://github.com/Kong/developer.konghq.com"
+WORK_DIR="${HOME}/dev/kong/docs-rag/source"
+OUTPUT_DIR="${HOME}/dev/kong/docs-rag/vector-db"
+REGISTRY_TAG=""
+CLEAN=false
+
+# Parse command line arguments
+while [[ $# -gt 0 ]]; do
+    case $1 in
+        -r|--repo)
+            REPO_URL="$2"
+            shift 2
+            ;;
+        -d|--work-dir)
+            WORK_DIR="$2"
+            shift 2
+            ;;
+        -o|--output)
+            OUTPUT_DIR="$2"
+            shift 2
+            ;;
+        -t|--registry)
+            REGISTRY_TAG="$2"
+            shift 2
+            ;;
+        -c|--clean)
+            CLEAN=true
+            shift
+            ;;
+        -h|--help)
+            grep '^#' "$0" | grep -v '#!/usr/bin/env' | sed 's/^# \?//'
+            exit 0
+            ;;
+        *)
+            log_error "Unknown option: $1"
+            echo "Use --help for usage information"
+            exit 1
+            ;;
+    esac
+done
+
+# Extract repo name from URL
+REPO_NAME=$(basename "${REPO_URL}" .git)
+CLONE_DIR="${WORK_DIR}/${REPO_NAME}"
+
+# Verify dependencies
+check_dependencies() {
+    local missing_deps=()
+
+    if ! command -v ramalama &> /dev/null; then
+        missing_deps+=("ramalama")
+    fi
+
+    if ! command -v git &> /dev/null; then
+        missing_deps+=("git")
+    fi
+
+    if [ ${#missing_deps[@]} -ne 0 ]; then
+        log_error "Missing required dependencies: ${missing_deps[*]}"
+        log_error "Please install them first (ramalama and docling via: uv tool install ramalama docling)"
+        exit 1
+    fi
+}
+
+# Clone or update repository
+clone_or_update_repo() {
+    log_info "Working with repository: ${REPO_URL}"
+
+    mkdir -p "${WORK_DIR}"
+
+    if [ -d "${CLONE_DIR}" ]; then
+        if [ "${CLEAN}" = true ]; then
+            log_warn "Cleaning existing clone at ${CLONE_DIR}"
+            rm -rf "${CLONE_DIR}"
+        else
+            log_info "Repository already exists at ${CLONE_DIR}, pulling latest changes..."
+            cd "${CLONE_DIR}"
+            if ! git pull --ff-only; then
+                log_warn "Could not fast-forward. Consider using --clean to start fresh."
+            fi
+            cd - > /dev/null
+            return 0
+        fi
+    fi
+
+    log_info "Cloning ${REPO_URL} to ${CLONE_DIR}..."
+    git clone --depth 1 "${REPO_URL}" "${CLONE_DIR}"
+    log_success "Repository cloned successfully"
+}
+
+# Find markdown and documentation files
+find_documentation_files() {
+    log_info "Scanning for documentation files in ${CLONE_DIR}..."
+
+    # Jekyll sites typically have docs in:
+    # - _posts/
+    # - _docs/
+    # - docs/
+    # - app/_src/
+    # - .md files in root and subdirs
+
+    local doc_files=()
+
+    # Find markdown files, excluding common non-doc directories
+    while IFS= read -r -d '' file; do
+        doc_files+=("$file")
+    done < <(find "${CLONE_DIR}" \
+        -type f \
+        \( -name "*.md" -o -name "*.markdown" \) \
+        ! -path "*/node_modules/*" \
+        ! -path "*/.git/*" \
+        ! -path "*/vendor/*" \
+        -print0)
+
+    if [ ${#doc_files[@]} -eq 0 ]; then
+        log_error "No documentation files found in ${CLONE_DIR}"
+        exit 1
+    fi
+
+    log_success "Found ${#doc_files[@]} documentation files"
+    echo "${doc_files[@]}"
+}
+
+# Build RAG vector database
+build_rag_database() {
+    log_info "Building RAG vector database with docling and ramalama..."
+    log_info "This may take several minutes depending on documentation size..."
+
+    # Ensure output directory exists
+    mkdir -p "${OUTPUT_DIR}"
+
+    # Find all documentation files
+    local doc_files
+    doc_files=$(find_documentation_files)
+
+    # Build ramalama rag command
+    # Format: ramalama rag <files/urls> <output-tag>
+    local rag_args=()
+    for file in ${doc_files}; do
+        rag_args+=("${file}")
+    done
+
+    # Add output path/tag
+    if [ -n "${REGISTRY_TAG}" ]; then
+        rag_args+=("${REGISTRY_TAG}")
+    else
+        # Use local directory as output
+        rag_args+=("dir:${OUTPUT_DIR}")
+    fi
+
+    log_info "Processing ${#rag_args[@]} files with ramalama rag..."
+    log_info "Output: ${rag_args[-1]}"
+
+    # Run ramalama rag command
+    # Note: ramalama uses docling internally via doc2rag script
+    if ramalama rag "${rag_args[@]}"; then
+        log_success "RAG vector database created successfully"
+
+        if [ -n "${REGISTRY_TAG}" ]; then
+            log_success "RAG image built and ready to push: ${REGISTRY_TAG}"
+            log_info "To push to registry, run: podman push ${REGISTRY_TAG}"
+        else
+            log_success "Vector database saved to: ${OUTPUT_DIR}"
+        fi
+    else
+        log_error "Failed to build RAG database"
+        exit 1
+    fi
+}
+
+# Print next steps
+print_next_steps() {
+    echo ""
+    log_success "RAG database build complete!"
+    echo ""
+    echo "Next steps:"
+    echo ""
+
+    if [ -n "${REGISTRY_TAG}" ]; then
+        echo "1. Push to registry (optional):"
+        echo "   podman push ${REGISTRY_TAG}"
+        echo ""
+        echo "2. Test interactively with a model:"
+        echo "   ramalama run --rag ${REGISTRY_TAG} llama3"
+        echo ""
+        echo "3. Serve via API:"
+        echo "   ramalama serve --rag ${REGISTRY_TAG} llama3"
+        echo ""
+    else
+        echo "1. Test interactively with a model:"
+        echo "   ramalama run --rag dir:${OUTPUT_DIR} llama3"
+        echo ""
+        echo "2. Serve via API:"
+        echo "   ramalama serve --rag dir:${OUTPUT_DIR} llama3"
+        echo ""
+    fi
+
+    echo "4. Use with MCP (Model Context Protocol):"
+    echo "   Configure Qdrant MCP server to point to the vector database"
+    echo "   See: https://github.com/qdrant/mcp-server-qdrant"
+    echo ""
+    echo "Vector database location: ${OUTPUT_DIR}"
+    if [ -d "${OUTPUT_DIR}" ]; then
+        echo "Database size: $(du -sh "${OUTPUT_DIR}" | cut -f1)"
+    fi
+    echo ""
+}
+
+# Main execution
+main() {
+    log_info "Kong Documentation RAG Builder"
+    log_info "=============================="
+    echo ""
+
+    check_dependencies
+    clone_or_update_repo
+    build_rag_database
+    print_next_steps
+}
+
+main
+

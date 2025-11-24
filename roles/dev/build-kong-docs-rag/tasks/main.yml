@@ -1,0 +1,73 @@
+---
+# Install build-kong-docs-rag script to ~/.local/bin
+# This script clones Jekyll docs, processes with docling, and creates RAG vector database
+
+- name: Ensure ~/.local/bin directory exists
+  ansible.builtin.file:
+    path: "{{ user.home }}/.local/bin"
+    state: directory
+    owner: "{{ user.name }}"
+    mode: "0755"
+  when: build_kong_docs_rag_state == 'present'
+
+- name: Check if script exists at source path
+  ansible.builtin.stat:
+    path: "{{ build_kong_docs_rag_source }}"
+  register: script_source_stat
+  delegate_to: localhost
+  become: false
+  when: build_kong_docs_rag_state == 'present'
+
+- name: Fail if source script does not exist
+  ansible.builtin.fail:
+    msg: "Source script not found at {{ build_kong_docs_rag_source }}"
+  when:
+    - build_kong_docs_rag_state == 'present'
+    - not script_source_stat.stat.exists
+
+- name: Copy build-kong-docs-rag script to ~/.local/bin
+  ansible.builtin.copy:
+    src: "{{ build_kong_docs_rag_source }}"
+    dest: "{{ build_kong_docs_rag_dest }}"
+    owner: "{{ user.name }}"
+    mode: "0755"
+  when: build_kong_docs_rag_state == 'present'
+
+- name: Show installation status
+  ansible.builtin.debug:
+    msg: "build-kong-docs-rag script installed to {{ build_kong_docs_rag_dest }}"
+  when: build_kong_docs_rag_state == 'present'
+
+- name: Ensure RAG work directory exists
+  ansible.builtin.file:
+    path: "{{ build_kong_docs_rag_work_dir }}"
+    state: directory
+    owner: "{{ user.name }}"
+    mode: "0755"
+  when: build_kong_docs_rag_state == 'present'
+
+- name: Deploy justfile for RAG management
+  ansible.builtin.template:
+    src: justfile.j2
+    dest: "{{ build_kong_docs_rag_justfile_dest }}"
+    owner: "{{ user.name }}"
+    mode: "0644"
+  when: build_kong_docs_rag_state == 'present'
+
+- name: Show justfile deployment status
+  ansible.builtin.debug:
+    msg: "Justfile deployed to {{ build_kong_docs_rag_justfile_dest }}"
+  when: build_kong_docs_rag_state == 'present'
+
+# Cleanup when absent
+- name: Remove build-kong-docs-rag script when absent
+  ansible.builtin.file:
+    path: "{{ build_kong_docs_rag_dest }}"
+    state: absent
+  when: build_kong_docs_rag_state == 'absent'
+
+- name: Remove RAG work directory when absent
+  ansible.builtin.file:
+    path: "{{ build_kong_docs_rag_work_dir }}"
+    state: absent
+  when: build_kong_docs_rag_state == 'absent'
