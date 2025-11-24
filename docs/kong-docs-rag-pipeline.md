@@ -209,7 +209,7 @@ build-kong-docs-rag --clean
 build-kong-docs-rag --registry quay.io/myuser/kong-docs-rag
 
 # Then push
-podman push quay.io/myuser/kong-docs-rag
+docker push quay.io/myuser/kong-docs-rag
 ```
 
 ### Script Options

@@ -156,7 +156,7 @@ export tag="localhost/kong-docs-rag:latest":
     @echo "Exporting vector DB as container image: {{ "{{" }} tag {{ "}}" }}"
     build-kong-docs-rag --registry {{ "{{" }} tag {{ "}}" }}
     @echo "✓ Image built: {{ "{{" }} tag {{ "}}" }}"
-    @echo "Push with: podman push {{ "{{" }} tag {{ "}}" }}"
+    @echo "Push with: docker push {{ "{{" }} tag {{ "}}" }}"
 
 # Show information about the cloned repo
 repo-info:

@@ -216,7 +216,7 @@ build_rag_database() {
 
         if [ -n "${REGISTRY_TAG}" ]; then
             log_success "RAG image built and ready to push: ${REGISTRY_TAG}"
-            log_info "To push to registry, run: podman push ${REGISTRY_TAG}"
+            log_info "To push to registry, run: docker push ${REGISTRY_TAG}"
         else
             log_success "Vector database saved to: ${OUTPUT_DIR}"
         fi
@@ -236,7 +236,7 @@ print_next_steps() {
 
     if [ -n "${REGISTRY_TAG}" ]; then
         echo "1. Push to registry (optional):"
-        echo "   podman push ${REGISTRY_TAG}"
+        echo "   docker push ${REGISTRY_TAG}"
         echo ""
         echo "2. Test interactively with a model:"
         echo "   ramalama run --rag ${REGISTRY_TAG} llama3"
