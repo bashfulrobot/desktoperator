@@ -190,12 +190,6 @@ build_rag_database() {
     # Verify documentation exists
     find_documentation_files >/dev/null
 
-    # Create a temporary directory with only markdown files
-    # This avoids processing config files, redirects, etc.
-    local temp_docs_dir
-    temp_docs_dir=$(mktemp -d)
-    trap "rm -rf ${temp_docs_dir}" EXIT
-
     # Determine source directory for docs
     local source_dir="${CLONE_DIR}"
     if [ -d "${CLONE_DIR}/app" ]; then
@@ -209,25 +203,34 @@ build_rag_database() {
         log_info "Found docs/ directory"
     fi
 
-    # Copy only markdown and HTML files to temp directory
-    log_info "Preparing documentation files from: ${source_dir}"
+    log_info "Finding documentation files in: ${source_dir}"
 
-    # Find and copy markdown files, preserving directory structure
-    cd "${source_dir}"
-    find . -type f \( -name "*.md" -o -name "*.markdown" -o -name "*.html" \) \
-        -not -path "*/_redirects" \
-        -not -path "*/node_modules/*" \
-        -not -path "*/.git/*" | while read -r file; do
-        # Create parent directory in temp location
-        mkdir -p "${temp_docs_dir}/$(dirname "$file")"
-        # Copy file
-        cp "$file" "${temp_docs_dir}/$file"
-    done
-    cd - > /dev/null
+    # Build array of only markdown files
+    # Use fd if available (faster), otherwise fall back to find
+    local doc_files=()
+    if command -v fd &> /dev/null; then
+        log_info "Using fd for faster file search..."
+        while IFS= read -r -d '' file; do
+            doc_files+=("$file")
+        done < <(fd -t f -e md -e markdown \
+            --exclude node_modules \
+            --exclude .git \
+            -0 . "${source_dir}")
+    else
+        while IFS= read -r -d '' file; do
+            doc_files+=("$file")
+        done < <(find "${source_dir}" -type f \( -name "*.md" -o -name "*.markdown" \) \
+            -not -path "*/node_modules/*" \
+            -not -path "*/.git/*" \
+            -print0)
+    fi
 
-    local file_count
-    file_count=$(find "${temp_docs_dir}" -type f | wc -l)
-    log_info "Prepared ${file_count} documentation files for processing"
+    if [ ${#doc_files[@]} -eq 0 ]; then
+        log_error "No documentation files found"
+        exit 1
+    fi
+
+    log_info "Found ${#doc_files[@]} documentation files to process"
 
     # Build ramalama rag command
     local output_tag
@@ -241,9 +244,9 @@ build_rag_database() {
     log_info "Processing documentation with ramalama..."
     log_info "Output: ${output_tag}"
 
-    # Run ramalama rag command with the filtered docs directory
+    # Run ramalama rag command with file list
     # Note: ramalama uses docling internally via doc2rag script
-    if ramalama rag "${temp_docs_dir}" "${output_tag}"; then
+    if ramalama rag "${doc_files[@]}" "${output_tag}"; then
         log_success "RAG vector database created successfully"
 
         if [ -n "${REGISTRY_TAG}" ]; then
