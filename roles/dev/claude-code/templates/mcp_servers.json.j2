@@ -22,13 +22,14 @@
       ]
     },
     "kong-docs": {
-      "command": "npx",
+      "command": "uvx",
       "args": [
-        "@qdrant/mcp-server-qdrant"
+        "mcp-server-qdrant"
       ],
       "env": {
-        "QDRANT_URL": "file://{{ user.home }}/dev/kong/docs-rag/vector-db",
-        "COLLECTION_NAME": "kong-docs"
+        "QDRANT_LOCAL_PATH": "{{ user.home }}/dev/kong/docs-rag/vector-db",
+        "COLLECTION_NAME": "kong-docs",
+        "EMBEDDING_MODEL": "sentence-transformers/all-MiniLM-L6-v2"
       }
     }
   }

@@ -46,6 +46,42 @@
     mode: "0755"
   when: build_kong_docs_rag_state == 'present'
 
+- name: Create virtual environment for Kong docs RAG
+  ansible.builtin.command:
+    cmd: python3 -m venv {{ user.home }}/.local/share/kong-docs-rag-venv
+    creates: "{{ user.home }}/.local/share/kong-docs-rag-venv/bin/python"
+  become: true
+  become_user: "{{ user.name }}"
+  when: build_kong_docs_rag_state == 'present'
+
+- name: Install Python RAG dependencies in virtual environment
+  ansible.builtin.pip:
+    name:
+      - docling
+      - qdrant-client
+      - fastembed
+    state: present
+    virtualenv: "{{ user.home }}/.local/share/kong-docs-rag-venv"
+  become: true
+  become_user: "{{ user.name }}"
+  when: build_kong_docs_rag_state == 'present'
+
+- name: Copy Docling-based Python script to ~/.local/bin
+  ansible.builtin.copy:
+    src: "{{ playbook_dir }}/scripts/build-kong-docs-rag-docling"
+    dest: "{{ user.home }}/.local/bin/build-kong-docs-rag-docling.py"
+    owner: "{{ user.name }}"
+    mode: "0644"
+  when: build_kong_docs_rag_state == 'present'
+
+- name: Deploy wrapper script for build-kong-docs-rag-docling
+  ansible.builtin.template:
+    src: build-kong-docs-rag-docling-wrapper.j2
+    dest: "{{ user.home }}/.local/bin/build-kong-docs-rag-docling"
+    owner: "{{ user.name }}"
+    mode: "0755"
+  when: build_kong_docs_rag_state == 'present'
+
 - name: Deploy justfile for RAG management
   ansible.builtin.template:
     src: justfile.j2
@@ -63,6 +99,24 @@
 - name: Remove build-kong-docs-rag script when absent
   ansible.builtin.file:
     path: "{{ build_kong_docs_rag_dest }}"
+    state: absent
+  when: build_kong_docs_rag_state == 'absent'
+
+- name: Remove Docling wrapper script when absent
+  ansible.builtin.file:
+    path: "{{ user.home }}/.local/bin/build-kong-docs-rag-docling"
+    state: absent
+  when: build_kong_docs_rag_state == 'absent'
+
+- name: Remove Docling Python script when absent
+  ansible.builtin.file:
+    path: "{{ user.home }}/.local/bin/build-kong-docs-rag-docling.py"
+    state: absent
+  when: build_kong_docs_rag_state == 'absent'
+
+- name: Remove Kong docs RAG virtual environment when absent
+  ansible.builtin.file:
+    path: "{{ user.home }}/.local/share/kong-docs-rag-venv"
     state: absent
   when: build_kong_docs_rag_state == 'absent'
 

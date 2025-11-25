@@ -1,0 +1,306 @@
+#!/usr/bin/env python3
+"""
+build-kong-docs-rag-docling - Build Kong docs RAG using Docling + Qdrant
+
+This script uses Docling to process Kong documentation and create a Qdrant
+vector database that's compatible with standard Qdrant MCP servers.
+
+Usage:
+    build-kong-docs-rag-docling [options]
+
+Options:
+    -r, --repo URL          Repository URL (default: Kong developer docs)
+    -d, --work-dir PATH     Working directory (default: ~/dev/kong/docs-rag/source)
+    -o, --output PATH       Output vector DB path (default: ~/dev/kong/docs-rag/vector-db)
+    -c, --clean             Clean existing clone before starting
+    -h, --help              Show this help message
+
+Requirements:
+    - docling (pip install docling)
+    - qdrant-client (pip install qdrant-client)
+    - git
+"""
+
+import argparse
+import sys
+import shutil
+from pathlib import Path
+from typing import List
+import subprocess
+
+# Color output
+class Colors:
+    BLUE = '\033[0;34m'
+    GREEN = '\033[0;32m'
+    YELLOW = '\033[1;33m'
+    RED = '\033[0;31m'
+    NC = '\033[0m'
+
+def log_info(msg: str):
+    print(f"{Colors.BLUE}==>{Colors.NC} {msg}")
+
+def log_success(msg: str):
+    print(f"{Colors.GREEN}==>{Colors.NC} {msg}")
+
+def log_warn(msg: str):
+    print(f"{Colors.YELLOW}==>{Colors.NC} {msg}")
+
+def log_error(msg: str):
+    print(f"{Colors.RED}ERROR:{Colors.NC} {msg}", file=sys.stderr)
+
+def clone_or_update_repo(repo_url: str, clone_dir: Path, clean: bool = False) -> bool:
+    """Clone or update the documentation repository"""
+    log_info(f"Working with repository: {repo_url}")
+
+    clone_dir.parent.mkdir(parents=True, exist_ok=True)
+
+    if clone_dir.exists():
+        if clean:
+            log_warn(f"Cleaning existing clone at {clone_dir}")
+            shutil.rmtree(clone_dir)
+        else:
+            log_info(f"Repository already exists, pulling latest changes...")
+            try:
+                subprocess.run(
+                    ["git", "pull", "--ff-only"],
+                    cwd=clone_dir,
+                    check=True,
+                    capture_output=True
+                )
+                return True
+            except subprocess.CalledProcessError:
+                log_warn("Could not fast-forward. Consider using --clean")
+                return False
+
+    log_info(f"Cloning {repo_url}...")
+    try:
+        subprocess.run(
+            ["git", "clone", "--depth", "1", repo_url, str(clone_dir)],
+            check=True,
+            capture_output=True
+        )
+        log_success("Repository cloned successfully")
+        return True
+    except subprocess.CalledProcessError as e:
+        log_error(f"Failed to clone repository: {e}")
+        return False
+
+def find_markdown_files(source_dir: Path) -> List[Path]:
+    """Find all markdown files in the source directory"""
+    log_info(f"Scanning for documentation files in {source_dir}...")
+
+    # Find Jekyll app directory
+    if (source_dir / "app").exists():
+        search_dir = source_dir / "app"
+        log_info("Found Jekyll app/ directory")
+    elif (source_dir / "_docs").exists():
+        search_dir = source_dir / "_docs"
+        log_info("Found _docs/ directory")
+    elif (source_dir / "docs").exists():
+        search_dir = source_dir / "docs"
+        log_info("Found docs/ directory")
+    else:
+        search_dir = source_dir
+
+    # Find all markdown files
+    md_files = []
+    for ext in ["*.md", "*.markdown"]:
+        md_files.extend(search_dir.rglob(ext))
+
+    # Filter out unwanted directories
+    md_files = [
+        f for f in md_files
+        if not any(part in f.parts for part in ["node_modules", ".git", "vendor"])
+    ]
+
+    log_success(f"Found {len(md_files)} documentation files")
+    return md_files
+
+def build_vector_database(md_files: List[Path], output_dir: Path) -> bool:
+    """Build Qdrant vector database using Docling"""
+    log_info("Building vector database with Docling...")
+    log_info("This may take several minutes...")
+
+    try:
+        from docling.document_converter import DocumentConverter
+        from docling.chunking import HybridChunker
+        from qdrant_client import QdrantClient
+        from qdrant_client.models import Distance, VectorParams, PointStruct
+        from fastembed import TextEmbedding
+        import hashlib
+        import os
+    except ImportError as e:
+        log_error(f"Missing required package: {e}")
+        log_error("Install with: pip install docling qdrant-client fastembed")
+        return False
+
+    # Optimize CPU threading for Docling
+    os.environ["OMP_NUM_THREADS"] = "8"  # Adjust based on available CPU cores
+
+    # Clean output directory
+    if output_dir.exists():
+        log_warn(f"Removing existing vector database at {output_dir}")
+        shutil.rmtree(output_dir)
+
+    output_dir.mkdir(parents=True, exist_ok=True)
+
+    # Initialize Docling converter
+    log_info("Initializing Docling converter...")
+    converter = DocumentConverter()
+
+    # Initialize Qdrant client
+    log_info(f"Initializing Qdrant database at {output_dir}...")
+    client = QdrantClient(path=str(output_dir))
+
+    # Initialize embeddings
+    log_info("Loading embedding model...")
+    embedding_model = TextEmbedding(model_name="sentence-transformers/all-MiniLM-L6-v2")
+
+    # Create collection with named vector (required by mcp-server-qdrant)
+    collection_name = "kong-docs"
+    vector_name = "fast-all-minilm-l6-v2"  # FastEmbed naming convention
+    log_info(f"Creating collection: {collection_name} with vector: {vector_name}")
+
+    client.create_collection(
+        collection_name=collection_name,
+        vectors_config={
+            vector_name: VectorParams(
+                size=384,  # all-MiniLM-L6-v2 embedding size
+                distance=Distance.COSINE
+            )
+        }
+    )
+
+    # Initialize chunker
+    chunker = HybridChunker(
+        tokenizer="sentence-transformers/all-MiniLM-L6-v2"
+    )
+
+    # Process documents
+    points = []
+    point_id = 0
+
+    for idx, md_file in enumerate(md_files, 1):
+        log_info(f"Processing {idx}/{len(md_files)}: {md_file.name}")
+
+        try:
+            # Convert document
+            result = converter.convert(str(md_file))
+            doc = result.document
+
+            # Chunk document
+            chunks = list(chunker.chunk(doc))
+
+            # Create embeddings and points
+            for chunk in chunks:
+                text = chunk.text
+                if not text.strip():
+                    continue
+
+                # Generate embedding
+                embeddings = list(embedding_model.embed([text]))
+                if not embeddings:
+                    continue
+
+                vector = embeddings[0].tolist()
+
+                # Create point with named vector and mcp-server-qdrant compatible payload
+                point = PointStruct(
+                    id=point_id,
+                    vector={vector_name: vector},  # Named vector format
+                    payload={
+                        "information": text,  # mcp-server-qdrant expects 'information' field
+                        "metadata": {
+                            "source": str(md_file.relative_to(md_file.parent.parent)),
+                            "file": md_file.name,
+                        }
+                    }
+                )
+                points.append(point)
+                point_id += 1
+
+                # Batch upsert every 100 points
+                if len(points) >= 100:
+                    client.upsert(collection_name=collection_name, points=points)
+                    points = []
+
+        except Exception as e:
+            log_warn(f"Failed to process {md_file.name}: {e}")
+            continue
+
+    # Upload remaining points
+    if points:
+        client.upsert(collection_name=collection_name, points=points)
+
+    log_success("Vector database created successfully!")
+    log_success(f"Indexed {point_id} chunks from {len(md_files)} documents")
+    return True
+
+def main():
+    parser = argparse.ArgumentParser(
+        description="Build Kong docs RAG using Docling + Qdrant"
+    )
+    parser.add_argument(
+        "-r", "--repo",
+        default="https://github.com/Kong/developer.konghq.com",
+        help="Repository URL"
+    )
+    parser.add_argument(
+        "-d", "--work-dir",
+        type=Path,
+        default=Path.home() / "dev/kong/docs-rag/source",
+        help="Working directory"
+    )
+    parser.add_argument(
+        "-o", "--output",
+        type=Path,
+        default=Path.home() / "dev/kong/docs-rag/vector-db",
+        help="Output vector database path"
+    )
+    parser.add_argument(
+        "-c", "--clean",
+        action="store_true",
+        help="Clean existing clone before starting"
+    )
+
+    args = parser.parse_args()
+
+    # Extract repo name
+    repo_name = args.repo.rstrip('/').split('/')[-1].replace('.git', '')
+    clone_dir = args.work_dir / repo_name
+
+    log_info("Kong Documentation RAG Builder (Docling)")
+    log_info("=" * 40)
+    print()
+
+    # Clone/update repository
+    if not clone_or_update_repo(args.repo, clone_dir, args.clean):
+        sys.exit(1)
+
+    # Find markdown files
+    md_files = find_markdown_files(clone_dir)
+    if not md_files:
+        log_error("No markdown files found")
+        sys.exit(1)
+
+    # Build vector database
+    if not build_vector_database(md_files, args.output):
+        sys.exit(1)
+
+    # Print next steps
+    print()
+    log_success("RAG database build complete!")
+    print()
+    print("Next steps:")
+    print()
+    print("1. Test with Qdrant MCP server:")
+    print(f"   Collection: kong-docs")
+    print(f"   Path: {args.output}")
+    print()
+    print("2. Configure MCP server in Claude Code:")
+    print('   QDRANT_LOCAL_PATH="{}"'.format(args.output))
+    print('   COLLECTION_NAME="kong-docs"')
+    print()
+
+if __name__ == "__main__":
+    main()

@@ -19,3 +19,6 @@ build_kong_docs_rag_repo_url: "https://github.com/Kong/developer.konghq.com"
 # Justfile deployment
 build_kong_docs_rag_justfile_dest: "{{ build_kong_docs_rag_work_dir }}/justfile"
 
+# Container registry for sharing vector database
+build_kong_docs_rag_registry: "ghcr.io/bashfulrobot/kong-docs-rag:latest"
+

@@ -1,0 +1,16 @@
+#!/bin/bash
+# Wrapper script to run build-kong-docs-rag-docling with its virtual environment
+# Managed by Ansible - DO NOT EDIT DIRECTLY
+
+VENV_PATH="{{ user.home }}/.local/share/kong-docs-rag-venv"
+SCRIPT_PATH="{{ user.home }}/.local/bin/build-kong-docs-rag-docling.py"
+
+# Check if venv exists
+if [ ! -f "${VENV_PATH}/bin/python3" ]; then
+    echo "Error: Virtual environment not found at ${VENV_PATH}" >&2
+    echo "Please run the Ansible playbook to set up the environment." >&2
+    exit 1
+fi
+
+# Run the Python script with the venv's Python
+exec "${VENV_PATH}/bin/python3" "${SCRIPT_PATH}" "$@"

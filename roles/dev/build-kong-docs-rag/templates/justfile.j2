@@ -1,5 +1,5 @@
-# Kong Documentation RAG Management
-# Requires: just, ramalama, docling, npm
+# Kong Documentation RAG Management (Docling + Qdrant)
+# Requires: just, python3, git
 # Managed by Ansible - DO NOT EDIT DIRECTLY
 
 # Default recipe - show available commands
@@ -10,70 +10,31 @@ default:
 source_dir := justfile_directory() / "source"
 vector_dir := justfile_directory() / "vector-db"
 repo_url := "{{ build_kong_docs_rag_repo_url }}"
-mcp_config := env_var('HOME') / ".config/claude-code/claude_desktop_config.json"
-# Set your container registry here (e.g., ghcr.io/username/kong-docs-rag, quay.io/username/kong-docs-rag)
-registry_tag := env_var_or_default('KONG_DOCS_REGISTRY', "localhost/kong-docs-rag:latest")
 
 # Build RAG database from Kong docs
 build:
-    @echo "Building Kong docs RAG database..."
-    build-kong-docs-rag
+    @echo "Building Kong docs RAG database with Docling..."
+    build-kong-docs-rag-docling
 
 # Build with clean clone
 rebuild:
     @echo "Rebuilding from scratch..."
-    build-kong-docs-rag --clean
+    build-kong-docs-rag-docling --clean
 
-# Build and publish to container registry
-publish:
-    @echo "Building and publishing to registry: {{ "{{" }} registry_tag {{ "}}" }}"
-    @build-kong-docs-rag --registry {{ "{{" }} registry_tag {{ "}}" }}
-    @echo "Pushing to registry..."
-    @docker push {{ "{{" }} registry_tag {{ "}}" }}
-    @echo "✓ Published: {{ "{{" }} registry_tag {{ "}}" }}"
-    @echo "Share this tag with your team!"
-
-# Rebuild and republish
-republish:
-    @echo "Rebuilding and republishing..."
-    @build-kong-docs-rag --clean --registry {{ "{{" }} registry_tag {{ "}}" }}
-    @docker push {{ "{{" }} registry_tag {{ "}}" }}
-    @echo "✓ Republished: {{ "{{" }} registry_tag {{ "}}" }}"
-
-# Pull container image from registry (for team members)
-pull-image:
-    @echo "Pulling from registry: {{ "{{" }} registry_tag {{ "}}" }}"
-    @docker pull {{ "{{" }} registry_tag {{ "}}" }}
-    @echo "✓ Image pulled successfully"
-    @echo "Run 'just setup-from-image' to configure MCP"
-
-# Setup from pre-built container image (for team members who don't build)
-setup-from-image:
-    @echo "=== Setup from Pre-Built Container ==="
-    @echo "Registry: {{ "{{" }} registry_tag {{ "}}" }}"
-    @just pull-image
-    @just install-mcp
-    @just configure-mcp-container
-    @echo ""
-    @echo "✓ Setup complete! Restart Claude Code to use."
-    @echo "No build required - using shared container image."
-
-# Update documentation (full rebuild required - ramalama doesn't support incremental)
+# Update documentation and rebuild
 update:
     @echo "Updating Kong documentation..."
+    @if [ ! -d "{{ "{{" }} source_dir {{ "}}" }}/developer.konghq.com" ]; then \
+        echo "Repository not cloned yet. Run 'just build' first."; \
+        exit 1; \
+    fi
     @cd {{ "{{" }} source_dir {{ "}}" }}/developer.konghq.com && git pull
-    @echo "Rebuilding vector database (ramalama requires full rebuild)..."
+    @echo "Rebuilding vector database..."
     @just rebuild
 
-# Update and republish
-update-publish:
-    @echo "Updating and republishing..."
-    @just update
-    @just publish
-
-# Clean all generated files
+# Clean vector database
 clean:
-    @echo "Cleaning generated files..."
+    @echo "Cleaning vector database..."
     rm -rf {{ "{{" }} vector_dir {{ "}}" }}
 
 # Deep clean (including cloned source)
@@ -98,114 +59,32 @@ status:
     @if [ -d "{{ "{{" }} vector_dir {{ "}}" }}" ]; then \
         echo "  ✓ Exists at {{ "{{" }} vector_dir {{ "}}" }}"; \
         echo "  Size: $$(du -sh {{ "{{" }} vector_dir {{ "}}" }} | cut -f1)"; \
+        echo "  Collection: kong-docs"; \
     else \
         echo "  ✗ Not built yet"; \
     fi
     @echo ""
     @echo "Dependencies:"
-    @command -v ramalama >/dev/null 2>&1 && echo "  ✓ ramalama" || echo "  ✗ ramalama"
-    @command -v docling >/dev/null 2>&1 && echo "  ✓ docling" || echo "  ✗ docling"
-    @command -v git >/dev/null 2>&1 && echo "  ✓ git" || echo "  ✗ git"
-    @command -v npm >/dev/null 2>&1 && echo "  ✓ npm" || echo "  ✗ npm"
+    @command -v python3 >/dev/null 2>&1 && echo "  ✓ python3" || echo "  ✗ python3"
+    @python3 -c "import docling" 2>/dev/null && echo "  ✓ docling" || echo "  ✗ docling"
+    @python3 -c "import qdrant_client" 2>/dev/null && echo "  ✓ qdrant-client" || echo "  ✗ qdrant-client"
+    @python3 -c "import fastembed" 2>/dev/null && echo "  ✓ fastembed" || echo "  ✗ fastembed"
+    @command -v git >/dev/null 2>&1 && echo "  ✓ git" || echo "  ✓ git"
+    @command -v uvx >/dev/null 2>&1 && echo "  ✓ uvx (for MCP server)" || echo "  ✗ uvx"
 
-# Test RAG with interactive query
-test query="What is Kong Gateway rate limiting?":
-    @echo "Testing RAG with query: {{ "{{" }} query {{ "}}" }}"
-    @if [ ! -d "{{ "{{" }} vector_dir {{ "}}" }}" ]; then \
-        echo "Error: Vector database not found. Run 'just build' first."; \
-        exit 1; \
-    fi
-    ramalama run --rag dir:{{ "{{" }} vector_dir {{ "}}" }} llama3 "{{ "{{" }} query {{ "}}" }}"
-
-# Install Qdrant MCP server globally
-install-mcp:
-    @echo "Installing Qdrant MCP server..."
-    npm install -g @qdrant/mcp-server-qdrant
-    @echo "✓ MCP server installed"
-
-# Configure MCP server for Claude Code (local files)
-configure-mcp-local:
-    @echo "Configuring MCP server for LOCAL vector database..."
-    @if [ ! -f "{{ "{{" }} mcp_config {{ "}}" }}" ]; then \
-        echo "Creating Claude Code config..."; \
-        mkdir -p "$$(dirname {{ "{{" }} mcp_config {{ "}}" }})"; \
-        echo '{"mcpServers": {}}' > {{ "{{" }} mcp_config {{ "}}" }}; \
-    fi
-    @echo ""
-    @echo "Add this to {{ "{{" }} mcp_config {{ "}}" }}:"
-    @echo ""
-    @echo '  "kong-docs": {'
-    @echo '    "command": "npx",'
-    @echo '    "args": ["@qdrant/mcp-server-qdrant"],'
-    @echo '    "env": {'
-    @echo '      "QDRANT_URL": "file://{{ "{{" }} vector_dir {{ "}}" }}",'
-    @echo '      "COLLECTION_NAME": "kong-docs"'
-    @echo '    }'
-    @echo '  }'
-    @echo ""
-    @echo "Then restart Claude Code."
-
-# Configure MCP server for Claude Code (container-based)
-configure-mcp-container:
-    @echo "Configuring MCP server for CONTAINER-BASED vector database..."
-    @echo ""
-    @echo "Container registry: {{ "{{" }} registry_tag {{ "}}" }}"
-    @echo ""
-    @echo "Add this to {{ "{{" }} mcp_config {{ "}}" }}:"
-    @echo ""
-    @echo '  "kong-docs": {'
-    @echo '    "command": "docker",'
-    @echo '    "args": ['
-    @echo '      "run", "--rm", "-i",'
-    @echo '      "--mount", "type=bind,source={{ "{{" }} vector_dir {{ "}}" }},target=/data",'
-    @echo '      "{{ "{{" }} registry_tag {{ "}}" }}",'
-    @echo '      "npx", "@qdrant/mcp-server-qdrant"'
-    @echo '    ],'
-    @echo '    "env": {'
-    @echo '      "QDRANT_URL": "file:///data",'
-    @echo '      "COLLECTION_NAME": "kong-docs"'
-    @echo '    }'
-    @echo '  }'
-    @echo ""
-    @echo "Then restart Claude Code."
-
-# Legacy command (defaults to local)
-configure-mcp: configure-mcp-local
-
-# Show MCP server logs
-mcp-logs:
-    @echo "MCP server logs:"
-    @tail -f ~/.config/claude-code/logs/mcp-kong-docs.log 2>/dev/null || echo "No logs found yet"
-
-# Quick setup - local files
+# Quick setup
 setup:
-    @echo "=== Quick Setup (Local Files) ==="
-    @just install-mcp
+    @echo "=== Quick Setup ==="
     @just build
-    @just configure-mcp-local
     @echo ""
-    @echo "✓ Setup complete! Restart Claude Code to use."
-
-# Quick setup - container-based (publish to registry)
-setup-container:
-    @echo "=== Quick Setup (Container-Based) ==="
-    @echo "Registry: {{ "{{" }} registry_tag {{ "}}" }}"
-    @just install-mcp
-    @just publish
-    @just configure-mcp-container
+    @echo "✓ Vector database built!"
     @echo ""
-    @echo "✓ Setup complete! Share registry tag with team."
-    @echo "✓ Restart Claude Code to use."
-
-# Watch for changes and rebuild (requires entr)
-watch:
-    @if ! command -v entr >/dev/null 2>&1; then \
-        echo "Error: 'entr' not installed. Install with: sudo apt install entr"; \
-        exit 1; \
-    fi
-    @echo "Watching {{ "{{" }} source_dir {{ "}}" }}/developer.konghq.com for changes..."
-    @cd {{ "{{" }} source_dir {{ "}}" }}/developer.konghq.com && \
-        git ls-files | entr -s 'just build'
+    @echo "MCP server configuration:"
+    @echo "  Location: {{ "{{" }} justfile_directory() {{ "}}" }}/../.mcp.json"
+    @echo "  Collection: kong-docs"
+    @echo "  Vector DB: {{ "{{" }} vector_dir {{ "}}" }}"
+    @echo ""
+    @echo "Restart Claude Code to use the Kong docs MCP server."
 
 # Show disk usage
 disk-usage:
@@ -218,26 +97,6 @@ disk-usage:
 benchmark:
     @echo "Benchmarking build time..."
     @time just rebuild
-
-# Verify RAG quality with test queries
-verify:
-    @echo "Verifying RAG quality with test queries..."
-    @echo ""
-    @echo "Query 1: Rate limiting"
-    @just test "Explain Kong Gateway rate limiting plugin"
-    @echo ""
-    @echo "Query 2: Admin API"
-    @just test "Show me Admin API endpoints for services"
-    @echo ""
-    @echo "Query 3: Configuration"
-    @just test "How do I configure Kong Gateway?"
-
-# Export vector DB as container image
-export tag="localhost/kong-docs-rag:latest":
-    @echo "Exporting vector DB as container image: {{ "{{" }} tag {{ "}}" }}"
-    build-kong-docs-rag --registry {{ "{{" }} tag {{ "}}" }}
-    @echo "✓ Image built: {{ "{{" }} tag {{ "}}" }}"
-    @echo "Push with: docker push {{ "{{" }} tag {{ "}}" }}"
 
 # Show information about the cloned repo
 repo-info:
@@ -254,7 +113,7 @@ repo-info:
         echo "Last update: $$(git log -1 --format=%cd)" && \
         echo "" && \
         echo "File counts:" && \
-        echo "  Markdown files: $$(find . -name '*.md' | wc -l)" && \
+        echo "  Markdown files: $$(find app -name '*.md' 2>/dev/null | wc -l)" && \
         echo "  Total files: $$(git ls-files | wc -l)"
 
 # Pull latest changes without rebuilding
@@ -285,4 +144,29 @@ check-updates:
         else \
             echo "✓ Already up to date"; \
         fi
+
+# Watch for changes and rebuild (requires entr)
+watch:
+    @if ! command -v entr >/dev/null 2>&1; then \
+        echo "Error: 'entr' not installed. Install with: sudo apt install entr"; \
+        exit 1; \
+    fi
+    @echo "Watching {{ "{{" }} source_dir {{ "}}" }}/developer.konghq.com for changes..."
+    @cd {{ "{{" }} source_dir {{ "}}" }}/developer.konghq.com && \
+        git ls-files | entr -s 'just build'
+
+# Install Python dependencies
+install-deps:
+    @echo "Installing Python dependencies..."
+    pip install --user docling qdrant-client fastembed
+    @echo "✓ Dependencies installed"
+
+# Verify database integrity
+verify:
+    @echo "Verifying vector database..."
+    @if [ ! -d "{{ "{{" }} vector_dir {{ "}}" }}" ]; then \
+        echo "Error: Vector database not found. Run 'just build' first."; \
+        exit 1; \
+    fi
+    @~/.local/share/kong-docs-rag-venv/bin/python3 -c "from qdrant_client import QdrantClient; client = QdrantClient(path='{{ "{{" }} vector_dir {{ "}}" }}'); info = client.get_collection('kong-docs'); print(f'✓ Collection: kong-docs'); print(f'  Points: {info.points_count}'); print(f'  Status: {info.status}'); print(f'  Vectors config: {info.config.params.vectors}')"
 

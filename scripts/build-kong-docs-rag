@@ -184,25 +184,30 @@ build_rag_database() {
     log_info "Building RAG vector database with docling and ramalama..."
     log_info "This may take several minutes depending on documentation size..."
 
-    # Handle existing vector database
-    if [ -d "${OUTPUT_DIR}/collection" ]; then
-        if [ "${CLEAN}" = true ]; then
-            log_warn "Removing existing vector database at ${OUTPUT_DIR}..."
-            rm -rf "${OUTPUT_DIR}"
-        else
-            log_error "Vector database already exists at ${OUTPUT_DIR}"
-            log_error "ramalama does not support incremental updates."
-            log_error ""
-            log_error "To rebuild from scratch, use one of:"
-            log_error "  --clean flag: build-kong-docs-rag --clean"
-            log_error "  just rebuild: cd ${OUTPUT_DIR%/*} && just rebuild"
-            log_error "  just clean:   cd ${OUTPUT_DIR%/*} && just clean && just build"
-            exit 1
+    # Handle existing vector database (only for local builds, not registry)
+    if [ -z "${REGISTRY_TAG}" ]; then
+        if [ -d "${OUTPUT_DIR}/collection" ]; then
+            if [ "${CLEAN}" = true ]; then
+                log_warn "Removing existing vector database at ${OUTPUT_DIR}..."
+                rm -rf "${OUTPUT_DIR}"
+            else
+                log_error "Vector database already exists at ${OUTPUT_DIR}"
+                log_error "ramalama does not support incremental updates."
+                log_error ""
+                log_error "To rebuild from scratch, use one of:"
+                log_error "  --clean flag: build-kong-docs-rag --clean"
+                log_error "  just rebuild: cd ${OUTPUT_DIR%/*} && just rebuild"
+                log_error "  just clean:   cd ${OUTPUT_DIR%/*} && just clean && just build"
+                exit 1
+            fi
         fi
-    fi
 
-    # Ensure output directory exists
-    mkdir -p "${OUTPUT_DIR}"
+        # Ensure output directory exists for local builds
+        mkdir -p "${OUTPUT_DIR}"
+    else
+        log_info "Building to registry: ${REGISTRY_TAG}"
+        log_info "Registry builds can coexist with local database"
+    fi
 
     # Verify documentation exists
     find_documentation_files >/dev/null
