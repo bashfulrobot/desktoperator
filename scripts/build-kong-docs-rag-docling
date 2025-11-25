@@ -209,7 +209,7 @@ def build_vector_database(md_files: List[Path], output_dir: Path) -> bool:
                     id=point_id,
                     vector={vector_name: vector},  # Named vector format
                     payload={
-                        "information": text,  # mcp-server-qdrant expects 'information' field
+                        "document": text,  # mcp-server-qdrant expects 'document' field (source code line 99)
                         "metadata": {
                             "source": str(md_file.relative_to(md_file.parent.parent)),
                             "file": md_file.name,
