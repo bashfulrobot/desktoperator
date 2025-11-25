@@ -58,11 +58,12 @@ setup-from-image:
     @echo "✓ Setup complete! Restart Claude Code to use."
     @echo "No build required - using shared container image."
 
-# Update documentation (incremental)
+# Update documentation (full rebuild required - ramalama doesn't support incremental)
 update:
     @echo "Updating Kong documentation..."
     @cd {{ "{{" }} source_dir {{ "}}" }}/developer.konghq.com && git pull
-    @just build
+    @echo "Rebuilding vector database (ramalama requires full rebuild)..."
+    @just rebuild
 
 # Update and republish
 update-publish:

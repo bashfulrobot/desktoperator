@@ -184,6 +184,23 @@ build_rag_database() {
     log_info "Building RAG vector database with docling and ramalama..."
     log_info "This may take several minutes depending on documentation size..."
 
+    # Handle existing vector database
+    if [ -d "${OUTPUT_DIR}/collection" ]; then
+        if [ "${CLEAN}" = true ]; then
+            log_warn "Removing existing vector database at ${OUTPUT_DIR}..."
+            rm -rf "${OUTPUT_DIR}"
+        else
+            log_error "Vector database already exists at ${OUTPUT_DIR}"
+            log_error "ramalama does not support incremental updates."
+            log_error ""
+            log_error "To rebuild from scratch, use one of:"
+            log_error "  --clean flag: build-kong-docs-rag --clean"
+            log_error "  just rebuild: cd ${OUTPUT_DIR%/*} && just rebuild"
+            log_error "  just clean:   cd ${OUTPUT_DIR%/*} && just clean && just build"
+            exit 1
+        fi
+    fi
+
     # Ensure output directory exists
     mkdir -p "${OUTPUT_DIR}"
 
@@ -210,18 +227,33 @@ build_rag_database() {
     local doc_files=()
     if command -v fd &> /dev/null; then
         log_info "Using fd for faster file search..."
+        # Run fd and capture both output and exit code
         while IFS= read -r -d '' file; do
             doc_files+=("$file")
         done < <(fd -t f -e md -e markdown \
             --exclude node_modules \
             --exclude .git \
-            -0 . "${source_dir}")
+            --exclude vendor \
+            -0 . "${source_dir}" 2>/dev/null || true)
+
+        # Fall back to find if fd produced no results
+        if [ ${#doc_files[@]} -eq 0 ]; then
+            log_warn "fd didn't find files, falling back to find..."
+            while IFS= read -r -d '' file; do
+                doc_files+=("$file")
+            done < <(find "${source_dir}" -type f \( -name "*.md" -o -name "*.markdown" \) \
+                -not -path "*/node_modules/*" \
+                -not -path "*/.git/*" \
+                -not -path "*/vendor/*" \
+                -print0)
+        fi
     else
         while IFS= read -r -d '' file; do
             doc_files+=("$file")
         done < <(find "${source_dir}" -type f \( -name "*.md" -o -name "*.markdown" \) \
             -not -path "*/node_modules/*" \
             -not -path "*/.git/*" \
+            -not -path "*/vendor/*" \
             -print0)
     fi
 
@@ -232,21 +264,66 @@ build_rag_database() {
 
     log_info "Found ${#doc_files[@]} documentation files to process"
 
+    # Create temporary directory with only documentation files
+    # This avoids ramalama trying to process unsupported files like _redirects
+    local temp_docs_dir
+    temp_docs_dir=$(mktemp -d -t kong-docs-XXXXXX)
+    trap "rm -rf '${temp_docs_dir}'" EXIT
+
+    log_info "Creating filtered documentation directory at ${temp_docs_dir}..."
+    local file_count=0
+    for file in "${doc_files[@]}"; do
+        # Create unique filename by replacing / with _ in the relative path
+        local rel_path="${file#${source_dir}/}"
+        local safe_name="${rel_path//\//_}"
+
+        # Copy the file with unique name (not symlink - ramalama follows symlinks)
+        if ! cp "${file}" "${temp_docs_dir}/${safe_name}" 2>/dev/null; then
+            log_warn "Failed to copy: ${file}"
+            continue
+        fi
+        file_count=$((file_count + 1))
+    done
+
+    if [ ${file_count} -eq 0 ]; then
+        log_error "No files were successfully prepared in temporary directory"
+        exit 1
+    fi
+
+    log_info "Prepared ${file_count} files in temporary directory"
+
     # Build ramalama rag command
     local output_tag
     if [ -n "${REGISTRY_TAG}" ]; then
         output_tag="${REGISTRY_TAG}"
+        log_info "Processing documentation with ramalama..."
+        log_info "Output (registry): ${output_tag}"
     else
-        # Use local directory as output
-        output_tag="dir:${OUTPUT_DIR}"
+        # Use local directory as output (no dir: prefix needed for creation)
+        output_tag="${OUTPUT_DIR}"
+        log_info "Processing documentation with ramalama..."
+        log_info "Output (local): ${output_tag}"
     fi
 
-    log_info "Processing documentation with ramalama..."
-    log_info "Output: ${output_tag}"
+    # Build array of file paths from temp directory
+    # We pass individual files because ramalama's directory mounting doesn't work correctly
+    # Note: We copied files (not symlinked) to avoid ramalama following symlinks to original paths
+    local temp_files=()
+    while IFS= read -r -d '' file; do
+        temp_files+=("$file")
+    done < <(find "${temp_docs_dir}" -type f \( -name "*.md" -o -name "*.markdown" \) -print0)
 
-    # Run ramalama rag command with file list
+    if [ ${#temp_files[@]} -eq 0 ]; then
+        log_error "No files found in temporary directory"
+        exit 1
+    fi
+
+    log_info "Passing ${#temp_files[@]} individual file paths to ramalama..."
+
+    # Run ramalama rag command with individual file paths (not directory)
     # Note: ramalama uses docling internally via doc2rag script
-    if ramalama rag "${doc_files[@]}" "${output_tag}"; then
+    # Individual files work correctly, directory mounting is broken in ramalama
+    if ramalama rag "${temp_files[@]}" "${output_tag}"; then
         log_success "RAG vector database created successfully"
 
         if [ -n "${REGISTRY_TAG}" ]; then
