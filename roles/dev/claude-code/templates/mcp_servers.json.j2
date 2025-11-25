@@ -20,6 +20,16 @@
         "-y",
         "@modelcontextprotocol/server-sequential-thinking"
       ]
+    },
+    "kong-docs": {
+      "command": "npx",
+      "args": [
+        "@qdrant/mcp-server-qdrant"
+      ],
+      "env": {
+        "QDRANT_URL": "file://{{ user.home }}/dev/kong/docs-rag/vector-db",
+        "COLLECTION_NAME": "kong-docs"
+      }
     }
   }
 }
