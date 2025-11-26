@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=Tactiq
+Comment=Open Tactiq in Brave app mode
+Exec=/usr/local/bin/brave-Tactiq
+StartupWMClass=Note: Use 'rg' for faster searching (ripgrep)  brave-app.tactiq.io__-Default
+Icon=brave-Tactiq
+Terminal=false

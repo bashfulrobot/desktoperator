@@ -1,0 +1,72 @@
+---
+- name: Install Brave web app "Tactiq" launcher
+  ansible.builtin.copy:
+    src: "brave-Tactiq-launcher.sh"
+    dest: "/usr/local/bin/brave-Tactiq"
+    mode: "0755"
+    owner: root
+    group: root
+  become: true
+  when: app_states['Tactiq'] | default('present') == 'present'
+
+- name: Install Brave web app "Tactiq" desktop entry
+  ansible.builtin.copy:
+    src: "brave-Tactiq.desktop"
+    dest: "/usr/share/applications/brave-Tactiq.desktop"
+    mode: "0644"
+    owner: root
+    group: root
+  become: true
+  when: app_states['Tactiq'] | default('present') == 'present'
+
+- name: Install Brave web app icons
+  ansible.builtin.copy:
+    src: '{{ item.src }}'
+    dest: '{{ item.dest }}'
+    mode: "0644"
+    owner: root
+    group: root
+  loop:
+    - { src: "brave-Tactiq-icon-16.png", dest: "/usr/share/icons/hicolor/16x16/apps/brave-Tactiq.png" }
+    - { src: "brave-Tactiq-icon-32.png", dest: "/usr/share/icons/hicolor/32x32/apps/brave-Tactiq.png" }
+    - { src: "brave-Tactiq-icon-48.png", dest: "/usr/share/icons/hicolor/48x48/apps/brave-Tactiq.png" }
+    - { src: "brave-Tactiq-icon-64.png", dest: "/usr/share/icons/hicolor/64x64/apps/brave-Tactiq.png" }
+    - { src: "brave-Tactiq-icon-128.png", dest: "/usr/share/icons/hicolor/128x128/apps/brave-Tactiq.png" }
+    - { src: "brave-Tactiq-icon-256.png", dest: "/usr/share/icons/hicolor/256x256/apps/brave-Tactiq.png" }
+    - { src: "brave-Tactiq-icon-512.png", dest: "/usr/share/icons/hicolor/512x512/apps/brave-Tactiq.png" }
+    - { src: "brave-Tactiq-icon-800.png", dest: "/usr/share/icons/hicolor/scalable/apps/brave-Tactiq.png" }
+  become: true
+  when: app_states['Tactiq'] | default('present') == 'present'
+  notify: Update icon cache
+
+- name: Remove Brave web app launcher when absent
+  ansible.builtin.file:
+    path: "/usr/local/bin/brave-Tactiq"
+    state: absent
+  become: true
+  when: app_states['Tactiq'] | default('present') == 'absent'
+
+- name: Remove Brave web app desktop entry when absent
+  ansible.builtin.file:
+    path: "/usr/share/applications/brave-Tactiq.desktop"
+    state: absent
+  become: true
+  when: app_states['Tactiq'] | default('present') == 'absent'
+
+- name: Remove Brave web app icons when absent
+  ansible.builtin.file:
+    path: '{{ item }}'
+    state: absent
+    owner: root
+    group: root
+  loop:
+    - /usr/share/icons/hicolor/16x16/apps/brave-Tactiq.png
+    - /usr/share/icons/hicolor/32x32/apps/brave-Tactiq.png
+    - /usr/share/icons/hicolor/48x48/apps/brave-Tactiq.png
+    - /usr/share/icons/hicolor/64x64/apps/brave-Tactiq.png
+    - /usr/share/icons/hicolor/128x128/apps/brave-Tactiq.png
+    - /usr/share/icons/hicolor/256x256/apps/brave-Tactiq.png
+    - /usr/share/icons/hicolor/512x512/apps/brave-Tactiq.png
+    - /usr/share/icons/hicolor/scalable/apps/brave-Tactiq.png
+  become: true
+  when: app_states['Tactiq'] | default('present') == 'absent'

@@ -152,3 +152,8 @@
   ansible.builtin.import_role:
     name: apps/brave-apps/zoom-brave
   tags: [zoom, zoom-brave, brave-web-apps]
+
+- name: Include Tactiq Brave Web App
+  ansible.builtin.import_role:
+    name: apps/Tactiq-brave
+  tags: [tactiq, Tactiq, brave-web-apps]
