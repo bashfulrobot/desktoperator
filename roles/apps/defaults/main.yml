@@ -20,6 +20,7 @@ app_states:
   helix: present
   zed: present
   zen-browser: present
+  vibe-transcribe: present
   slack: present
   claude-code: present
   codex-cli: present

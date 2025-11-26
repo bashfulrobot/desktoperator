@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=Vibe Transcribe
+Comment=Audio/video transcription using OpenAI Whisper
+Exec=vibe-launcher
+Icon=vibe-transcribe
+Terminal=false
+Categories=AudioVideo;Audio;Video;Recorder;
+Keywords=transcribe;transcription;audio;video;whisper;

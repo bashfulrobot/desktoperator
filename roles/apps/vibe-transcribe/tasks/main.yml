@@ -1,0 +1,141 @@
+---
+# vibe-transcribe - Audio/video transcription using OpenAI Whisper
+# GitHub: https://github.com/thewh1teagle/vibe
+
+- name: Install vibe-transcribe dependencies
+  ansible.builtin.apt:
+    name: "{{ vibe_dependencies }}"
+    state: present
+    update_cache: false
+  when: app_states['vibe-transcribe'] | default('present') == 'present'
+
+- name: Check if vibe-transcribe is installed
+  ansible.builtin.command: dpkg-query -W vibe
+  register: vibe_check
+  changed_when: false
+  failed_when: false
+  when: app_states['vibe-transcribe'] | default('present') == 'present'
+
+- name: Download vibe-transcribe package
+  ansible.builtin.get_url:
+    url: "{{ vibe_download_url }}"
+    dest: "/tmp/vibe_{{ vibe_version }}_amd64.deb"
+    mode: "0644"
+  when:
+    - app_states['vibe-transcribe'] | default('present') == 'present'
+    - vibe_check.rc != 0
+
+- name: Install vibe-transcribe from .deb package
+  ansible.builtin.apt:
+    deb: "/tmp/vibe_{{ vibe_version }}_amd64.deb"
+    state: present
+  when:
+    - app_states['vibe-transcribe'] | default('present') == 'present'
+    - vibe_check.rc != 0
+
+- name: Clean up downloaded .deb package
+  ansible.builtin.file:
+    path: "/tmp/vibe_{{ vibe_version }}_amd64.deb"
+    state: absent
+  when:
+    - app_states['vibe-transcribe'] | default('present') == 'present'
+    - vibe_check.rc != 0
+
+- name: Verify vibe-transcribe installation
+  ansible.builtin.command: vibe --version
+  register: vibe_version_check
+  changed_when: false
+  failed_when: false
+  when: app_states['vibe-transcribe'] | default('present') == 'present'
+
+- name: Install vibe-transcribe launcher script
+  ansible.builtin.copy:
+    src: vibe-launcher.sh
+    dest: /usr/local/bin/vibe-launcher
+    mode: "0755"
+    owner: root
+    group: root
+  become: true
+  when: app_states['vibe-transcribe'] | default('present') == 'present'
+
+- name: Install vibe-transcribe desktop entry
+  ansible.builtin.copy:
+    src: vibe-transcribe.desktop
+    dest: /usr/share/applications/vibe-transcribe.desktop
+    mode: "0644"
+    owner: root
+    group: root
+  become: true
+  when: app_states['vibe-transcribe'] | default('present') == 'present'
+  notify:
+    - Update desktop database
+    - Update icon cache
+
+- name: Install vibe-transcribe icons
+  ansible.builtin.copy:
+    src: '{{ item.src }}'
+    dest: '{{ item.dest }}'
+    mode: "0644"
+    owner: root
+    group: root
+  loop:
+    - { src: "vibe-transcribe-icon-16.png", dest: "/usr/share/icons/hicolor/16x16/apps/vibe-transcribe.png" }
+    - { src: "vibe-transcribe-icon-32.png", dest: "/usr/share/icons/hicolor/32x32/apps/vibe-transcribe.png" }
+    - { src: "vibe-transcribe-icon-48.png", dest: "/usr/share/icons/hicolor/48x48/apps/vibe-transcribe.png" }
+    - { src: "vibe-transcribe-icon-64.png", dest: "/usr/share/icons/hicolor/64x64/apps/vibe-transcribe.png" }
+    - { src: "vibe-transcribe-icon-128.png", dest: "/usr/share/icons/hicolor/128x128/apps/vibe-transcribe.png" }
+    - { src: "vibe-transcribe-icon-256.png", dest: "/usr/share/icons/hicolor/256x256/apps/vibe-transcribe.png" }
+    - { src: "vibe-transcribe-icon-512.png", dest: "/usr/share/icons/hicolor/512x512/apps/vibe-transcribe.png" }
+    - { src: "vibe-transcribe-icon-800.png", dest: "/usr/share/icons/hicolor/scalable/apps/vibe-transcribe.png" }
+  become: true
+  when: app_states['vibe-transcribe'] | default('present') == 'present'
+  notify: Update icon cache
+
+# Removal when absent
+- name: Remove vibe-transcribe launcher script when absent
+  ansible.builtin.file:
+    path: /usr/local/bin/vibe-launcher
+    state: absent
+  become: true
+  when: app_states['vibe-transcribe'] | default('present') == 'absent'
+
+- name: Remove vibe-transcribe package
+  ansible.builtin.apt:
+    name: vibe
+    state: absent
+    purge: true
+  when: app_states['vibe-transcribe'] | default('present') == 'absent'
+
+- name: Remove vibe-transcribe dependencies (optional)
+  ansible.builtin.apt:
+    name: "{{ vibe_dependencies }}"
+    state: absent
+    autoremove: true
+  when:
+    - app_states['vibe-transcribe'] | default('present') == 'absent'
+    - vibe_remove_dependencies | default(false)
+
+- name: Remove vibe-transcribe desktop entry when absent
+  ansible.builtin.file:
+    path: /usr/share/applications/vibe-transcribe.desktop
+    state: absent
+  become: true
+  when: app_states['vibe-transcribe'] | default('present') == 'absent'
+  notify: Update desktop database
+
+- name: Remove vibe-transcribe icons when absent
+  ansible.builtin.file:
+    path: '{{ item }}'
+    state: absent
+  loop:
+    - /usr/share/icons/hicolor/16x16/apps/vibe-transcribe.png
+    - /usr/share/icons/hicolor/32x32/apps/vibe-transcribe.png
+    - /usr/share/icons/hicolor/48x48/apps/vibe-transcribe.png
+    - /usr/share/icons/hicolor/64x64/apps/vibe-transcribe.png
+    - /usr/share/icons/hicolor/128x128/apps/vibe-transcribe.png
+    - /usr/share/icons/hicolor/256x256/apps/vibe-transcribe.png
+    - /usr/share/icons/hicolor/512x512/apps/vibe-transcribe.png
+    - /usr/share/icons/hicolor/scalable/apps/vibe-transcribe.png
+  become: true
+  when: app_states['vibe-transcribe'] | default('present') == 'absent'
+  notify: Update icon cache

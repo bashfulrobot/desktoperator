@@ -142,3 +142,8 @@
   ansible.builtin.import_role:
     name: apps/idescriptor
   tags: [idescriptor]
+
+- name: Include vibe-transcribe audio/video transcription
+  ansible.builtin.import_role:
+    name: apps/vibe-transcribe
+  tags: [vibe-transcribe, vibe, transcribe]

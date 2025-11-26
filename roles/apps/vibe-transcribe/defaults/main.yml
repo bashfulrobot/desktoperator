@@ -1,0 +1,10 @@
+---
+# vibe-transcribe default variables
+# Audio/video transcription tool using OpenAI Whisper
+# GitHub: https://github.com/thewh1teagle/vibe
+
+vibe_version: "3.0.5"
+vibe_download_url: "https://github.com/thewh1teagle/vibe/releases/download/v{{ vibe_version }}/vibe_{{ vibe_version }}_amd64.deb"
+vibe_dependencies:
+  - ffmpeg
+  - libopenblas-dev
