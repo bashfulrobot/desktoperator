@@ -157,3 +157,8 @@
   ansible.builtin.import_role:
     name: apps/Tactiq-brave
   tags: [tactiq, Tactiq, brave-web-apps]
+
+- name: Include Clari Brave Web App
+  ansible.builtin.import_role:
+    name: apps/Clari-brave
+  tags: [clari, Clari, brave-web-apps]
