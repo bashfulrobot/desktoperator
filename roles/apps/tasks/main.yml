@@ -147,3 +147,8 @@
   ansible.builtin.import_role:
     name: apps/vibe-transcribe
   tags: [vibe-transcribe, vibe, transcribe]
+
+- name: Include Zoom Brave Web App
+  ansible.builtin.import_role:
+    name: apps/brave-apps/zoom-brave
+  tags: [zoom, zoom-brave, brave-web-apps]

@@ -31,7 +31,7 @@ app_states:
   firefox: present
   vscode: present
   chrome: present
-  zoom: present
+  zoom: absent
   insync: present
   gemini-cli: present
   goose: present
@@ -72,6 +72,7 @@ app_states:
   kong-academy-brave: present
   omni-brave: present
   asana-brave: present
+  zoom-brave: present
   kong-cli: present
   zns: present
   yq: present

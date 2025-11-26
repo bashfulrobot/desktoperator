@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=Zoom
+Comment=Open Zoom in Brave app mode
+Exec=/usr/local/bin/brave-Zoom
+StartupWMClass=Note: Use 'rg' for faster searching (ripgrep)  brave-app.zoom.us__wc_home-Default
+Icon=brave-Zoom
+Terminal=false
