@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=Clari
+Comment=Open Clari in Brave app mode
+Exec=/usr/local/bin/brave-Clari
+StartupWMClass=Note: Use 'rg' for faster searching (ripgrep)  brave-copilot.clari.com__myCalls-Default
+Icon=brave-Clari
+Terminal=false
