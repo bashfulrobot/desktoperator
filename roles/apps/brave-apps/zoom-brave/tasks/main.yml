@@ -2,6 +2,16 @@
 # Zoom web client in Brave app mode
 # For tips and troubleshooting, see: https://wiki.archlinux.org/title/Zoom_Meetings
 
+- name: Install Zoom URL transformation handler
+  ansible.builtin.copy:
+    src: "zoom-url-handler.sh"
+    dest: "/usr/local/bin/zoom-url-handler"
+    mode: "0755"
+    owner: root
+    group: root
+  become: true
+  when: app_states['zoom-brave'] | default('present') == 'present'
+
 - name: Install Brave web app "Zoom" launcher
   ansible.builtin.copy:
     src: "brave-Zoom-launcher.sh"
@@ -16,6 +26,16 @@
   ansible.builtin.copy:
     src: "brave-Zoom.desktop"
     dest: "/usr/share/applications/brave-Zoom.desktop"
+    mode: "0644"
+    owner: root
+    group: root
+  become: true
+  when: app_states['zoom-brave'] | default('present') == 'present'
+
+- name: Install Zoom URL handler desktop entry
+  ansible.builtin.copy:
+    src: "zoom-url.desktop"
+    dest: "/usr/share/applications/zoom-url.desktop"
     mode: "0644"
     owner: root
     group: root
@@ -42,6 +62,13 @@
   when: app_states['zoom-brave'] | default('present') == 'present'
   notify: Update icon cache
 
+- name: Remove Zoom URL handler when absent
+  ansible.builtin.file:
+    path: "/usr/local/bin/zoom-url-handler"
+    state: absent
+  become: true
+  when: app_states['zoom-brave'] | default('present') == 'absent'
+
 - name: Remove Brave web app launcher when absent
   ansible.builtin.file:
     path: "/usr/local/bin/brave-Zoom"
@@ -52,6 +79,13 @@
 - name: Remove Brave web app desktop entry when absent
   ansible.builtin.file:
     path: "/usr/share/applications/brave-Zoom.desktop"
+    state: absent
+  become: true
+  when: app_states['zoom-brave'] | default('present') == 'absent'
+
+- name: Remove Zoom URL handler desktop entry when absent
+  ansible.builtin.file:
+    path: "/usr/share/applications/zoom-url.desktop"
     state: absent
   become: true
   when: app_states['zoom-brave'] | default('present') == 'absent'

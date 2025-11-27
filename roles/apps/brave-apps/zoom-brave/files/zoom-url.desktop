@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=Zoom URL Handler
+Comment=Transform and route Zoom URLs to Brave Zoom app
+Exec=/usr/local/bin/zoom-url-handler %u
+MimeType=x-scheme-handler/http;x-scheme-handler/https;x-scheme-handler/zoommtg;
+NoDisplay=true
+StartupNotify=false
+Categories=Network;
