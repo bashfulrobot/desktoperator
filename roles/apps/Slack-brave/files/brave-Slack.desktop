@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=Slack
+Comment=Open Slack in Brave app mode
+Exec=/usr/local/bin/brave-Slack
+StartupWMClass=Note: Use 'rg' for faster searching (ripgrep)  brave-app.slack.com__client_T0DS5NB27-Default
+Icon=brave-Slack
+Terminal=false

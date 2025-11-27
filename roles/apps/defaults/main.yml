@@ -21,7 +21,7 @@ app_states:
   zed: present
   zen-browser: present
   vibe-transcribe: present
-  slack: present
+  slack: absent
   claude-code: present
   codex-cli: present
   starship: present
@@ -73,6 +73,7 @@ app_states:
   omni-brave: present
   asana-brave: present
   zoom-brave: present
+  Slack-brave: present
   kong-cli: present
   zns: present
   yq: present

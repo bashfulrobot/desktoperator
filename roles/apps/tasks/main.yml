@@ -162,3 +162,8 @@
   ansible.builtin.import_role:
     name: apps/Clari-brave
   tags: [clari, Clari, brave-web-apps]
+
+- name: Include Slack Brave Web App
+  ansible.builtin.import_role:
+    name: apps/Slack-brave
+  tags: [slack, Slack, brave-web-apps]

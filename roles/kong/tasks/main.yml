@@ -1,11 +1,6 @@
 ---
 # Kong role - Kong-related tools and collaboration apps
 
-- name: Include Slack
-  ansible.builtin.import_role:
-    name: kong/slack
-  tags: [kong, slack]
-
 - name: Include Kong CLI tools (deck and kongctl)
   ansible.builtin.import_role:
     name: kong/kong-cli
