@@ -13,6 +13,8 @@ app_states:
   chrome: absent
   firefox: absent
   vivaldi: absent
+  docling: absent
+  build-kong-docs-rag: absent
 
 # Libvirt configuration
 libvirt_install_gui_tools: true
