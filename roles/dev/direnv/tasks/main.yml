@@ -1,0 +1,59 @@
+---
+# Direnv installation - directory-based environment variable manager
+# https://direnv.net/
+
+- name: Install direnv via APT
+  ansible.builtin.apt:
+    name: direnv
+    state: present
+  become: true
+  when: app_states['direnv'] | default('present') == 'present'
+
+- name: Verify direnv installation
+  ansible.builtin.command: direnv version
+  register: direnv_verify
+  changed_when: false
+  failed_when: false
+  when: app_states['direnv'] | default('present') == 'present'
+
+- name: Display direnv version
+  ansible.builtin.debug:
+    msg: "direnv installed: {{ direnv_verify.stdout }}"
+  when:
+    - app_states['direnv'] | default('present') == 'present'
+    - direnv_verify is defined
+    - direnv_verify.rc == 0
+
+# Fish shell integration
+- name: Create fish conf.d directory
+  ansible.builtin.file:
+    path: "{{ user.home }}/.config/fish/conf.d"
+    state: directory
+    owner: "{{ user.name }}"
+    group: "{{ user.name }}"
+    mode: "0755"
+  when: app_states['direnv'] | default('present') == 'present'
+
+- name: Deploy fish configuration for direnv
+  ansible.builtin.template:
+    src: direnv.fish.j2
+    dest: "{{ user.home }}/.config/fish/conf.d/direnv.fish"
+    owner: "{{ user.name }}"
+    group: "{{ user.name }}"
+    mode: "0644"
+  when: app_states['direnv'] | default('present') == 'present'
+
+# Cleanup when absent
+- name: Remove direnv when absent
+  ansible.builtin.apt:
+    name: direnv
+    state: absent
+    purge: true
+  become: true
+  when: app_states['direnv'] | default('present') == 'absent'
+
+- name: Remove fish configuration for direnv when absent
+  ansible.builtin.file:
+    path: "{{ user.home }}/.config/fish/conf.d/direnv.fish"
+    state: absent
+  when: app_states['direnv'] | default('present') == 'absent'

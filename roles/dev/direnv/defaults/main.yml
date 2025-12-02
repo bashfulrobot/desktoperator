@@ -1,0 +1,5 @@
+---
+# Direnv default variables
+
+# Installation state (present/absent)
+direnv_state: present

@@ -46,6 +46,11 @@
     name: dev/copilot-cli
   tags: [dev, copilot-cli]
 
+- name: Include Direnv (directory-based env manager)
+  ansible.builtin.import_role:
+    name: dev/direnv
+  tags: [dev, direnv]
+
 - name: Include Docling (document parsing library)
   ansible.builtin.import_role:
     name: dev/docling
