@@ -22,14 +22,12 @@
       ]
     },
     "kong-docs": {
-      "command": "uvx",
+      "command": "/home/dustin/.local/share/kong-docs-rag-venv/bin/python3",
       "args": [
-        "mcp-server-qdrant"
+        "/home/dustin/dev/kong/docs-rag/query_kong_docs_mcp.py"
       ],
       "env": {
-        "QDRANT_LOCAL_PATH": "{{ user.home }}/dev/kong/docs-rag/vector-db",
-        "COLLECTION_NAME": "kong-docs",
-        "EMBEDDING_MODEL": "sentence-transformers/all-MiniLM-L6-v2"
+        "WEAVIATE_URL": "http://localhost:8080"
       }
     }
   }
