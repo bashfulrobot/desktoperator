@@ -294,6 +294,17 @@
   tags: [libvirt]
   when: app_states['libvirt'] | default('present') == 'present'
 
+- name: Configure libvirt-guests to suspend VMs on shutdown
+  ansible.builtin.lineinfile:
+    path: /etc/default/libvirt-guests
+    regexp: '^#?ON_SHUTDOWN='
+    line: 'ON_SHUTDOWN=suspend'
+    state: present
+    backup: true
+  become: true
+  tags: [libvirt]
+  when: app_states['libvirt'] | default('present') == 'present'
+
 - name: Configure libvirt images directory with proper permissions
   ansible.builtin.file:
     path: "{{ libvirt_default_storage_pool }}"
