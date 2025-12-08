@@ -10,9 +10,9 @@ host_specific_apps: []
 app_states:
   zed: present
   chromium: absent
-  chrome: absent
+  chrome: present
   firefox: absent
-  vivaldi: absent
+  vivaldi: present
   ramalama: present
   docling: present
 

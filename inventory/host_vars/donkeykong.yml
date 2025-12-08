@@ -10,9 +10,9 @@ host_specific_apps: []
 app_states:
   zed: absent
   chromium: absent
-  chrome: absent
+  chrome: present
   firefox: absent
-  vivaldi: absent
+  vivaldi: present
   docling: absent
   build-kong-docs-rag: absent
 
