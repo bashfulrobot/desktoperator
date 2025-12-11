@@ -1,5 +1,5 @@
 ---
-# Screenshot tools installation (cosmic-screenshot + satty)
+# Screenshot tools installation (Gradia via flatpak)
 
 - name: Create Screenshots directory
   ansible.builtin.file:
@@ -11,33 +11,53 @@
   become: true
   when: app_states.screenshot | default('present') == 'present'
 
-- name: Install satty from GitHub
-  ansible.builtin.include_tasks: ../../../system/tasks/includes/github_release.yml
-  vars:
-    org: Satty-org
-    repo: Satty
-    binary_name: satty
-    filename_substring: x86_64-unknown-linux-gnu.tar.gz
+# DISABLED: Switched to Gradia flatpak for better screenshot functionality
+# - name: Install satty from GitHub
+#   ansible.builtin.include_tasks: ../../../system/tasks/includes/github_release.yml
+#   vars:
+#     org: Satty-org
+#     repo: Satty
+#     binary_name: satty
+#     filename_substring: x86_64-unknown-linux-gnu.tar.gz
+#   when: app_states.screenshot | default('present') == 'present'
+#
+# - name: Install screenshot script
+#   ansible.builtin.copy:
+#     src: screenshot
+#     dest: /usr/local/bin/screenshot
+#     mode: "0755"
+#   become: true
+#   when: app_states.screenshot | default('present') == 'present'
+
+- name: Install Gradia flatpak
+  community.general.flatpak:
+    name: be.alexandervanhee.gradia
+    state: present
+    method: user
+  become: true
+  become_user: "{{ user.name }}"
   when: app_states.screenshot | default('present') == 'present'
 
-- name: Install screenshot script
-  ansible.builtin.copy:
-    src: screenshot
-    dest: /usr/local/bin/screenshot
-    mode: "0755"
-  become: true
-  when: app_states.screenshot | default('present') == 'present'
-
-- name: Remove satty binary when absent
-  ansible.builtin.file:
-    path: /usr/local/bin/satty
+- name: Remove Gradia flatpak when absent
+  community.general.flatpak:
+    name: be.alexandervanhee.gradia
     state: absent
-  when: app_states.screenshot | default('present') == 'absent'
+    method: user
   become: true
+  become_user: "{{ user.name }}"
+  when: app_states.screenshot | default('present') == 'absent'
 
-- name: Remove screenshot script when absent
-  ansible.builtin.file:
-    path: /usr/local/bin/screenshot
-    state: absent
-  when: app_states.screenshot | default('present') == 'absent'
-  become: true
+# DISABLED: Legacy cleanup tasks for satty
+# - name: Remove satty binary when absent
+#   ansible.builtin.file:
+#     path: /usr/local/bin/satty
+#     state: absent
+#   when: app_states.screenshot | default('present') == 'absent'
+#   become: true
+#
+# - name: Remove screenshot script when absent
+#   ansible.builtin.file:
+#     path: /usr/local/bin/screenshot
+#     state: absent
+#   when: app_states.screenshot | default('present') == 'absent'
+#   become: true

@@ -68,5 +68,5 @@
         ],
         key: "p",
         description: Some("Screenshot"),
-    ): Spawn("screenshot"),
+    ): Spawn("flatpak run be.alexandervanhee.gradia --screenshot=INTERACTIVE"),
 }
