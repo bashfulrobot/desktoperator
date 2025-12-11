@@ -20,8 +20,7 @@ satty --filename "$latest" \
     --early-exit \
     --copy-command wl-copy \
     --output-filename "$HOME/Screenshots/%Y-%m-%d_%H-%M-%S.png" \
-    --initial-tool arrow \
-    --fullscreen || true
+    --initial-tool arrow || true
 
 # Remove the temp screenshot
 rm -f "$latest"
